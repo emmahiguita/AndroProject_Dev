@@ -1,0 +1,86 @@
+{
+  "name": "androproject-gui",
+  "version": "1.0.0",
+  "description": "AndroProject - Android Device Manager",
+  "private": true,
+  "main": "electron/main.js",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start:server": "cross-env PORT=3001 node .next/standalone/server.js",
+    "start": "next start",
+    "electron": "concurrently --kill-others \"cross-env PORT=3001 next dev -p 3001\" \"wait-on http://127.0.0.1:3001 && electron .\"",
+    "electron:fresh": "npm run build && npm run electron",
+    "build:win": "npm run build && electron-builder --win dir && xcopy /s /e /i /y .next\\standalone\\node_modules dist\\win-unpacked\\resources\\next-standalone\\node_modules",
+    "lint": "eslint"
+  },
+  "dependencies": {
+    "electron-updater": "^6.8.9",
+    "lucide-react": "^1.18.0",
+    "next": "16.2.9",
+    "react": "19.2.4",
+    "react-dom": "19.2.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "autoprefixer": "^10.5.1",
+    "concurrently": "^10.0.3",
+    "cross-env": "^7.0.3",
+    "electron": "^42.4.0",
+    "electron-builder": "^26.15.3",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.9",
+    "postcss": "^8.5.15",
+    "tailwindcss": "^3.4.19",
+    "typescript": "^5",
+    "wait-on": "^9.0.10"
+  },
+  "build": {
+    "appId": "com.androproject.manager",
+    "productName": "AndroProject",
+    "files": [
+      "electron/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": ".next/standalone",
+        "to": "next-standalone",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": ".next/static",
+        "to": "next-standalone/.next/static",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": "public",
+        "to": "next-standalone/public",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ],
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "emmahiguita",
+        "repo": "AndroidProject"
+      }
+    ],
+    "win": {
+      "icon": "public/icon.ico",
+      "target": "nsis"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
+  }
+}

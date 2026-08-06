@@ -1,0 +1,341 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── OPPO ColorOS / A79 5G Design Tokens ── */
+:root {
+  --oppo-green: #1bae6e;
+  --oppo-green-light: #22c97d;
+  --oppo-green-muted: #0d5c3a;
+  --oppo-surface: #111622;
+  --oppo-surface-elevated: #181c2b;
+  --oppo-border: rgba(255, 255, 255, 0.06);
+
+  --glow-cyan: #00e5ff;
+  --glow-emerald: #00ffa3;
+  --glow-violet: #a855f7;
+  --glow-amber: #fbbf24;
+  --glow-red: #ff4d6d;
+  --glow-blue: #3b82f6;
+
+  --glow-oppo-shadow: 0 0 6px rgba(27,174,110,0.4), 0 0 16px rgba(27,174,110,0.15);
+  --glow-cyan-shadow: 0 0 8px rgba(0,229,255,0.6), 0 0 20px rgba(0,229,255,0.3), 0 0 40px rgba(0,229,255,0.15);
+  --glow-emerald-shadow: 0 0 8px rgba(0,255,163,0.6), 0 0 20px rgba(0,255,163,0.3), 0 0 40px rgba(0,255,163,0.15);
+  --glow-violet-shadow: 0 0 8px rgba(168,85,247,0.6), 0 0 20px rgba(168,85,247,0.3), 0 0 40px rgba(168,85,247,0.15);
+  --glow-blue-shadow: 0 0 8px rgba(59,130,246,0.6), 0 0 20px rgba(59,130,246,0.3), 0 0 40px rgba(59,130,246,0.15);
+}
+
+body {
+  background-color: var(--oppo-surface);
+  color: white;
+  font-family: 'Inter', system-ui, sans-serif;
+  margin: 0;
+  overflow: hidden;
+}
+
+button, select, input, textarea { font: inherit; }
+
+button:focus-visible, select:focus-visible, input:focus-visible, textarea:focus-visible {
+  outline: 2px solid var(--oppo-green-light);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ── Neon border animation ── */
+@keyframes neon-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+@keyframes border-glow-spin {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes scan-line {
+  0%   { top: 0%; }
+  100% { top: 100%; }
+}
+
+/* ── Glowing card borders (OPPO theme: green accent, solid backdrop) ── */
+.glow-card {
+  position: relative;
+  border-radius: 16px;
+  background: var(--oppo-surface-elevated);
+  border: 1px solid var(--oppo-border);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.25), inset 0 0 30px rgba(27,174,110,0.02);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+.glow-card:hover {
+  border-color: rgba(27, 174, 110, 0.3);
+  box-shadow: var(--glow-oppo-shadow), 0 4px 20px rgba(0,0,0,0.3), inset 0 0 30px rgba(27,174,110,0.04);
+}
+
+.glow-card-emerald {
+  border: 1px solid rgba(0, 255, 163, 0.15);
+  box-shadow: 0 0 0 1px rgba(0,255,163,0.08), inset 0 0 30px rgba(0,255,163,0.03);
+}
+.glow-card-emerald:hover {
+  border-color: rgba(0, 255, 163, 0.4);
+  box-shadow: var(--glow-emerald-shadow), inset 0 0 30px rgba(0,255,163,0.05);
+}
+
+/* ── Sidebar active nav glow (OPPO green accent) ── */
+.nav-active-glow {
+  background: linear-gradient(135deg, rgba(27,174,110,0.18) 0%, rgba(34,201,125,0.1) 100%) !important;
+  border: 1px solid rgba(27,174,110,0.35) !important;
+  box-shadow: var(--glow-oppo-shadow), inset 0 0 12px rgba(27,174,110,0.04) !important;
+  color: var(--oppo-green-light) !important;
+}
+
+/* ── Neon button (OPPO green accent) ── */
+.btn-neon {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(27, 174, 110, 0.45);
+  box-shadow: 0 0 10px rgba(27,174,110,0.2), inset 0 0 10px rgba(27,174,110,0.04);
+  transition: all 0.3s ease;
+}
+.btn-neon:hover {
+  border-color: rgba(27, 174, 110, 0.8);
+  box-shadow: var(--glow-oppo-shadow);
+  background: rgba(27,174,110,0.12);
+}
+.btn-neon::before {
+  content: '';
+  position: absolute;
+  top: -1px; left: -1px; right: -1px; bottom: -1px;
+  background: linear-gradient(90deg, transparent, rgba(27,174,110,0.12), transparent);
+  transform: translateX(-100%);
+  transition: transform 0.5s ease;
+}
+.btn-neon:hover::before {
+  transform: translateX(100%);
+}
+
+/* ── Logo pulse ── */
+.logo-glow {
+  box-shadow: 0 0 15px rgba(27,174,110,0.5), 0 0 30px rgba(27,174,110,0.2);
+  animation: neon-pulse 3s ease-in-out infinite;
+}
+
+/* ── Status dot glow ── */
+.dot-connected {
+  background: #00ffa3;
+  box-shadow: 0 0 6px rgba(0,255,163,0.9), 0 0 12px rgba(0,255,163,0.5);
+  animation: neon-pulse 2s ease-in-out infinite;
+}
+
+/* ── Screen frame glow ── */
+.screen-frame {
+  border: 1px solid var(--oppo-border);
+  box-shadow: 0 0 20px rgba(27,174,110,0.08), inset 0 0 20px rgba(0,0,0,0.4);
+  transition: box-shadow 0.4s ease, border-color 0.4s ease;
+}
+.screen-frame:hover {
+  border-color: rgba(27,174,110,0.35);
+  box-shadow: var(--glow-oppo-shadow), inset 0 0 20px rgba(0,0,0,0.4);
+}
+
+/* ── Scrollbar (OPPO green) ── */
+.custom-scrollbar::-webkit-scrollbar { width: 3px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(27, 174, 110, 0.25);
+  border-radius: 2px;
+  box-shadow: 0 0 4px rgba(27,174,110,0.3);
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(27, 174, 110, 0.5);
+}
+
+/* ── Sidebar border ── */
+.sidebar-glow {
+  border-right: 1px solid var(--oppo-border) !important;
+  box-shadow: 4px 0 20px rgba(27,174,110,0.04);
+}
+
+/* ── Device Neon Frame & Scanline GPU Effects ── */
+.device-neon-frame {
+  position: relative;
+  border-radius: 16px;
+  background: rgba(9, 11, 21, 0.65) !important;
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(0, 229, 255, 0.25) !important;
+  box-shadow: 0 0 15px rgba(0, 229, 255, 0.15), inset 0 0 20px rgba(0, 229, 255, 0.05);
+  overflow: hidden;
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.device-neon-frame:hover {
+  border-color: rgba(0, 255, 163, 0.45) !important;
+  box-shadow: 0 0 25px rgba(0, 255, 163, 0.3), inset 0 0 25px rgba(0, 255, 163, 0.08);
+}
+
+.device-neon-frame::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 2.5px;
+  background: linear-gradient(90deg, transparent, #1bae6e, #22c97d, transparent);
+  box-shadow: 0 0 6px #1bae6e, 0 0 12px #22c97d;
+  animation: scan-line 3.5s linear infinite;
+  opacity: 0.65;
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* ── Solid Settings Panel (replaces bg-black/20) ── */
+.settings-panel {
+  background: var(--oppo-surface-elevated);
+  border: 1px solid var(--oppo-border);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+.settings-panel:hover {
+  border-color: rgba(27, 174, 110, 0.2);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.3), 0 0 0 1px rgba(27,174,110,0.06);
+}
+
+/* ── Storage / RAM Usage Bar ── */
+.usage-bar-track {
+  background: rgba(255,255,255,0.04);
+  border-radius: 6px;
+  overflow: hidden;
+  position: relative;
+}
+.usage-bar-fill {
+  height: 100%;
+  border-radius: 6px;
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.usage-bar-fill.usage-low    { background: linear-gradient(90deg, var(--oppo-green-muted), var(--oppo-green)); box-shadow: 0 0 6px rgba(27,174,110,0.3); }
+.usage-bar-fill.usage-medium { background: linear-gradient(90deg, #92400e, #f59e0b); box-shadow: 0 0 6px rgba(245,158,11,0.35); }
+.usage-bar-fill.usage-high   { background: linear-gradient(90deg, #7f1d1d, #ef4444); box-shadow: 0 0 6px rgba(239,68,68,0.4); }
+
+/* Desktop product system */
+html, body {
+  width: 100%;
+  height: 100%;
+}
+
+* {
+  box-sizing: border-box;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.28) transparent;
+}
+
+::selection {
+  background: rgba(34, 201, 125, 0.28);
+  color: #f8fafc;
+}
+
+body {
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  letter-spacing: -0.006em;
+}
+
+button {
+  min-height: 32px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+input, select, textarea {
+  min-height: 38px;
+  border-radius: 10px;
+  accent-color: var(--oppo-green-light);
+}
+
+input::placeholder, textarea::placeholder {
+  color: rgba(148, 163, 184, 0.58);
+}
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.22);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover { background: rgba(34, 201, 125, 0.42); background-clip: padding-box; }
+
+/* Reduce decorative noise so status and content remain the focus. */
+.glow-card, .settings-panel, .settings-card {
+  border-color: rgba(255, 255, 255, 0.075);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16);
+}
+
+.glow-card:hover, .settings-panel:hover, .settings-card:hover {
+  border-color: rgba(34, 201, 125, 0.22);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.22);
+}
+
+.logo-glow {
+  animation: none;
+  box-shadow: 0 8px 20px rgba(27, 174, 110, 0.22);
+}
+
+.device-neon-frame::after { display: none; }
+
+.nav-active-glow {
+  box-shadow: inset 3px 0 0 var(--oppo-green-light) !important;
+  border-color: rgba(34, 201, 125, 0.18) !important;
+}
+
+@media (max-width: 1100px) {
+  body { font-size: 14px; }
+}
+
+/* Final elevation and motion rules */
+.glow-card,
+.glow-card-emerald,
+.settings-panel {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+}
+
+.glow-card:hover,
+.glow-card-emerald:hover,
+.settings-panel:hover {
+  border-color: rgba(34, 201, 125, 0.18);
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.2);
+}
+
+.sidebar-glow {
+  box-shadow: none;
+}
+
+.screen-frame,
+.screen-frame:hover,
+.device-neon-frame,
+.device-neon-frame:hover {
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  box-shadow: inset 0 0 16px rgba(0, 0, 0, 0.28);
+}
+
+.btn-neon,
+.btn-neon:hover {
+  border-color: rgba(34, 201, 125, 0.28);
+  background: rgba(27, 174, 110, 0.1);
+  box-shadow: none;
+}
+
+.btn-neon::before {
+  display: none;
+}

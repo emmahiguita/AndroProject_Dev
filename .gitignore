@@ -1,0 +1,51 @@
+# Environments & Configs
+.env
+*.env
+.venv/
+**/venv/
+**/.venv/
+ENV/
+
+# Python
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*$py.class
+.ruff_cache/
+*.egg-info/
+
+# IDEs & Editors
+.idea/
+.vscode/
+.opencode/
+*.swp
+*.swo
+
+# Node / Next / Electron / GUI
+node_modules/
+**/node_modules/
+dist/
+**/dist/
+build/
+**/build/
+.next/
+**/.next/
+out/
+**/out/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Binaries & Executables
+*.exe
+*.apk
+*.asar
+*.7z
+*.zip
+*.tar.gz
+AndroProject_Installer/output/
+
+# OS / Temporary
+.DS_Store
+Thumbs.db
+*.log

@@ -1,0 +1,14 @@
+# ============================================================================
+# AndroProject Vision Backend - Soporte CUDA (GPU NVIDIA)
+# Requiere: NVIDIA GPU + CUDA Toolkit + cuDNN instalados en el sistema
+# Instalar: pip install -r requirements.txt -r requirements-cuda.txt
+# ============================================================================
+
+# Desinstalar opencv-python primero:
+# pip uninstall opencv-python -y
+# Luego instalar la version con CUDA:
+
+opencv-contrib-python>=4.9.0   # Incluye modulos extra + soporte CUDA si el sistema lo tiene
+# NOTA: La mayoria de builds wheel de opencv-contrib-python NO incluyen CUDA.
+# Para soporte CUDA real, compilar OpenCV desde fuente con -DWITH_CUDA=ON
+# o usar: pip install opencv-python-headless si solo necesitas procesamiento sin GUI

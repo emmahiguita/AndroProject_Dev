@@ -1,0 +1,83 @@
+╔══════════════════════════════════════════════════════════╗
+║          ANDROPROJECT — CONEXIÓN REMOTA                ║
+║   Accede a tu OPPO A79 5G desde cualquier parte        ║
+╚══════════════════════════════════════════════════════════╝
+
+═══ OPCIÓN 1: TAILSCALE (RECOMENDADA) ═══
+
+En el PC (Windows):
+  1. Descarga: https://tailscale.com/download/windows
+  2. Instala, inicia sesión con tu cuenta Google/Microsoft/Apple
+  3. Anota la IP Tailscale (100.x.x.x) del PC
+
+En el celular OPPO:
+  1. Play Store → busca "Tailscale" → instala
+  2. Abre, inicia sesión con la MISMA cuenta que el PC
+  3. Anota la IP Tailscale del celular
+
+Una vez conectados:
+  - El PC y el celular se ven como si estuvieran en la misma red
+  - ADB funciona: `adb connect 100.x.x.x:5555`
+  - VNC funciona: VNC Viewer → 100.x.x.x:5901
+  - Web funciona: http://100.x.x.x:8000
+  - La conexión NO se pierde aunque cambies de WiFi a datos móviles
+
+Para configurar la IP en la app:
+  - Ejecuta: `tailscale ip -4` en el PC para ver la IP
+  - La app detecta Tailscale automáticamente
+
+═══ OPCIÓN 2: CLOUDFLARE TUNNEL ═══
+
+En el PC:
+  1. cloudflared tunnel login
+     (Abre navegador → autoriza con Cloudflare)
+  
+  2. cloudflared tunnel create androproject
+     (Crea el tunnel, guarda el JSON de credenciales)
+  
+  3. cloudflared tunnel route dns androproject andro.tudominio.com
+     (Crea un DNS CNAME en tu dominio)
+  
+  4. Crear config.yml:
+     tunnel: androproject
+     credentials-file: C:\Users\emma\.cloudflared\androproject.json
+     ingress:
+       - hostname: andro.tudominio.com
+         service: http://localhost:3001
+       - hostname: api.andro.tudominio.com
+         service: http://localhost:8000
+       - service: http_status:404
+  
+  5. cloudflared tunnel run androproject
+
+  Accedes desde cualquier lugar via:
+  - Web: https://andro.tudominio.com
+  - API: https://api.andro.tudominio.com
+
+═══ OPCIÓN 3: TURN SERVER (PARA WEBRTC) ═══
+
+Si usas Tailscale → NO necesitas TURN (Tailscale hace P2P).
+
+Si NO usas Tailscale y necesitas WebRTC remoto:
+
+Opción A: TURN público (gratis, limitado)
+  - openrelay.metered.ca:443 (gratuito, 50MB/mes)
+
+Opción B: TURN propio con Docker
+  1. docker run -d --name coturn --network host coturn/coturn
+  2. Configurar en .env:
+     TURN_SERVER_URL=turn:127.0.0.1:3478
+     TURN_USERNAME=andro
+     TURN_CREDENTIAL=andro123
+
+Opción C: TURN en VPS
+  - Instalar coturn en VPS (DigitalOcean, Linode, etc.)
+  - Usar la IP pública del VPS como TURN server
+
+═══ ¿QUÉ OPCIÓN USAR? ═══
+
+  ¿Tienes un dominio Cloudflare?  → Opción 2
+  ¿Solo quieres que funcione ya? → Opción 1 (Tailscale)
+  ¿WebRTC no funciona con Tailscale? → Opción 3 (TURN)
+
+  Combinación ideal: Tailscale + TURN propio = máxima velocidad

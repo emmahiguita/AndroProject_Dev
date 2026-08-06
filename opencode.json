@@ -1,0 +1,37 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "instructions": [
+    ".opencode/AGENTS.md"
+  ],
+  "agent": {
+    "linux": {
+      "model": "google/gemini-2.5-pro",
+      "steps": 40,
+      "prompt": "You are a Linux sysadmin managing Ubuntu 24.04 LTS on OPPO CPH2557 via Termux + ADB. Use android-linux skill for device-specific commands.",
+      "permission": {
+        "bash": "allow",
+        "edit": "allow",
+        "read": "allow",
+        "glob": "allow",
+        "grep": "allow",
+        "list": "allow",
+        "webfetch": "allow",
+        "websearch": "allow"
+      }
+    }
+  },
+  "tools": {
+    "codebase-memory-mcp_*": true,
+    "blender_*": true,
+    "github_*": true,
+    "filesystem_*": true,
+    "brave_search_*": true,
+    "memory_*": true,
+    "sequential_thinking_*": true,
+    "opencode-mcp_*": true,
+    "puppeteer_*": true,
+    "context7_*": true,
+    "grep_vercel_*": true,
+    "sentry_*": true
+  }
+}
