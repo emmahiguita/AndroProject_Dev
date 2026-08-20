@@ -7,9 +7,19 @@ from processing.denoise import process_frame, CUDA_AVAILABLE
 
 logger = logging.getLogger(__name__)
 
-# Keep track of active peer connections with their stats
-pcs = set()
+# Keep track of active peer connections (internal — use get_active_connections() to access)
+__pcs: set = set()
 _stale_cleanup_started = False
+
+
+def get_active_connection_count() -> int:
+    """Thread-safe accessor for active WebRTC connections count."""
+    return len(__pcs)
+
+
+def get_active_connections() -> set:
+    """Returns a copy of the active connection set (read-only usage)."""
+    return set(__pcs)
 
 
 class VideoTransformTrack(MediaStreamTrack):
@@ -115,19 +125,21 @@ async def _cleanup_stale_connections():
     try:
         while True:
             await asyncio.sleep(30)
-            dead = [pc for pc in list(pcs) if pc.connectionState in ("failed", "closed")]
+            dead = [
+                pc for pc in list(_pcs) if pc.connectionState in ("failed", "closed")
+            ]
             for pc in dead:
                 logger.warning(
                     f"Cleaning up stale connection in state '{pc.connectionState}'"
                 )
-                pcs.discard(pc)
+                _pcs.discard(pc)
                 try:
                     await pc.close()
                 except Exception:
                     pass
             if dead:
                 logger.info(
-                    f"Stale cleanup: removed {len(dead)} connections, {len(pcs)} remaining"
+                    f"Stale cleanup: removed {len(dead)} connections, {len(_pcs)} remaining"
                 )
     finally:
         _stale_cleanup_started = False
@@ -162,7 +174,7 @@ async def handle_offer(sdp: str, type: str) -> RTCSessionDescription:
     pc = RTCPeerConnection()
     # Aplicar servidores ICE para NAT traversal
     pc._iceServers = ICE_SERVERS  # type: ignore[attr-defined]
-    pcs.add(pc)
+    _pcs.add(pc)
 
     # Start the stale connection cleanup loop (idempotent)
     asyncio.create_task(_cleanup_stale_connections())
@@ -176,20 +188,20 @@ async def handle_offer(sdp: str, type: str) -> RTCSessionDescription:
         state = pc.connectionState
         logger.info(f"Connection state -> {state}")
         if state in ("failed", "closed"):
-            pcs.discard(pc)
+            _pcs.discard(pc)
             try:
                 await pc.close()
             except Exception:
                 pass
             # Notify about active connections remaining
-            logger.info(f"Active connections remaining: {len(pcs)}")
+            logger.info(f"Active connections remaining: {len(_pcs)}")
 
     @pc.on("iceconnectionstatechange")
     async def on_iceconnectionstatechange():
         ice_state = pc.iceConnectionState
         if ice_state in ("failed", "disconnected", "closed"):
             logger.info(f"ICE state -> {ice_state}, scheduling cleanup")
-            pcs.discard(pc)
+            _pcs.discard(pc)
             try:
                 await pc.close()
             except Exception:
@@ -219,7 +231,7 @@ async def handle_offer(sdp: str, type: str) -> RTCSessionDescription:
         return pc.localDescription
     except Exception as e:
         logger.error(f"Failed to handle WebRTC offer: {e}")
-        pcs.discard(pc)
+        _pcs.discard(pc)
         try:
             await pc.close()
         except Exception:

@@ -12,6 +12,7 @@
     .\andro.ps1 server       = Iniciar AndroProject server
     .\andro.ps1 tool <name>  = Ejecutar herramienta en Ubuntu
     .\andro.ps1 hash <file>  = Crackear hash con hashcat
+    .\andro.ps1 fixshot      = Reparar capturas de pantalla
 #>
 param(
     [string]$Action = "",
@@ -19,7 +20,20 @@ param(
     [string]$Arg2 = ""
 )
 
-$ADB = "$env:LOCALAPPDATA\Android\Sdk\platform-tools\adb.exe"
+function Resolve-AdbBinary {
+    $candidates = @(
+        "C:\AndroProject\adb.exe",
+        "$env:LOCALAPPDATA\Android\Sdk\platform-tools\adb.exe",
+        "C:\Program Files\Android\platform-tools\adb.exe"
+    )
+    foreach ($c in $candidates) {
+        if (Test-Path $c) { return $c }
+    }
+    $cmd = Get-Command adb.exe -ErrorAction SilentlyContinue
+    if ($cmd) { return $cmd.Source }
+    return "adb.exe"
+}
+$ADB = Resolve-AdbBinary
 $PHONE_SN = "VGL7MVFMDYQG8T55"
 $PHONE_IP = "192.168.0.13"
 $PROOT_PREFIX = "run-as com.termux /data/data/com.termux/files/usr/bin/bash -c 'PATH=/data/data/com.termux/files/usr/bin proot-distro login ubuntu -- "
@@ -196,6 +210,125 @@ function Invoke-Tool {
     Write-Host ""
 }
 
+# ── REPARAR CAPTURAS (OPPO/ColorOS) ──
+function Repair-Screenshot {
+    Write-Host "`n  === REPARANDO CAPTURAS DE PANTALLA ===" -ForegroundColor Cyan
+    
+    if (-not (Ensure-Connected)) { return }
+
+    # ── DIAGNÓSTICO PREVIO ──────────────────────────────────────────
+    Write-Host "`n  -- Diagnostico --" -ForegroundColor Magenta
+
+    $globalDisable = adb-sh "settings get global disable_screen_shot 2>/dev/null"
+    if (($globalDisable -replace '\s','') -eq '1') {
+        Write-Host "  [FAIL] disable_screen_shot = 1 (BLOQUEA TODO)" -ForegroundColor Red
+        $needsFix = $true
+    } else {
+        Write-Host "  [OK] disable_screen_shot = $($globalDisable.Trim())" -ForegroundColor Green
+    }
+
+    $threeFinger = adb-sh "settings get system oppo_three_finger_screenshot 2>/dev/null"
+    if (($threeFinger -replace '\s','') -eq '0' -or ($threeFinger -replace '\s','') -eq 'null') {
+        Write-Host "  [FAIL] Gesto tres dedos: $($threeFinger.Trim())" -ForegroundColor Red
+        $needsFix = $true
+    } else {
+        Write-Host "  [OK] Gesto tres dedos: $($threeFinger.Trim())" -ForegroundColor Green
+    }
+
+    # Test screencap directo
+    adb-sh "screencap -p /data/local/tmp/_test_cap.png 2>/dev/null" | Out-Null
+    Start-Sleep -Seconds 1
+    $testSize = adb-sh "stat -c %s /data/local/tmp/_test_cap.png 2>/dev/null"
+    adb-sh "rm -f /data/local/tmp/_test_cap.png" | Out-Null
+    $testSize = ($testSize -replace '\D','').Trim()
+
+    if ([int]$testSize -gt 5000) {
+        Write-Host "  [OK] screencap funcional ($testSize bytes)" -ForegroundColor Green
+    } elseif ([int]$testSize -gt 0) {
+        Write-Host "  [FAIL] screencap genera archivo diminuto ($testSize bytes) - FLAG_SECURE activo!" -ForegroundColor Red
+        Write-Host "         Cerra la app actual (banco, Netflix, etc.) y ejecuta de nuevo." -ForegroundColor Yellow
+        return
+    } else {
+        Write-Host "  [FAIL] screencap NO funciona ($testSize bytes) - error del display HAL" -ForegroundColor Red
+    }
+
+    # ── REPARACIÓN ───────────────────────────────────────────────────
+    if ($needsFix) {
+        Write-Host "`n  -- Aplicando reparaciones --" -ForegroundColor Magenta
+
+        if (($globalDisable -replace '\s','') -eq '1') {
+            Write-Host "  [>>] Eliminando bloqueo global..." -ForegroundColor Cyan
+            adb-sh "settings delete global disable_screen_shot 2>/dev/null"
+            adb-sh "settings put global disable_screen_shot 0 2>/dev/null"
+            Write-Host "  [OK] Bloqueo global eliminado" -ForegroundColor Green
+        }
+
+        if (($threeFinger -replace '\s','') -eq '0' -or ($threeFinger -replace '\s','') -eq 'null') {
+            Write-Host "  [>>] Activando gestos de captura ColorOS..." -ForegroundColor Cyan
+            adb-sh "settings put system oppo_three_finger_screenshot 1 2>/dev/null"
+            adb-sh "settings put system three_gesture_screenshot 1 2>/dev/null"
+            adb-sh "settings put system oppo_screenshot_gesture 1 2>/dev/null"
+            adb-sh "settings put secure screenshot_enabled 1 2>/dev/null"
+            Write-Host "  [OK] Gestos activados" -ForegroundColor Green
+        }
+
+        Write-Host "  [>>] Liberando cache..." -ForegroundColor Cyan
+        adb-sh "pm trim-caches 999G 2>/dev/null"
+        Write-Host "  [OK] Cache liberada" -ForegroundColor Green
+
+        Write-Host "  [>>] Reiniciando SystemUI..." -ForegroundColor Cyan
+        adb-sh "pkill -f com.android.systemui 2>/dev/null"
+        Start-Sleep -Seconds 4
+        Write-Host "  [OK] SystemUI reiniciado" -ForegroundColor Green
+    } else {
+        Write-Host "`n  [OK] No se detectaron settings rotos. Verificando funcionalidad..." -ForegroundColor Green
+    }
+
+    # ── VERIFICACIÓN REAL ────────────────────────────────────────────
+    Write-Host "`n  -- Verificando captura --" -ForegroundColor Magenta
+    
+    $ts = Get-Date -Format "yyyy-MM-dd_HH-mm-ss"
+    $deviceFile = "/data/local/tmp/_verify_${ts}.png"
+    $capturasDir = "C:\AndroProject\Capturas"
+    if (-not (Test-Path $capturasDir)) { New-Item -ItemType Directory -Path $capturasDir -Force | Out-Null }
+    $localFile = "$capturasDir\verificacion_${ts}.png"
+
+    Write-Host "  [>>] Tomando captura de prueba..." -ForegroundColor Cyan
+    & $ADB -s $script:target shell "screencap -p $deviceFile" 2>&1 | Out-Null
+    Start-Sleep -Seconds 1
+
+    Write-Host "  [>>] Transfiriendo a PC..." -ForegroundColor Cyan
+    & $ADB -s $script:target pull "$deviceFile" "$localFile" 2>&1 | Out-Null
+    & $ADB -s $script:target shell "rm -f $deviceFile" 2>&1 | Out-Null
+
+    if (Test-Path $localFile) {
+        $size = (Get-Item $localFile).Length
+        if ($size -gt 10240) {
+            Write-Host ""
+            Write-Host "  ============================================" -ForegroundColor Green
+            Write-Host "  |   CAPTURA FUNCIONANDO CORRECTAMENTE      |" -ForegroundColor Green
+            Write-Host "  |   Archivo: $localFile" -ForegroundColor Green
+            Write-Host "  |   Tamano:  $([math]::Round($size/1024,1)) KB"  -ForegroundColor Green
+            Write-Host "  ============================================" -ForegroundColor Green
+            
+            Write-Host "`n  Abriendo imagen para verificacion visual..." -ForegroundColor Yellow
+            Start-Process $localFile
+            Write-Host "  Proba Power+Vol Down o tres dedos en el movil. Deberia funcionar." -ForegroundColor Gray
+        } elseif ($size -gt 100) {
+            Write-Host "`n  [WARN] Captura demasiado pequena (${size} bytes)" -ForegroundColor Yellow
+            Write-Host "          Posible FLAG_SECURE. Cerra apps bancarias/de streaming y reintenta." -ForegroundColor Yellow
+            Remove-Item $localFile -Force
+        } else {
+            Write-Host "`n  [FAIL] Archivo vacio o corrupto (${size} bytes)" -ForegroundColor Red
+            Remove-Item $localFile -Force
+        }
+    } else {
+        Write-Host "`n  [FAIL] No se pudo obtener la captura de prueba" -ForegroundColor Red
+        Write-Host "         Diagnostico completo: .\scripts\fix-screenshot.ps1" -ForegroundColor Gray
+    }
+    Write-Host ""
+}
+
 # ── MENU ──
 function Show-Menu {
     Write-Banner
@@ -214,6 +347,7 @@ function Show-Menu {
   [6] Shell Ubuntu interactiva
   [7] Metasploit console
   [8] AndroProject Server
+  [9] Reparar capturas de pantalla (OPPO)
   [0] Salir
 "@
     
@@ -227,6 +361,7 @@ function Show-Menu {
         '6' { Enter-Shell }
         '7' { Enter-MSF }
         '8' { Start-Server }
+        '9' { Repair-Screenshot }
         '0' { return }
         default { Write-Host "  Invalido" -ForegroundColor Red }
     }
@@ -246,6 +381,7 @@ switch ($Action) {
     'server'   { Start-Server }
     'hash'     { Start-Hashcat $Arg1 $Arg2 }
     'tool'     { Invoke-Tool $Arg1 }
+    'fixshot'  { Repair-Screenshot }
     ''         { Show-Menu }
     default    { Invoke-Tool "$Action $Arg1 $Arg2" }
 }

@@ -1,0 +1,168 @@
+{
+    "timestamp":  "2026-08-08T03:46:55.3695897-05:00",
+    "packages":  [
+                     "com.heytap.market",
+                     "com.heytap.htms",
+                     "com.oplus.themestore",
+                     "com.coloros.weather2",
+                     "com.coloros.musiclink",
+                     "com.oplus.musiclink",
+                     "com.coloros.oshare",
+                     "com.coloros.lockassistant",
+                     "com.coloros.bootreg",
+                     "android.autoinstalls.config.oppo",
+                     "com.oplus.atlas",
+                     "com.oplus.aiunit",
+                     "com.oplus.deepthinker",
+                     "com.oplus.athena",
+                     "com.oplus.pscanvas",
+                     "com.oplus.upgradeguide",
+                     "com.oplus.multiapp",
+                     "com.oplus.virtualcomm",
+                     "com.oplus.statistics.rom",
+                     "com.oplus.logkit",
+                     "com.oplus.onetrace",
+                     "com.oplus.crashbox",
+                     "com.oplus.healthservice",
+                     "com.nearme.instant.platform",
+                     "com.mediatek.magtapp",
+                     "com.oplus.trafficmonitor",
+                     "com.oplus.appbooster",
+                     "com.oplus.mediaturbo",
+                     "com.oplus.account",
+                     "com.oplus.appplatform",
+                     "com.oplus.engineernetwork",
+                     "com.oplus.keyguard.clock.magazine"
+                 ],
+    "mode":  "debloated",
+    "results":  [
+                    {
+                        "package":  "com.heytap.market",
+                        "status":  "disabled"
+                    },
+                    {
+                        "package":  "com.heytap.htms",
+                        "status":  "FAILED: Failure [DELETE_FAILED_INTERNAL_ERROR] | Package com.heytap.htms new state: default"
+                    },
+                    {
+                        "package":  "com.oplus.themestore",
+                        "status":  "FAILED: Failure [DELETE_FAILED_INTERNAL_ERROR] | Package com.oplus.themestore new state: default"
+                    },
+                    {
+                        "package":  "com.coloros.weather2",
+                        "status":  "uninstalled"
+                    },
+                    {
+                        "package":  "com.coloros.musiclink",
+                        "status":  "uninstalled"
+                    },
+                    {
+                        "package":  "com.oplus.musiclink",
+                        "status":  "FAILED: Failure [not installed for 0] | System.Management.Automation.RemoteException Exception occurred while executing \u0027disable-user\u0027: java.lang.IllegalArgumentException: Unknown package: com.oplus.musiclink \tat com.android.server.pm.PackageManagerService.setEnabledSettings(PackageManagerService.java:4229) \tat com.android.server.pm.PackageManagerService.-$$Nest$msetEnabledSettings(PackageManagerService.java:0) \tat com.android.server.pm.PackageManagerService$IPackageManagerImpl.setApplicationEnabledSetting(PackageManagerService.java:6293) \tat com.android.server.pm.PackageManagerShellCommand.runSetEnabledSetting(PackageManagerShellCommand.java:2434) \tat com.android.server.pm.PackageManagerShellCommand.onCommand(PackageManagerShellCommand.java:302) \tat com.android.modules.utils.BasicShellCommandHandler.exec(BasicShellCommandHandler.java:97) \tat android.os.ShellCommand.exec(ShellCommand.java:38) \tat com.android.server.pm.PackageManagerService$IPackageManagerImpl.onShellCommand(PackageManagerService.java:7037) \tat android.os.Binder.shellCommand(Binder.java:1243) \tat android.os.Binder.onTransact(Binder.java:1056) \tat android.content.pm.IPackageManager$Stub.onTransact(IPackageManager.java:4620) \tat com.android.server.pm.PackageManagerService$IPackageManagerImpl.onTransact(PackageManagerService.java:7021) \tat android.os.Binder.execTransactInternal(Binder.java:1523) \tat android.os.Binder.execTransact(Binder.java:1457)"
+                    },
+                    {
+                        "package":  "com.coloros.oshare",
+                        "status":  "uninstalled"
+                    },
+                    {
+                        "package":  "com.coloros.lockassistant",
+                        "status":  "FAILED: Failure [DELETE_FAILED_INTERNAL_ERROR] | Package com.coloros.lockassistant new state: enabled"
+                    },
+                    {
+                        "package":  "com.coloros.bootreg",
+                        "status":  "FAILED: Failure [DELETE_FAILED_INTERNAL_ERROR] | Package com.coloros.bootreg new state: default"
+                    },
+                    {
+                        "package":  "android.autoinstalls.config.oppo",
+                        "status":  "uninstalled"
+                    },
+                    {
+                        "package":  "com.oplus.atlas",
+                        "status":  "uninstalled"
+                    },
+                    {
+                        "package":  "com.oplus.aiunit",
+                        "status":  "FAILED: Failure [DELETE_FAILED_INTERNAL_ERROR] | Package com.oplus.aiunit new state: default"
+                    },
+                    {
+                        "package":  "com.oplus.deepthinker",
+                        "status":  "uninstalled"
+                    },
+                    {
+                        "package":  "com.oplus.athena",
+                        "status":  "uninstalled"
+                    },
+                    {
+                        "package":  "com.oplus.pscanvas",
+                        "status":  "uninstalled"
+                    },
+                    {
+                        "package":  "com.oplus.upgradeguide",
+                        "status":  "uninstalled"
+                    },
+                    {
+                        "package":  "com.oplus.multiapp",
+                        "status":  "uninstalled"
+                    },
+                    {
+                        "package":  "com.oplus.virtualcomm",
+                        "status":  "uninstalled"
+                    },
+                    {
+                        "package":  "com.oplus.statistics.rom",
+                        "status":  "uninstalled"
+                    },
+                    {
+                        "package":  "com.oplus.logkit",
+                        "status":  "uninstalled"
+                    },
+                    {
+                        "package":  "com.oplus.onetrace",
+                        "status":  "uninstalled"
+                    },
+                    {
+                        "package":  "com.oplus.crashbox",
+                        "status":  "uninstalled"
+                    },
+                    {
+                        "package":  "com.oplus.healthservice",
+                        "status":  "uninstalled"
+                    },
+                    {
+                        "package":  "com.nearme.instant.platform",
+                        "status":  "FAILED: Failure [DELETE_FAILED_INTERNAL_ERROR] | Package com.nearme.instant.platform new state: default"
+                    },
+                    {
+                        "package":  "com.mediatek.magtapp",
+                        "status":  "uninstalled"
+                    },
+                    {
+                        "package":  "com.oplus.trafficmonitor",
+                        "status":  "uninstalled"
+                    },
+                    {
+                        "package":  "com.oplus.appbooster",
+                        "status":  "uninstalled"
+                    },
+                    {
+                        "package":  "com.oplus.mediaturbo",
+                        "status":  "uninstalled"
+                    },
+                    {
+                        "package":  "com.oplus.account",
+                        "status":  "uninstalled"
+                    },
+                    {
+                        "package":  "com.oplus.appplatform",
+                        "status":  "uninstalled"
+                    },
+                    {
+                        "package":  "com.oplus.engineernetwork",
+                        "status":  "uninstalled"
+                    },
+                    {
+                        "package":  "com.oplus.keyguard.clock.magazine",
+                        "status":  "uninstalled"
+                    }
+                ]
+}

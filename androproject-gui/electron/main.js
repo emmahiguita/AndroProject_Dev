@@ -168,12 +168,13 @@ function startNextServer() {
 
 async function createWindow() {
   mainWindow = new BrowserWindow({
-    width: 1280, height: 820, minWidth: 960, minHeight: 640,
+    width: 1360, height: 860, minWidth: 900, minHeight: 600,
     icon: getAssetPath('icon.png'),
-    backgroundColor: '#0d0f1a',
+    backgroundColor: '#0b0e17',
     title: 'AndroProject v2.1.0',
     show: false,
     autoHideMenuBar: true,
+    center: true,
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: false,
@@ -188,6 +189,14 @@ async function createWindow() {
     if (!url.startsWith(SERVER_URL)) event.preventDefault();
   });
 
+  // Mostrar la ventana cuando esté lista para ser presentada
+  mainWindow.once('ready-to-show', () => {
+    if (mainWindow) {
+      mainWindow.show();
+      mainWindow.focus();
+    }
+  });
+
   // ── Minimizar a bandeja en vez de cerrar ──────────────────────────
   mainWindow.on('close', (event) => {
     if (!isQuitting) {
@@ -200,9 +209,17 @@ async function createWindow() {
     mainWindow = null;
   });
 
-  await mainWindow.loadURL(SERVER_URL);
-  mainWindow.show();
-  mainWindow.focus();
+  try {
+    await mainWindow.loadURL(SERVER_URL);
+  } catch (err) {
+    console.error('[Electron] Failed to load URL:', err.message);
+  }
+
+  // Asegurar que la ventana sea visible si ready-to-show ya pasó
+  if (mainWindow && !mainWindow.isVisible()) {
+    mainWindow.show();
+    mainWindow.focus();
+  }
 }
 
 // ── ADB Radar ──────────────────────────────────────────────────────────

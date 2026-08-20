@@ -99,10 +99,10 @@ fi
 
 # Verificar scripts personalizados
 echo -e "${YELLOW}[7/8] Verificando scripts personalizados...${NC}"
-if [ -d "~/bin" ]; then
+if [ -d "$HOME/bin" ]; then
     echo -e "${GREEN}✓ Directorio ~/bin existe${NC}"
     for script in start-kali-desktop.sh start-kali-cli.sh update-kali.sh; do
-        if [ -f "~/bin/$script" ]; then
+        if [ -f "$HOME/bin/$script" ]; then
             echo -e "${GREEN}✓ $script${NC}"
         else
             echo -e "${YELLOW}⚠ $script (no existe)${NC}"
@@ -114,9 +114,9 @@ fi
 
 # Verificar accesos directos
 echo -e "${YELLOW}[8/8] Verificando accesos directos...${NC}"
-if [ -d "~/.shortcuts" ]; then
+if [ -d "$HOME/.shortcuts" ]; then
     echo -e "${GREEN}✓ Directorio ~/.shortcuts existe${NC}"
-    SHORTCUT_COUNT=$(ls ~/.shortcuts/ 2>/dev/null | wc -l)
+    SHORTCUT_COUNT=$(ls "$HOME/.shortcuts/" 2>/dev/null | wc -l)
     echo -e "  Accesos directos: ${BLUE}$SHORTCUT_COUNT${NC}"
 else
     echo -e "${YELLOW}⚠ Directorio ~/.shortcuts no existe${NC}"

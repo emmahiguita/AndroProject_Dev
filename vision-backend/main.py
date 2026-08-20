@@ -42,7 +42,10 @@ app = FastAPI(
 # variables de entorno (p. ej. https://androproject.mi-dominio.com).
 # ═══════════════════════════════════════════════════════════════════════════
 import os
-_CORS_ORIGINS = os.environ.get("FRONTEND_ORIGIN", "http://127.0.0.1:3001,http://localhost:3001")
+
+_CORS_ORIGINS = os.environ.get(
+    "FRONTEND_ORIGIN", "http://127.0.0.1:3001,http://localhost:3001"
+)
 _ALLOWED_ORIGINS = [o.strip() for o in _CORS_ORIGINS.split(",") if o.strip()]
 
 app.add_middleware(
@@ -65,7 +68,8 @@ async def root():
 @app.get("/health")
 async def health_check():
     """Endpoint de salud: CUDA, WebRTC, métricas básicas."""
-    from ingest.webrtc import pcs
+    from ingest.webrtc import get_active_connection_count
+
     return {
         "status": "healthy",
         "gpu": {
@@ -74,10 +78,26 @@ async def health_check():
             "filter": "gaussian_blur_3x3 + unsharp_mask",
         },
         "webrtc": {
-            "active_connections": len(pcs),
+            "active_connections": get_active_connection_count(),
         },
         "version": "2.1.0",
     }
+
+
+from fastapi import WebSocket, WebSocketDisconnect
+
+@app.websocket("/ws/browser-runtime")
+async def websocket_browser_runtime(websocket: WebSocket):
+    await websocket.accept()
+    logger.info("WebSocket /ws/browser-runtime conectado")
+    try:
+        while True:
+            data = await websocket.receive_text()
+            await websocket.send_text(f"echo: {data}")
+    except WebSocketDisconnect:
+        logger.info("WebSocket /ws/browser-runtime desconectado")
+    except Exception as e:
+        logger.warning(f"WebSocket /ws/browser-runtime cerrado: {e}")
 
 
 if __name__ == "__main__":

@@ -1,0 +1,153 @@
+/* ═══════════════════════════════════════════════════════════════════
+   AndroProject — Design Tokens v2
+   Minimalist dark-first design system. OPPO ColorOS inspired.
+   ═══════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* ── Brand ── */
+  --brand:            #1bae6e;
+  --brand-light:      #22c97d;
+  --brand-muted:      #0d5c3a;
+
+  /* ── Surfaces ── */
+  --surface-root:     #0b0e17;
+  --surface-base:     #111622;
+  --surface-raised:   #181c2b;
+  --surface-overlay:  #1e2335;
+
+  /* ── Borders ── */
+  --border-subtle:    rgba(255, 255, 255, 0.05);
+  --border-default:   rgba(255, 255, 255, 0.08);
+  --border-strong:    rgba(255, 255, 255, 0.12);
+  --border-accent:    rgba(27, 174, 110, 0.25);
+
+  /* ── Text ── */
+  --text-primary:     #f1f5f9;
+  --text-secondary:   rgba(241, 245, 249, 0.65);
+  --text-tertiary:    rgba(241, 245, 249, 0.35);
+  --text-disabled:    rgba(241, 245, 249, 0.18);
+  --text-accent:      var(--brand-light);
+
+  /* ── Semantic ── */
+  --success:          #22c97d;
+  --warning:          #f59e0b;
+  --danger:           #ef4444;
+  --info:             #3b82f6;
+  --violet:           #a855f7;
+
+  /* ── Glow colors ── */
+  --glow-cyan:        #00e5ff;
+  --glow-emerald:     #00ffa3;
+  --glow-violet:      #a855f7;
+  --glow-amber:       #fbbf24;
+  --glow-red:         #ff4d6d;
+  --glow-blue:        #3b82f6;
+
+  /* ── Shadows (elevation scale) ── */
+  --shadow-xs:        0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-sm:        0 2px 8px rgba(0, 0, 0, 0.25);
+  --shadow-md:        0 4px 16px rgba(0, 0, 0, 0.3);
+  --shadow-lg:        0 8px 32px rgba(0, 0, 0, 0.35);
+  --shadow-xl:        0 12px 48px rgba(0, 0, 0, 0.4);
+
+  --glow-brand-sm:    0 0 8px rgba(27, 174, 110, 0.35);
+  --glow-brand-md:    0 0 16px rgba(27, 174, 110, 0.25);
+  --glow-brand-lg:    0 0 24px rgba(27, 174, 110, 0.2);
+  --glow-emerald-sm:  0 0 8px rgba(0, 255, 163, 0.4);
+  --glow-cyan-sm:     0 0 8px rgba(0, 229, 255, 0.4);
+
+  /* ── Spacing scale ── */
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  20px;
+  --space-6:  24px;
+  --space-8:  32px;
+  --space-10: 40px;
+  --space-12: 48px;
+
+  /* ── Radius ── */
+  --radius-sm:   6px;
+  --radius-md:   10px;
+  --radius-lg:   14px;
+  --radius-xl:   18px;
+  --radius-full: 9999px;
+
+  /* ── Typography ── */
+  --font-sans:   var(--font-inter), system-ui, -apple-system, sans-serif;
+  --font-mono:   'JetBrains Mono', 'Fira Code', monospace;
+
+  /* Escala alineada 1:1 con Tailwind (tailwind.config.ts → fontSize).
+     Única fuente de verdad: los componentes usan clases de Tailwind
+     (text-sm, text-base…); estos tokens existen para CSS puro y para
+     documentar la escala. NO divergir de Tailwind aquí. */
+  --text-3xs:    0.5rem;     /* 8px  — solo captions técnicas */
+  --text-2xs:    0.625rem;   /* 10px — solo captions técnicas */
+  --text-xs:     0.75rem;    /* 12px */
+  --text-sm:     0.875rem;   /* 14px */
+  --text-base:   1rem;       /* 16px */
+  --text-lg:     1.125rem;   /* 18px */
+  --text-xl:     1.25rem;    /* 20px */
+  --text-2xl:    1.5rem;     /* 24px */
+
+  --leading-tight:   1.2;
+  --leading-normal:  1.5;
+  --tracking-tight:  -0.01em;
+  --tracking-wide:   0.05em;
+  --tracking-wider:  0.1em;
+
+  /* ── Motion ── */
+  --duration-instant:  100ms;
+  --duration-fast:     150ms;
+  --duration-normal:   250ms;
+  --duration-slow:     400ms;
+  --duration-glacial:  700ms;
+
+  --ease-out:     cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out:  cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-spring:  cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-smooth:  cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* ── Z-index ── */
+  --z-base:      0;
+  --z-dropdown:  100;
+  --z-sticky:    200;
+  --z-overlay:   300;
+  --z-modal:     400;
+  --z-toast:     500;
+  --z-tooltip:   600;
+
+  /* ── Cosmic 3D ── */
+  --lightX:           50%;
+  --lightY:           28%;
+  --cosmic-cyan:      #63e9ff;
+  --cosmic-violet:    #9a6dff;
+  --cosmic-pink:      #ff8bd8;
+  --cosmic-deep:      #020614;
+  --cosmic-nebula:    #06142d;
+}
+
+/* ── Light theme overrides ── */
+:root.light,
+[data-theme="light"] {
+  --surface-root:     #f8fafc;
+  --surface-base:     #f1f5f9;
+  --surface-raised:   #ffffff;
+  --surface-overlay:  #e2e8f0;
+
+  --border-subtle:    rgba(0, 0, 0, 0.06);
+  --border-default:   rgba(0, 0, 0, 0.1);
+  --border-strong:    rgba(0, 0, 0, 0.15);
+  --border-accent:    rgba(27, 174, 110, 0.3);
+
+  --text-primary:     #0f172a;
+  --text-secondary:   rgba(15, 23, 42, 0.6);
+  --text-tertiary:    rgba(15, 23, 42, 0.35);
+  --text-disabled:    rgba(15, 23, 42, 0.18);
+
+  --shadow-xs:        0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-sm:        0 2px 6px rgba(0, 0, 0, 0.06);
+  --shadow-md:        0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-lg:        0 8px 24px rgba(0, 0, 0, 0.1);
+}

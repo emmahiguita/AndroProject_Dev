@@ -195,23 +195,42 @@ export async function POST(request: Request) {
 
       // 8. Instalacion Inteligente
       if (isClone) {
-        await appendLog('Modo CLON activado. Instalando en el perfil de trabajo paralelo...');
+        await appendLog('Modo CLON activado. Buscando perfil secundario aislado...');
+        let targetUser = '10';
+        try {
+          const { stdout: usersOut } = await execAsync(`${adbTarget} shell pm list users`);
+          const userMatches = Array.from(usersOut.matchAll(/UserInfo\{(\d+):/g));
+          const secondary = userMatches.find(m => m[1] !== '0');
+          if (secondary) {
+            targetUser = secondary[1];
+            await appendLog(`Perfil aislado detectado: ID ${targetUser}`);
+          } else {
+            await appendLog('Aviso: No se detectó perfil secundario. Usando ID 10 por defecto.');
+          }
+        } catch {}
+
         try {
           const installPaths = patchedApks.map(p => `"${p}"`).join(' ');
-          await execAsync(`${adbTarget} install-multiple --user 10 ${installPaths}`, { maxBuffer: 50 * 1024 * 1024 });
-          await appendLog('Clon instalado exitosamente en el perfil aislado.');
+          const installCmd = patchedApks.length === 1
+            ? `${adbTarget} install --user ${targetUser} ${installPaths}`
+            : `${adbTarget} install-multiple --user ${targetUser} ${installPaths}`;
+          await execAsync(installCmd, { maxBuffer: 50 * 1024 * 1024 });
+          await appendLog(`Clon instalado exitosamente en el perfil ${targetUser}.`);
         } catch (e: unknown) {
-          await appendLog(`Error creando el clon (¿Perfil 10 existe?): ${getErrorMessage(e)}`);
-          throw new Error('Fallo al clonar en el perfil secundario');
+          await appendLog(`Error creando el clon en perfil ${targetUser}: ${getErrorMessage(e)}`);
+          throw new Error(`Fallo al clonar en el perfil secundario (${getErrorMessage(e)})`);
         }
       } else {
-        await appendLog('Desinstalando version bloqueada original (Liberando candados)...');
+        await appendLog('Desinstalando versión original (Liberando candados)...');
         await execAsync(`${adbTarget} uninstall ${packageName}`).catch(() => {});
         
-        await appendLog('Instalando Arquitectura Curada...');
+        await appendLog('Instalando aplicación curada...');
         const installPaths = patchedApks.map(p => `"${p}"`).join(' ');
-        await execAsync(`${adbTarget} install-multiple ${installPaths}`, { maxBuffer: 50 * 1024 * 1024 });
-        await appendLog(`Despliegue finalizado con exito.`);
+        const installCmd = patchedApks.length === 1
+          ? `${adbTarget} install -r ${installPaths}`
+          : `${adbTarget} install-multiple -r ${installPaths}`;
+        await execAsync(installCmd, { maxBuffer: 50 * 1024 * 1024 });
+        await appendLog(`Despliegue finalizado con éxito.`);
       }
       
       await appendLog('¡PROCESO PROFESIONAL COMPLETADO EXITOSAMENTE!');

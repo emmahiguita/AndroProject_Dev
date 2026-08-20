@@ -1,0 +1,9 @@
+{
+    "timestamp":  "2026-08-08T05:07:14.3712422-05:00",
+    "entries":  [
+                    {
+                        "package":  "com.google.android.feedback",
+                        "action":  "disable"
+                    }
+                ]
+}

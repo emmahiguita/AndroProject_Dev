@@ -1,0 +1,253 @@
+/* ═══════════════════════════════════════════════════════════════════
+   AndroProject — Animation & Transition Library
+   Minimalist. No unnecessary motion. Respects prefers-reduced-motion.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Entrance: fade ── */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fade-in-down {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fade-in-left {
+  from { opacity: 0; transform: translateX(-8px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes fade-in-right {
+  from { opacity: 0; transform: translateX(8px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* ── Entrance: scale ── */
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.94); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* ── Status indicators ── */
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1;    transform: scale(1); }
+  50%      { opacity: 0.4;  transform: scale(0.85); }
+}
+@keyframes pulse-ring {
+  0%   { box-shadow: 0 0 0 0 rgba(34, 201, 125, 0.5); }
+  70%  { box-shadow: 0 0 0 6px rgba(34, 201, 125, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(34, 201, 125, 0); }
+}
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 6px rgba(27, 174, 110, 0.4); }
+  50%      { box-shadow: 0 0 14px rgba(27, 174, 110, 0.15); }
+}
+
+/* ── Loading / shimmer ── */
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* ── Scan line (device frame) ── */
+@keyframes scan-line {
+  0%   { top: 0%; }
+  100% { top: 100%; }
+}
+
+/* ── Border glow ── */
+@keyframes border-glow-spin {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* ── Slide toggle ── */
+@keyframes slide-right {
+  from { transform: translateX(0); }
+  to   { transform: translateX(calc(100% - 2px)); }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   UTILITY CLASSES
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Entrance animations ── */
+.anim-fade-in {
+  animation: fade-in var(--duration-normal) var(--ease-out) both;
+}
+.anim-fade-in-up {
+  animation: fade-in-up var(--duration-slow) var(--ease-out) both;
+}
+.anim-fade-in-down {
+  animation: fade-in-down var(--duration-normal) var(--ease-out) both;
+}
+.anim-fade-in-left {
+  animation: fade-in-left var(--duration-normal) var(--ease-out) both;
+}
+.anim-fade-in-right {
+  animation: fade-in-right var(--duration-normal) var(--ease-out) both;
+}
+.anim-scale-in {
+  animation: scale-in var(--duration-slow) var(--ease-spring) both;
+}
+
+/* ── Stagger delays for children ── */
+.stagger-1 { animation-delay: 0ms; }
+.stagger-2 { animation-delay: 60ms; }
+.stagger-3 { animation-delay: 120ms; }
+.stagger-4 { animation-delay: 180ms; }
+.stagger-5 { animation-delay: 240ms; }
+.stagger-6 { animation-delay: 300ms; }
+
+/* Apply stagger to all direct children */
+.stagger-children > * {
+  animation: fade-in-up var(--duration-slow) var(--ease-out) both;
+}
+.stagger-children > *:nth-child(1) { animation-delay: 0ms; }
+.stagger-children > *:nth-child(2) { animation-delay: 60ms; }
+.stagger-children > *:nth-child(3) { animation-delay: 120ms; }
+.stagger-children > *:nth-child(4) { animation-delay: 180ms; }
+.stagger-children > *:nth-child(5) { animation-delay: 240ms; }
+.stagger-children > *:nth-child(6) { animation-delay: 300ms; }
+
+/* ── Status indicators ── */
+.dot-pulse {
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+.dot-ring {
+  animation: pulse-ring 2s ease-out infinite;
+}
+.glow-pulse {
+  animation: pulse-glow 3s ease-in-out infinite;
+}
+
+/* ── Shimmer ── */
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.04) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s ease-in-out infinite;
+}
+
+/* ── Spin ── */
+.spin-slow {
+  animation: spin-slow 3s linear infinite;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   TRANSITION PRESETS
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Base transition — apply to any interactive element */
+.tx {
+  transition: all var(--duration-fast) var(--ease-out);
+}
+.tx-smooth {
+  transition: all var(--duration-normal) var(--ease-smooth);
+}
+.tx-spring {
+  transition: all var(--duration-slow) var(--ease-spring);
+}
+.tx-colors {
+  transition: background-color var(--duration-normal) var(--ease-out),
+              border-color var(--duration-normal) var(--ease-out),
+              color var(--duration-fast) var(--ease-out),
+              box-shadow var(--duration-normal) var(--ease-out);
+}
+.tx-transform {
+  transition: transform var(--duration-normal) var(--ease-spring),
+              opacity var(--duration-normal) var(--ease-out);
+}
+
+/* ── Hover lift ── */
+.hover-lift {
+  transition: transform var(--duration-fast) var(--ease-out),
+              box-shadow var(--duration-fast) var(--ease-out);
+}
+.hover-lift:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+.hover-lift:active {
+  transform: translateY(0);
+}
+
+/* ── Hover glow ── */
+.hover-glow {
+  transition: border-color var(--duration-normal) var(--ease-out),
+              box-shadow var(--duration-normal) var(--ease-out);
+}
+.hover-glow:hover {
+  border-color: var(--border-accent);
+  box-shadow: var(--glow-brand-sm);
+}
+
+/* ── Press scale ── */
+.press-scale:active {
+  transform: scale(0.97);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   COSMIC 3D — Background & Parallax Animations
+   ═══════════════════════════════════════════════════════════════════ */
+
+@keyframes cosmic-space-drift {
+  to {
+    background-position: 103px 91px, -79px 148px, 218px -64px;
+  }
+}
+
+@keyframes cosmic-fog-move {
+  from { transform: translate3d(-2%, -2%, 0) scale(1); }
+  to   { transform: translate3d(2%, 2%, 0) scale(1.08); }
+}
+
+@keyframes cosmic-pulse {
+  0%, 100% { opacity: 0.15; transform: scale(1); }
+  50%      { opacity: 0.25; transform: scale(1.02); }
+}
+
+@keyframes cosmic-light-shift {
+  0%, 100% { opacity: 0.18; }
+  50%      { opacity: 0.28; }
+}
+
+@keyframes cosmic-specular-breathe {
+  0%, 100% { opacity: 0.5; }
+  50%      { opacity: 0.7; }
+}
+
+@keyframes cosmic-card-tilt {
+  0%   { transform: perspective(800px) rotateX(1deg) rotateY(-1deg); }
+  25%  { transform: perspective(800px) rotateX(-0.5deg) rotateY(1deg); }
+  50%  { transform: perspective(800px) rotateX(-1deg) rotateY(1.5deg); }
+  75%  { transform: perspective(800px) rotateX(0.3deg) rotateY(-0.8deg); }
+  100% { transform: perspective(800px) rotateX(1deg) rotateY(-1deg); }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   REDUCED MOTION
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

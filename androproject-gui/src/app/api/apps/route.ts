@@ -238,6 +238,77 @@ function deriveAppName(apkPath: string, pkg: string): string {
   return lastPkgPart.charAt(0).toUpperCase() + lastPkgPart.slice(1);
 }
 
+// ── Safe-to-remove classification ────────────────────────────────
+// Apps that are SAFE to uninstall without affecting core functionality
+const SAFE_TO_REMOVE_PACKAGES = new Set([
+  // Social media bloatware
+  'com.facebook.katana', 'com.facebook.orca', 'com.facebook.lite',
+  'com.facebook.system', 'com.facebook.appmanager', 'com.facebook.services',
+  'com.instagram.android', 'com.zhiliaoapp.musically', // TikTok
+  'com.twitter.android', 'com.snapchat.android',
+  // Entertainment bloatware
+  'com.netflix.mediaclient', 'com.spotify.music', 'com.amazon.mShop.android.shopping',
+  'com.ebay.mobile', 'com.shopee.*',
+  // Google optional
+  'com.google.android.apps.youtube.music',
+  'com.google.android.apps.tachyon', // Meet
+  'com.google.android.apps.wellbeing', // Digital Wellbeing
+  'com.google.android.googlequicksearchbox', // Google App
+  // OEM bloatware (OPPO/Realme/OnePlus)
+  'com.heytap.browser', 'com.heytap.cloud', 'com.heytap.market',
+  'com.heytap.pictorial', 'com.heytap.mcs',
+  'com.oplus.member', 'com.oplus.pay', 'com.oplus.games',
+  'com.oplus.appdetail', 'com.oplus.sau', 'com.oplus.olc',
+  'com.coloros.note', 'com.coloros.phonemanager',
+  'com.nearme.atlas', 'com.oplus.quicksearch',
+  // Samsung bloatware
+  'com.samsung.android.bixby.agent', 'com.samsung.android.bixby.wakeup',
+  'com.samsung.android.game.gamehome', 'com.samsung.android.app.spage',
+  'com.samsung.android.email.provider',
+  // Carrier bloatware
+  'com.carrier.*',
+]);
+
+// Critical system packages — NEVER suggest removing these
+const CRITICAL_SYSTEM_PACKAGES = new Set([
+  'android', 'system', 'com.android.providers.*', 'com.android.server.*',
+  'com.android.phone', 'com.android.systemui', 'com.android.settings',
+  'com.android.bluetooth', 'com.android.nfc', 'com.android.wifi',
+  'com.android.shell', 'com.android.packageinstaller',
+  'com.google.android.gms', 'com.google.android.gms.persistent',
+  'com.google.android.gsf', 'com.google.android.gsf.login',
+  'com.android.vending', // Play Store — technically removable but risky
+  'com.qualcomm.*', 'com.mediatek.*',
+]);
+
+function isCriticalSystem(pkg: string): boolean {
+  // Direct match
+  if (CRITICAL_SYSTEM_PACKAGES.has(pkg)) return true;
+  // Prefix match for wildcard patterns
+  for (const pattern of CRITICAL_SYSTEM_PACKAGES) {
+    if (pattern.endsWith('*') && pkg.startsWith(pattern.slice(0, -1))) return true;
+  }
+  return false;
+}
+
+function isSafeToRemove(pkg: string, isSystem: boolean): boolean {
+  // Never mark critical system packages as safe
+  if (isCriticalSystem(pkg)) return false;
+  // Direct match
+  if (SAFE_TO_REMOVE_PACKAGES.has(pkg)) return true;
+  // Prefix match for wildcard patterns
+  for (const pattern of SAFE_TO_REMOVE_PACKAGES) {
+    if (pattern.endsWith('*') && pkg.startsWith(pattern.slice(0, -1))) return true;
+  }
+  // Heuristic: OEM-specific packages that aren't critical are usually safe
+  if (isSystem && (
+    pkg.startsWith('com.heytap.') || pkg.startsWith('com.oplus.') ||
+    pkg.startsWith('com.coloros.') || pkg.startsWith('com.nearme.')
+  )) return true;
+  return false;
+}
+
+// ── Handler ──────────────────────────────────────────────────────
 export async function POST(req: Request) {
   try {
     const body = await req.json();
@@ -351,6 +422,8 @@ export async function POST(req: Request) {
         const isMalware = malwareInfo !== null;
         const threatName = malwareInfo ? malwareInfo.threatName : '';
         const threatSeverity = malwareInfo ? malwareInfo.severity : '';
+        const safeToDel = isSafeToRemove(pkg, isSystem);
+        const critical = isCriticalSystem(pkg);
 
         apps.push({
           packageName: pkg,
@@ -366,7 +439,9 @@ export async function POST(req: Request) {
           isGoogle,
           isMalware,
           threatName,
-          threatSeverity
+          threatSeverity,
+          safeToRemove: safeToDel,
+          criticalSystem: critical,
         });
       }
 
