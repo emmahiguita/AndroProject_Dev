@@ -75,7 +75,7 @@
   --radius-full: 9999px;
 
   /* ── Typography ── */
-  --font-sans:   var(--font-inter), system-ui, -apple-system, sans-serif;
+  --font-sans:   var(--font-jakarta), var(--font-inter), system-ui, -apple-system, sans-serif;
   --font-mono:   'JetBrains Mono', 'Fira Code', monospace;
 
   /* Escala alineada 1:1 con Tailwind (tailwind.config.ts → fontSize).

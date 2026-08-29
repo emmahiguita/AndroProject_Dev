@@ -3418,7 +3418,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "androproject_gui_src_components_layout_sidebar",
-      "community": 5,
+      "community": 76,
       "norm_label": "sidebar.tsx"
     },
     {
@@ -3438,7 +3438,7 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "androproject_gui_src_components_layout_sidebar_navitemdef",
-      "community": 5,
+      "community": 76,
       "norm_label": "navitemdef"
     },
     {
@@ -3448,7 +3448,7 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "androproject_gui_src_components_layout_sidebar_groups",
-      "community": 5,
+      "community": 76,
       "norm_label": "groups"
     },
     {
@@ -4375,7 +4375,7 @@
       "label": "MetricCard()",
       "file_type": "code",
       "source_file": "androproject-gui/src/features/DashboardView.tsx",
-      "source_location": "L596",
+      "source_location": "L545",
       "_origin": "ast",
       "id": "androproject_gui_src_features_dashboardview_metriccard",
       "community": 74,
@@ -4385,7 +4385,7 @@
       "label": "ActionRow()",
       "file_type": "code",
       "source_file": "androproject-gui/src/features/DashboardView.tsx",
-      "source_location": "L655",
+      "source_location": "L604",
       "_origin": "ast",
       "id": "androproject_gui_src_features_dashboardview_actionrow",
       "community": 74,
@@ -4588,7 +4588,7 @@
       "source_location": "L41",
       "_origin": "ast",
       "id": "androproject_gui_src_features_types_quickactionitem",
-      "community": 54,
+      "community": 79,
       "norm_label": "quickactionitem"
     },
     {
@@ -4608,7 +4608,7 @@
       "source_location": "L66",
       "_origin": "ast",
       "id": "androproject_gui_src_features_types_apppackage",
-      "community": 54,
+      "community": 79,
       "norm_label": "apppackage"
     },
     {
@@ -4628,7 +4628,7 @@
       "source_location": "L75",
       "_origin": "ast",
       "id": "androproject_gui_src_features_types_diagnosticsdata",
-      "community": 79,
+      "community": 54,
       "norm_label": "diagnosticsdata"
     },
     {
@@ -4638,7 +4638,7 @@
       "source_location": "L89",
       "_origin": "ast",
       "id": "androproject_gui_src_features_types_animscales",
-      "community": 79,
+      "community": 54,
       "norm_label": "animscales"
     },
     {
@@ -4648,7 +4648,7 @@
       "source_location": "L95",
       "_origin": "ast",
       "id": "androproject_gui_src_features_types_gputweaks",
-      "community": 79,
+      "community": 54,
       "norm_label": "gputweaks"
     },
     {
@@ -6478,7 +6478,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "androproject_gui_src_services_contracts",
-      "community": 54,
+      "community": 79,
       "norm_label": "contracts.ts"
     },
     {
@@ -6608,7 +6608,7 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "androproject_gui_src_services_contracts_inetworkradarservice",
-      "community": 54,
+      "community": 79,
       "norm_label": "inetworkradarservice"
     },
     {
@@ -6618,7 +6618,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "androproject_gui_src_services_contracts_inetworkradarservice_scansubnet",
-      "community": 54,
+      "community": 79,
       "norm_label": ".scansubnet()"
     },
     {
@@ -6628,7 +6628,7 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "androproject_gui_src_services_contracts_inetworkradarservice_connectwireless",
-      "community": 54,
+      "community": 79,
       "norm_label": ".connectwireless()"
     },
     {
@@ -6638,7 +6638,7 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "androproject_gui_src_services_contracts_inetworkradarservice_disconnectwireless",
-      "community": 54,
+      "community": 79,
       "norm_label": ".disconnectwireless()"
     },
     {
@@ -6858,7 +6858,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "androproject_gui_src_stores_optimizerslice",
-      "community": 79,
+      "community": 54,
       "norm_label": "optimizerslice.ts"
     },
     {
@@ -6868,7 +6868,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "androproject_gui_src_stores_optimizerslice_optimizertab",
-      "community": 79,
+      "community": 54,
       "norm_label": "optimizertab"
     },
     {
@@ -6878,7 +6878,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "androproject_gui_src_stores_optimizerslice_adguardprofile",
-      "community": 79,
+      "community": 54,
       "norm_label": "adguardprofile"
     },
     {
@@ -6888,7 +6888,7 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "androproject_gui_src_stores_optimizerslice_optimizerslice",
-      "community": 79,
+      "community": 54,
       "norm_label": "optimizerslice"
     },
     {
@@ -6898,7 +6898,7 @@
       "source_location": "L78",
       "_origin": "ast",
       "id": "androproject_gui_src_stores_optimizerslice_createoptimizerslice",
-      "community": 79,
+      "community": 54,
       "norm_label": "createoptimizerslice()"
     },
     {
@@ -18322,7 +18322,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/features/DashboardView.tsx",
-      "source_location": "L655",
+      "source_location": "L604",
       "weight": 1.0,
       "source": "androproject_gui_src_features_dashboardview",
       "target": "androproject_gui_src_features_dashboardview_actionrow",
@@ -18382,7 +18382,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/features/DashboardView.tsx",
-      "source_location": "L596",
+      "source_location": "L545",
       "weight": 1.0,
       "source": "androproject_gui_src_features_dashboardview",
       "target": "androproject_gui_src_features_dashboardview_metriccard",
@@ -18535,7 +18535,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/features/DashboardView.tsx",
-      "source_location": "L529",
+      "source_location": "L478",
       "weight": 1.0,
       "source": "androproject_gui_src_features_dashboardview_dashboardview",
       "target": "androproject_gui_src_features_dashboardview_getappcolor",

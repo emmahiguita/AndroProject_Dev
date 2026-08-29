@@ -1,7 +1,7 @@
 # Graph Report - AndroProject_Dev  (2026-08-29)
 
 ## Corpus Check
-- 143 files · ~179,915 words
+- 143 files · ~179,666 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
@@ -130,8 +130,8 @@ Cohesion: 0.11
 Nodes (8): AdbCommandExecutor, execAsync, MockCommandExecutor, IAdbCommandExecutor, IDeviceService, AdbConfig, CommandResult, ICommandExecutor
 
 ### Community 5 - "types.ts"
-Cohesion: 0.23
-Nodes (11): AppShell(), Header(), HeaderProps, groups, NavItemDef, Sidebar(), WirelessConnectModal(), WirelessConnectModalProps (+3 more)
+Cohesion: 0.28
+Nodes (9): AppShell(), Header(), HeaderProps, Sidebar(), WirelessConnectModal(), WirelessConnectModalProps, useAppTheme(), RegisteredDevice (+1 more)
 
 ### Community 6 - "webrtc.py"
 Cohesion: 0.07
@@ -206,8 +206,8 @@ Cohesion: 0.29
 Nodes (6): AndroidProject 📱⚡, 🚀 Características Principales, ⚙️ Instalación (Entorno de Desarrollo), 🛡️ Seguridad y Arquitectura, 💻 Tecnologías Utilizadas, 📸 Vistazo al Dashboard
 
 ### Community 54 - "index.ts"
-Cohesion: 0.17
-Nodes (10): AppPackage, BluetoothInfo, DeviceData, DeviceListItem, DiagnosticsStorage, OptimizerSettings, QuickActionItem, INetworkRadarService (+2 more)
+Cohesion: 0.19
+Nodes (14): AnimScales, BluetoothInfo, DeviceData, DeviceListItem, DiagnosticsData, DiagnosticsStorage, GpuTweaks, OptimizerSettings (+6 more)
 
 ### Community 55 - "AndroProject - Instalador Oficial"
 Cohesion: 0.33
@@ -266,8 +266,8 @@ Cohesion: 0.17
 Nodes (12): build, appId, extraResources, files, nsis, productName, publish, win (+4 more)
 
 ### Community 76 - "NavSection"
-Cohesion: 0.33
-Nodes (6): SidebarProps, ViewShellProps, DashboardViewProps, NavSection, createUISlice(), UISlice
+Cohesion: 0.24
+Nodes (8): groups, NavItemDef, SidebarProps, ViewShellProps, DashboardViewProps, NavSection, createUISlice(), UISlice
 
 ### Community 77 - "scripts"
 Cohesion: 0.22
@@ -278,8 +278,8 @@ Cohesion: 0.25
 Nodes (6): inter, metadata, Theme, ThemeContext, ThemeContextValue, ThemeProvider()
 
 ### Community 79 - "contracts.ts"
-Cohesion: 0.36
-Nodes (7): AnimScales, DiagnosticsData, GpuTweaks, AdguardProfile, createOptimizerSlice(), OptimizerSlice, OptimizerTab
+Cohesion: 0.29
+Nodes (3): AppPackage, QuickActionItem, INetworkRadarService
 
 ### Community 80 - "package.json"
 Cohesion: 0.33
