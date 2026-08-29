@@ -149,6 +149,7 @@ class AirPlayReceiverEngine implements IAirPlayReceiverEngine {
         res.setHeader('CSeq', req.headers['cseq'] || '1');
 
         if (url.includes('/info') || url.includes('/server-info')) {
+          const statusFlagsVal = this.currentOptions.pinRequired ? 4 : 0;
           const infoXml = `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -166,7 +167,7 @@ class AirPlayReceiverEngine implements IAirPlayReceiverEngine {
   <key>srcvers</key>
   <string>220.68</string>
   <key>statusFlags</key>
-  <integer>4</integer>
+  <integer>${statusFlagsVal}</integer>
   <key>vv</key>
   <integer>2</integer>
 </dict>
@@ -210,6 +211,9 @@ class AirPlayReceiverEngine implements IAirPlayReceiverEngine {
 
         const broadcastAnnouncement = () => {
           try {
+            const flagsTxt = this.currentOptions.pinRequired ? 'flags=0x4' : 'flags=0x0';
+            const sfTxt = this.currentOptions.pinRequired ? 'sf=0x4' : 'sf=0x0';
+
             mdns.respond({
               answers: [
                 {
@@ -235,7 +239,7 @@ class AirPlayReceiverEngine implements IAirPlayReceiverEngine {
                   data: [
                     Buffer.from(`deviceid=${mac}`),
                     Buffer.from('features=0x5A7FFFF7,0x1E'),
-                    Buffer.from('flags=0x4'),
+                    Buffer.from(flagsTxt),
                     Buffer.from('model=AppleTV5,3'),
                     Buffer.from('srcvers=220.68'),
                     Buffer.from('vv=2'),
@@ -275,7 +279,7 @@ class AirPlayReceiverEngine implements IAirPlayReceiverEngine {
                     Buffer.from(`da=true`),
                     Buffer.from(`sv=false`),
                     Buffer.from(`ft=0x5A7FFFF7,0x1E`),
-                    Buffer.from(`sf=0x4`),
+                    Buffer.from(sfTxt),
                     Buffer.from(`vn=65537`),
                     Buffer.from(`tp=UDP`),
                     Buffer.from(`vs=220.68`),

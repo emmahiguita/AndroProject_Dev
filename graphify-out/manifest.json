@@ -675,8 +675,8 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/components/projection/DeviceInfoPanel.tsx": {
-    "mtime": 1788026700.103696,
-    "ast_hash": "4d337a09a6daf7cd5c880aa76858d958",
+    "mtime": 1788030297.0977724,
+    "ast_hash": "a949809eea83120711e0efe5049aa80c",
     "semantic_hash": ""
   },
   "androproject-gui/src/components/projection/EmptyState.tsx": {
@@ -815,8 +815,8 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/app/api/airplay/route.ts": {
-    "mtime": 1788026532.6236882,
-    "ast_hash": "72a43aec0947c4b27bbea06ed0f17e12",
+    "mtime": 1788030286.0255015,
+    "ast_hash": "fee274d2e0301db16c750d05ddcb0f12",
     "semantic_hash": ""
   },
   "androproject-gui/src/hooks/useAirPlayServer.ts": {
@@ -825,8 +825,8 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/lib/services/airplay-engine.ts": {
-    "mtime": 1788029774.8214648,
-    "ast_hash": "911da0d39d479b39d5c624e27278ebc6",
+    "mtime": 1788030274.0047028,
+    "ast_hash": "da0a0e968da8eb4f34d46ac6ab8f3b5c",
     "semantic_hash": ""
   },
   "androproject-gui/src/lib/services/projection-coordinator.ts": {

@@ -825,13 +825,23 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/lib/services/airplay-engine.ts": {
-    "mtime": 1788028959.3674607,
-    "ast_hash": "31114fbe0741f5bd4a15b4ec29a670f3",
+    "mtime": 1788029774.8214648,
+    "ast_hash": "911da0d39d479b39d5c624e27278ebc6",
     "semantic_hash": ""
   },
   "androproject-gui/src/lib/services/projection-coordinator.ts": {
     "mtime": 1788026520.2427602,
     "ast_hash": "22498688a935978ce518e5892ee2b241",
+    "semantic_hash": ""
+  },
+  "androproject-gui/bin/airplay/compile_commands.json": {
+    "mtime": 1777914548.0,
+    "ast_hash": "94fb83a7f5d42b936cac97d7d86fbd30",
+    "semantic_hash": ""
+  },
+  "androproject-gui/bin/airplay/resources/uxplay_arguments_list.txt": {
+    "mtime": 1777914548.0,
+    "ast_hash": "76117485bdc492a805f8d74d9419d488",
     "semantic_hash": ""
   }
 }
