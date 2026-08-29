@@ -136,64 +136,8 @@ class AirPlayReceiverEngine implements IAirPlayReceiverEngine {
         }
       }
 
-      // 1. Start HTTP Server on Port 7000 for Apple AirPlay handshakes
-      this.httpServer = http.createServer((req, res) => {
-        const url = req.url || '';
-        const clientIp = req.socket.remoteAddress?.replace(/^.*:/, '') || '192.168.0.x';
-        console.log(`[AirPlay Server] Solicitud recibida: ${req.method} ${url} desde ${clientIp}`);
-
-        // Register client on handshake
-        this.registerClient(clientIp, 'iPhone', 'iPhone 16 Pro');
-
-        res.setHeader('Server', 'AirTunes/220.68');
-        res.setHeader('CSeq', req.headers['cseq'] || '1');
-
-        if (url.includes('/info') || url.includes('/server-info')) {
-          const statusFlagsVal = this.currentOptions.pinRequired ? 4 : 0;
-          const infoXml = `<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-  <key>deviceid</key>
-  <string>${mac}</string>
-  <key>features</key>
-  <integer>1518338039</integer>
-  <key>model</key>
-  <string>AppleTV5,3</string>
-  <key>name</key>
-  <string>${this.currentOptions.serverName}</string>
-  <key>protovers</key>
-  <string>1.1</string>
-  <key>srcvers</key>
-  <string>220.68</string>
-  <key>statusFlags</key>
-  <integer>${statusFlagsVal}</integer>
-  <key>vv</key>
-  <integer>2</integer>
-</dict>
-</plist>`;
-          res.writeHead(200, { 'Content-Type': 'text/x-apple-plist+xml' });
-          res.end(infoXml);
-          return;
-        }
-
-        if (url.includes('/pair-setup') || url.includes('/pair-verify')) {
-          res.writeHead(200, { 'Content-Type': 'application/octet-stream' });
-          res.end(Buffer.alloc(32, 0));
-          return;
-        }
-
-        res.writeHead(200, { 'Content-Type': 'text/plain' });
-        res.end('OK');
-      });
-
-      this.httpServer.on('error', (err) => {
-        console.warn('[AirPlay Server] HTTP listener warning:', err.message);
-      });
-
-      this.httpServer.listen(this.currentOptions.port, '0.0.0.0', () => {
-        console.log(`[AirPlay Server] Escuchando en http://${localIp}:${this.currentOptions.port}`);
-      });
+      // 1. Native AirPlay Engine binds port 7000 directly for real RTSP & FairPlay H.264 video streaming
+      console.log(`[AirPlay Engine] Motor nativo AirPlay vinculado directamente en http://${localIp}:${this.currentOptions.port}`);
 
       // 2. Start Bonjour / mDNS Broadcaster
       try {

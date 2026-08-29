@@ -1,16 +1,16 @@
 # Graph Report - AndroProject_Dev  (2026-08-29)
 
 ## Corpus Check
-- 149 files · ~257,851 words
+- 151 files · ~257,974 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 994 nodes · 1680 edges · 77 communities (57 shown, 20 thin omitted)
+- 1006 nodes · 1690 edges · 84 communities (64 shown, 20 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 6 edges (avg confidence: 0.65)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `c0c2bd35`
+- Built from commit: `459de3ce`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -69,11 +69,18 @@
 - stream-diagnostic.mjs
 - route.ts
 - paths.ts
+- page.tsx
 - route.ts
 - route.ts
 - build
+- ProjectionCanvas.tsx
 - scripts
+- DeviceInfo
+- AppsView.tsx
 - package.json
+- route.ts
+- launch_airplay.js
+- test_airplay_run.js
 
 ## God Nodes (most connected - your core abstractions)
 1. `safeExec()` - 51 edges
@@ -92,8 +99,8 @@
   androproject-gui/src/components/layout/DeviceFrame.tsx → androproject-gui/src/features/types.ts
 - `ProjectionCanvasProps` --references--> `DeviceInfo`  [EXTRACTED]
   androproject-gui/src/components/projection/ProjectionCanvas.tsx → androproject-gui/src/features/types.ts
-- `ProjectionViewProps` --references--> `DeviceInfo`  [EXTRACTED]
-  androproject-gui/src/features/ProjectionView.tsx → androproject-gui/src/features/types.ts
+- `AppsViewProps` --references--> `DeviceInfo`  [EXTRACTED]
+  androproject-gui/src/features/AppsView.tsx → androproject-gui/src/features/types.ts
 - `listRunning()` --calls--> `safeExec()`  [EXTRACTED]
   androproject-gui/src/app/api/actions/apps.ts → androproject-gui/src/app/api/actions/_lib/helpers.ts
 - `diagnoseScreenshot()` --calls--> `safeExec()`  [EXTRACTED]
@@ -102,7 +109,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (77 total, 20 thin omitted)
+## Communities (84 total, 20 thin omitted)
 
 ### Community 0 - "page.tsx"
 Cohesion: 0.43
@@ -125,8 +132,8 @@ Cohesion: 0.09
 Nodes (11): AppPackage, QuickActionItem, AdbCommandExecutor, execAsync, MockCommandExecutor, IAdbCommandExecutor, IDeviceService, INetworkRadarService (+3 more)
 
 ### Community 5 - "types.ts"
-Cohesion: 0.06
-Nodes (33): GET(), inFlightWorkers, lastGoodFrame, lastGoodFrameId, lastGoodTs, placeholderFrame(), triggerCapture(), buildOfflineDevice() (+25 more)
+Cohesion: 0.07
+Nodes (26): buildOfflineDevice(), detectHardwareFallback(), detector, fetcher, GET(), selectTarget(), adb, AdbExecResult (+18 more)
 
 ### Community 6 - "webrtc.py"
 Cohesion: 0.07
@@ -189,8 +196,8 @@ Cohesion: 0.18
 Nodes (8): Get-MdnsTargets(), Get-WirelessAttachedDevices(), Invoke-Adb(), Invoke-DeviceHardening(), Start-Projection(), Stop-ScrcpyIfRunning(), Test-AdbHealth(), Write-Log()
 
 ### Community 51 - "detect.ts"
-Cohesion: 0.09
-Nodes (32): SidebarProps, ViewShellProps, DashboardViewProps, AnimScales, AppInfo, BluetoothInfo, DeviceData, DeviceListItem (+24 more)
+Cohesion: 0.11
+Nodes (28): AnimScales, AppInfo, BluetoothInfo, DeviceData, DeviceListItem, DiagnosticsData, DiagnosticsStorage, GpuTweaks (+20 more)
 
 ### Community 52 - "debloat-driver.ps1"
 Cohesion: 0.32
@@ -201,20 +208,20 @@ Cohesion: 0.29
 Nodes (6): AndroidProject 📱⚡, 🚀 Características Principales, ⚙️ Instalación (Entorno de Desarrollo), 🛡️ Seguridad y Arquitectura, 💻 Tecnologías Utilizadas, 📸 Vistazo al Dashboard
 
 ### Community 54 - "index.ts"
-Cohesion: 0.08
-Nodes (35): inter, metadata, plusJakartaSans, AppShell(), AppShellProps, Header(), HeaderProps, groups (+27 more)
+Cohesion: 0.07
+Nodes (39): inter, metadata, plusJakartaSans, AppShell(), AppShellProps, Header(), HeaderProps, groups (+31 more)
 
 ### Community 55 - "AndroProject - Instalador Oficial"
 Cohesion: 0.33
 Nodes (5): AndroProject - Instalador Oficial, Como generar el instalador, Estructura de carpetas, Que hace el instalador al ejecutarse, Requisitos del sistema
 
 ### Community 59 - "cn"
-Cohesion: 0.07
-Nodes (29): DeviceFrame(), DeviceFrameProps, DeviceInfoPanel(), DeviceInfoPanelProps, EmptyState(), EmptyStateProps, clamp(), clamp01() (+21 more)
+Cohesion: 0.12
+Nodes (16): DeviceInfoPanel(), DeviceInfoPanelProps, EmptyState(), EmptyStateProps, SplitDivider(), SplitDividerProps, ProjectionView(), useMediaQuery() (+8 more)
 
 ### Community 60 - "index.ts"
-Cohesion: 0.24
-Nodes (6): AirPlayServerOptions, ProjectionLaunchOptions, IScrcpyEngine, IVisionNanoEngine, VisionNanoOptions, VisionNanoResult
+Cohesion: 0.21
+Nodes (5): getLockFile(), IScrcpyEngine, IVisionNanoEngine, VisionNanoEngine, VisionNanoResult
 
 ### Community 61 - "Button.tsx"
 Cohesion: 0.15
@@ -225,12 +232,12 @@ Cohesion: 0.12
 Nodes (4): BLOCKED_PATTERNS, inputSwipe(), inputTap(), isValidPoint()
 
 ### Community 65 - "paths.ts"
-Cohesion: 0.09
-Nodes (6): checkOrStopScreen(), AirPlayServerStatus, AirPlayReceiverEngine, DEFAULT_AIRPLAY_OPTIONS, getLocalIpAndMac(), IAirPlayReceiverEngine
+Cohesion: 0.14
+Nodes (7): checkOrStopScreen(), AirPlayServerStatus, AirPlayServerOptions, DEFAULT_AIRPLAY_OPTIONS, IAirPlayReceiverEngine, ProjectionLaunchOptions, VisionNanoOptions
 
 ### Community 66 - "ViewShell.tsx"
-Cohesion: 0.05
-Nodes (59): Page(), Badge(), BadgeProps, BadgeSize, BadgeTone, sizeClasses, toneClasses, Button() (+51 more)
+Cohesion: 0.10
+Nodes (25): Badge(), BadgeProps, BadgeSize, BadgeTone, sizeClasses, toneClasses, Button(), ButtonProps (+17 more)
 
 ### Community 68 - "route.ts"
 Cohesion: 0.07
@@ -239,6 +246,10 @@ Nodes (17): captureScreenshot(), createMjpegStream(), execAsync, FFMPEG_PATH, GE
 ### Community 69 - "paths.ts"
 Cohesion: 0.15
 Nodes (10): ANDROPROJECT_BIN, discoverAndroprojectBin(), findWingetScrcpy(), ADB_BUNDLED, ADB_SDK, ADB_SDK_ALT, DEBUG_LOG, FASTBOOT_BUNDLED (+2 more)
+
+### Community 72 - "page.tsx"
+Cohesion: 0.19
+Nodes (17): Page(), AppsView(), ArchivosView(), ConfigView(), AntivirusPanel(), CurarView(), ScreenshotPanel(), APP_COLORS (+9 more)
 
 ### Community 73 - "route.ts"
 Cohesion: 0.83
@@ -252,26 +263,50 @@ Nodes (3): execFileAsync, getErrorMessage(), POST()
 Cohesion: 0.17
 Nodes (12): build, appId, extraResources, files, nsis, productName, publish, win (+4 more)
 
+### Community 76 - "ProjectionCanvas.tsx"
+Cohesion: 0.17
+Nodes (12): DeviceFrame(), DeviceFrameProps, clamp(), clamp01(), MjpegStreamViewProps, ProjectionCanvas(), ProjectionCanvasProps, TouchRipple (+4 more)
+
 ### Community 77 - "scripts"
 Cohesion: 0.22
 Nodes (9): scripts, build, build:win, dev, electron, electron:fresh, lint, start (+1 more)
+
+### Community 78 - "DeviceInfo"
+Cohesion: 0.15
+Nodes (12): QuickAction(), QuickActionProps, ThemeProps, ArchivosViewProps, CurarViewProps, FlasherViewProps, OptimizerViewProps, ProjectionViewProps (+4 more)
+
+### Community 79 - "AppsView.tsx"
+Cohesion: 0.24
+Nodes (6): AppCard(), AppRow(), AppsViewProps, formatBytes(), formatDate(), getErrorMessage()
 
 ### Community 80 - "package.json"
 Cohesion: 0.33
 Nodes (5): description, main, name, private, version
 
+### Community 81 - "route.ts"
+Cohesion: 0.32
+Nodes (7): GET(), inFlightWorkers, lastGoodFrame, lastGoodFrameId, lastGoodTs, placeholderFrame(), triggerCapture()
+
+### Community 82 - "launch_airplay.js"
+Cohesion: 0.33
+Nodes (5): airplayDir, airplayExe, p, path, { spawn }
+
+### Community 83 - "test_airplay_run.js"
+Cohesion: 0.33
+Nodes (5): airplayDir, airplayExe, p, path, { spawn }
+
 ## Knowledge Gaps
-- **298 isolated node(s):** `INSTALL-OPPO-DIRECTO.sh script`, `{ app, BrowserWindow, Tray, Menu, nativeImage, shell, dialog }`, `{ spawn }`, `path`, `fs` (+293 more)
+- **308 isolated node(s):** `INSTALL-OPPO-DIRECTO.sh script`, `{ app, BrowserWindow, Tray, Menu, nativeImage, shell, dialog }`, `{ spawn }`, `path`, `fs` (+303 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **20 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `DeviceInfo` connect `ViewShell.tsx` to `paths.ts`, `CommandResult`, `detect.ts`, `index.ts`, `cn`, `index.ts`?**
-  _High betweenness centrality (0.101) - this node is a cross-community bridge._
+- **Why does `DeviceInfo` connect `DeviceInfo` to `paths.ts`, `ViewShell.tsx`, `CommandResult`, `page.tsx`, `ProjectionCanvas.tsx`, `AppsView.tsx`, `detect.ts`, `index.ts`, `cn`, `DeviceInfoFetcher`?**
+  _High betweenness centrality (0.079) - this node is a cross-community bridge._
 - **What connects `INSTALL-OPPO-DIRECTO.sh script`, `{ app, BrowserWindow, Tray, Menu, nativeImage, shell, dialog }`, `{ spawn }` to the rest of the system?**
-  _310 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _320 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `safeExec` be split into smaller, more focused modules?**
   _Cohesion score 0.07192460317460317 - nodes in this community are weakly interconnected._
 - **Should `devDependencies` be split into smaller, more focused modules?**
@@ -279,6 +314,6 @@ _Questions this graph is uniquely positioned to answer:_
 - **Should `CommandResult` be split into smaller, more focused modules?**
   _Cohesion score 0.08708708708708708 - nodes in this community are weakly interconnected._
 - **Should `types.ts` be split into smaller, more focused modules?**
-  _Cohesion score 0.0574400723654455 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.06779661016949153 - nodes in this community are weakly interconnected._
 - **Should `webrtc.py` be split into smaller, more focused modules?**
   _Cohesion score 0.06827880512091039 - nodes in this community are weakly interconnected._

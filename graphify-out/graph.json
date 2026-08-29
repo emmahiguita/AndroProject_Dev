@@ -2328,7 +2328,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "androproject_gui_src_app_api_airplay_route",
-      "community": 62,
+      "community": 65,
       "norm_label": "route.ts"
     },
     {
@@ -2338,7 +2338,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "androproject_gui_src_app_api_airplay_route_get",
-      "community": 62,
+      "community": 65,
       "norm_label": "get()"
     },
     {
@@ -2348,7 +2348,7 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "androproject_gui_src_app_api_airplay_route_post",
-      "community": 62,
+      "community": 65,
       "norm_label": "post()"
     },
     {
@@ -2518,7 +2518,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "androproject_gui_src_app_api_config_route",
-      "community": 69,
+      "community": 3,
       "norm_label": "route.ts"
     },
     {
@@ -2528,7 +2528,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "androproject_gui_src_app_api_config_route_get",
-      "community": 69,
+      "community": 3,
       "norm_label": "get()"
     },
     {
@@ -2538,7 +2538,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "androproject_gui_src_app_api_device_image_route",
-      "community": 81,
+      "community": 5,
       "norm_label": "route.ts"
     },
     {
@@ -2548,7 +2548,7 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "androproject_gui_src_app_api_device_image_route_lastgoodframe",
-      "community": 81,
+      "community": 5,
       "norm_label": "lastgoodframe"
     },
     {
@@ -2558,7 +2558,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "androproject_gui_src_app_api_device_image_route_lastgoodframeid",
-      "community": 81,
+      "community": 5,
       "norm_label": "lastgoodframeid"
     },
     {
@@ -2568,7 +2568,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "androproject_gui_src_app_api_device_image_route_lastgoodts",
-      "community": 81,
+      "community": 5,
       "norm_label": "lastgoodts"
     },
     {
@@ -2578,7 +2578,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "androproject_gui_src_app_api_device_image_route_inflightworkers",
-      "community": 81,
+      "community": 5,
       "norm_label": "inflightworkers"
     },
     {
@@ -2588,7 +2588,7 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "androproject_gui_src_app_api_device_image_route_placeholderframe",
-      "community": 81,
+      "community": 5,
       "norm_label": "placeholderframe()"
     },
     {
@@ -2598,7 +2598,7 @@
       "source_location": "L39",
       "_origin": "ast",
       "id": "androproject_gui_src_app_api_device_image_route_triggercapture",
-      "community": 81,
+      "community": 5,
       "norm_label": "triggercapture()"
     },
     {
@@ -2608,7 +2608,7 @@
       "source_location": "L65",
       "_origin": "ast",
       "id": "androproject_gui_src_app_api_device_image_route_get",
-      "community": 81,
+      "community": 5,
       "norm_label": "get()"
     },
     {
@@ -3348,7 +3348,7 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "androproject_gui_src_components_viewshell_viewshellprops",
-      "community": 54,
+      "community": 81,
       "norm_label": "viewshellprops"
     },
     {
@@ -3398,7 +3398,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "androproject_gui_src_components_layout_deviceframe",
-      "community": 76,
+      "community": 59,
       "norm_label": "deviceframe.tsx"
     },
     {
@@ -3408,7 +3408,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "androproject_gui_src_components_layout_deviceframe_deviceframeprops",
-      "community": 76,
+      "community": 59,
       "norm_label": "deviceframeprops"
     },
     {
@@ -3418,7 +3418,7 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "androproject_gui_src_components_layout_deviceframe_clamp",
-      "community": 76,
+      "community": 59,
       "norm_label": "clamp()"
     },
     {
@@ -3428,7 +3428,7 @@
       "source_location": "L30",
       "_origin": "ast",
       "id": "androproject_gui_src_components_layout_deviceframe_deviceframe",
-      "community": 76,
+      "community": 59,
       "norm_label": "deviceframe()"
     },
     {
@@ -3478,7 +3478,7 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "androproject_gui_src_components_layout_sidebar_sidebarprops",
-      "community": 54,
+      "community": 81,
       "norm_label": "sidebarprops"
     },
     {
@@ -3598,7 +3598,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "androproject_gui_src_components_projection_emptystate",
-      "community": 59,
+      "community": 76,
       "norm_label": "emptystate.tsx"
     },
     {
@@ -3608,7 +3608,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "androproject_gui_src_components_projection_emptystate_emptystateprops",
-      "community": 59,
+      "community": 76,
       "norm_label": "emptystateprops"
     },
     {
@@ -3618,7 +3618,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "androproject_gui_src_components_projection_emptystate_emptystate",
-      "community": 59,
+      "community": 76,
       "norm_label": "emptystate()"
     },
     {
@@ -3638,7 +3638,7 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "androproject_gui_src_components_projection_projectioncanvas_zoomstate",
-      "community": 76,
+      "community": 59,
       "norm_label": "zoomstate"
     },
     {
@@ -3718,7 +3718,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "androproject_gui_src_components_projection_splitdivider",
-      "community": 59,
+      "community": 76,
       "norm_label": "splitdivider.tsx"
     },
     {
@@ -3728,7 +3728,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "androproject_gui_src_components_projection_splitdivider_splitdividerprops",
-      "community": 59,
+      "community": 76,
       "norm_label": "splitdividerprops"
     },
     {
@@ -3738,7 +3738,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "androproject_gui_src_components_projection_splitdivider_splitdivider",
-      "community": 59,
+      "community": 76,
       "norm_label": "splitdivider()"
     },
     {
@@ -3748,7 +3748,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "androproject_gui_src_components_projection_index",
-      "community": 59,
+      "community": 76,
       "norm_label": "index.ts"
     },
     {
@@ -4238,7 +4238,7 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "androproject_gui_src_features_archivosview_archivosviewprops",
-      "community": 78,
+      "community": 59,
       "norm_label": "archivosviewprops"
     },
     {
@@ -4318,7 +4318,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "androproject_gui_src_features_curarview_curarviewprops",
-      "community": 78,
+      "community": 59,
       "norm_label": "curarviewprops"
     },
     {
@@ -4358,7 +4358,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "androproject_gui_src_features_dashboardview",
-      "community": 72,
+      "community": 81,
       "norm_label": "dashboardview.tsx"
     },
     {
@@ -4368,7 +4368,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "androproject_gui_src_features_dashboardview_dashboardviewprops",
-      "community": 54,
+      "community": 81,
       "norm_label": "dashboardviewprops"
     },
     {
@@ -4378,7 +4378,7 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "androproject_gui_src_features_dashboardview_sparkline",
-      "community": 72,
+      "community": 81,
       "norm_label": "sparkline()"
     },
     {
@@ -4388,7 +4388,7 @@
       "source_location": "L53",
       "_origin": "ast",
       "id": "androproject_gui_src_features_dashboardview_appsfilterdash",
-      "community": 72,
+      "community": 81,
       "norm_label": "appsfilterdash"
     },
     {
@@ -4398,7 +4398,7 @@
       "source_location": "L56",
       "_origin": "ast",
       "id": "androproject_gui_src_features_dashboardview_app_colors",
-      "community": 72,
+      "community": 81,
       "norm_label": "app_colors"
     },
     {
@@ -4408,7 +4408,7 @@
       "source_location": "L71",
       "_origin": "ast",
       "id": "androproject_gui_src_features_dashboardview_getappcolor",
-      "community": 72,
+      "community": 81,
       "norm_label": "getappcolor()"
     },
     {
@@ -4428,7 +4428,7 @@
       "source_location": "L545",
       "_origin": "ast",
       "id": "androproject_gui_src_features_dashboardview_metriccard",
-      "community": 72,
+      "community": 81,
       "norm_label": "metriccard()"
     },
     {
@@ -4438,7 +4438,7 @@
       "source_location": "L604",
       "_origin": "ast",
       "id": "androproject_gui_src_features_dashboardview_actionrow",
-      "community": 72,
+      "community": 81,
       "norm_label": "actionrow()"
     },
     {
@@ -4448,7 +4448,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "androproject_gui_src_features_flasherview",
-      "community": 66,
+      "community": 72,
       "norm_label": "flasherview.tsx"
     },
     {
@@ -4458,7 +4458,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "androproject_gui_src_features_flasherview_partitions",
-      "community": 66,
+      "community": 72,
       "norm_label": "partitions"
     },
     {
@@ -4468,7 +4468,7 @@
       "source_location": "L36",
       "_origin": "ast",
       "id": "androproject_gui_src_features_flasherview_flasherviewprops",
-      "community": 78,
+      "community": 72,
       "norm_label": "flasherviewprops"
     },
     {
@@ -4498,7 +4498,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "androproject_gui_src_features_optimizerview_optimizerviewprops",
-      "community": 78,
+      "community": 59,
       "norm_label": "optimizerviewprops"
     },
     {
@@ -4528,7 +4528,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "androproject_gui_src_features_projectionview_projectionviewprops",
-      "community": 78,
+      "community": 59,
       "norm_label": "projectionviewprops"
     },
     {
@@ -4608,7 +4608,7 @@
       "source_location": "L36",
       "_origin": "ast",
       "id": "androproject_gui_src_features_types_deviceinfo",
-      "community": 78,
+      "community": 59,
       "norm_label": "deviceinfo"
     },
     {
@@ -4638,7 +4638,7 @@
       "source_location": "L62",
       "_origin": "ast",
       "id": "androproject_gui_src_features_types_navsection",
-      "community": 54,
+      "community": 81,
       "norm_label": "navsection"
     },
     {
@@ -4648,7 +4648,7 @@
       "source_location": "L64",
       "_origin": "ast",
       "id": "androproject_gui_src_features_types_quickactionitem",
-      "community": 4,
+      "community": 51,
       "norm_label": "quickactionitem"
     },
     {
@@ -4668,7 +4668,7 @@
       "source_location": "L89",
       "_origin": "ast",
       "id": "androproject_gui_src_features_types_apppackage",
-      "community": 4,
+      "community": 51,
       "norm_label": "apppackage"
     },
     {
@@ -4868,7 +4868,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "androproject_gui_src_hooks_usedevicepolling_usedevicepollingresult",
-      "community": 78,
+      "community": 59,
       "norm_label": "usedevicepollingresult"
     },
     {
@@ -5288,7 +5288,7 @@
       "source_location": "L43",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_discovery_androproject_bin",
-      "community": 69,
+      "community": 3,
       "norm_label": "androproject_bin"
     },
     {
@@ -5628,7 +5628,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_airplay_engine_airplayserveroptions",
-      "community": 65,
+      "community": 84,
       "norm_label": "airplayserveroptions"
     },
     {
@@ -5728,7 +5728,7 @@
       "source_location": "L47",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_airplay_engine_getlocalipandmac",
-      "community": 62,
+      "community": 65,
       "norm_label": "getlocalipandmac()"
     },
     {
@@ -5788,7 +5788,7 @@
       "source_location": "L375",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_airplay_engine_airplayreceiverengine_getstatus",
-      "community": 65,
+      "community": 62,
       "norm_label": ".getstatus()"
     },
     {
@@ -5835,7 +5835,7 @@
       "label": ".setServerName()",
       "file_type": "code",
       "source_file": "androproject-gui/src/lib/services/airplay-engine.ts",
-      "source_location": "L462",
+      "source_location": "L461",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_airplay_engine_airplayreceiverengine_setservername",
       "community": 62,
@@ -5845,7 +5845,7 @@
       "label": ".setPin()",
       "file_type": "code",
       "source_file": "androproject-gui/src/lib/services/airplay-engine.ts",
-      "source_location": "L471",
+      "source_location": "L470",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_airplay_engine_airplayreceiverengine_setpin",
       "community": 62,
@@ -5855,7 +5855,7 @@
       "label": ".getLatestFrame()",
       "file_type": "code",
       "source_file": "androproject-gui/src/lib/services/airplay-engine.ts",
-      "source_location": "L480",
+      "source_location": "L479",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_airplay_engine_airplayreceiverengine_getlatestframe",
       "community": 62,
@@ -6388,7 +6388,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_projection_coordinator",
-      "community": 65,
+      "community": 84,
       "norm_label": "projection-coordinator.ts"
     },
     {
@@ -6398,7 +6398,7 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_projection_coordinator_projectionlaunchoptions",
-      "community": 65,
+      "community": 84,
       "norm_label": "projectionlaunchoptions"
     },
     {
@@ -6408,7 +6408,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_projection_coordinator_projectioncoordinator",
-      "community": 78,
+      "community": 84,
       "norm_label": "projectioncoordinator"
     },
     {
@@ -6418,7 +6418,7 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_projection_coordinator_projectioncoordinator_start",
-      "community": 78,
+      "community": 84,
       "norm_label": ".start()"
     },
     {
@@ -6428,7 +6428,7 @@
       "source_location": "L39",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_projection_coordinator_projectioncoordinator_stop",
-      "community": 78,
+      "community": 84,
       "norm_label": ".stop()"
     },
     {
@@ -6438,7 +6438,7 @@
       "source_location": "L54",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_projection_coordinator_projectioncoordinator_isalive",
-      "community": 78,
+      "community": 84,
       "norm_label": ".isalive()"
     },
     {
@@ -6448,7 +6448,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_scrcpy_engine",
-      "community": 60,
+      "community": 3,
       "norm_label": "scrcpy-engine.ts"
     },
     {
@@ -6458,7 +6458,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_scrcpy_engine_visionnanooptions",
-      "community": 65,
+      "community": 84,
       "norm_label": "visionnanooptions"
     },
     {
@@ -6478,7 +6478,7 @@
       "source_location": "L38",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_scrcpy_engine_visionnanoresult",
-      "community": 60,
+      "community": 84,
       "norm_label": "visionnanoresult"
     },
     {
@@ -6498,7 +6498,7 @@
       "source_location": "L48",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_scrcpy_engine_ivisionnanoengine",
-      "community": 60,
+      "community": 88,
       "norm_label": "ivisionnanoengine"
     },
     {
@@ -6508,7 +6508,7 @@
       "source_location": "L49",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_scrcpy_engine_ivisionnanoengine_buildargs",
-      "community": 60,
+      "community": 88,
       "norm_label": ".buildargs()"
     },
     {
@@ -6518,7 +6518,7 @@
       "source_location": "L50",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_scrcpy_engine_ivisionnanoengine_start",
-      "community": 60,
+      "community": 88,
       "norm_label": ".start()"
     },
     {
@@ -6528,7 +6528,7 @@
       "source_location": "L51",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_scrcpy_engine_ivisionnanoengine_stop",
-      "community": 60,
+      "community": 88,
       "norm_label": ".stop()"
     },
     {
@@ -6538,7 +6538,7 @@
       "source_location": "L52",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_scrcpy_engine_ivisionnanoengine_checkalive",
-      "community": 60,
+      "community": 88,
       "norm_label": ".checkalive()"
     },
     {
@@ -6548,7 +6548,7 @@
       "source_location": "L55",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_scrcpy_engine_iscrcpyengine",
-      "community": 60,
+      "community": 88,
       "norm_label": "iscrcpyengine"
     },
     {
@@ -6968,7 +6968,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "androproject_gui_src_services_contracts",
-      "community": 4,
+      "community": 51,
       "norm_label": "contracts.ts"
     },
     {
@@ -7438,7 +7438,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "androproject_gui_src_stores_uislice",
-      "community": 51,
+      "community": 81,
       "norm_label": "uislice.ts"
     },
     {
@@ -7448,7 +7448,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "androproject_gui_src_stores_uislice_uislice",
-      "community": 51,
+      "community": 81,
       "norm_label": "uislice"
     },
     {
@@ -7458,7 +7458,7 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "androproject_gui_src_stores_uislice_createuislice",
-      "community": 51,
+      "community": 81,
       "norm_label": "createuislice()"
     },
     {
@@ -8504,6 +8504,76 @@
       "norm_label": "scan.ps1"
     },
     {
+      "label": "debug_uxplay.js",
+      "file_type": "code",
+      "source_file": "scratch/debug_uxplay.js",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "scratch_debug_uxplay",
+      "community": 87,
+      "norm_label": "debug_uxplay.js"
+    },
+    {
+      "label": "{ spawn }",
+      "file_type": "code",
+      "source_file": "scratch/debug_uxplay.js",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "scratch_debug_uxplay_spawn",
+      "community": 87,
+      "norm_label": "{ spawn }"
+    },
+    {
+      "label": "path",
+      "file_type": "code",
+      "source_file": "scratch/debug_uxplay.js",
+      "source_location": "L2",
+      "_origin": "ast",
+      "id": "scratch_debug_uxplay_path",
+      "community": 87,
+      "norm_label": "path"
+    },
+    {
+      "label": "airplayDir",
+      "file_type": "code",
+      "source_file": "scratch/debug_uxplay.js",
+      "source_location": "L4",
+      "_origin": "ast",
+      "id": "scratch_debug_uxplay_airplaydir",
+      "community": 87,
+      "norm_label": "airplaydir"
+    },
+    {
+      "label": "uxplayExe",
+      "file_type": "code",
+      "source_file": "scratch/debug_uxplay.js",
+      "source_location": "L5",
+      "_origin": "ast",
+      "id": "scratch_debug_uxplay_uxplayexe",
+      "community": 87,
+      "norm_label": "uxplayexe"
+    },
+    {
+      "label": "env",
+      "file_type": "code",
+      "source_file": "scratch/debug_uxplay.js",
+      "source_location": "L7",
+      "_origin": "ast",
+      "id": "scratch_debug_uxplay_env",
+      "community": 87,
+      "norm_label": "env"
+    },
+    {
+      "label": "p",
+      "file_type": "code",
+      "source_file": "scratch/debug_uxplay.js",
+      "source_location": "L13",
+      "_origin": "ast",
+      "id": "scratch_debug_uxplay_p",
+      "community": 87,
+      "norm_label": "p"
+    },
+    {
       "label": "launch_airplay.js",
       "file_type": "code",
       "source_file": "scratch/launch_airplay.js",
@@ -8564,6 +8634,86 @@
       "norm_label": "p"
     },
     {
+      "label": "run_uxplay_standalone.js",
+      "file_type": "code",
+      "source_file": "scratch/run_uxplay_standalone.js",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "scratch_run_uxplay_standalone",
+      "community": 85,
+      "norm_label": "run_uxplay_standalone.js"
+    },
+    {
+      "label": "{ spawn }",
+      "file_type": "code",
+      "source_file": "scratch/run_uxplay_standalone.js",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "scratch_run_uxplay_standalone_spawn",
+      "community": 85,
+      "norm_label": "{ spawn }"
+    },
+    {
+      "label": "path",
+      "file_type": "code",
+      "source_file": "scratch/run_uxplay_standalone.js",
+      "source_location": "L2",
+      "_origin": "ast",
+      "id": "scratch_run_uxplay_standalone_path",
+      "community": 85,
+      "norm_label": "path"
+    },
+    {
+      "label": "airplayDir",
+      "file_type": "code",
+      "source_file": "scratch/run_uxplay_standalone.js",
+      "source_location": "L4",
+      "_origin": "ast",
+      "id": "scratch_run_uxplay_standalone_airplaydir",
+      "community": 85,
+      "norm_label": "airplaydir"
+    },
+    {
+      "label": "uxplayExe",
+      "file_type": "code",
+      "source_file": "scratch/run_uxplay_standalone.js",
+      "source_location": "L5",
+      "_origin": "ast",
+      "id": "scratch_run_uxplay_standalone_uxplayexe",
+      "community": 85,
+      "norm_label": "uxplayexe"
+    },
+    {
+      "label": "env",
+      "file_type": "code",
+      "source_file": "scratch/run_uxplay_standalone.js",
+      "source_location": "L7",
+      "_origin": "ast",
+      "id": "scratch_run_uxplay_standalone_env",
+      "community": 85,
+      "norm_label": "env"
+    },
+    {
+      "label": "args",
+      "file_type": "code",
+      "source_file": "scratch/run_uxplay_standalone.js",
+      "source_location": "L13",
+      "_origin": "ast",
+      "id": "scratch_run_uxplay_standalone_args",
+      "community": 85,
+      "norm_label": "args"
+    },
+    {
+      "label": "child",
+      "file_type": "code",
+      "source_file": "scratch/run_uxplay_standalone.js",
+      "source_location": "L20",
+      "_origin": "ast",
+      "id": "scratch_run_uxplay_standalone_child",
+      "community": 85,
+      "norm_label": "child"
+    },
+    {
       "label": "test_airplay_run.js",
       "file_type": "code",
       "source_file": "scratch/test_airplay_run.js",
@@ -8621,6 +8771,86 @@
       "_origin": "ast",
       "id": "scratch_test_airplay_run_p",
       "community": 83,
+      "norm_label": "p"
+    },
+    {
+      "label": "test_uxplay_live.js",
+      "file_type": "code",
+      "source_file": "scratch/test_uxplay_live.js",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "scratch_test_uxplay_live",
+      "community": 86,
+      "norm_label": "test_uxplay_live.js"
+    },
+    {
+      "label": "{ spawn }",
+      "file_type": "code",
+      "source_file": "scratch/test_uxplay_live.js",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "scratch_test_uxplay_live_spawn",
+      "community": 86,
+      "norm_label": "{ spawn }"
+    },
+    {
+      "label": "path",
+      "file_type": "code",
+      "source_file": "scratch/test_uxplay_live.js",
+      "source_location": "L2",
+      "_origin": "ast",
+      "id": "scratch_test_uxplay_live_path",
+      "community": 86,
+      "norm_label": "path"
+    },
+    {
+      "label": "airplayDir",
+      "file_type": "code",
+      "source_file": "scratch/test_uxplay_live.js",
+      "source_location": "L4",
+      "_origin": "ast",
+      "id": "scratch_test_uxplay_live_airplaydir",
+      "community": 86,
+      "norm_label": "airplaydir"
+    },
+    {
+      "label": "uxplayExe",
+      "file_type": "code",
+      "source_file": "scratch/test_uxplay_live.js",
+      "source_location": "L5",
+      "_origin": "ast",
+      "id": "scratch_test_uxplay_live_uxplayexe",
+      "community": 86,
+      "norm_label": "uxplayexe"
+    },
+    {
+      "label": "env",
+      "file_type": "code",
+      "source_file": "scratch/test_uxplay_live.js",
+      "source_location": "L7",
+      "_origin": "ast",
+      "id": "scratch_test_uxplay_live_env",
+      "community": 86,
+      "norm_label": "env"
+    },
+    {
+      "label": "args",
+      "file_type": "code",
+      "source_file": "scratch/test_uxplay_live.js",
+      "source_location": "L14",
+      "_origin": "ast",
+      "id": "scratch_test_uxplay_live_args",
+      "community": 86,
+      "norm_label": "args"
+    },
+    {
+      "label": "p",
+      "file_type": "code",
+      "source_file": "scratch/test_uxplay_live.js",
+      "source_location": "L24",
+      "_origin": "ast",
+      "id": "scratch_test_uxplay_live_p",
+      "community": 86,
       "norm_label": "p"
     },
     {
@@ -22324,7 +22554,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/lib/services/airplay-engine.ts",
-      "source_location": "L689",
+      "source_location": "L688",
       "weight": 1.0,
       "source": "androproject_gui_src_lib_services_airplay_engine",
       "target": "androproject_gui_src_lib_services_airplay_engine_airplayreceiverengine",
@@ -22529,7 +22759,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/lib/services/airplay-engine.ts",
-      "source_location": "L480",
+      "source_location": "L479",
       "weight": 1.0,
       "source": "androproject_gui_src_lib_services_airplay_engine_airplayreceiverengine",
       "target": "androproject_gui_src_lib_services_airplay_engine_airplayreceiverengine_getlatestframe",
@@ -22569,7 +22799,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/lib/services/airplay-engine.ts",
-      "source_location": "L471",
+      "source_location": "L470",
       "weight": 1.0,
       "source": "androproject_gui_src_lib_services_airplay_engine_airplayreceiverengine",
       "target": "androproject_gui_src_lib_services_airplay_engine_airplayreceiverengine_setpin",
@@ -22579,7 +22809,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/lib/services/airplay-engine.ts",
-      "source_location": "L462",
+      "source_location": "L461",
       "weight": 1.0,
       "source": "androproject_gui_src_lib_services_airplay_engine_airplayreceiverengine",
       "target": "androproject_gui_src_lib_services_airplay_engine_airplayreceiverengine_setservername",
@@ -22642,7 +22872,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/lib/services/airplay-engine.ts",
-      "source_location": "L466",
+      "source_location": "L465",
       "weight": 1.0,
       "source": "androproject_gui_src_lib_services_airplay_engine_airplayreceiverengine_setservername",
       "target": "androproject_gui_src_lib_services_airplay_engine_airplayreceiverengine_start",
@@ -26304,6 +26534,66 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "scratch/debug_uxplay.js",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "scratch_debug_uxplay",
+      "target": "scratch_debug_uxplay_airplaydir",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scratch/debug_uxplay.js",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "scratch_debug_uxplay",
+      "target": "scratch_debug_uxplay_env",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scratch/debug_uxplay.js",
+      "source_location": "L13",
+      "weight": 1.0,
+      "source": "scratch_debug_uxplay",
+      "target": "scratch_debug_uxplay_p",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scratch/debug_uxplay.js",
+      "source_location": "L2",
+      "weight": 1.0,
+      "source": "scratch_debug_uxplay",
+      "target": "scratch_debug_uxplay_path",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scratch/debug_uxplay.js",
+      "source_location": "L1",
+      "weight": 1.0,
+      "source": "scratch_debug_uxplay",
+      "target": "scratch_debug_uxplay_spawn",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scratch/debug_uxplay.js",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "scratch_debug_uxplay",
+      "target": "scratch_debug_uxplay_uxplayexe",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "scratch/launch_airplay.js",
       "source_location": "L3",
       "weight": 1.0,
@@ -26354,6 +26644,76 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "scratch/run_uxplay_standalone.js",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "scratch_run_uxplay_standalone",
+      "target": "scratch_run_uxplay_standalone_airplaydir",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scratch/run_uxplay_standalone.js",
+      "source_location": "L13",
+      "weight": 1.0,
+      "source": "scratch_run_uxplay_standalone",
+      "target": "scratch_run_uxplay_standalone_args",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scratch/run_uxplay_standalone.js",
+      "source_location": "L20",
+      "weight": 1.0,
+      "source": "scratch_run_uxplay_standalone",
+      "target": "scratch_run_uxplay_standalone_child",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scratch/run_uxplay_standalone.js",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "scratch_run_uxplay_standalone",
+      "target": "scratch_run_uxplay_standalone_env",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scratch/run_uxplay_standalone.js",
+      "source_location": "L2",
+      "weight": 1.0,
+      "source": "scratch_run_uxplay_standalone",
+      "target": "scratch_run_uxplay_standalone_path",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scratch/run_uxplay_standalone.js",
+      "source_location": "L1",
+      "weight": 1.0,
+      "source": "scratch_run_uxplay_standalone",
+      "target": "scratch_run_uxplay_standalone_spawn",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scratch/run_uxplay_standalone.js",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "scratch_run_uxplay_standalone",
+      "target": "scratch_run_uxplay_standalone_uxplayexe",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "scratch/test_airplay_run.js",
       "source_location": "L3",
       "weight": 1.0,
@@ -26399,6 +26759,76 @@
       "weight": 1.0,
       "source": "scratch_test_airplay_run",
       "target": "scratch_test_airplay_run_spawn",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scratch/test_uxplay_live.js",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "scratch_test_uxplay_live",
+      "target": "scratch_test_uxplay_live_airplaydir",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scratch/test_uxplay_live.js",
+      "source_location": "L14",
+      "weight": 1.0,
+      "source": "scratch_test_uxplay_live",
+      "target": "scratch_test_uxplay_live_args",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scratch/test_uxplay_live.js",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "scratch_test_uxplay_live",
+      "target": "scratch_test_uxplay_live_env",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scratch/test_uxplay_live.js",
+      "source_location": "L24",
+      "weight": 1.0,
+      "source": "scratch_test_uxplay_live",
+      "target": "scratch_test_uxplay_live_p",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scratch/test_uxplay_live.js",
+      "source_location": "L2",
+      "weight": 1.0,
+      "source": "scratch_test_uxplay_live",
+      "target": "scratch_test_uxplay_live_path",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scratch/test_uxplay_live.js",
+      "source_location": "L1",
+      "weight": 1.0,
+      "source": "scratch_test_uxplay_live",
+      "target": "scratch_test_uxplay_live_spawn",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scratch/test_uxplay_live.js",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "scratch_test_uxplay_live",
+      "target": "scratch_test_uxplay_live_uxplayexe",
       "confidence_score": 1.0
     },
     {
@@ -27831,5 +28261,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "459de3ceb3c8a0105cad809d5c34538d538f3f1d"
+  "built_at_commit": "95a4e2d77a0d1f6b9d595124cf58f7d345ebd99b"
 }

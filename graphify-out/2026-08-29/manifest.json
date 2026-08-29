@@ -843,5 +843,15 @@
     "mtime": 1777914548.0,
     "ast_hash": "76117485bdc492a805f8d74d9419d488",
     "semantic_hash": ""
+  },
+  "scratch/launch_airplay.js": {
+    "mtime": 1788030655.3364434,
+    "ast_hash": "359c5a2c6ea223fe6adcdcd3a112c42f",
+    "semantic_hash": ""
+  },
+  "scratch/test_airplay_run.js": {
+    "mtime": 1788030697.8546433,
+    "ast_hash": "cce698ae4a4dcb12f9f44845246fe32d",
+    "semantic_hash": ""
   }
 }
