@@ -142,9 +142,17 @@ export async function inputText(ctx: ActionContext, body: { text: string }) {
   if (!text || typeof text !== 'string') {
     return NextResponse.json({ success: false, error: 'Texto requerido' }, { status: 400 });
   }
+
+  const target = ctx.targetSerial || '';
+  if (target.startsWith('airplay-')) {
+    const { airPlayReceiverEngine } = await import('@/lib/services/airplay-engine');
+    const res = await airPlayReceiverEngine.injectText(text);
+    return NextResponse.json(res);
+  }
+
   // Escape shell characters and spaces for adb shell input text
   const escaped = text.replace(/([\\$`"!\s])/g, (char) => (char === ' ' ? '%s' : `\\${char}`));
-  await adb.shell(ctx.targetSerial!, `input text "${escaped}"`);
+  await adb.shell(target, `input text "${escaped}"`);
   return NextResponse.json({ success: true, message: 'Texto enviado al dispositivo' });
 }
 
@@ -159,7 +167,14 @@ export async function inputTap(ctx: ActionContext, body: { x: number; y: number 
   if (!isValidPoint(x) || !isValidPoint(y)) {
     return NextResponse.json({ success: false, error: 'Coordenadas de tap inválidas' }, { status: 400 });
   }
+
   const target = ctx.targetSerial || '';
+  if (target.startsWith('airplay-')) {
+    const { airPlayReceiverEngine } = await import('@/lib/services/airplay-engine');
+    const res = await airPlayReceiverEngine.injectTap(Math.round(x), Math.round(y));
+    return NextResponse.json(res);
+  }
+
   await adb.shell(target, `input tap ${Math.round(x)} ${Math.round(y)}`);
   return NextResponse.json({ success: true, message: `Tap en (${Math.round(x)}, ${Math.round(y)})` });
 }
@@ -175,8 +190,15 @@ export async function inputSwipe(
   if (![x1, y1, x2, y2].every(isValidPoint)) {
     return NextResponse.json({ success: false, error: 'Coordenadas de swipe inválidas' }, { status: 400 });
   }
+
   const duration = Math.max(20, Math.min(5000, Math.round(Number(body.duration ?? 120))));
   const target = ctx.targetSerial || '';
+  if (target.startsWith('airplay-')) {
+    const { airPlayReceiverEngine } = await import('@/lib/services/airplay-engine');
+    const res = await airPlayReceiverEngine.injectSwipe(Math.round(x1), Math.round(y1), Math.round(x2), Math.round(y2), duration);
+    return NextResponse.json(res);
+  }
+
   await adb.shell(target, `input swipe ${Math.round(x1)} ${Math.round(y1)} ${Math.round(x2)} ${Math.round(y2)} ${duration}`);
   return NextResponse.json({ success: true, message: 'Gesto enviado' });
 }
