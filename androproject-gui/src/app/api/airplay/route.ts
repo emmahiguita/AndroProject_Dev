@@ -52,6 +52,11 @@ export async function POST(request: Request) {
         return NextResponse.json({ success: updated, message: 'PIN actualizado' });
       }
 
+      case 'open_native_window': {
+        const launched = await airPlayReceiverEngine.openNativeWindow();
+        return NextResponse.json({ success: launched, message: launched ? 'Ventana nativa abierta en el escritorio' : 'No se pudo abrir la ventana' });
+      }
+
       case 'register_test_client': {
         airPlayReceiverEngine.registerClient(
           body.clientIp || '192.168.0.25',

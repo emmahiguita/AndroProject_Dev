@@ -147,6 +147,27 @@ export const DeviceInfoPanel: React.FC<DeviceInfoPanelProps> = ({
             </div>
           </div>
 
+          <button
+            type="button"
+            onClick={async () => {
+              showToast('Abriendo ventana nativa de AirPlay...');
+              try {
+                await fetch('/api/airplay', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ action: 'open_native_window' }),
+                });
+                showToast('Ventana nativa de AirPlay abierta');
+              } catch {
+                showToast('Error al abrir ventana nativa');
+              }
+            }}
+            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-bold transition-all shadow-md bg-gradient-to-r from-[#00b4d8] to-[#0077b6] hover:from-[#0096c7] hover:to-[#023e8a] text-white active:scale-[0.98] cursor-pointer"
+          >
+            <Maximize2 size={13} />
+            <span>Abrir Ventana Flotante de AirPlay en Escritorio</span>
+          </button>
+
           <div className="p-3 rounded-xl bg-[#00e5ff]/5 border border-[#00e5ff]/20 text-[11px] text-white/80 space-y-1.5">
             <div className="font-bold text-[#00e5ff] flex items-center gap-1">
               <span>📱 Cómo conectar tu iPhone / iPad:</span>

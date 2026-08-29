@@ -440,6 +440,21 @@ class AirPlayReceiverEngine implements IAirPlayReceiverEngine {
     return devices;
   }
 
+  public async openNativeWindow(): Promise<boolean> {
+    const airplayExe = path.join(process.cwd(), 'bin', 'airplay', 'AirPlayServer.exe');
+    if (fs.existsSync(airplayExe)) {
+      spawn('cmd.exe', ['/c', 'start', '""', `"${airplayExe}"`], {
+        cwd: path.dirname(airplayExe),
+        detached: true,
+        stdio: 'ignore',
+        windowsHide: false,
+        shell: true,
+      }).unref();
+      return true;
+    }
+    return false;
+  }
+
   public async setServerName(name: string): Promise<boolean> {
     if (!name.trim()) return false;
     this.currentOptions.serverName = name.trim();
