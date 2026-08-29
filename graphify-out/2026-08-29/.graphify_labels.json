@@ -82,5 +82,10 @@
   "80": "package.json",
   "81": "route.ts",
   "82": "launch_airplay.js",
-  "83": "test_airplay_run.js"
+  "83": "test_airplay_run.js",
+  "84": "projection-coordinator.ts",
+  "85": "run_uxplay_standalone.js",
+  "86": "test_uxplay_live.js",
+  "87": "debug_uxplay.js",
+  "88": "IVisionNanoEngine"
 }

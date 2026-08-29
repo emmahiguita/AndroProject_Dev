@@ -390,9 +390,20 @@ class AirPlayReceiverEngine implements IAirPlayReceiverEngine {
 
   public async openNativeWindow(): Promise<boolean> {
     const airplayDir = path.join(process.cwd(), 'bin', 'airplay');
+    const uxplayExe = path.join(airplayDir, 'uxplay-windows.exe');
     const airplayExe = path.join(airplayDir, 'AirPlayServer.exe');
-    if (fs.existsSync(airplayExe)) {
-      spawn('powershell.exe', ['-NoProfile', '-Command', `Start-Process -FilePath '${airplayExe}' -WorkingDirectory '${airplayDir}'`], {
+
+    const targetExe = fs.existsSync(uxplayExe) ? uxplayExe : airplayExe;
+    const targetArgs = targetExe === uxplayExe
+      ? "-n 'AndroProject [PC]' -nh -vs d3d11videosink -as wasapisink -s 1179x2556@60 -fps 60 -p 7000"
+      : '';
+
+    if (fs.existsSync(targetExe)) {
+      const cmd = targetArgs
+        ? `Start-Process -FilePath '${targetExe}' -ArgumentList "${targetArgs}" -WorkingDirectory '${airplayDir}'`
+        : `Start-Process -FilePath '${targetExe}' -WorkingDirectory '${airplayDir}'`;
+
+      spawn('powershell.exe', ['-NoProfile', '-Command', cmd], {
         detached: true,
         stdio: 'ignore',
         windowsHide: false,

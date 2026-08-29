@@ -825,8 +825,8 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/lib/services/airplay-engine.ts": {
-    "mtime": 1788030425.962185,
-    "ast_hash": "67a26f01d39382783f5db26fd13674d1",
+    "mtime": 1788031270.7214372,
+    "ast_hash": "d36f3c7542d0a4de704ec5bad5d6babb",
     "semantic_hash": ""
   },
   "androproject-gui/src/lib/services/projection-coordinator.ts": {
@@ -852,6 +852,21 @@
   "scratch/test_airplay_run.js": {
     "mtime": 1788030697.8546433,
     "ast_hash": "cce698ae4a4dcb12f9f44845246fe32d",
+    "semantic_hash": ""
+  },
+  "scratch/debug_uxplay.js": {
+    "mtime": 1788031205.2235343,
+    "ast_hash": "9f21bc24c57f0f66944c1ad3416d86a7",
+    "semantic_hash": ""
+  },
+  "scratch/run_uxplay_standalone.js": {
+    "mtime": 1788031184.7527094,
+    "ast_hash": "2f49d37acdbd12ef0878f457de867b0a",
+    "semantic_hash": ""
+  },
+  "scratch/test_uxplay_live.js": {
+    "mtime": 1788031112.6839406,
+    "ast_hash": "98896581058250c6295d9bcfe6bc3a6e",
     "semantic_hash": ""
   }
 }
