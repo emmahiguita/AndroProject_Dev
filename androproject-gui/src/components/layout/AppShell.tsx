@@ -114,7 +114,7 @@ export const AppShell: React.FC<AppShellProps> = ({
   }, [viewportMedium]);
 
   return (
-    <div ref={sceneRef} className={`relative flex h-screen w-screen overflow-hidden ${isDark ? 'bg-[#070913] text-[#e2e8f0]' : 'bg-slate-50 text-slate-900'}`}>
+    <div ref={sceneRef} suppressHydrationWarning className={`relative flex h-screen w-screen overflow-hidden ${isDark ? 'bg-[#070913] text-[#e2e8f0]' : 'bg-slate-50 text-slate-900'}`}>
       {/* ═══ COSMIC 3D BACKGROUND ═══ */}
       {isDark && (
         <>
