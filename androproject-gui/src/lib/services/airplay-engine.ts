@@ -445,14 +445,13 @@ class AirPlayReceiverEngine implements IAirPlayReceiverEngine {
   }
 
   public async openNativeWindow(): Promise<boolean> {
-    const airplayExe = path.join(process.cwd(), 'bin', 'airplay', 'AirPlayServer.exe');
+    const airplayDir = path.join(process.cwd(), 'bin', 'airplay');
+    const airplayExe = path.join(airplayDir, 'AirPlayServer.exe');
     if (fs.existsSync(airplayExe)) {
-      spawn('cmd.exe', ['/c', 'start', '""', `"${airplayExe}"`], {
-        cwd: path.dirname(airplayExe),
+      spawn('powershell.exe', ['-NoProfile', '-Command', `Start-Process -FilePath '${airplayExe}' -WorkingDirectory '${airplayDir}'`], {
         detached: true,
         stdio: 'ignore',
         windowsHide: false,
-        shell: true,
       }).unref();
       return true;
     }

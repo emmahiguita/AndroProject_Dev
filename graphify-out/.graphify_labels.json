@@ -71,9 +71,16 @@
   "69": "paths.ts",
   "70": "create_desktop_shortcut.ps1",
   "71": "launch_a30.ps1",
+  "72": "page.tsx",
   "73": "route.ts",
   "74": "route.ts",
   "75": "build",
+  "76": "ProjectionCanvas.tsx",
   "77": "scripts",
-  "80": "package.json"
+  "78": "DeviceInfo",
+  "79": "AppsView.tsx",
+  "80": "package.json",
+  "81": "route.ts",
+  "82": "launch_airplay.js",
+  "83": "test_airplay_run.js"
 }
