@@ -1,7 +1,7 @@
 # Graph Report - AndroProject_Dev  (2026-08-29)
 
 ## Corpus Check
-- 148 files · ~255,292 words
+- 148 files · ~255,353 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
@@ -10,7 +10,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `bf79ef14`
+- Built from commit: `f1e29bb0`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 

@@ -6,6 +6,7 @@
  * Broadcasts mDNS / Bonjour services (_airplay._tcp, _raop._tcp) and handles AirPlay HTTP/RTSP discovery.
  */
 
+import { spawn, ChildProcess } from 'child_process';
 import http from 'http';
 import os from 'os';
 import path from 'path';
@@ -65,6 +66,7 @@ function getLocalIpAndMac(): { ip: string; mac: string } {
 class AirPlayReceiverEngine implements IAirPlayReceiverEngine {
   private currentOptions: AirPlayServerOptions = { ...DEFAULT_AIRPLAY_OPTIONS };
   private isRunning: boolean = false;
+  private serverProcess: ChildProcess | null = null;
   private httpServer: http.Server | null = null;
   private mdnsInstance: unknown = null;
   private announceInterval: NodeJS.Timeout | null = null;
@@ -114,6 +116,23 @@ class AirPlayReceiverEngine implements IAirPlayReceiverEngine {
       const { ip: localIp, mac } = getLocalIpAndMac();
       const cleanMac = (mac || 'd4:ab:61:17:a1:65').replace(/[:-]/g, '').toUpperCase();
       const hostname = os.hostname() || 'AndroProject-PC';
+
+      // 0. Launch native AirPlayServer executable with Bonjour if present
+      const airplayExe = path.join(process.cwd(), 'bin', 'airplay', 'AirPlayServer.exe');
+      if (fs.existsSync(airplayExe)) {
+        try {
+          this.serverProcess = spawn(airplayExe, [], {
+            cwd: path.dirname(airplayExe),
+            detached: true,
+            stdio: 'ignore',
+          });
+          this.serverProcess.unref();
+          console.log(`[AirPlay Engine] Proceso nativo AirPlayServer iniciado con Bonjour (PID ${this.serverProcess.pid})`);
+        } catch (e: unknown) {
+          const msg = e instanceof Error ? e.message : String(e);
+          console.warn('[AirPlay Engine] Advertencia al iniciar binario nativo:', msg);
+        }
+      }
 
       // 1. Start HTTP Server on Port 7000 for Apple AirPlay handshakes
       this.httpServer = http.createServer((req, res) => {
@@ -328,7 +347,14 @@ class AirPlayReceiverEngine implements IAirPlayReceiverEngine {
       try {
         this.httpServer.close();
       } catch {}
-      this.httpServer = null;
+        this.httpServer = null;
+    }
+
+    if (this.serverProcess) {
+      try {
+        this.serverProcess.kill();
+      } catch {}
+      this.serverProcess = null;
     }
 
     this.isRunning = false;
