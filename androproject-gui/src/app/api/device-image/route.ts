@@ -9,6 +9,7 @@
 export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { adb } from '@/lib/services/adb-executor';
+import { airPlayReceiverEngine } from '@/lib/services/airplay-engine';
 
 // ── Persistent last-good frame per serial ───────────────────
 const lastGoodFrame = new Map<string, Uint8Array>();
@@ -69,6 +70,20 @@ export async function GET(req: NextRequest) {
   if (!serial) {
     return new NextResponse(placeholderFrame() as unknown as BodyInit, {
       headers: { 'Content-Type': 'image/png', 'Cache-Control': 'no-store' },
+    });
+  }
+
+  // Handle iOS AirPlay screen streaming
+  if (serial.startsWith('airplay-')) {
+    const frameBuffer = airPlayReceiverEngine.getLatestFrame(serial);
+    const uint8 = new Uint8Array(frameBuffer.buffer, frameBuffer.byteOffset, frameBuffer.byteLength);
+    return new NextResponse(uint8 as unknown as BodyInit, {
+      headers: {
+        'Content-Type': 'image/svg+xml',
+        'Cache-Control': 'no-store',
+        'ETag': String(Date.now()),
+        'X-Connection': 'ok',
+      },
     });
   }
 

@@ -68,11 +68,12 @@
   "66": "ViewShell.tsx",
   "67": "stream-diagnostic.mjs",
   "68": "route.ts",
-  "69": "IAdbExecutor",
+  "69": "paths.ts",
   "70": "create_desktop_shortcut.ps1",
   "71": "launch_a30.ps1",
   "72": "route.ts",
   "73": "route.ts",
+  "74": "route.ts",
   "75": "build",
   "77": "scripts",
   "80": "package.json"

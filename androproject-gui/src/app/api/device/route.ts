@@ -11,6 +11,7 @@ import { NextResponse } from 'next/server';
 import { adb } from '@/lib/services/adb-executor';
 import { DeviceDetector, DetectedDevice } from '@/lib/services/device-detector';
 import { DeviceInfoFetcher } from '@/lib/services/device-info-fetcher';
+import { airPlayReceiverEngine } from '@/lib/services/airplay-engine';
 
 const detector = new DeviceDetector(adb);
 const fetcher = new DeviceInfoFetcher(adb);
@@ -20,10 +21,24 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const requestedSerial = searchParams.get('serial');
 
-    // 1. Discover connected devices
-    const devices = await detector.detect();
+    // 1. Discover connected Android devices + active iOS AirPlay clients
+    const androidDevices = await detector.detect();
+    const iosDevices = airPlayReceiverEngine.getConnectedDevices();
 
-    if (devices.length === 0) {
+    const allDetectedDeviceSummaries = [
+      ...androidDevices.map(d => ({ ...d, platform: 'android' as const })),
+      ...iosDevices.map(d => ({
+        serial: d.serial,
+        model: d.model || 'iPhone (AirPlay)',
+        product: 'Apple iOS',
+        transport_id: 'airplay-wifi',
+        connectionType: 'Wi-Fi',
+        state: 'device',
+        platform: 'ios' as const,
+      })),
+    ];
+
+    if (allDetectedDeviceSummaries.length === 0) {
       // Hardware fallback: check for USB devices in bootloader/offline state
       const fallback = await detectHardwareFallback();
       if (fallback) {
@@ -35,16 +50,38 @@ export async function GET(request: Request) {
       );
     }
 
-    // 2. Select target device
-    const target = selectTarget(devices, requestedSerial);
+    // Check if an iOS AirPlay device was requested
+    if (requestedSerial?.startsWith('airplay-')) {
+      const iosMatch = iosDevices.find(d => d.serial === requestedSerial);
+      if (iosMatch) {
+        return NextResponse.json({
+          connected: true,
+          devices: allDetectedDeviceSummaries,
+          serialChanged: false,
+          activeDevice: iosMatch,
+        }, { headers: { 'Cache-Control': 'no-store, max-age=0' } });
+      }
+    }
+
+    // 2. Select target device from Android devices if available, else first iOS
+    if (androidDevices.length === 0 && iosDevices.length > 0) {
+      return NextResponse.json({
+        connected: true,
+        devices: allDetectedDeviceSummaries,
+        serialChanged: requestedSerial && requestedSerial !== iosDevices[0].serial,
+        activeDevice: iosDevices[0],
+      }, { headers: { 'Cache-Control': 'no-store, max-age=0' } });
+    }
+
+    const target = selectTarget(androidDevices, requestedSerial);
 
     // 3. If device is not ready, return minimal info
     if (target.state !== 'device') {
       return NextResponse.json({
         connected: true,
-        devices,
+        devices: allDetectedDeviceSummaries,
         serialChanged: requestedSerial && requestedSerial !== target.serial,
-        activeDevice: buildOfflineDevice(target),
+        activeDevice: { ...buildOfflineDevice(target), platform: 'android' },
       }, { headers: { 'Cache-Control': 'no-store, max-age=0' } });
     }
 
@@ -53,16 +90,16 @@ export async function GET(request: Request) {
     if (!info) {
       return NextResponse.json({
         connected: true,
-        devices,
-        activeDevice: buildOfflineDevice(target),
+        devices: allDetectedDeviceSummaries,
+        activeDevice: { ...buildOfflineDevice(target), platform: 'android' },
       }, { headers: { 'Cache-Control': 'no-store, max-age=0' } });
     }
 
     return NextResponse.json({
       connected: true,
-      devices,
+      devices: allDetectedDeviceSummaries,
       serialChanged: requestedSerial && requestedSerial !== target.serial,
-      activeDevice: info,
+      activeDevice: { ...info, platform: 'android' },
     }, { headers: { 'Cache-Control': 'no-store, max-age=0' } });
 
   } catch (error: unknown) {

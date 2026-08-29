@@ -1,10 +1,10 @@
-// ── Shared types for all feature views ──────────────────────────────
-
 export type DeviceData = {
   connected: boolean;
+  platform?: 'android' | 'ios';
   connectionType?: string;
   model?: string;
   androidVersion?: string;
+  iosVersion?: string;
   serial: string;
   product?: string;
   transport_id?: string;
@@ -25,9 +25,32 @@ export type DeviceData = {
   bootloaderLocked?: boolean;
   verifiedBootState?: string;
   vbmetaState?: string;
+  // AirPlay iOS metadata
+  airplayClientName?: string;
+  airplayPin?: string;
+  airplayResolution?: string;
+  airplayFps?: number;
+  airplayAudioEnabled?: boolean;
 };
 
 export type DeviceInfo = DeviceData;
+
+export interface AirPlayServerStatus {
+  running: boolean;
+  port: number;
+  serverName: string;
+  bonjourActive: boolean;
+  pinRequired: boolean;
+  pinCode?: string;
+  connectedClients: {
+    clientName: string;
+    clientIp: string;
+    model: string;
+    resolution: string;
+    fps: number;
+    audioActive: boolean;
+  }[];
+}
 
 export type SystemLogs = {
   id: string;

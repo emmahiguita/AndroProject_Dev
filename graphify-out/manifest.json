@@ -55,8 +55,8 @@
     "semantic_hash": "fa81320f84d2ed199c192282da920476"
   },
   "androproject-gui/src/app/api/actions/_lib/validation.ts": {
-    "mtime": 1787891049.3704307,
-    "ast_hash": "a31f7d1d2e6d630aa24d990154c27676",
+    "mtime": 1788027234.0261216,
+    "ast_hash": "109f03897431ec6c6015dd79e5875afe",
     "semantic_hash": ""
   },
   "androproject-gui/src/app/api/actions/device.ts": {
@@ -90,8 +90,8 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/app/api/actions/stream.ts": {
-    "mtime": 1788024392.5254965,
-    "ast_hash": "31ecebd1026a1772caed794fb5dfd856",
+    "mtime": 1788027247.5309708,
+    "ast_hash": "da3b6d86ea71e097f3d23484103f2798",
     "semantic_hash": ""
   },
   "androproject-gui/src/app/api/actions/tweaks.ts": {
@@ -115,8 +115,8 @@
     "semantic_hash": "5195a01e817aeba2789f906907064289"
   },
   "androproject-gui/src/app/api/device/route.ts": {
-    "mtime": 1786418372.247161,
-    "ast_hash": "60e916969dc0ba3baec9ffc1ef779c91",
+    "mtime": 1788026556.4545088,
+    "ast_hash": "479481d7b7d8a97f79ea7e06c4bd0013",
     "semantic_hash": ""
   },
   "androproject-gui/src/app/api/flash/route.ts": {
@@ -165,8 +165,8 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/components/layout/Header.tsx": {
-    "mtime": 1788023794.9373379,
-    "ast_hash": "03b8d28b486f4e3eba46c17ffba1dc8b",
+    "mtime": 1788026592.523616,
+    "ast_hash": "d4b672860ecf41e6d8d9034cb796a90a",
     "semantic_hash": ""
   },
   "androproject-gui/src/components/layout/Sidebar.tsx": {
@@ -225,8 +225,8 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/features/types.ts": {
-    "mtime": 1786410977.3746984,
-    "ast_hash": "4ca5930628a3b99b318c52cbbfb8d6b1",
+    "mtime": 1788026494.2293983,
+    "ast_hash": "ffd312de42ad26fe74462ed5e077693c",
     "semantic_hash": ""
   },
   "androproject-gui/src/hooks/useActions.ts": {
@@ -450,8 +450,8 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/app/api/device-image/route.ts": {
-    "mtime": 1787979662.496782,
-    "ast_hash": "3c7509bf7dfddd9b5001a26470549ce0",
+    "mtime": 1788027370.4147196,
+    "ast_hash": "47f331d218ddd2fe9601fdbdf1a2b75c",
     "semantic_hash": ""
   },
   "androproject-gui/src/components/ThemeProvider.tsx": {
@@ -465,8 +465,8 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/components/layout/DeviceFrame.tsx": {
-    "mtime": 1788024170.0745602,
-    "ast_hash": "07526954d26c06441eb4527cb299d3a6",
+    "mtime": 1788026615.1833818,
+    "ast_hash": "278a0e51e68c71d56ad7030428790567",
     "semantic_hash": ""
   },
   "androproject-gui/src/components/layout/WirelessConnectModal.tsx": {
@@ -675,8 +675,8 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/components/projection/DeviceInfoPanel.tsx": {
-    "mtime": 1788024509.4999588,
-    "ast_hash": "a147cf0287d38da93c26eaf1b66e99f4",
+    "mtime": 1788026700.103696,
+    "ast_hash": "4d337a09a6daf7cd5c880aa76858d958",
     "semantic_hash": ""
   },
   "androproject-gui/src/components/projection/EmptyState.tsx": {
@@ -812,6 +812,26 @@
   "androproject-gui/public/projection_header_banner.png": {
     "mtime": 1788024073.386749,
     "ast_hash": "ebe9702be5a67ed2437c3c36d25937a8",
+    "semantic_hash": ""
+  },
+  "androproject-gui/src/app/api/airplay/route.ts": {
+    "mtime": 1788026532.6236882,
+    "ast_hash": "72a43aec0947c4b27bbea06ed0f17e12",
+    "semantic_hash": ""
+  },
+  "androproject-gui/src/hooks/useAirPlayServer.ts": {
+    "mtime": 1788026564.3519049,
+    "ast_hash": "c671e45ec2aab95202f8650b2a4a380f",
+    "semantic_hash": ""
+  },
+  "androproject-gui/src/lib/services/airplay-engine.ts": {
+    "mtime": 1788027359.5367599,
+    "ast_hash": "bb7bd6119486d0092ac57338ae19f50d",
+    "semantic_hash": ""
+  },
+  "androproject-gui/src/lib/services/projection-coordinator.ts": {
+    "mtime": 1788026520.2427602,
+    "ast_hash": "22498688a935978ce518e5892ee2b241",
     "semantic_hash": ""
   }
 }

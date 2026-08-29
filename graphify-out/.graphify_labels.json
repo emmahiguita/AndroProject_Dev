@@ -68,11 +68,21 @@
   "66": "ViewShell.tsx",
   "67": "stream-diagnostic.mjs",
   "68": "route.ts",
+  "69": "paths.ts",
   "70": "create_desktop_shortcut.ps1",
   "71": "launch_a30.ps1",
   "72": "route.ts",
   "73": "route.ts",
+  "74": "route.ts",
   "75": "build",
+  "76": "types.ts",
   "77": "scripts",
-  "80": "package.json"
+  "78": "airplay-engine.ts",
+  "79": "ArchivosView.tsx",
+  "80": "package.json",
+  "81": "DeviceInfo",
+  "82": "DashboardView.tsx",
+  "83": "AppsView.tsx",
+  "84": "useSystemLogs.ts",
+  "85": "dashboard-components.tsx"
 }

@@ -3,8 +3,8 @@ import { z } from 'zod';
 // ── Base schema — every action request must have at least an action field ──
 export const baseActionSchema = z.object({
   action: z.string().min(1, 'Se requiere una acción'),
-  serial: z.string().optional(),
-  ip: z.string().optional(),
+  serial: z.string().nullable().optional(),
+  ip: z.string().nullable().optional(),
   videoSource: z.enum(['display', 'camera']).optional(),
 }).passthrough();
 

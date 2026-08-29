@@ -55,6 +55,18 @@ export async function openScreen(ctx: ActionContext, body: {
 export async function checkOrStopScreen(ctx: ActionContext, action: 'check_screen' | 'stop_screen') {
   const serial = ctx.targetSerial || 'default';
 
+  if (serial.startsWith('airplay-')) {
+    const { airPlayReceiverEngine } = await import('@/lib/services/airplay-engine');
+    if (action === 'check_screen') {
+      const status = await airPlayReceiverEngine.getStatus();
+      return NextResponse.json({ success: true, alive: status.running });
+    }
+    if (action === 'stop_screen') {
+      const stopped = await airPlayReceiverEngine.stop();
+      return NextResponse.json({ success: true, alive: false, message: 'Transmisión AirPlay detenida' });
+    }
+  }
+
   if (action === 'check_screen') {
     const alive = await scrcpyEngine.checkAlive(serial);
     return NextResponse.json({ success: true, alive });

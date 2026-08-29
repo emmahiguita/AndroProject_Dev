@@ -77,20 +77,27 @@ export const Header: React.FC<HeaderProps> = ({
       </button>
 
       {/* Device selector */}
-      <div className={`flex items-center gap-2 rounded-lg px-2.5 py-1.5 min-w-[180px] border ${
+      <div className={`flex items-center gap-2 rounded-lg px-2.5 py-1.5 min-w-[190px] border ${
         isDark ? 'bg-white/[0.03] border-white/8' : 'bg-slate-50 border-slate-200'
       }`}>
-        <Smartphone size={15} className={currentDevice?.state === 'device' ? 'text-[#22c97d]' : 'opacity-35'} />
-        <select value={selectedSerial} onChange={(e) => onSelectSerial(e.target.value)} title="Seleccionar dispositivo Android"
+        <Smartphone size={15} className={
+          currentDevice?.platform === 'ios' || currentDevice?.serial.startsWith('airplay-')
+            ? 'text-[#00e5ff]'
+            : (currentDevice?.state === 'device' ? 'text-[#22c97d]' : 'opacity-35')
+        } />
+        <select value={selectedSerial} onChange={(e) => onSelectSerial(e.target.value)} title="Seleccionar dispositivo Android / iOS"
           className={`bg-transparent text-[11px] font-semibold focus:outline-none cursor-pointer w-full ${isDark ? 'text-white' : 'text-slate-800'}`}>
           {devices.length === 0 ? (
             <option value="">Sin dispositivos</option>
           ) : (
-            devices.map((dev) => (
-              <option key={dev.serial} value={dev.serial} className={isDark ? 'bg-[#0b0e17] text-white' : 'bg-white text-slate-900'}>
-                {dev.model || dev.serial} ({dev.state})
-              </option>
-            ))
+            devices.map((dev) => {
+              const isIos = dev.platform === 'ios' || dev.serial.startsWith('airplay-');
+              return (
+                <option key={dev.serial} value={dev.serial} className={isDark ? 'bg-[#0b0e17] text-white' : 'bg-white text-slate-900'}>
+                  {isIos ? `🍏 ${dev.model || 'iPhone (AirPlay)'}` : `🤖 ${dev.model || dev.serial}`} ({dev.state || 'activo'})
+                </option>
+              );
+            })
           )}
         </select>
       </div>
@@ -98,12 +105,14 @@ export const Header: React.FC<HeaderProps> = ({
       {/* Status dot */}
       <div className={`hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] border ${
         isDark ? 'bg-white/[0.02] border-white/5 text-white/50' : 'bg-slate-50 border-slate-200 text-slate-500'
-      }`} title="Estado de la conexión ADB/Fastboot">
+      }`} title="Estado de la conexión">
         <span className={`w-1.5 h-1.5 rounded-full ${
-          currentDevice?.state === 'device' ? 'dot-connected' :
-          currentDevice?.state === 'recovery' ? 'bg-amber-400' : 'bg-rose-500'
+          currentDevice?.platform === 'ios' || currentDevice?.serial.startsWith('airplay-')
+            ? 'bg-[#00e5ff] animate-pulse'
+            : (currentDevice?.state === 'device' ? 'dot-connected' :
+               currentDevice?.state === 'recovery' ? 'bg-amber-400' : 'bg-rose-500')
         }`} />
-        {currentDevice?.state || 'offline'}
+        {currentDevice?.platform === 'ios' ? 'AirPlay 60 FPS' : (currentDevice?.state || 'offline')}
       </div>
 
       {/* Spacer */}

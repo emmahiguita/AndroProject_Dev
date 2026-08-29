@@ -116,6 +116,7 @@ export const DeviceFrame: React.FC<DeviceFrameProps> = ({
   const zoomLabel = `${Math.round(zoom.scale * 100)}%`;
   const isWifi = device.connectionType === 'Wi-Fi';
   const isDisconnected = device.state !== 'device';
+  const isIos = device.platform === 'ios' || device.serial?.startsWith('airplay-');
 
   return (
     <div ref={containerRef} className="flex flex-col flex-1 min-h-0 min-w-0 bg-[#080b11] outline-none">
@@ -137,7 +138,7 @@ export const DeviceFrame: React.FC<DeviceFrameProps> = ({
             {/* Reverse Agent Bridge Monitor Heartbeat Badge */}
             <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#00e5ff]/10 border border-[#00e5ff]/30 text-[10px] font-semibold text-[#00e5ff] shadow-sm shadow-[#00e5ff]/15">
               <Activity size={11} className="text-[#00e5ff] animate-pulse" />
-              <span className="truncate">Reverse Agent Bridge Monitor</span>
+              <span className="truncate">{isIos ? 'Apple AirPlay 2 Receiver' : 'Reverse Agent Bridge Monitor'}</span>
             </div>
           </div>
         </div>
@@ -147,11 +148,11 @@ export const DeviceFrame: React.FC<DeviceFrameProps> = ({
           {/* Device model / Connection badge */}
           <div className="hidden lg:flex items-center gap-1 px-2 py-0.5 rounded-lg bg-white/5 border border-white/10 text-[10px] text-white/70">
             <span className={`w-1.5 h-1.5 rounded-full ${isDisconnected ? 'bg-red-400' : 'bg-emerald-400 animate-pulse'}`} />
-            <span className="truncate max-w-[100px] font-medium">{device.model || 'Android'}</span>
+            <span className="truncate max-w-[110px] font-medium">{device.model || (isIos ? 'iPhone' : 'Android')}</span>
           </div>
 
           {/* Quick VisionNano Toggle */}
-          {onToggleScrcpy && (
+          {onToggleScrcpy && !isIos && (
             <button
               type="button"
               onClick={onToggleScrcpy}
@@ -196,7 +197,7 @@ export const DeviceFrame: React.FC<DeviceFrameProps> = ({
                 if (scrcpyActive && onToggleScrcpy) onToggleScrcpy();
               }}
               className="w-6 h-6 rounded-md border border-[#00e5ff]/25 bg-[#081220]/90 text-[#00e5ff]/80 hover:text-rose-300 hover:bg-rose-500/25 hover:border-rose-500/50 flex items-center justify-center transition-all active:scale-95 cursor-pointer"
-              title="Detener proyección VisionNano"
+              title="Detener proyección"
             >
               <X size={12} strokeWidth={2.5} />
             </button>
@@ -209,13 +210,25 @@ export const DeviceFrame: React.FC<DeviceFrameProps> = ({
         {/* Smartphone Bezel Enclosure */}
         <div style={{ aspectRatio: `${deviceRatio}` }} className="relative h-full max-h-full max-w-full rounded-[34px] p-2 bg-[#121620] border-[2.5px] border-white/10 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9),0_0_0_1px_rgba(255,255,255,0.06)] flex flex-col items-center justify-center">
 
-          {/* Camera Notch */}
-          <div className="absolute top-3 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-black/90 border border-white/15 shadow-md">
-            <div className="w-2.5 h-2.5 rounded-full bg-[#0a0d13] border border-white/20 flex items-center justify-center">
-              <div className="w-1 h-1 rounded-full bg-blue-500/80" />
+          {/* Camera Notch / Apple Dynamic Island */}
+          {isIos ? (
+            <div className="absolute top-3.5 left-1/2 -translate-x-1/2 z-20 flex items-center justify-between px-3 py-1 rounded-full bg-black border border-white/20 shadow-lg min-w-[90px]">
+              <div className="w-2 h-2 rounded-full bg-[#0a0d13] border border-white/30 flex items-center justify-center">
+                <div className="w-1 h-1 rounded-full bg-blue-500" />
+              </div>
+              <div className="flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="text-[8px] font-bold text-white/80">AirPlay</span>
+              </div>
             </div>
-            {scrcpyActive && <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />}
-          </div>
+          ) : (
+            <div className="absolute top-3 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-black/90 border border-white/15 shadow-md">
+              <div className="w-2.5 h-2.5 rounded-full bg-[#0a0d13] border border-white/20 flex items-center justify-center">
+                <div className="w-1 h-1 rounded-full bg-blue-500/80" />
+              </div>
+              {scrcpyActive && <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />}
+            </div>
+          )}
 
           {/* Hardware Accelerated Interactive Projection Canvas */}
           <ProjectionCanvas
@@ -238,7 +251,7 @@ export const DeviceFrame: React.FC<DeviceFrameProps> = ({
             type="text"
             value={textInput}
             onChange={(e) => setTextInput(e.target.value)}
-            placeholder="Escribir texto en el dispositivo Android..."
+            placeholder={isIos ? "Escribir texto en el dispositivo Apple / AirPlay..." : "Escribir texto en el dispositivo Android..."}
             className="w-full pl-8 pr-3 py-1.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-xs placeholder:text-white/25 focus:outline-none focus:border-[#22c97d]/50"
           />
         </div>

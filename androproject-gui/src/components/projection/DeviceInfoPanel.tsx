@@ -45,6 +45,7 @@ interface DeviceInfoPanelProps {
 }
 
 export const DeviceInfoPanel: React.FC<DeviceInfoPanelProps> = ({
+  device,
   dark,
   scrcpyActive,
   onToggleScrcpy,
@@ -95,6 +96,8 @@ export const DeviceInfoPanel: React.FC<DeviceInfoPanelProps> = ({
     return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
   };
 
+  const isIos = device.platform === 'ios' || device.serial?.startsWith('airplay-');
+
   return (
     <div className="p-3 space-y-3 relative">
       {/* Toast notification overlay */}
@@ -107,36 +110,86 @@ export const DeviceInfoPanel: React.FC<DeviceInfoPanelProps> = ({
         </div>
       )}
 
-      {/* ═══ Motor de Transmisión Nativo VisionNano 60 FPS ═══ */}
-      <div className={`rounded-xl border p-3 ${cardBg} ${cardBorder} ${cardShadow} space-y-3`}>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-1.5">
-            <Sparkles size={14} className="text-[#22c97d]" />
-            <h3 className={`text-xs font-bold ${dark ? 'text-white' : 'text-slate-900'}`}>
-              VisionNano Engine (Direct3D11 60 FPS)
-            </h3>
-          </div>
-          {scrcpyActive && (
-            <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[9px] font-bold text-emerald-400 shrink-0">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> VISIONNANO ACTIVO
+      {/* ═══ MODO APPLE AIRPLAY 2 STUDIO (Si el dispositivo es iOS) ═══ */}
+      {isIos ? (
+        <div className={`rounded-xl border p-3.5 ${cardBg} ${cardBorder} ${cardShadow} space-y-3`}>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="text-base">🍏</span>
+              <div>
+                <h3 className={`text-xs font-bold ${dark ? 'text-white' : 'text-slate-900'}`}>
+                  Receptor Apple AirPlay 2
+                </h3>
+                <p className="text-[10px] text-white/50">Screen Mirroring H.264 + Audio Sincronizado</p>
+              </div>
+            </div>
+            <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#00e5ff]/10 border border-[#00e5ff]/30 text-[9px] font-bold text-[#00e5ff] shrink-0">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#00e5ff] animate-pulse" /> AIRPLAY 60 FPS
             </span>
-          )}
-        </div>
+          </div>
 
-        {/* Action Button */}
-        <button
-          type="button"
-          onClick={() => onToggleScrcpy()}
-          disabled={isBusy}
-          className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-bold transition-all shadow-md ${
-            scrcpyActive
-              ? 'bg-red-500/15 text-red-400 hover:bg-red-500/25 border border-red-500/30'
-              : 'bg-[#1bae6e] hover:bg-[#22c97d] text-white shadow-[#1bae6e]/20 active:scale-[0.98]'
-          }`}
-        >
-          {scrcpyActive ? <Square size={13} fill="currentColor" /> : <Play size={13} fill="currentColor" />}
-          <span>{scrcpyActive ? 'Detener VisionNano 60 FPS' : 'Lanzar VisionNano 60 FPS (Direct3D11)'}</span>
-        </button>
+          <div className="p-2.5 rounded-xl bg-white/[0.02] border border-white/5 space-y-2">
+            <div className="flex items-center justify-between text-[11px]">
+              <span className="text-white/60 font-medium">Nombre en Red (Bonjour):</span>
+              <span className="font-bold text-white font-mono">AndroProject [PC]</span>
+            </div>
+            <div className="flex items-center justify-between text-[11px]">
+              <span className="text-white/60 font-medium">Resolución de Flujo:</span>
+              <span className="font-bold text-white font-mono">{device.resolution || '1179 × 2556'}</span>
+            </div>
+            <div className="flex items-center justify-between text-[11px]">
+              <span className="text-white/60 font-medium">Velocidad de Cuadros:</span>
+              <span className="font-bold text-emerald-400 font-mono">60 FPS (GPU Direct3D)</span>
+            </div>
+            <div className="flex items-center justify-between text-[11px]">
+              <span className="text-white/60 font-medium">Audio AirPlay:</span>
+              <span className="font-bold text-emerald-400">Activado (AAC-ELD)</span>
+            </div>
+          </div>
+
+          <div className="p-3 rounded-xl bg-[#00e5ff]/5 border border-[#00e5ff]/20 text-[11px] text-white/80 space-y-1.5">
+            <div className="font-bold text-[#00e5ff] flex items-center gap-1">
+              <span>📱 Cómo conectar tu iPhone / iPad:</span>
+            </div>
+            <ol className="list-decimal list-inside space-y-1 text-[10px] text-white/70">
+              <li>Abre el <strong>Centro de Control</strong> deslizando hacia abajo.</li>
+              <li>Toca el icono de <strong>Duplicar Pantalla</strong>.</li>
+              <li>Selecciona <strong>AndroProject [PC]</strong> de la lista.</li>
+              <li>La pantalla y el audio se proyectarán en vivo en este marco.</li>
+            </ol>
+          </div>
+        </div>
+      ) : (
+        /* ═══ MODO ANDROID VISIONNANO 60 FPS ENGINE ═══ */
+        <div className={`rounded-xl border p-3 ${cardBg} ${cardBorder} ${cardShadow} space-y-3`}>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1.5">
+              <Sparkles size={14} className="text-[#22c97d]" />
+              <h3 className={`text-xs font-bold ${dark ? 'text-white' : 'text-slate-900'}`}>
+                VisionNano Engine (Direct3D11 60 FPS)
+              </h3>
+            </div>
+            {scrcpyActive && (
+              <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[9px] font-bold text-emerald-400 shrink-0">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> VISIONNANO ACTIVO
+              </span>
+            )}
+          </div>
+
+          {/* Action Button */}
+          <button
+            type="button"
+            onClick={() => onToggleScrcpy()}
+            disabled={isBusy}
+            className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-bold transition-all shadow-md ${
+              scrcpyActive
+                ? 'bg-red-500/15 text-red-400 hover:bg-red-500/25 border border-red-500/30'
+                : 'bg-[#1bae6e] hover:bg-[#22c97d] text-white shadow-[#1bae6e]/20 active:scale-[0.98]'
+            }`}
+          >
+            {scrcpyActive ? <Square size={13} fill="currentColor" /> : <Play size={13} fill="currentColor" />}
+            <span>{scrcpyActive ? 'Detener VisionNano 60 FPS' : 'Lanzar VisionNano 60 FPS (Direct3D11)'}</span>
+          </button>
 
         {/* Streaming Controls Configuration */}
         <div className="grid grid-cols-3 gap-2 pt-1">
@@ -256,6 +309,7 @@ export const DeviceInfoPanel: React.FC<DeviceInfoPanelProps> = ({
           )}
         </div>
       </div>
+      )}
 
       {/* ═══ Grabador de Pantalla HD en Segundo Plano ═══ */}
       <div className={`rounded-xl border p-3 ${cardBg} ${cardBorder} ${cardShadow} space-y-2`}>

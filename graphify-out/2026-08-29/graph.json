@@ -2195,7 +2195,7 @@
       "label": "checkOrStopScreen()",
       "file_type": "code",
       "source_file": "androproject-gui/src/app/api/actions/stream.ts",
-      "source_location": "L53",
+      "source_location": "L55",
       "_origin": "ast",
       "id": "androproject_gui_src_app_api_actions_stream_checkorstopscreen",
       "community": 3,
@@ -2205,7 +2205,7 @@
       "label": "screenshot()",
       "file_type": "code",
       "source_file": "androproject-gui/src/app/api/actions/stream.ts",
-      "source_location": "L77",
+      "source_location": "L79",
       "_origin": "ast",
       "id": "androproject_gui_src_app_api_actions_stream_screenshot",
       "community": 3,
@@ -2215,7 +2215,7 @@
       "label": "startRecord()",
       "file_type": "code",
       "source_file": "androproject-gui/src/app/api/actions/stream.ts",
-      "source_location": "L123",
+      "source_location": "L125",
       "_origin": "ast",
       "id": "androproject_gui_src_app_api_actions_stream_startrecord",
       "community": 3,
@@ -2225,7 +2225,7 @@
       "label": "stopRecord()",
       "file_type": "code",
       "source_file": "androproject-gui/src/app/api/actions/stream.ts",
-      "source_location": "L171",
+      "source_location": "L173",
       "_origin": "ast",
       "id": "androproject_gui_src_app_api_actions_stream_stoprecord",
       "community": 3,
@@ -2310,6 +2310,36 @@
       "id": "androproject_gui_src_app_api_actions_tweaks_setshadestyle",
       "community": 1,
       "norm_label": "setshadestyle()"
+    },
+    {
+      "label": "route.ts",
+      "file_type": "code",
+      "source_file": "androproject-gui/src/app/api/airplay/route.ts",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "androproject_gui_src_app_api_airplay_route",
+      "community": 62,
+      "norm_label": "route.ts"
+    },
+    {
+      "label": "GET()",
+      "file_type": "code",
+      "source_file": "androproject-gui/src/app/api/airplay/route.ts",
+      "source_location": "L9",
+      "_origin": "ast",
+      "id": "androproject_gui_src_app_api_airplay_route_get",
+      "community": 62,
+      "norm_label": "get()"
+    },
+    {
+      "label": "POST()",
+      "file_type": "code",
+      "source_file": "androproject-gui/src/app/api/airplay/route.ts",
+      "source_location": "L22",
+      "_origin": "ast",
+      "id": "androproject_gui_src_app_api_airplay_route_post",
+      "community": 62,
+      "norm_label": "post()"
     },
     {
       "label": "route.ts",
@@ -2498,7 +2528,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "androproject_gui_src_app_api_device_image_route",
-      "community": 65,
+      "community": 5,
       "norm_label": "route.ts"
     },
     {
@@ -2508,7 +2538,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "androproject_gui_src_app_api_device_image_route_lastgoodframe",
-      "community": 65,
+      "community": 5,
       "norm_label": "lastgoodframe"
     },
     {
@@ -2518,7 +2548,7 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "androproject_gui_src_app_api_device_image_route_lastgoodframeid",
-      "community": 65,
+      "community": 5,
       "norm_label": "lastgoodframeid"
     },
     {
@@ -2528,7 +2558,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "androproject_gui_src_app_api_device_image_route_lastgoodts",
-      "community": 65,
+      "community": 5,
       "norm_label": "lastgoodts"
     },
     {
@@ -2538,7 +2568,7 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "androproject_gui_src_app_api_device_image_route_inflightworkers",
-      "community": 65,
+      "community": 5,
       "norm_label": "inflightworkers"
     },
     {
@@ -2548,7 +2578,7 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "androproject_gui_src_app_api_device_image_route_placeholderframe",
-      "community": 65,
+      "community": 5,
       "norm_label": "placeholderframe()"
     },
     {
@@ -2558,7 +2588,7 @@
       "source_location": "L38",
       "_origin": "ast",
       "id": "androproject_gui_src_app_api_device_image_route_triggercapture",
-      "community": 65,
+      "community": 5,
       "norm_label": "triggercapture()"
     },
     {
@@ -2568,7 +2598,7 @@
       "source_location": "L64",
       "_origin": "ast",
       "id": "androproject_gui_src_app_api_device_image_route_get",
-      "community": 65,
+      "community": 5,
       "norm_label": "get()"
     },
     {
@@ -2665,7 +2695,7 @@
       "label": "detector",
       "file_type": "code",
       "source_file": "androproject-gui/src/app/api/device/route.ts",
-      "source_location": "L15",
+      "source_location": "L16",
       "_origin": "ast",
       "id": "androproject_gui_src_app_api_device_route_detector",
       "community": 5,
@@ -2675,7 +2705,7 @@
       "label": "fetcher",
       "file_type": "code",
       "source_file": "androproject-gui/src/app/api/device/route.ts",
-      "source_location": "L16",
+      "source_location": "L17",
       "_origin": "ast",
       "id": "androproject_gui_src_app_api_device_route_fetcher",
       "community": 5,
@@ -2685,7 +2715,7 @@
       "label": "GET()",
       "file_type": "code",
       "source_file": "androproject-gui/src/app/api/device/route.ts",
-      "source_location": "L18",
+      "source_location": "L19",
       "_origin": "ast",
       "id": "androproject_gui_src_app_api_device_route_get",
       "community": 5,
@@ -2695,7 +2725,7 @@
       "label": "selectTarget()",
       "file_type": "code",
       "source_file": "androproject-gui/src/app/api/device/route.ts",
-      "source_location": "L80",
+      "source_location": "L117",
       "_origin": "ast",
       "id": "androproject_gui_src_app_api_device_route_selecttarget",
       "community": 5,
@@ -2705,7 +2735,7 @@
       "label": "buildOfflineDevice()",
       "file_type": "code",
       "source_file": "androproject-gui/src/app/api/device/route.ts",
-      "source_location": "L89",
+      "source_location": "L126",
       "_origin": "ast",
       "id": "androproject_gui_src_app_api_device_route_buildofflinedevice",
       "community": 5,
@@ -2715,7 +2745,7 @@
       "label": "detectHardwareFallback()",
       "file_type": "code",
       "source_file": "androproject-gui/src/app/api/device/route.ts",
-      "source_location": "L115",
+      "source_location": "L152",
       "_origin": "ast",
       "id": "androproject_gui_src_app_api_device_route_detecthardwarefallback",
       "community": 5,
@@ -2818,7 +2848,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "androproject_gui_src_app_api_install_apk_route",
-      "community": 3,
+      "community": 73,
       "norm_label": "route.ts"
     },
     {
@@ -2828,7 +2858,7 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "androproject_gui_src_app_api_install_apk_route_execfileasync",
-      "community": 3,
+      "community": 73,
       "norm_label": "execfileasync"
     },
     {
@@ -2838,7 +2868,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "androproject_gui_src_app_api_install_apk_route_geterrormessage",
-      "community": 3,
+      "community": 73,
       "norm_label": "geterrormessage()"
     },
     {
@@ -2848,7 +2878,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "androproject_gui_src_app_api_install_apk_route_post",
-      "community": 3,
+      "community": 73,
       "norm_label": "post()"
     },
     {
@@ -3018,7 +3048,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "androproject_gui_src_app_api_upload_file_route",
-      "community": 3,
+      "community": 74,
       "norm_label": "route.ts"
     },
     {
@@ -3028,7 +3058,7 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "androproject_gui_src_app_api_upload_file_route_execfileasync",
-      "community": 3,
+      "community": 74,
       "norm_label": "execfileasync"
     },
     {
@@ -3038,7 +3068,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "androproject_gui_src_app_api_upload_file_route_geterrormessage",
-      "community": 3,
+      "community": 74,
       "norm_label": "geterrormessage()"
     },
     {
@@ -3048,7 +3078,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "androproject_gui_src_app_api_upload_file_route_post",
-      "community": 3,
+      "community": 74,
       "norm_label": "post()"
     },
     {
@@ -3308,7 +3338,7 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "androproject_gui_src_components_viewshell_viewshellprops",
-      "community": 51,
+      "community": 54,
       "norm_label": "viewshellprops"
     },
     {
@@ -3535,7 +3565,7 @@
       "label": "ToggleRow()",
       "file_type": "code",
       "source_file": "androproject-gui/src/components/projection/DeviceInfoPanel.tsx",
-      "source_location": "L420",
+      "source_location": "L483",
       "_origin": "ast",
       "id": "androproject_gui_src_components_projection_deviceinfopanel_togglerow",
       "community": 59,
@@ -3545,7 +3575,7 @@
       "label": "ToolButton()",
       "file_type": "code",
       "source_file": "androproject-gui/src/components/projection/DeviceInfoPanel.tsx",
-      "source_location": "L468",
+      "source_location": "L531",
       "_origin": "ast",
       "id": "androproject_gui_src_components_projection_deviceinfopanel_toolbutton",
       "community": 59,
@@ -4198,7 +4228,7 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "androproject_gui_src_features_archivosview_archivosviewprops",
-      "community": 54,
+      "community": 66,
       "norm_label": "archivosviewprops"
     },
     {
@@ -4278,7 +4308,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "androproject_gui_src_features_curarview_curarviewprops",
-      "community": 54,
+      "community": 66,
       "norm_label": "curarviewprops"
     },
     {
@@ -4328,7 +4358,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "androproject_gui_src_features_dashboardview_dashboardviewprops",
-      "community": 51,
+      "community": 54,
       "norm_label": "dashboardviewprops"
     },
     {
@@ -4428,7 +4458,7 @@
       "source_location": "L36",
       "_origin": "ast",
       "id": "androproject_gui_src_features_flasherview_flasherviewprops",
-      "community": 54,
+      "community": 66,
       "norm_label": "flasherviewprops"
     },
     {
@@ -4458,7 +4488,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "androproject_gui_src_features_optimizerview_optimizerviewprops",
-      "community": 54,
+      "community": 66,
       "norm_label": "optimizerviewprops"
     },
     {
@@ -4528,7 +4558,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "androproject_gui_src_features_toolsview_toolsviewprops",
-      "community": 54,
+      "community": 66,
       "norm_label": "toolsviewprops"
     },
     {
@@ -4555,7 +4585,7 @@
       "label": "DeviceData",
       "file_type": "code",
       "source_file": "androproject-gui/src/features/types.ts",
-      "source_location": "L3",
+      "source_location": "L1",
       "_origin": "ast",
       "id": "androproject_gui_src_features_types_devicedata",
       "community": 51,
@@ -4565,47 +4595,57 @@
       "label": "DeviceInfo",
       "file_type": "code",
       "source_file": "androproject-gui/src/features/types.ts",
-      "source_location": "L30",
+      "source_location": "L36",
       "_origin": "ast",
       "id": "androproject_gui_src_features_types_deviceinfo",
-      "community": 54,
+      "community": 66,
       "norm_label": "deviceinfo"
+    },
+    {
+      "label": "AirPlayServerStatus",
+      "file_type": "code",
+      "source_file": "androproject-gui/src/features/types.ts",
+      "source_location": "L38",
+      "_origin": "ast",
+      "id": "androproject_gui_src_features_types_airplayserverstatus",
+      "community": 62,
+      "norm_label": "airplayserverstatus"
     },
     {
       "label": "SystemLogs",
       "file_type": "code",
       "source_file": "androproject-gui/src/features/types.ts",
-      "source_location": "L32",
+      "source_location": "L55",
       "_origin": "ast",
       "id": "androproject_gui_src_features_types_systemlogs",
-      "community": 51,
+      "community": 54,
       "norm_label": "systemlogs"
     },
     {
       "label": "NavSection",
       "file_type": "code",
       "source_file": "androproject-gui/src/features/types.ts",
-      "source_location": "L39",
+      "source_location": "L62",
       "_origin": "ast",
       "id": "androproject_gui_src_features_types_navsection",
-      "community": 51,
+      "community": 54,
       "norm_label": "navsection"
     },
     {
       "label": "QuickActionItem",
       "file_type": "code",
       "source_file": "androproject-gui/src/features/types.ts",
-      "source_location": "L41",
+      "source_location": "L64",
       "_origin": "ast",
       "id": "androproject_gui_src_features_types_quickactionitem",
-      "community": 51,
+      "community": 4,
       "norm_label": "quickactionitem"
     },
     {
       "label": "AppInfo",
       "file_type": "code",
       "source_file": "androproject-gui/src/features/types.ts",
-      "source_location": "L48",
+      "source_location": "L71",
       "_origin": "ast",
       "id": "androproject_gui_src_features_types_appinfo",
       "community": 51,
@@ -4615,17 +4655,17 @@
       "label": "AppPackage",
       "file_type": "code",
       "source_file": "androproject-gui/src/features/types.ts",
-      "source_location": "L66",
+      "source_location": "L89",
       "_origin": "ast",
       "id": "androproject_gui_src_features_types_apppackage",
-      "community": 51,
+      "community": 4,
       "norm_label": "apppackage"
     },
     {
       "label": "DiagnosticsStorage",
       "file_type": "code",
       "source_file": "androproject-gui/src/features/types.ts",
-      "source_location": "L68",
+      "source_location": "L91",
       "_origin": "ast",
       "id": "androproject_gui_src_features_types_diagnosticsstorage",
       "community": 51,
@@ -4635,7 +4675,7 @@
       "label": "DiagnosticsData",
       "file_type": "code",
       "source_file": "androproject-gui/src/features/types.ts",
-      "source_location": "L75",
+      "source_location": "L98",
       "_origin": "ast",
       "id": "androproject_gui_src_features_types_diagnosticsdata",
       "community": 51,
@@ -4645,7 +4685,7 @@
       "label": "AnimScales",
       "file_type": "code",
       "source_file": "androproject-gui/src/features/types.ts",
-      "source_location": "L89",
+      "source_location": "L112",
       "_origin": "ast",
       "id": "androproject_gui_src_features_types_animscales",
       "community": 51,
@@ -4655,7 +4695,7 @@
       "label": "GpuTweaks",
       "file_type": "code",
       "source_file": "androproject-gui/src/features/types.ts",
-      "source_location": "L95",
+      "source_location": "L118",
       "_origin": "ast",
       "id": "androproject_gui_src_features_types_gputweaks",
       "community": 51,
@@ -4665,7 +4705,7 @@
       "label": "BluetoothInfo",
       "file_type": "code",
       "source_file": "androproject-gui/src/features/types.ts",
-      "source_location": "L101",
+      "source_location": "L124",
       "_origin": "ast",
       "id": "androproject_gui_src_features_types_bluetoothinfo",
       "community": 51,
@@ -4675,7 +4715,7 @@
       "label": "OptimizerSettings",
       "file_type": "code",
       "source_file": "androproject-gui/src/features/types.ts",
-      "source_location": "L109",
+      "source_location": "L132",
       "_origin": "ast",
       "id": "androproject_gui_src_features_types_optimizersettings",
       "community": 51,
@@ -4685,7 +4725,7 @@
       "label": "DeviceListItem",
       "file_type": "code",
       "source_file": "androproject-gui/src/features/types.ts",
-      "source_location": "L138",
+      "source_location": "L161",
       "_origin": "ast",
       "id": "androproject_gui_src_features_types_devicelistitem",
       "community": 51,
@@ -4782,6 +4822,26 @@
       "norm_label": "useadbconnection()"
     },
     {
+      "label": "useAirPlayServer.ts",
+      "file_type": "code",
+      "source_file": "androproject-gui/src/hooks/useAirPlayServer.ts",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "androproject_gui_src_hooks_useairplayserver",
+      "community": 51,
+      "norm_label": "useairplayserver.ts"
+    },
+    {
+      "label": "useAirPlayServer()",
+      "file_type": "code",
+      "source_file": "androproject-gui/src/hooks/useAirPlayServer.ts",
+      "source_location": "L10",
+      "_origin": "ast",
+      "id": "androproject_gui_src_hooks_useairplayserver_useairplayserver",
+      "community": 51,
+      "norm_label": "useairplayserver()"
+    },
+    {
       "label": "useDevicePolling.ts",
       "file_type": "code",
       "source_file": "androproject-gui/src/hooks/useDevicePolling.ts",
@@ -4798,7 +4858,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "androproject_gui_src_hooks_usedevicepolling_usedevicepollingresult",
-      "community": 54,
+      "community": 66,
       "norm_label": "usedevicepollingresult"
     },
     {
@@ -4915,7 +4975,7 @@
       "label": "UseProjectionReturn",
       "file_type": "code",
       "source_file": "androproject-gui/src/hooks/useProjection.ts",
-      "source_location": "L22",
+      "source_location": "L23",
       "_origin": "ast",
       "id": "androproject_gui_src_hooks_useprojection_useprojectionreturn",
       "community": 59,
@@ -4925,7 +4985,7 @@
       "label": "DEFAULT_OPTIONS",
       "file_type": "code",
       "source_file": "androproject-gui/src/hooks/useProjection.ts",
-      "source_location": "L60",
+      "source_location": "L61",
       "_origin": "ast",
       "id": "androproject_gui_src_hooks_useprojection_default_options",
       "community": 59,
@@ -4935,7 +4995,7 @@
       "label": "useProjection()",
       "file_type": "code",
       "source_file": "androproject-gui/src/hooks/useProjection.ts",
-      "source_location": "L73",
+      "source_location": "L75",
       "_origin": "ast",
       "id": "androproject_gui_src_hooks_useprojection_useprojection",
       "community": 59,
@@ -4945,9 +5005,9 @@
       "label": "NOTE: prevDeviceSerialRef is intentionally updated ONLY inside the auto-project",
       "file_type": "rationale",
       "source_file": "androproject-gui/src/hooks/useProjection.ts",
-      "source_location": "L137",
+      "source_location": "L139",
       "_origin": "ast",
-      "id": "androproject_gui_src_hooks_useprojection_rationale_137",
+      "id": "androproject_gui_src_hooks_useprojection_rationale_139",
       "community": 59,
       "norm_label": "note: prevdeviceserialref is intentionally updated only inside the auto-project"
     },
@@ -5068,7 +5128,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "androproject_gui_src_hooks_usesystemlogs",
-      "community": 51,
+      "community": 54,
       "norm_label": "usesystemlogs.ts"
     },
     {
@@ -5078,7 +5138,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "androproject_gui_src_hooks_usesystemlogs_systemlogtype",
-      "community": 51,
+      "community": 54,
       "norm_label": "systemlogtype"
     },
     {
@@ -5088,7 +5148,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "androproject_gui_src_hooks_usesystemlogs_usesystemlogsresult",
-      "community": 51,
+      "community": 54,
       "norm_label": "usesystemlogsresult"
     },
     {
@@ -5098,7 +5158,7 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "androproject_gui_src_hooks_usesystemlogs_createsystemlogentry",
-      "community": 51,
+      "community": 54,
       "norm_label": "createsystemlogentry()"
     },
     {
@@ -5108,7 +5168,7 @@
       "source_location": "L28",
       "_origin": "ast",
       "id": "androproject_gui_src_hooks_usesystemlogs_usesystemlogs",
-      "community": 51,
+      "community": 54,
       "norm_label": "usesystemlogs()"
     },
     {
@@ -5188,7 +5248,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_discovery",
-      "community": 3,
+      "community": 69,
       "norm_label": "discovery.ts"
     },
     {
@@ -5198,7 +5258,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_discovery_findwingetscrcpy",
-      "community": 3,
+      "community": 69,
       "norm_label": "findwingetscrcpy()"
     },
     {
@@ -5208,7 +5268,7 @@
       "source_location": "L28",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_discovery_discoverandroprojectbin",
-      "community": 3,
+      "community": 69,
       "norm_label": "discoverandroprojectbin()"
     },
     {
@@ -5238,7 +5298,7 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_locks_execasync",
-      "community": 3,
+      "community": 72,
       "norm_label": "execasync"
     },
     {
@@ -5248,7 +5308,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_locks_getlockfile",
-      "community": 3,
+      "community": 65,
       "norm_label": "getlockfile()"
     },
     {
@@ -5308,7 +5368,7 @@
       "source_location": "L54",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_locks_killlockedprocess",
-      "community": 3,
+      "community": 72,
       "norm_label": "killlockedprocess()"
     },
     {
@@ -5328,7 +5388,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_paths",
-      "community": 3,
+      "community": 69,
       "norm_label": "paths.ts"
     },
     {
@@ -5338,7 +5398,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_paths_adb_bundled",
-      "community": 3,
+      "community": 69,
       "norm_label": "adb_bundled"
     },
     {
@@ -5348,7 +5408,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_paths_adb_sdk",
-      "community": 3,
+      "community": 69,
       "norm_label": "adb_sdk"
     },
     {
@@ -5358,7 +5418,7 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_paths_adb_sdk_alt",
-      "community": 3,
+      "community": 69,
       "norm_label": "adb_sdk_alt"
     },
     {
@@ -5368,7 +5428,7 @@
       "source_location": "L34",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_paths_fastboot_bundled",
-      "community": 3,
+      "community": 69,
       "norm_label": "fastboot_bundled"
     },
     {
@@ -5378,7 +5438,7 @@
       "source_location": "L35",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_paths_fastboot_sdk",
-      "community": 3,
+      "community": 69,
       "norm_label": "fastboot_sdk"
     },
     {
@@ -5388,7 +5448,7 @@
       "source_location": "L39",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_paths_fastboot_sdk_alt",
-      "community": 3,
+      "community": 69,
       "norm_label": "fastboot_sdk_alt"
     },
     {
@@ -5398,7 +5458,7 @@
       "source_location": "L50",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_paths_debug_log",
-      "community": 3,
+      "community": 69,
       "norm_label": "debug_log"
     },
     {
@@ -5408,7 +5468,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_adb_executor",
-      "community": 69,
+      "community": 5,
       "norm_label": "adb-executor.ts"
     },
     {
@@ -5418,7 +5478,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_adb_executor_execasync",
-      "community": 69,
+      "community": 5,
       "norm_label": "execasync"
     },
     {
@@ -5428,7 +5488,7 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_adb_executor_adbexecresult",
-      "community": 69,
+      "community": 5,
       "norm_label": "adbexecresult"
     },
     {
@@ -5438,7 +5498,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_adb_executor_iadbexecutor",
-      "community": 62,
+      "community": 5,
       "norm_label": "iadbexecutor"
     },
     {
@@ -5458,7 +5518,7 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_adb_executor_iadbexecutor_execfor",
-      "community": 62,
+      "community": 5,
       "norm_label": ".execfor()"
     },
     {
@@ -5468,7 +5528,7 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_adb_executor_iadbexecutor_shell",
-      "community": 62,
+      "community": 5,
       "norm_label": ".shell()"
     },
     {
@@ -5478,7 +5538,7 @@
       "source_location": "L28",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_adb_executor_iadbexecutor_execout",
-      "community": 62,
+      "community": 5,
       "norm_label": ".execout()"
     },
     {
@@ -5488,7 +5548,7 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_adb_executor_adbexecutor",
-      "community": 69,
+      "community": 5,
       "norm_label": "adbexecutor"
     },
     {
@@ -5498,7 +5558,7 @@
       "source_location": "L34",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_adb_executor_adbexecutor_exec",
-      "community": 69,
+      "community": 5,
       "norm_label": ".exec()"
     },
     {
@@ -5508,7 +5568,7 @@
       "source_location": "L46",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_adb_executor_adbexecutor_execfor",
-      "community": 69,
+      "community": 5,
       "norm_label": ".execfor()"
     },
     {
@@ -5518,7 +5578,7 @@
       "source_location": "L51",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_adb_executor_adbexecutor_shell",
-      "community": 69,
+      "community": 5,
       "norm_label": ".shell()"
     },
     {
@@ -5528,7 +5588,7 @@
       "source_location": "L57",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_adb_executor_adbexecutor_execout",
-      "community": 69,
+      "community": 5,
       "norm_label": ".execout()"
     },
     {
@@ -5538,8 +5598,238 @@
       "source_location": "L74",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_adb_executor_adb",
-      "community": 65,
+      "community": 5,
       "norm_label": "adb"
+    },
+    {
+      "label": "airplay-engine.ts",
+      "file_type": "code",
+      "source_file": "androproject-gui/src/lib/services/airplay-engine.ts",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "androproject_gui_src_lib_services_airplay_engine",
+      "community": 62,
+      "norm_label": "airplay-engine.ts"
+    },
+    {
+      "label": "AirPlayServerOptions",
+      "file_type": "code",
+      "source_file": "androproject-gui/src/lib/services/airplay-engine.ts",
+      "source_location": "L15",
+      "_origin": "ast",
+      "id": "androproject_gui_src_lib_services_airplay_engine_airplayserveroptions",
+      "community": 60,
+      "norm_label": "airplayserveroptions"
+    },
+    {
+      "label": "IAirPlayReceiverEngine",
+      "file_type": "code",
+      "source_file": "androproject-gui/src/lib/services/airplay-engine.ts",
+      "source_location": "L24",
+      "_origin": "ast",
+      "id": "androproject_gui_src_lib_services_airplay_engine_iairplayreceiverengine",
+      "community": 62,
+      "norm_label": "iairplayreceiverengine"
+    },
+    {
+      "label": ".start()",
+      "file_type": "code",
+      "source_file": "androproject-gui/src/lib/services/airplay-engine.ts",
+      "source_location": "L25",
+      "_origin": "ast",
+      "id": "androproject_gui_src_lib_services_airplay_engine_iairplayreceiverengine_start",
+      "community": 62,
+      "norm_label": ".start()"
+    },
+    {
+      "label": ".stop()",
+      "file_type": "code",
+      "source_file": "androproject-gui/src/lib/services/airplay-engine.ts",
+      "source_location": "L26",
+      "_origin": "ast",
+      "id": "androproject_gui_src_lib_services_airplay_engine_iairplayreceiverengine_stop",
+      "community": 62,
+      "norm_label": ".stop()"
+    },
+    {
+      "label": ".getStatus()",
+      "file_type": "code",
+      "source_file": "androproject-gui/src/lib/services/airplay-engine.ts",
+      "source_location": "L27",
+      "_origin": "ast",
+      "id": "androproject_gui_src_lib_services_airplay_engine_iairplayreceiverengine_getstatus",
+      "community": 62,
+      "norm_label": ".getstatus()"
+    },
+    {
+      "label": ".getConnectedDevices()",
+      "file_type": "code",
+      "source_file": "androproject-gui/src/lib/services/airplay-engine.ts",
+      "source_location": "L28",
+      "_origin": "ast",
+      "id": "androproject_gui_src_lib_services_airplay_engine_iairplayreceiverengine_getconnecteddevices",
+      "community": 62,
+      "norm_label": ".getconnecteddevices()"
+    },
+    {
+      "label": ".setServerName()",
+      "file_type": "code",
+      "source_file": "androproject-gui/src/lib/services/airplay-engine.ts",
+      "source_location": "L29",
+      "_origin": "ast",
+      "id": "androproject_gui_src_lib_services_airplay_engine_iairplayreceiverengine_setservername",
+      "community": 62,
+      "norm_label": ".setservername()"
+    },
+    {
+      "label": ".setPin()",
+      "file_type": "code",
+      "source_file": "androproject-gui/src/lib/services/airplay-engine.ts",
+      "source_location": "L30",
+      "_origin": "ast",
+      "id": "androproject_gui_src_lib_services_airplay_engine_iairplayreceiverengine_setpin",
+      "community": 62,
+      "norm_label": ".setpin()"
+    },
+    {
+      "label": "DEFAULT_AIRPLAY_OPTIONS",
+      "file_type": "code",
+      "source_file": "androproject-gui/src/lib/services/airplay-engine.ts",
+      "source_location": "L33",
+      "_origin": "ast",
+      "id": "androproject_gui_src_lib_services_airplay_engine_default_airplay_options",
+      "community": 62,
+      "norm_label": "default_airplay_options"
+    },
+    {
+      "label": "AirPlayReceiverEngine",
+      "file_type": "code",
+      "source_file": "androproject-gui/src/lib/services/airplay-engine.ts",
+      "source_location": "L44",
+      "_origin": "ast",
+      "id": "androproject_gui_src_lib_services_airplay_engine_airplayreceiverengine",
+      "community": 65,
+      "norm_label": "airplayreceiverengine"
+    },
+    {
+      "label": ".constructor()",
+      "file_type": "code",
+      "source_file": "androproject-gui/src/lib/services/airplay-engine.ts",
+      "source_location": "L58",
+      "_origin": "ast",
+      "id": "androproject_gui_src_lib_services_airplay_engine_airplayreceiverengine_constructor",
+      "community": 65,
+      "norm_label": ".constructor()"
+    },
+    {
+      "label": ".checkInitialState()",
+      "file_type": "code",
+      "source_file": "androproject-gui/src/lib/services/airplay-engine.ts",
+      "source_location": "L62",
+      "_origin": "ast",
+      "id": "androproject_gui_src_lib_services_airplay_engine_airplayreceiverengine_checkinitialstate",
+      "community": 65,
+      "norm_label": ".checkinitialstate()"
+    },
+    {
+      "label": ".start()",
+      "file_type": "code",
+      "source_file": "androproject-gui/src/lib/services/airplay-engine.ts",
+      "source_location": "L72",
+      "_origin": "ast",
+      "id": "androproject_gui_src_lib_services_airplay_engine_airplayreceiverengine_start",
+      "community": 65,
+      "norm_label": ".start()"
+    },
+    {
+      "label": ".stop()",
+      "file_type": "code",
+      "source_file": "androproject-gui/src/lib/services/airplay-engine.ts",
+      "source_location": "L104",
+      "_origin": "ast",
+      "id": "androproject_gui_src_lib_services_airplay_engine_airplayreceiverengine_stop",
+      "community": 65,
+      "norm_label": ".stop()"
+    },
+    {
+      "label": ".getStatus()",
+      "file_type": "code",
+      "source_file": "androproject-gui/src/lib/services/airplay-engine.ts",
+      "source_location": "L124",
+      "_origin": "ast",
+      "id": "androproject_gui_src_lib_services_airplay_engine_airplayreceiverengine_getstatus",
+      "community": 65,
+      "norm_label": ".getstatus()"
+    },
+    {
+      "label": ".registerClient()",
+      "file_type": "code",
+      "source_file": "androproject-gui/src/lib/services/airplay-engine.ts",
+      "source_location": "L151",
+      "_origin": "ast",
+      "id": "androproject_gui_src_lib_services_airplay_engine_airplayreceiverengine_registerclient",
+      "community": 65,
+      "norm_label": ".registerclient()"
+    },
+    {
+      "label": ".unregisterClient()",
+      "file_type": "code",
+      "source_file": "androproject-gui/src/lib/services/airplay-engine.ts",
+      "source_location": "L166",
+      "_origin": "ast",
+      "id": "androproject_gui_src_lib_services_airplay_engine_airplayreceiverengine_unregisterclient",
+      "community": 65,
+      "norm_label": ".unregisterclient()"
+    },
+    {
+      "label": ".getConnectedDevices()",
+      "file_type": "code",
+      "source_file": "androproject-gui/src/lib/services/airplay-engine.ts",
+      "source_location": "L173",
+      "_origin": "ast",
+      "id": "androproject_gui_src_lib_services_airplay_engine_airplayreceiverengine_getconnecteddevices",
+      "community": 65,
+      "norm_label": ".getconnecteddevices()"
+    },
+    {
+      "label": ".setServerName()",
+      "file_type": "code",
+      "source_file": "androproject-gui/src/lib/services/airplay-engine.ts",
+      "source_location": "L196",
+      "_origin": "ast",
+      "id": "androproject_gui_src_lib_services_airplay_engine_airplayreceiverengine_setservername",
+      "community": 65,
+      "norm_label": ".setservername()"
+    },
+    {
+      "label": ".setPin()",
+      "file_type": "code",
+      "source_file": "androproject-gui/src/lib/services/airplay-engine.ts",
+      "source_location": "L205",
+      "_origin": "ast",
+      "id": "androproject_gui_src_lib_services_airplay_engine_airplayreceiverengine_setpin",
+      "community": 65,
+      "norm_label": ".setpin()"
+    },
+    {
+      "label": "AirPlayGlobal",
+      "file_type": "code",
+      "source_file": "androproject-gui/src/lib/services/airplay-engine.ts",
+      "source_location": "L212",
+      "_origin": "ast",
+      "id": "androproject_gui_src_lib_services_airplay_engine_airplayglobal",
+      "community": 62,
+      "norm_label": "airplayglobal"
+    },
+    {
+      "label": "g",
+      "file_type": "code",
+      "source_file": "androproject-gui/src/lib/services/airplay-engine.ts",
+      "source_location": "L216",
+      "_origin": "ast",
+      "id": "androproject_gui_src_lib_services_airplay_engine_g",
+      "community": 62,
+      "norm_label": "g"
     },
     {
       "label": "binary-resolver.ts",
@@ -5738,7 +6028,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_device_info_fetcher",
-      "community": 73,
+      "community": 5,
       "norm_label": "device-info-fetcher.ts"
     },
     {
@@ -5748,7 +6038,7 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_device_info_fetcher_deviceinfo",
-      "community": 73,
+      "community": 5,
       "norm_label": "deviceinfo"
     },
     {
@@ -5758,7 +6048,7 @@
       "source_location": "L40",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_device_info_fetcher_ideviceinfofetcher",
-      "community": 73,
+      "community": 5,
       "norm_label": "ideviceinfofetcher"
     },
     {
@@ -5768,7 +6058,7 @@
       "source_location": "L41",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_device_info_fetcher_ideviceinfofetcher_fetch",
-      "community": 73,
+      "community": 5,
       "norm_label": ".fetch()"
     },
     {
@@ -5778,7 +6068,7 @@
       "source_location": "L44",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_device_info_fetcher_staticprops",
-      "community": 73,
+      "community": 5,
       "norm_label": "staticprops"
     },
     {
@@ -5788,7 +6078,7 @@
       "source_location": "L52",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_device_info_fetcher_staticpropscache",
-      "community": 73,
+      "community": 5,
       "norm_label": "staticpropscache"
     },
     {
@@ -5798,7 +6088,7 @@
       "source_location": "L53",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_device_info_fetcher_dynamictelemetrycache",
-      "community": 73,
+      "community": 5,
       "norm_label": "dynamictelemetrycache"
     },
     {
@@ -5808,7 +6098,7 @@
       "source_location": "L56",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_device_info_fetcher_deviceinfofetcher",
-      "community": 72,
+      "community": 5,
       "norm_label": "deviceinfofetcher"
     },
     {
@@ -5818,7 +6108,7 @@
       "source_location": "L57",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_device_info_fetcher_deviceinfofetcher_constructor",
-      "community": 62,
+      "community": 5,
       "norm_label": ".constructor()"
     },
     {
@@ -5828,7 +6118,7 @@
       "source_location": "L59",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_device_info_fetcher_deviceinfofetcher_fetch",
-      "community": 72,
+      "community": 5,
       "norm_label": ".fetch()"
     },
     {
@@ -5838,7 +6128,7 @@
       "source_location": "L146",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_device_info_fetcher_deviceinfofetcher_parseproperties",
-      "community": 72,
+      "community": 5,
       "norm_label": ".parseproperties()"
     },
     {
@@ -5848,7 +6138,7 @@
       "source_location": "L155",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_device_info_fetcher_deviceinfofetcher_parsebattery",
-      "community": 72,
+      "community": 5,
       "norm_label": ".parsebattery()"
     },
     {
@@ -5858,7 +6148,7 @@
       "source_location": "L172",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_device_info_fetcher_deviceinfofetcher_parseram",
-      "community": 72,
+      "community": 5,
       "norm_label": ".parseram()"
     },
     {
@@ -5868,7 +6158,7 @@
       "source_location": "L188",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_device_info_fetcher_deviceinfofetcher_parsecpu",
-      "community": 72,
+      "community": 5,
       "norm_label": ".parsecpu()"
     },
     {
@@ -5878,7 +6168,7 @@
       "source_location": "L196",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_device_info_fetcher_deviceinfofetcher_parsestorage",
-      "community": 72,
+      "community": 5,
       "norm_label": ".parsestorage()"
     },
     {
@@ -5888,7 +6178,7 @@
       "source_location": "L226",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_device_info_fetcher_deviceinfofetcher_parseresolution",
-      "community": 72,
+      "community": 5,
       "norm_label": ".parseresolution()"
     },
     {
@@ -5898,7 +6188,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_index",
-      "community": 60,
+      "community": 5,
       "norm_label": "index.ts"
     },
     {
@@ -6062,6 +6352,66 @@
       "norm_label": ".destroy()"
     },
     {
+      "label": "projection-coordinator.ts",
+      "file_type": "code",
+      "source_file": "androproject-gui/src/lib/services/projection-coordinator.ts",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "androproject_gui_src_lib_services_projection_coordinator",
+      "community": 60,
+      "norm_label": "projection-coordinator.ts"
+    },
+    {
+      "label": "ProjectionLaunchOptions",
+      "file_type": "code",
+      "source_file": "androproject-gui/src/lib/services/projection-coordinator.ts",
+      "source_location": "L12",
+      "_origin": "ast",
+      "id": "androproject_gui_src_lib_services_projection_coordinator_projectionlaunchoptions",
+      "community": 60,
+      "norm_label": "projectionlaunchoptions"
+    },
+    {
+      "label": "ProjectionCoordinator",
+      "file_type": "code",
+      "source_file": "androproject-gui/src/lib/services/projection-coordinator.ts",
+      "source_location": "L17",
+      "_origin": "ast",
+      "id": "androproject_gui_src_lib_services_projection_coordinator_projectioncoordinator",
+      "community": 66,
+      "norm_label": "projectioncoordinator"
+    },
+    {
+      "label": ".start()",
+      "file_type": "code",
+      "source_file": "androproject-gui/src/lib/services/projection-coordinator.ts",
+      "source_location": "L21",
+      "_origin": "ast",
+      "id": "androproject_gui_src_lib_services_projection_coordinator_projectioncoordinator_start",
+      "community": 66,
+      "norm_label": ".start()"
+    },
+    {
+      "label": ".stop()",
+      "file_type": "code",
+      "source_file": "androproject-gui/src/lib/services/projection-coordinator.ts",
+      "source_location": "L39",
+      "_origin": "ast",
+      "id": "androproject_gui_src_lib_services_projection_coordinator_projectioncoordinator_stop",
+      "community": 66,
+      "norm_label": ".stop()"
+    },
+    {
+      "label": ".isAlive()",
+      "file_type": "code",
+      "source_file": "androproject-gui/src/lib/services/projection-coordinator.ts",
+      "source_location": "L54",
+      "_origin": "ast",
+      "id": "androproject_gui_src_lib_services_projection_coordinator_projectioncoordinator_isalive",
+      "community": 66,
+      "norm_label": ".isalive()"
+    },
+    {
       "label": "scrcpy-engine.ts",
       "file_type": "code",
       "source_file": "androproject-gui/src/lib/services/scrcpy-engine.ts",
@@ -6085,17 +6435,17 @@
       "label": "ScrcpyEngineOptions",
       "file_type": "code",
       "source_file": "androproject-gui/src/lib/services/scrcpy-engine.ts",
-      "source_location": "L35",
+      "source_location": "L36",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_scrcpy_engine_scrcpyengineoptions",
-      "community": 60,
+      "community": 5,
       "norm_label": "scrcpyengineoptions"
     },
     {
       "label": "VisionNanoResult",
       "file_type": "code",
       "source_file": "androproject-gui/src/lib/services/scrcpy-engine.ts",
-      "source_location": "L37",
+      "source_location": "L38",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_scrcpy_engine_visionnanoresult",
       "community": 60,
@@ -6105,17 +6455,17 @@
       "label": "ScrcpyStreamResult",
       "file_type": "code",
       "source_file": "androproject-gui/src/lib/services/scrcpy-engine.ts",
-      "source_location": "L45",
+      "source_location": "L46",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_scrcpy_engine_scrcpystreamresult",
-      "community": 60,
+      "community": 5,
       "norm_label": "scrcpystreamresult"
     },
     {
       "label": "IVisionNanoEngine",
       "file_type": "code",
       "source_file": "androproject-gui/src/lib/services/scrcpy-engine.ts",
-      "source_location": "L47",
+      "source_location": "L48",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_scrcpy_engine_ivisionnanoengine",
       "community": 60,
@@ -6125,7 +6475,7 @@
       "label": ".buildArgs()",
       "file_type": "code",
       "source_file": "androproject-gui/src/lib/services/scrcpy-engine.ts",
-      "source_location": "L48",
+      "source_location": "L49",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_scrcpy_engine_ivisionnanoengine_buildargs",
       "community": 60,
@@ -6135,7 +6485,7 @@
       "label": ".start()",
       "file_type": "code",
       "source_file": "androproject-gui/src/lib/services/scrcpy-engine.ts",
-      "source_location": "L49",
+      "source_location": "L50",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_scrcpy_engine_ivisionnanoengine_start",
       "community": 60,
@@ -6145,7 +6495,7 @@
       "label": ".stop()",
       "file_type": "code",
       "source_file": "androproject-gui/src/lib/services/scrcpy-engine.ts",
-      "source_location": "L50",
+      "source_location": "L51",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_scrcpy_engine_ivisionnanoengine_stop",
       "community": 60,
@@ -6155,7 +6505,7 @@
       "label": ".checkAlive()",
       "file_type": "code",
       "source_file": "androproject-gui/src/lib/services/scrcpy-engine.ts",
-      "source_location": "L51",
+      "source_location": "L52",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_scrcpy_engine_ivisionnanoengine_checkalive",
       "community": 60,
@@ -6165,7 +6515,7 @@
       "label": "IScrcpyEngine",
       "file_type": "code",
       "source_file": "androproject-gui/src/lib/services/scrcpy-engine.ts",
-      "source_location": "L54",
+      "source_location": "L55",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_scrcpy_engine_iscrcpyengine",
       "community": 60,
@@ -6175,50 +6525,50 @@
       "label": "VisionNanoEngine",
       "file_type": "code",
       "source_file": "androproject-gui/src/lib/services/scrcpy-engine.ts",
-      "source_location": "L56",
+      "source_location": "L57",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_scrcpy_engine_visionnanoengine",
-      "community": 3,
+      "community": 72,
       "norm_label": "visionnanoengine"
     },
     {
       "label": ".buildArgs()",
       "file_type": "code",
       "source_file": "androproject-gui/src/lib/services/scrcpy-engine.ts",
-      "source_location": "L60",
+      "source_location": "L61",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_scrcpy_engine_visionnanoengine_buildargs",
-      "community": 3,
+      "community": 72,
       "norm_label": ".buildargs()"
     },
     {
       "label": ".start()",
       "file_type": "code",
       "source_file": "androproject-gui/src/lib/services/scrcpy-engine.ts",
-      "source_location": "L107",
+      "source_location": "L111",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_scrcpy_engine_visionnanoengine_start",
-      "community": 3,
+      "community": 72,
       "norm_label": ".start()"
     },
     {
       "label": ".stop()",
       "file_type": "code",
       "source_file": "androproject-gui/src/lib/services/scrcpy-engine.ts",
-      "source_location": "L159",
+      "source_location": "L163",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_scrcpy_engine_visionnanoengine_stop",
-      "community": 3,
+      "community": 72,
       "norm_label": ".stop()"
     },
     {
       "label": ".checkAlive()",
       "file_type": "code",
       "source_file": "androproject-gui/src/lib/services/scrcpy-engine.ts",
-      "source_location": "L167",
+      "source_location": "L171",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_scrcpy_engine_visionnanoengine_checkalive",
-      "community": 3,
+      "community": 65,
       "norm_label": ".checkalive()"
     },
     {
@@ -6228,7 +6578,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_screen_capture",
-      "community": 60,
+      "community": 5,
       "norm_label": "screen-capture.ts"
     },
     {
@@ -6238,7 +6588,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_screen_capture_captureresult",
-      "community": 60,
+      "community": 5,
       "norm_label": "captureresult"
     },
     {
@@ -6248,7 +6598,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_screen_capture_iscreencapture",
-      "community": 60,
+      "community": 5,
       "norm_label": "iscreencapture"
     },
     {
@@ -6258,7 +6608,7 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_screen_capture_iscreencapture_capture",
-      "community": 60,
+      "community": 5,
       "norm_label": ".capture()"
     },
     {
@@ -6268,7 +6618,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_screen_capture_screencapture",
-      "community": 62,
+      "community": 5,
       "norm_label": "screencapture"
     },
     {
@@ -6278,7 +6628,7 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_screen_capture_screencapture_constructor",
-      "community": 62,
+      "community": 5,
       "norm_label": ".constructor()"
     },
     {
@@ -6288,7 +6638,7 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_screen_capture_screencapture_capture",
-      "community": 62,
+      "community": 5,
       "norm_label": ".capture()"
     },
     {
@@ -6298,7 +6648,7 @@
       "source_location": "L41",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_screen_capture_screencapture_captureexecout",
-      "community": 62,
+      "community": 5,
       "norm_label": ".captureexecout()"
     },
     {
@@ -6308,7 +6658,7 @@
       "source_location": "L52",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_screen_capture_screencapture_captureviafile",
-      "community": 62,
+      "community": 5,
       "norm_label": ".captureviafile()"
     },
     {
@@ -6588,7 +6938,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "androproject_gui_src_services_contracts",
-      "community": 51,
+      "community": 4,
       "norm_label": "contracts.ts"
     },
     {
@@ -6598,7 +6948,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "androproject_gui_src_services_contracts_ideviceservice",
-      "community": 54,
+      "community": 4,
       "norm_label": "ideviceservice"
     },
     {
@@ -6608,7 +6958,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "androproject_gui_src_services_contracts_ideviceservice_getdevices",
-      "community": 54,
+      "community": 4,
       "norm_label": ".getdevices()"
     },
     {
@@ -6618,7 +6968,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "androproject_gui_src_services_contracts_ideviceservice_getdevicedetails",
-      "community": 54,
+      "community": 4,
       "norm_label": ".getdevicedetails()"
     },
     {
@@ -6628,7 +6978,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "androproject_gui_src_services_contracts_ideviceservice_rebootdevice",
-      "community": 54,
+      "community": 4,
       "norm_label": ".rebootdevice()"
     },
     {
@@ -6638,7 +6988,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "androproject_gui_src_services_contracts_ideviceservice_takescreenshot",
-      "community": 54,
+      "community": 4,
       "norm_label": ".takescreenshot()"
     },
     {
@@ -6648,7 +6998,7 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "androproject_gui_src_services_contracts_ideviceservice_startscreenrecord",
-      "community": 54,
+      "community": 4,
       "norm_label": ".startscreenrecord()"
     },
     {
@@ -6658,7 +7008,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "androproject_gui_src_services_contracts_ideviceservice_stopscreenrecord",
-      "community": 54,
+      "community": 4,
       "norm_label": ".stopscreenrecord()"
     },
     {
@@ -9629,10 +9979,10 @@
       "label": "ScrcpyEngine",
       "file_type": "code",
       "source_file": "androproject-gui/src/lib/services/scrcpy-engine.ts",
-      "source_location": "L176",
+      "source_location": "L180",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_scrcpy_engine_scrcpyengine",
-      "community": 60,
+      "community": 5,
       "norm_label": "scrcpyengine"
     }
   ],
@@ -13238,7 +13588,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/app/api/actions/stream.ts",
-      "source_location": "L53",
+      "source_location": "L55",
       "weight": 1.0,
       "source": "androproject_gui_src_app_api_actions_stream",
       "target": "androproject_gui_src_app_api_actions_stream_checkorstopscreen",
@@ -13258,7 +13608,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/app/api/actions/stream.ts",
-      "source_location": "L77",
+      "source_location": "L79",
       "weight": 1.0,
       "source": "androproject_gui_src_app_api_actions_stream",
       "target": "androproject_gui_src_app_api_actions_stream_screenshot",
@@ -13268,7 +13618,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/app/api/actions/stream.ts",
-      "source_location": "L123",
+      "source_location": "L125",
       "weight": 1.0,
       "source": "androproject_gui_src_app_api_actions_stream",
       "target": "androproject_gui_src_app_api_actions_stream_startrecord",
@@ -13278,7 +13628,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/app/api/actions/stream.ts",
-      "source_location": "L171",
+      "source_location": "L173",
       "weight": 1.0,
       "source": "androproject_gui_src_app_api_actions_stream",
       "target": "androproject_gui_src_app_api_actions_stream_stoprecord",
@@ -13422,7 +13772,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "androproject-gui/src/app/api/actions/stream.ts",
-      "source_location": "L131",
+      "source_location": "L133",
       "weight": 1.0,
       "source": "androproject_gui_src_app_api_actions_stream_startrecord",
       "target": "androproject_gui_src_lib_locks_deletelock"
@@ -13433,7 +13783,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "androproject-gui/src/app/api/actions/stream.ts",
-      "source_location": "L125",
+      "source_location": "L127",
       "weight": 1.0,
       "source": "androproject_gui_src_app_api_actions_stream_startrecord",
       "target": "androproject_gui_src_lib_locks_getrecordlockfile"
@@ -13444,7 +13794,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "androproject-gui/src/app/api/actions/stream.ts",
-      "source_location": "L127",
+      "source_location": "L129",
       "weight": 1.0,
       "source": "androproject_gui_src_app_api_actions_stream_startrecord",
       "target": "androproject_gui_src_lib_locks_islockalive"
@@ -13455,7 +13805,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "androproject-gui/src/app/api/actions/stream.ts",
-      "source_location": "L158",
+      "source_location": "L160",
       "weight": 1.0,
       "source": "androproject_gui_src_app_api_actions_stream_startrecord",
       "target": "androproject_gui_src_lib_locks_writelock"
@@ -13466,7 +13816,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "androproject-gui/src/app/api/actions/stream.ts",
-      "source_location": "L173",
+      "source_location": "L175",
       "weight": 1.0,
       "source": "androproject_gui_src_app_api_actions_stream_stoprecord",
       "target": "androproject_gui_src_lib_locks_getrecordlockfile"
@@ -13477,7 +13827,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "androproject-gui/src/app/api/actions/stream.ts",
-      "source_location": "L179",
+      "source_location": "L181",
       "weight": 1.0,
       "source": "androproject_gui_src_app_api_actions_stream_stoprecord",
       "target": "androproject_gui_src_lib_locks_killlockedprocess"
@@ -13488,7 +13838,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "androproject-gui/src/app/api/actions/stream.ts",
-      "source_location": "L177",
+      "source_location": "L179",
       "weight": 1.0,
       "source": "androproject_gui_src_app_api_actions_stream_stoprecord",
       "target": "androproject_gui_src_lib_locks_readlock"
@@ -13561,6 +13911,48 @@
       "weight": 1.0,
       "source": "androproject_gui_src_app_api_actions_tweaks",
       "target": "androproject_gui_src_app_api_actions_tweaks_setshadestyle",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/app/api/airplay/route.ts",
+      "source_location": "L9",
+      "weight": 1.0,
+      "source": "androproject_gui_src_app_api_airplay_route",
+      "target": "androproject_gui_src_app_api_airplay_route_get",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/app/api/airplay/route.ts",
+      "source_location": "L22",
+      "weight": 1.0,
+      "source": "androproject_gui_src_app_api_airplay_route",
+      "target": "androproject_gui_src_app_api_airplay_route_post",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/app/api/airplay/route.ts",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "androproject_gui_src_app_api_airplay_route",
+      "target": "androproject_gui_src_lib_services_airplay_engine",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/app/api/airplay/route.ts",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "androproject_gui_src_app_api_airplay_route",
+      "target": "androproject_gui_src_lib_services_airplay_engine_airplayreceiverengine",
       "confidence_score": 1.0
     },
     {
@@ -14198,7 +14590,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/app/api/device/route.ts",
-      "source_location": "L89",
+      "source_location": "L126",
       "weight": 1.0,
       "source": "androproject_gui_src_app_api_device_route",
       "target": "androproject_gui_src_app_api_device_route_buildofflinedevice",
@@ -14208,7 +14600,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/app/api/device/route.ts",
-      "source_location": "L115",
+      "source_location": "L152",
       "weight": 1.0,
       "source": "androproject_gui_src_app_api_device_route",
       "target": "androproject_gui_src_app_api_device_route_detecthardwarefallback",
@@ -14218,7 +14610,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/app/api/device/route.ts",
-      "source_location": "L15",
+      "source_location": "L16",
       "weight": 1.0,
       "source": "androproject_gui_src_app_api_device_route",
       "target": "androproject_gui_src_app_api_device_route_detector",
@@ -14228,7 +14620,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/app/api/device/route.ts",
-      "source_location": "L16",
+      "source_location": "L17",
       "weight": 1.0,
       "source": "androproject_gui_src_app_api_device_route",
       "target": "androproject_gui_src_app_api_device_route_fetcher",
@@ -14238,7 +14630,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/app/api/device/route.ts",
-      "source_location": "L18",
+      "source_location": "L19",
       "weight": 1.0,
       "source": "androproject_gui_src_app_api_device_route",
       "target": "androproject_gui_src_app_api_device_route_get",
@@ -14248,7 +14640,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/app/api/device/route.ts",
-      "source_location": "L80",
+      "source_location": "L117",
       "weight": 1.0,
       "source": "androproject_gui_src_app_api_device_route",
       "target": "androproject_gui_src_app_api_device_route_selecttarget",
@@ -14274,6 +14666,28 @@
       "weight": 1.0,
       "source": "androproject_gui_src_app_api_device_route",
       "target": "androproject_gui_src_lib_services_adb_executor_adb",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/app/api/device/route.ts",
+      "source_location": "L14",
+      "weight": 1.0,
+      "source": "androproject_gui_src_app_api_device_route",
+      "target": "androproject_gui_src_lib_services_airplay_engine",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/app/api/device/route.ts",
+      "source_location": "L14",
+      "weight": 1.0,
+      "source": "androproject_gui_src_app_api_device_route",
+      "target": "androproject_gui_src_lib_services_airplay_engine_airplayreceiverengine",
       "confidence_score": 1.0
     },
     {
@@ -14336,7 +14750,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/app/api/device/route.ts",
-      "source_location": "L47",
+      "source_location": "L84",
       "weight": 1.0,
       "source": "androproject_gui_src_app_api_device_route_get",
       "target": "androproject_gui_src_app_api_device_route_buildofflinedevice",
@@ -14347,7 +14761,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/app/api/device/route.ts",
-      "source_location": "L28",
+      "source_location": "L43",
       "weight": 1.0,
       "source": "androproject_gui_src_app_api_device_route_get",
       "target": "androproject_gui_src_app_api_device_route_detecthardwarefallback",
@@ -14358,7 +14772,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/app/api/device/route.ts",
-      "source_location": "L39",
+      "source_location": "L76",
       "weight": 1.0,
       "source": "androproject_gui_src_app_api_device_route_get",
       "target": "androproject_gui_src_app_api_device_route_selecttarget",
@@ -14370,7 +14784,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "androproject-gui/src/app/api/device/route.ts",
-      "source_location": "L24",
+      "source_location": "L25",
       "weight": 1.0,
       "source": "androproject_gui_src_app_api_device_route_get",
       "target": "androproject_gui_src_lib_services_device_detector_devicedetector_detect"
@@ -14381,7 +14795,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "androproject-gui/src/app/api/device/route.ts",
-      "source_location": "L52",
+      "source_location": "L89",
       "weight": 1.0,
       "source": "androproject_gui_src_app_api_device_route_get",
       "target": "androproject_gui_src_lib_services_device_info_fetcher_deviceinfofetcher_fetch"
@@ -14392,7 +14806,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "androproject-gui/src/app/api/device/route.ts",
-      "source_location": "L122",
+      "source_location": "L159",
       "weight": 1.0,
       "source": "androproject_gui_src_app_api_device_route_detecthardwarefallback",
       "target": "androproject_gui_src_lib_services_adb_executor_execasync"
@@ -16580,7 +16994,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/components/projection/DeviceInfoPanel.tsx",
-      "source_location": "L420",
+      "source_location": "L483",
       "weight": 1.0,
       "source": "androproject_gui_src_components_projection_deviceinfopanel",
       "target": "androproject_gui_src_components_projection_deviceinfopanel_togglerow",
@@ -16590,7 +17004,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/components/projection/DeviceInfoPanel.tsx",
-      "source_location": "L468",
+      "source_location": "L531",
       "weight": 1.0,
       "source": "androproject_gui_src_components_projection_deviceinfopanel",
       "target": "androproject_gui_src_components_projection_deviceinfopanel_toolbutton",
@@ -19325,7 +19739,17 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/features/types.ts",
-      "source_location": "L89",
+      "source_location": "L38",
+      "weight": 1.0,
+      "source": "androproject_gui_src_features_types",
+      "target": "androproject_gui_src_features_types_airplayserverstatus",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/features/types.ts",
+      "source_location": "L112",
       "weight": 1.0,
       "source": "androproject_gui_src_features_types",
       "target": "androproject_gui_src_features_types_animscales",
@@ -19335,7 +19759,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/features/types.ts",
-      "source_location": "L48",
+      "source_location": "L71",
       "weight": 1.0,
       "source": "androproject_gui_src_features_types",
       "target": "androproject_gui_src_features_types_appinfo",
@@ -19345,7 +19769,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/features/types.ts",
-      "source_location": "L66",
+      "source_location": "L89",
       "weight": 1.0,
       "source": "androproject_gui_src_features_types",
       "target": "androproject_gui_src_features_types_apppackage",
@@ -19355,7 +19779,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/features/types.ts",
-      "source_location": "L101",
+      "source_location": "L124",
       "weight": 1.0,
       "source": "androproject_gui_src_features_types",
       "target": "androproject_gui_src_features_types_bluetoothinfo",
@@ -19365,7 +19789,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/features/types.ts",
-      "source_location": "L3",
+      "source_location": "L1",
       "weight": 1.0,
       "source": "androproject_gui_src_features_types",
       "target": "androproject_gui_src_features_types_devicedata",
@@ -19375,7 +19799,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/features/types.ts",
-      "source_location": "L30",
+      "source_location": "L36",
       "weight": 1.0,
       "source": "androproject_gui_src_features_types",
       "target": "androproject_gui_src_features_types_deviceinfo",
@@ -19385,7 +19809,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/features/types.ts",
-      "source_location": "L138",
+      "source_location": "L161",
       "weight": 1.0,
       "source": "androproject_gui_src_features_types",
       "target": "androproject_gui_src_features_types_devicelistitem",
@@ -19395,7 +19819,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/features/types.ts",
-      "source_location": "L75",
+      "source_location": "L98",
       "weight": 1.0,
       "source": "androproject_gui_src_features_types",
       "target": "androproject_gui_src_features_types_diagnosticsdata",
@@ -19405,7 +19829,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/features/types.ts",
-      "source_location": "L68",
+      "source_location": "L91",
       "weight": 1.0,
       "source": "androproject_gui_src_features_types",
       "target": "androproject_gui_src_features_types_diagnosticsstorage",
@@ -19415,7 +19839,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/features/types.ts",
-      "source_location": "L95",
+      "source_location": "L118",
       "weight": 1.0,
       "source": "androproject_gui_src_features_types",
       "target": "androproject_gui_src_features_types_gputweaks",
@@ -19425,7 +19849,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/features/types.ts",
-      "source_location": "L39",
+      "source_location": "L62",
       "weight": 1.0,
       "source": "androproject_gui_src_features_types",
       "target": "androproject_gui_src_features_types_navsection",
@@ -19435,7 +19859,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/features/types.ts",
-      "source_location": "L109",
+      "source_location": "L132",
       "weight": 1.0,
       "source": "androproject_gui_src_features_types",
       "target": "androproject_gui_src_features_types_optimizersettings",
@@ -19445,7 +19869,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/features/types.ts",
-      "source_location": "L41",
+      "source_location": "L64",
       "weight": 1.0,
       "source": "androproject_gui_src_features_types",
       "target": "androproject_gui_src_features_types_quickactionitem",
@@ -19455,10 +19879,21 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/features/types.ts",
-      "source_location": "L32",
+      "source_location": "L55",
       "weight": 1.0,
       "source": "androproject_gui_src_features_types",
       "target": "androproject_gui_src_features_types_systemlogs",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/hooks/useAirPlayServer.ts",
+      "source_location": "L8",
+      "weight": 1.0,
+      "source": "androproject_gui_src_hooks_useairplayserver",
+      "target": "androproject_gui_src_features_types",
       "confidence_score": 1.0
     },
     {
@@ -19502,6 +19937,28 @@
       "source_location": "L4",
       "weight": 1.0,
       "source": "androproject_gui_src_hooks_usesystemlogs",
+      "target": "androproject_gui_src_features_types",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/lib/services/airplay-engine.ts",
+      "source_location": "L13",
+      "weight": 1.0,
+      "source": "androproject_gui_src_lib_services_airplay_engine",
+      "target": "androproject_gui_src_features_types",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/lib/services/projection-coordinator.ts",
+      "source_location": "L10",
+      "weight": 1.0,
+      "source": "androproject_gui_src_lib_services_projection_coordinator",
       "target": "androproject_gui_src_features_types",
       "confidence_score": 1.0
     },
@@ -19630,6 +20087,83 @@
       "relation": "imports",
       "context": "import",
       "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/lib/services/airplay-engine.ts",
+      "source_location": "L13",
+      "weight": 1.0,
+      "source": "androproject_gui_src_lib_services_airplay_engine",
+      "target": "androproject_gui_src_features_types_deviceinfo",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "context": "return_type",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/lib/services/airplay-engine.ts",
+      "source_location": "L173",
+      "weight": 1.0,
+      "source": "androproject_gui_src_lib_services_airplay_engine_airplayreceiverengine_getconnecteddevices",
+      "target": "androproject_gui_src_features_types_deviceinfo",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "context": "return_type",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/lib/services/airplay-engine.ts",
+      "source_location": "L28",
+      "weight": 1.0,
+      "source": "androproject_gui_src_lib_services_airplay_engine_iairplayreceiverengine_getconnecteddevices",
+      "target": "androproject_gui_src_features_types_deviceinfo",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/lib/services/projection-coordinator.ts",
+      "source_location": "L10",
+      "weight": 1.0,
+      "source": "androproject_gui_src_lib_services_projection_coordinator",
+      "target": "androproject_gui_src_features_types_deviceinfo",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "context": "parameter_type",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/lib/services/projection-coordinator.ts",
+      "source_location": "L54",
+      "weight": 1.0,
+      "source": "androproject_gui_src_lib_services_projection_coordinator_projectioncoordinator_isalive",
+      "target": "androproject_gui_src_features_types_deviceinfo",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "context": "parameter_type",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/lib/services/projection-coordinator.ts",
+      "source_location": "L21",
+      "weight": 1.0,
+      "source": "androproject_gui_src_lib_services_projection_coordinator_projectioncoordinator_start",
+      "target": "androproject_gui_src_features_types_deviceinfo",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "context": "parameter_type",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/lib/services/projection-coordinator.ts",
+      "source_location": "L39",
+      "weight": 1.0,
+      "source": "androproject_gui_src_lib_services_projection_coordinator_projectioncoordinator_stop",
+      "target": "androproject_gui_src_features_types_deviceinfo",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/services/contracts.ts",
       "source_location": "L1",
       "weight": 1.0,
@@ -19657,6 +20191,94 @@
       "weight": 1.0,
       "source": "androproject_gui_src_services_contracts_ideviceservice_getdevices",
       "target": "androproject_gui_src_features_types_deviceinfo",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/hooks/useAirPlayServer.ts",
+      "source_location": "L8",
+      "weight": 1.0,
+      "source": "androproject_gui_src_hooks_useairplayserver",
+      "target": "androproject_gui_src_features_types_airplayserverstatus",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/lib/services/airplay-engine.ts",
+      "source_location": "L13",
+      "weight": 1.0,
+      "source": "androproject_gui_src_lib_services_airplay_engine",
+      "target": "androproject_gui_src_features_types_airplayserverstatus",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "context": "generic_arg",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/lib/services/airplay-engine.ts",
+      "source_location": "L124",
+      "weight": 1.0,
+      "source": "androproject_gui_src_lib_services_airplay_engine_airplayreceiverengine_getstatus",
+      "target": "androproject_gui_src_features_types_airplayserverstatus",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "context": "generic_arg",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/lib/services/airplay-engine.ts",
+      "source_location": "L72",
+      "weight": 1.0,
+      "source": "androproject_gui_src_lib_services_airplay_engine_airplayreceiverengine_start",
+      "target": "androproject_gui_src_features_types_airplayserverstatus",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "context": "generic_arg",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/lib/services/airplay-engine.ts",
+      "source_location": "L27",
+      "weight": 1.0,
+      "source": "androproject_gui_src_lib_services_airplay_engine_iairplayreceiverengine_getstatus",
+      "target": "androproject_gui_src_features_types_airplayserverstatus",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "context": "generic_arg",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/lib/services/airplay-engine.ts",
+      "source_location": "L25",
+      "weight": 1.0,
+      "source": "androproject_gui_src_lib_services_airplay_engine_iairplayreceiverengine_start",
+      "target": "androproject_gui_src_features_types_airplayserverstatus",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/lib/services/projection-coordinator.ts",
+      "source_location": "L10",
+      "weight": 1.0,
+      "source": "androproject_gui_src_lib_services_projection_coordinator",
+      "target": "androproject_gui_src_features_types_airplayserverstatus",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "context": "generic_arg",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/lib/services/projection-coordinator.ts",
+      "source_location": "L21",
+      "weight": 1.0,
+      "source": "androproject_gui_src_lib_services_projection_coordinator_projectioncoordinator_start",
+      "target": "androproject_gui_src_features_types_airplayserverstatus",
       "confidence_score": 1.0
     },
     {
@@ -19917,7 +20539,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "androproject-gui/src/hooks/useProjection.ts",
-      "source_location": "L74",
+      "source_location": "L76",
       "weight": 1.0,
       "source": "androproject_gui_src_hooks_useprojection_useprojection",
       "target": "androproject_gui_src_hooks_useactions_useactions"
@@ -20002,6 +20624,16 @@
       "weight": 1.0,
       "source": "androproject_gui_src_hooks_useadbconnection_useadbconnection",
       "target": "androproject_gui_src_hooks_useadbconnection_saveregistereddevices",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/hooks/useAirPlayServer.ts",
+      "source_location": "L10",
+      "weight": 1.0,
+      "source": "androproject_gui_src_hooks_useairplayserver",
+      "target": "androproject_gui_src_hooks_useairplayserver_useairplayserver",
       "confidence_score": 1.0
     },
     {
@@ -20111,7 +20743,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/hooks/useProjection.ts",
-      "source_location": "L60",
+      "source_location": "L61",
       "weight": 1.0,
       "source": "androproject_gui_src_hooks_useprojection",
       "target": "androproject_gui_src_hooks_useprojection_default_options",
@@ -20131,7 +20763,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/hooks/useProjection.ts",
-      "source_location": "L73",
+      "source_location": "L75",
       "weight": 1.0,
       "source": "androproject_gui_src_hooks_useprojection",
       "target": "androproject_gui_src_hooks_useprojection_useprojection",
@@ -20141,7 +20773,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/hooks/useProjection.ts",
-      "source_location": "L22",
+      "source_location": "L23",
       "weight": 1.0,
       "source": "androproject_gui_src_hooks_useprojection",
       "target": "androproject_gui_src_hooks_useprojection_useprojectionreturn",
@@ -20151,9 +20783,9 @@
       "relation": "rationale_for",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/hooks/useProjection.ts",
-      "source_location": "L137",
+      "source_location": "L139",
       "weight": 1.0,
-      "source": "androproject_gui_src_hooks_useprojection_rationale_137",
+      "source": "androproject_gui_src_hooks_useprojection_rationale_139",
       "target": "androproject_gui_src_hooks_useprojection",
       "confidence_score": 1.0
     },
@@ -20518,6 +21150,17 @@
       "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/lib/services/airplay-engine.ts",
+      "source_location": "L12",
+      "weight": 1.0,
+      "source": "androproject_gui_src_lib_services_airplay_engine",
+      "target": "androproject_gui_src_lib_config",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/lib/services/scrcpy-engine.ts",
       "source_location": "L15",
       "weight": 1.0,
@@ -20726,6 +21369,61 @@
       "relation": "imports",
       "context": "import",
       "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/lib/services/airplay-engine.ts",
+      "source_location": "L12",
+      "weight": 1.0,
+      "source": "androproject_gui_src_lib_services_airplay_engine",
+      "target": "androproject_gui_src_lib_locks_getlockfile",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "androproject-gui/src/lib/services/airplay-engine.ts",
+      "source_location": "L63",
+      "weight": 1.0,
+      "source": "androproject_gui_src_lib_services_airplay_engine_airplayreceiverengine_checkinitialstate",
+      "target": "androproject_gui_src_lib_locks_getlockfile"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "androproject-gui/src/lib/services/airplay-engine.ts",
+      "source_location": "L125",
+      "weight": 1.0,
+      "source": "androproject_gui_src_lib_services_airplay_engine_airplayreceiverengine_getstatus",
+      "target": "androproject_gui_src_lib_locks_getlockfile"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "androproject-gui/src/lib/services/airplay-engine.ts",
+      "source_location": "L74",
+      "weight": 1.0,
+      "source": "androproject_gui_src_lib_services_airplay_engine_airplayreceiverengine_start",
+      "target": "androproject_gui_src_lib_locks_getlockfile"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "androproject-gui/src/lib/services/airplay-engine.ts",
+      "source_location": "L105",
+      "weight": 1.0,
+      "source": "androproject_gui_src_lib_services_airplay_engine_airplayreceiverengine_stop",
+      "target": "androproject_gui_src_lib_locks_getlockfile"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/lib/services/scrcpy-engine.ts",
       "source_location": "L15",
       "weight": 1.0,
@@ -20739,7 +21437,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "androproject-gui/src/lib/services/scrcpy-engine.ts",
-      "source_location": "L168",
+      "source_location": "L172",
       "weight": 1.0,
       "source": "androproject_gui_src_lib_services_scrcpy_engine_visionnanoengine_checkalive",
       "target": "androproject_gui_src_lib_locks_getlockfile"
@@ -20750,7 +21448,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "androproject-gui/src/lib/services/scrcpy-engine.ts",
-      "source_location": "L117",
+      "source_location": "L121",
       "weight": 1.0,
       "source": "androproject_gui_src_lib_services_scrcpy_engine_visionnanoengine_start",
       "target": "androproject_gui_src_lib_locks_getlockfile"
@@ -20761,10 +21459,32 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "androproject-gui/src/lib/services/scrcpy-engine.ts",
-      "source_location": "L160",
+      "source_location": "L164",
       "weight": 1.0,
       "source": "androproject_gui_src_lib_services_scrcpy_engine_visionnanoengine_stop",
       "target": "androproject_gui_src_lib_locks_getlockfile"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/lib/services/airplay-engine.ts",
+      "source_location": "L12",
+      "weight": 1.0,
+      "source": "androproject_gui_src_lib_services_airplay_engine",
+      "target": "androproject_gui_src_lib_locks_writelock",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "androproject-gui/src/lib/services/airplay-engine.ts",
+      "source_location": "L87",
+      "weight": 1.0,
+      "source": "androproject_gui_src_lib_services_airplay_engine_airplayreceiverengine_start",
+      "target": "androproject_gui_src_lib_locks_writelock"
     },
     {
       "relation": "imports",
@@ -20783,7 +21503,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "androproject-gui/src/lib/services/scrcpy-engine.ts",
-      "source_location": "L143",
+      "source_location": "L147",
       "weight": 1.0,
       "source": "androproject_gui_src_lib_services_scrcpy_engine_visionnanoengine_start",
       "target": "androproject_gui_src_lib_locks_writelock"
@@ -20847,6 +21567,17 @@
       "relation": "imports",
       "context": "import",
       "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/lib/services/airplay-engine.ts",
+      "source_location": "L12",
+      "weight": 1.0,
+      "source": "androproject_gui_src_lib_services_airplay_engine",
+      "target": "androproject_gui_src_lib_locks_islockalive",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/lib/services/scrcpy-engine.ts",
       "source_location": "L15",
       "weight": 1.0,
@@ -20860,10 +21591,32 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "androproject-gui/src/lib/services/scrcpy-engine.ts",
-      "source_location": "L169",
+      "source_location": "L173",
       "weight": 1.0,
       "source": "androproject_gui_src_lib_services_scrcpy_engine_visionnanoengine_checkalive",
       "target": "androproject_gui_src_lib_locks_islockalive"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/lib/services/airplay-engine.ts",
+      "source_location": "L12",
+      "weight": 1.0,
+      "source": "androproject_gui_src_lib_services_airplay_engine",
+      "target": "androproject_gui_src_lib_locks_killlockedprocess",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "androproject-gui/src/lib/services/airplay-engine.ts",
+      "source_location": "L106",
+      "weight": 1.0,
+      "source": "androproject_gui_src_lib_services_airplay_engine_airplayreceiverengine_stop",
+      "target": "androproject_gui_src_lib_locks_killlockedprocess"
     },
     {
       "relation": "imports",
@@ -20882,7 +21635,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "androproject-gui/src/lib/services/scrcpy-engine.ts",
-      "source_location": "L118",
+      "source_location": "L122",
       "weight": 1.0,
       "source": "androproject_gui_src_lib_services_scrcpy_engine_visionnanoengine_start",
       "target": "androproject_gui_src_lib_locks_killlockedprocess"
@@ -20893,7 +21646,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "androproject-gui/src/lib/services/scrcpy-engine.ts",
-      "source_location": "L161",
+      "source_location": "L165",
       "weight": 1.0,
       "source": "androproject_gui_src_lib_services_scrcpy_engine_visionnanoengine_stop",
       "target": "androproject_gui_src_lib_locks_killlockedprocess"
@@ -21382,6 +22135,325 @@
       "weight": 1.0,
       "source": "androproject_gui_src_lib_services_index",
       "target": "androproject_gui_src_lib_services_adb_executor_adb",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/lib/services/airplay-engine.ts",
+      "source_location": "L212",
+      "weight": 1.0,
+      "source": "androproject_gui_src_lib_services_airplay_engine",
+      "target": "androproject_gui_src_lib_services_airplay_engine_airplayglobal",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/lib/services/airplay-engine.ts",
+      "source_location": "L44",
+      "weight": 1.0,
+      "source": "androproject_gui_src_lib_services_airplay_engine",
+      "target": "androproject_gui_src_lib_services_airplay_engine_airplayreceiverengine",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/lib/services/airplay-engine.ts",
+      "source_location": "L15",
+      "weight": 1.0,
+      "source": "androproject_gui_src_lib_services_airplay_engine",
+      "target": "androproject_gui_src_lib_services_airplay_engine_airplayserveroptions",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/lib/services/airplay-engine.ts",
+      "source_location": "L33",
+      "weight": 1.0,
+      "source": "androproject_gui_src_lib_services_airplay_engine",
+      "target": "androproject_gui_src_lib_services_airplay_engine_default_airplay_options",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/lib/services/airplay-engine.ts",
+      "source_location": "L216",
+      "weight": 1.0,
+      "source": "androproject_gui_src_lib_services_airplay_engine",
+      "target": "androproject_gui_src_lib_services_airplay_engine_g",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/lib/services/airplay-engine.ts",
+      "source_location": "L24",
+      "weight": 1.0,
+      "source": "androproject_gui_src_lib_services_airplay_engine",
+      "target": "androproject_gui_src_lib_services_airplay_engine_iairplayreceiverengine",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/lib/services/projection-coordinator.ts",
+      "source_location": "L9",
+      "weight": 1.0,
+      "source": "androproject_gui_src_lib_services_projection_coordinator",
+      "target": "androproject_gui_src_lib_services_airplay_engine",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/lib/services/projection-coordinator.ts",
+      "source_location": "L9",
+      "weight": 1.0,
+      "source": "androproject_gui_src_lib_services_projection_coordinator",
+      "target": "androproject_gui_src_lib_services_airplay_engine_airplayserveroptions",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "context": "generic_arg",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/lib/services/projection-coordinator.ts",
+      "source_location": "L14",
+      "weight": 1.0,
+      "source": "androproject_gui_src_lib_services_projection_coordinator_projectionlaunchoptions",
+      "target": "androproject_gui_src_lib_services_airplay_engine_airplayserveroptions",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "implements",
+      "context": "type",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/lib/services/airplay-engine.ts",
+      "source_location": "L44",
+      "weight": 1.0,
+      "source": "androproject_gui_src_lib_services_airplay_engine_airplayreceiverengine",
+      "target": "androproject_gui_src_lib_services_airplay_engine_iairplayreceiverengine",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/lib/services/airplay-engine.ts",
+      "source_location": "L28",
+      "weight": 1.0,
+      "source": "androproject_gui_src_lib_services_airplay_engine_iairplayreceiverengine",
+      "target": "androproject_gui_src_lib_services_airplay_engine_iairplayreceiverengine_getconnecteddevices",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/lib/services/airplay-engine.ts",
+      "source_location": "L27",
+      "weight": 1.0,
+      "source": "androproject_gui_src_lib_services_airplay_engine_iairplayreceiverengine",
+      "target": "androproject_gui_src_lib_services_airplay_engine_iairplayreceiverengine_getstatus",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/lib/services/airplay-engine.ts",
+      "source_location": "L30",
+      "weight": 1.0,
+      "source": "androproject_gui_src_lib_services_airplay_engine_iairplayreceiverengine",
+      "target": "androproject_gui_src_lib_services_airplay_engine_iairplayreceiverengine_setpin",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/lib/services/airplay-engine.ts",
+      "source_location": "L29",
+      "weight": 1.0,
+      "source": "androproject_gui_src_lib_services_airplay_engine_iairplayreceiverengine",
+      "target": "androproject_gui_src_lib_services_airplay_engine_iairplayreceiverengine_setservername",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/lib/services/airplay-engine.ts",
+      "source_location": "L25",
+      "weight": 1.0,
+      "source": "androproject_gui_src_lib_services_airplay_engine_iairplayreceiverengine",
+      "target": "androproject_gui_src_lib_services_airplay_engine_iairplayreceiverengine_start",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/lib/services/airplay-engine.ts",
+      "source_location": "L26",
+      "weight": 1.0,
+      "source": "androproject_gui_src_lib_services_airplay_engine_iairplayreceiverengine",
+      "target": "androproject_gui_src_lib_services_airplay_engine_iairplayreceiverengine_stop",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/lib/services/airplay-engine.ts",
+      "source_location": "L62",
+      "weight": 1.0,
+      "source": "androproject_gui_src_lib_services_airplay_engine_airplayreceiverengine",
+      "target": "androproject_gui_src_lib_services_airplay_engine_airplayreceiverengine_checkinitialstate",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/lib/services/airplay-engine.ts",
+      "source_location": "L58",
+      "weight": 1.0,
+      "source": "androproject_gui_src_lib_services_airplay_engine_airplayreceiverengine",
+      "target": "androproject_gui_src_lib_services_airplay_engine_airplayreceiverengine_constructor",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/lib/services/airplay-engine.ts",
+      "source_location": "L173",
+      "weight": 1.0,
+      "source": "androproject_gui_src_lib_services_airplay_engine_airplayreceiverengine",
+      "target": "androproject_gui_src_lib_services_airplay_engine_airplayreceiverengine_getconnecteddevices",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/lib/services/airplay-engine.ts",
+      "source_location": "L124",
+      "weight": 1.0,
+      "source": "androproject_gui_src_lib_services_airplay_engine_airplayreceiverengine",
+      "target": "androproject_gui_src_lib_services_airplay_engine_airplayreceiverengine_getstatus",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/lib/services/airplay-engine.ts",
+      "source_location": "L151",
+      "weight": 1.0,
+      "source": "androproject_gui_src_lib_services_airplay_engine_airplayreceiverengine",
+      "target": "androproject_gui_src_lib_services_airplay_engine_airplayreceiverengine_registerclient",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/lib/services/airplay-engine.ts",
+      "source_location": "L205",
+      "weight": 1.0,
+      "source": "androproject_gui_src_lib_services_airplay_engine_airplayreceiverengine",
+      "target": "androproject_gui_src_lib_services_airplay_engine_airplayreceiverengine_setpin",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/lib/services/airplay-engine.ts",
+      "source_location": "L196",
+      "weight": 1.0,
+      "source": "androproject_gui_src_lib_services_airplay_engine_airplayreceiverengine",
+      "target": "androproject_gui_src_lib_services_airplay_engine_airplayreceiverengine_setservername",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/lib/services/airplay-engine.ts",
+      "source_location": "L72",
+      "weight": 1.0,
+      "source": "androproject_gui_src_lib_services_airplay_engine_airplayreceiverengine",
+      "target": "androproject_gui_src_lib_services_airplay_engine_airplayreceiverengine_start",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/lib/services/airplay-engine.ts",
+      "source_location": "L104",
+      "weight": 1.0,
+      "source": "androproject_gui_src_lib_services_airplay_engine_airplayreceiverengine",
+      "target": "androproject_gui_src_lib_services_airplay_engine_airplayreceiverengine_stop",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/lib/services/airplay-engine.ts",
+      "source_location": "L166",
+      "weight": 1.0,
+      "source": "androproject_gui_src_lib_services_airplay_engine_airplayreceiverengine",
+      "target": "androproject_gui_src_lib_services_airplay_engine_airplayreceiverengine_unregisterclient",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/lib/services/projection-coordinator.ts",
+      "source_location": "L9",
+      "weight": 1.0,
+      "source": "androproject_gui_src_lib_services_projection_coordinator",
+      "target": "androproject_gui_src_lib_services_airplay_engine_airplayreceiverengine",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/lib/services/airplay-engine.ts",
+      "source_location": "L59",
+      "weight": 1.0,
+      "source": "androproject_gui_src_lib_services_airplay_engine_airplayreceiverengine_constructor",
+      "target": "androproject_gui_src_lib_services_airplay_engine_airplayreceiverengine_checkinitialstate",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/lib/services/airplay-engine.ts",
+      "source_location": "L200",
+      "weight": 1.0,
+      "source": "androproject_gui_src_lib_services_airplay_engine_airplayreceiverengine_setservername",
+      "target": "androproject_gui_src_lib_services_airplay_engine_airplayreceiverengine_start",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/lib/services/airplay-engine.ts",
+      "source_location": "L92",
+      "weight": 1.0,
+      "source": "androproject_gui_src_lib_services_airplay_engine_airplayreceiverengine_start",
+      "target": "androproject_gui_src_lib_services_airplay_engine_airplayreceiverengine_getstatus",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/lib/services/airplay-engine.ts",
+      "source_location": "L77",
+      "weight": 1.0,
+      "source": "androproject_gui_src_lib_services_airplay_engine_airplayreceiverengine_start",
+      "target": "androproject_gui_src_lib_services_airplay_engine_airplayreceiverengine_stop",
       "confidence_score": 1.0
     },
     {
@@ -22385,8 +23457,124 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "androproject-gui/src/lib/services/scrcpy-engine.ts",
+      "source_file": "androproject-gui/src/lib/services/projection-coordinator.ts",
+      "source_location": "L66",
+      "weight": 1.0,
+      "source": "androproject_gui_src_lib_services_projection_coordinator",
+      "target": "androproject_gui_src_lib_services_projection_coordinator_projectioncoordinator",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/lib/services/projection-coordinator.ts",
+      "source_location": "L12",
+      "weight": 1.0,
+      "source": "androproject_gui_src_lib_services_projection_coordinator",
+      "target": "androproject_gui_src_lib_services_projection_coordinator_projectionlaunchoptions",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/lib/services/projection-coordinator.ts",
+      "source_location": "L8",
+      "weight": 1.0,
+      "source": "androproject_gui_src_lib_services_projection_coordinator",
+      "target": "androproject_gui_src_lib_services_scrcpy_engine",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/lib/services/projection-coordinator.ts",
+      "source_location": "L8",
+      "weight": 1.0,
+      "source": "androproject_gui_src_lib_services_projection_coordinator",
+      "target": "androproject_gui_src_lib_services_scrcpy_engine_visionnanoengine",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/lib/services/projection-coordinator.ts",
+      "source_location": "L8",
+      "weight": 1.0,
+      "source": "androproject_gui_src_lib_services_projection_coordinator",
+      "target": "androproject_gui_src_lib_services_scrcpy_engine_visionnanooptions",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/lib/services/projection-coordinator.ts",
+      "source_location": "L8",
+      "weight": 1.0,
+      "source": "androproject_gui_src_lib_services_projection_coordinator",
+      "target": "androproject_gui_src_lib_services_scrcpy_engine_visionnanoresult",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "inherits",
+      "context": "type",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/lib/services/projection-coordinator.ts",
+      "source_location": "L12",
+      "weight": 1.0,
+      "source": "androproject_gui_src_lib_services_projection_coordinator_projectionlaunchoptions",
+      "target": "androproject_gui_src_lib_services_scrcpy_engine_visionnanooptions",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/lib/services/projection-coordinator.ts",
       "source_location": "L54",
+      "weight": 1.0,
+      "source": "androproject_gui_src_lib_services_projection_coordinator_projectioncoordinator",
+      "target": "androproject_gui_src_lib_services_projection_coordinator_projectioncoordinator_isalive",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/lib/services/projection-coordinator.ts",
+      "source_location": "L21",
+      "weight": 1.0,
+      "source": "androproject_gui_src_lib_services_projection_coordinator_projectioncoordinator",
+      "target": "androproject_gui_src_lib_services_projection_coordinator_projectioncoordinator_start",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/lib/services/projection-coordinator.ts",
+      "source_location": "L39",
+      "weight": 1.0,
+      "source": "androproject_gui_src_lib_services_projection_coordinator_projectioncoordinator",
+      "target": "androproject_gui_src_lib_services_projection_coordinator_projectioncoordinator_stop",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "context": "generic_arg",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/lib/services/projection-coordinator.ts",
+      "source_location": "L21",
+      "weight": 1.0,
+      "source": "androproject_gui_src_lib_services_projection_coordinator_projectioncoordinator_start",
+      "target": "androproject_gui_src_lib_services_scrcpy_engine_visionnanoresult",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/lib/services/scrcpy-engine.ts",
+      "source_location": "L55",
       "weight": 1.0,
       "source": "androproject_gui_src_lib_services_scrcpy_engine",
       "target": "androproject_gui_src_lib_services_scrcpy_engine_iscrcpyengine",
@@ -22396,7 +23584,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/lib/services/scrcpy-engine.ts",
-      "source_location": "L47",
+      "source_location": "L48",
       "weight": 1.0,
       "source": "androproject_gui_src_lib_services_scrcpy_engine",
       "target": "androproject_gui_src_lib_services_scrcpy_engine_ivisionnanoengine",
@@ -22406,7 +23594,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/lib/services/scrcpy-engine.ts",
-      "source_location": "L35",
+      "source_location": "L36",
       "weight": 1.0,
       "source": "androproject_gui_src_lib_services_scrcpy_engine",
       "target": "androproject_gui_src_lib_services_scrcpy_engine_scrcpyengineoptions",
@@ -22416,7 +23604,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/lib/services/scrcpy-engine.ts",
-      "source_location": "L45",
+      "source_location": "L46",
       "weight": 1.0,
       "source": "androproject_gui_src_lib_services_scrcpy_engine",
       "target": "androproject_gui_src_lib_services_scrcpy_engine_scrcpystreamresult",
@@ -22426,7 +23614,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/lib/services/scrcpy-engine.ts",
-      "source_location": "L174",
+      "source_location": "L178",
       "weight": 1.0,
       "source": "androproject_gui_src_lib_services_scrcpy_engine",
       "target": "androproject_gui_src_lib_services_scrcpy_engine_visionnanoengine",
@@ -22446,7 +23634,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/lib/services/scrcpy-engine.ts",
-      "source_location": "L37",
+      "source_location": "L38",
       "weight": 1.0,
       "source": "androproject_gui_src_lib_services_scrcpy_engine",
       "target": "androproject_gui_src_lib_services_scrcpy_engine_visionnanoresult",
@@ -22457,7 +23645,7 @@
       "context": "type",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/lib/services/scrcpy-engine.ts",
-      "source_location": "L54",
+      "source_location": "L55",
       "weight": 1.0,
       "source": "androproject_gui_src_lib_services_scrcpy_engine_iscrcpyengine",
       "target": "androproject_gui_src_lib_services_scrcpy_engine_ivisionnanoengine",
@@ -22467,7 +23655,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/lib/services/scrcpy-engine.ts",
-      "source_location": "L48",
+      "source_location": "L49",
       "weight": 1.0,
       "source": "androproject_gui_src_lib_services_scrcpy_engine_ivisionnanoengine",
       "target": "androproject_gui_src_lib_services_scrcpy_engine_ivisionnanoengine_buildargs",
@@ -22477,7 +23665,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/lib/services/scrcpy-engine.ts",
-      "source_location": "L51",
+      "source_location": "L52",
       "weight": 1.0,
       "source": "androproject_gui_src_lib_services_scrcpy_engine_ivisionnanoengine",
       "target": "androproject_gui_src_lib_services_scrcpy_engine_ivisionnanoengine_checkalive",
@@ -22487,7 +23675,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/lib/services/scrcpy-engine.ts",
-      "source_location": "L49",
+      "source_location": "L50",
       "weight": 1.0,
       "source": "androproject_gui_src_lib_services_scrcpy_engine_ivisionnanoengine",
       "target": "androproject_gui_src_lib_services_scrcpy_engine_ivisionnanoengine_start",
@@ -22497,7 +23685,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/lib/services/scrcpy-engine.ts",
-      "source_location": "L50",
+      "source_location": "L51",
       "weight": 1.0,
       "source": "androproject_gui_src_lib_services_scrcpy_engine_ivisionnanoengine",
       "target": "androproject_gui_src_lib_services_scrcpy_engine_ivisionnanoengine_stop",
@@ -22508,7 +23696,7 @@
       "context": "type",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/lib/services/scrcpy-engine.ts",
-      "source_location": "L56",
+      "source_location": "L57",
       "weight": 1.0,
       "source": "androproject_gui_src_lib_services_scrcpy_engine_visionnanoengine",
       "target": "androproject_gui_src_lib_services_scrcpy_engine_ivisionnanoengine",
@@ -22518,7 +23706,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/lib/services/scrcpy-engine.ts",
-      "source_location": "L60",
+      "source_location": "L61",
       "weight": 1.0,
       "source": "androproject_gui_src_lib_services_scrcpy_engine_visionnanoengine",
       "target": "androproject_gui_src_lib_services_scrcpy_engine_visionnanoengine_buildargs",
@@ -22528,7 +23716,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/lib/services/scrcpy-engine.ts",
-      "source_location": "L167",
+      "source_location": "L171",
       "weight": 1.0,
       "source": "androproject_gui_src_lib_services_scrcpy_engine_visionnanoengine",
       "target": "androproject_gui_src_lib_services_scrcpy_engine_visionnanoengine_checkalive",
@@ -22538,7 +23726,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/lib/services/scrcpy-engine.ts",
-      "source_location": "L107",
+      "source_location": "L111",
       "weight": 1.0,
       "source": "androproject_gui_src_lib_services_scrcpy_engine_visionnanoengine",
       "target": "androproject_gui_src_lib_services_scrcpy_engine_visionnanoengine_start",
@@ -22548,7 +23736,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/lib/services/scrcpy-engine.ts",
-      "source_location": "L159",
+      "source_location": "L163",
       "weight": 1.0,
       "source": "androproject_gui_src_lib_services_scrcpy_engine_visionnanoengine",
       "target": "androproject_gui_src_lib_services_scrcpy_engine_visionnanoengine_stop",
@@ -22559,7 +23747,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/lib/services/scrcpy-engine.ts",
-      "source_location": "L126",
+      "source_location": "L130",
       "weight": 1.0,
       "source": "androproject_gui_src_lib_services_scrcpy_engine_visionnanoengine_start",
       "target": "androproject_gui_src_lib_services_scrcpy_engine_visionnanoengine_buildargs",
@@ -22571,7 +23759,7 @@
       "deferred": true,
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/lib/services/scrcpy-engine.ts",
-      "source_location": "L122",
+      "source_location": "L126",
       "weight": 1.0,
       "source": "androproject_gui_src_lib_services_scrcpy_engine_visionnanoengine_start",
       "target": "androproject_gui_src_lib_services_stream_manager",
@@ -22583,7 +23771,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "androproject-gui/src/lib/services/scrcpy-engine.ts",
-      "source_location": "L123",
+      "source_location": "L127",
       "weight": 1.0,
       "source": "androproject_gui_src_lib_services_scrcpy_engine_visionnanoengine_start",
       "target": "androproject_gui_src_lib_services_stream_manager_streammanager_cleanup"
@@ -26318,5 +27506,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "9287f4b27860c3a6a64bb7330b43ccd6eaf68c6f"
+  "built_at_commit": "720c0adc26c8881cafb98b4ac78c73e75242e6c2"
 }
