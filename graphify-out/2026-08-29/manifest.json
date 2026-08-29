@@ -465,8 +465,8 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/components/layout/DeviceFrame.tsx": {
-    "mtime": 1788026615.1833818,
-    "ast_hash": "278a0e51e68c71d56ad7030428790567",
+    "mtime": 1788032608.6483963,
+    "ast_hash": "d17edaa9f6bb6841d56a705c35d4317c",
     "semantic_hash": ""
   },
   "androproject-gui/src/components/layout/WirelessConnectModal.tsx": {
@@ -875,8 +875,13 @@
     "semantic_hash": ""
   },
   "launch_ios_projection.ps1": {
-    "mtime": 1788032311.8992388,
-    "ast_hash": "a042cbce5f9c99074e29da3c2059a6cb",
+    "mtime": 1788032618.9344835,
+    "ast_hash": "3c52017738b297d1f2c674940a6eef0b",
+    "semantic_hash": ""
+  },
+  "androproject-gui/src/app/popout/page.tsx": {
+    "mtime": 1788032650.481879,
+    "ast_hash": "85a7d649af33c7e4e8fe0eda0f84a7f0",
     "semantic_hash": ""
   }
 }

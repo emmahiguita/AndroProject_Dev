@@ -15,8 +15,8 @@
     "semantic_hash": ""
   },
   "androproject-gui/electron/main.js": {
-    "mtime": 1786418372.237118,
-    "ast_hash": "fc53f0683c6e518b92363b45125a9253",
+    "mtime": 1788034651.5086884,
+    "ast_hash": "b540f9d38741b5630a411a29a2902bdf",
     "semantic_hash": ""
   },
   "androproject-gui/eslint.config.mjs": {
@@ -882,6 +882,26 @@
   "androproject-gui/src/app/popout/page.tsx": {
     "mtime": 1788032650.481879,
     "ast_hash": "85a7d649af33c7e4e8fe0eda0f84a7f0",
+    "semantic_hash": ""
+  },
+  "androproject-gui/src/app/ios-mirror/page.tsx": {
+    "mtime": 1788034631.7143066,
+    "ast_hash": "4169df875a235b85e6ae45d32af56c81",
+    "semantic_hash": ""
+  },
+  "launch_native_ios_projector.ps1": {
+    "mtime": 1788034447.1135964,
+    "ast_hash": "efe6d7542952393b3cc58c8c328a2f5e",
+    "semantic_hash": ""
+  },
+  "scratch/run_airplay_server.ps1": {
+    "mtime": 1788033344.6942623,
+    "ast_hash": "36e21fe3e33b7c6dccf4d4df89d6dd56",
+    "semantic_hash": ""
+  },
+  "scratch/run_uxplay_clean.ps1": {
+    "mtime": 1788033299.3115227,
+    "ast_hash": "af36148342abf436e90c455746366676",
     "semantic_hash": ""
   }
 }

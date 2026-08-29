@@ -341,6 +341,33 @@ class AirPlayReceiverEngine implements IAirPlayReceiverEngine {
   }
 
   /**
+   * Opens the native/floating iOS projector window on Windows Desktop.
+   */
+  public async openNativeWindow(): Promise<boolean> {
+    try {
+      await this.start();
+      const psCommand = `
+        $AppUrl = "http://localhost:3001/ios-mirror"
+        $ChromePath = (Get-Command chrome.exe -ErrorAction SilentlyContinue).Source
+        if ($ChromePath) {
+            Start-Process chrome.exe -ArgumentList "--app=$AppUrl", "--window-size=430,900", "--window-position=1150,40"
+        } else {
+            Start-Process $AppUrl
+        }
+      `;
+      const encoded = Buffer.from(psCommand, 'utf16le').toString('base64');
+      spawn('powershell.exe', ['-ExecutionPolicy', 'Bypass', '-NoProfile', '-EncodedCommand', encoded], {
+        detached: true,
+        stdio: 'ignore',
+      }).unref();
+      return true;
+    } catch (e) {
+      console.error('[AirPlay Engine] Error opening native window:', e);
+      return false;
+    }
+  }
+
+  /**
    * Registers an incoming iOS AirPlay connection (e.g. from Bonjour handshake).
    */
   public registerClient(clientIp: string, clientName: string = 'iPhone', model: string = 'iPhone 16 Pro') {
@@ -386,31 +413,6 @@ class AirPlayReceiverEngine implements IAirPlayReceiverEngine {
     });
 
     return devices;
-  }
-
-  public async openNativeWindow(): Promise<boolean> {
-    const airplayDir = path.join(process.cwd(), 'bin', 'airplay');
-    const uxplayExe = path.join(airplayDir, 'uxplay-windows.exe');
-    const airplayExe = path.join(airplayDir, 'AirPlayServer.exe');
-
-    const targetExe = fs.existsSync(uxplayExe) ? uxplayExe : airplayExe;
-    const targetArgs = targetExe === uxplayExe
-      ? "-n 'AndroProject [PC]' -nh -vs d3d11videosink -as wasapisink -s 1179x2556@60 -fps 60 -p 7000"
-      : '';
-
-    if (fs.existsSync(targetExe)) {
-      const cmd = targetArgs
-        ? `Start-Process -FilePath '${targetExe}' -ArgumentList "${targetArgs}" -WorkingDirectory '${airplayDir}'`
-        : `Start-Process -FilePath '${targetExe}' -WorkingDirectory '${airplayDir}'`;
-
-      spawn('powershell.exe', ['-NoProfile', '-Command', cmd], {
-        detached: true,
-        stdio: 'ignore',
-        windowsHide: false,
-      }).unref();
-      return true;
-    }
-    return false;
   }
 
   public async setServerName(name: string): Promise<boolean> {

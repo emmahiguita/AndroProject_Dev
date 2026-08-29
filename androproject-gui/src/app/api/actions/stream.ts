@@ -25,10 +25,27 @@ export async function openScreen(ctx: ActionContext, body: {
   alwaysOnTop?: boolean;
   borderless?: boolean;
   videoBuffer?: number | string;
+  platform?: 'android' | 'ios';
 }) {
   const targetSerial = ctx.targetSerial;
+  const isIos = (targetSerial && targetSerial.startsWith('airplay-')) || body.platform === 'ios';
+
+  if (isIos) {
+    const { airPlayReceiverEngine } = await import('@/lib/services/airplay-engine');
+    const result = await airPlayReceiverEngine.start({
+      serverName: 'AndroProject [PC]',
+      port: 7000,
+      pinRequired: false,
+    });
+    return NextResponse.json({
+      success: true,
+      alive: result.running,
+      message: 'Proyector AirPlay 2 iniciado. Conecte su iPhone desde Duplicar Pantalla -> AndroProject [PC].',
+    });
+  }
+
   if (!targetSerial) {
-    return NextResponse.json({ success: false, error: 'No hay un dispositivo Android conectado' }, { status: 400 });
+    return NextResponse.json({ success: false, error: 'No hay un dispositivo conectado' }, { status: 400 });
   }
 
   const result = await scrcpyEngine.start({

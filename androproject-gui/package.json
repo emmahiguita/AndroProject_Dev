@@ -10,6 +10,7 @@
     "start:server": "cross-env PORT=3001 node .next/standalone/server.js",
     "start": "next start",
     "electron": "concurrently --kill-others \"cross-env PORT=3001 next dev -p 3001\" \"wait-on http://127.0.0.1:3001 && electron .\"",
+    "electron:dev": "concurrently --kill-others \"cross-env PORT=3001 next dev -p 3001\" \"wait-on http://127.0.0.1:3001 && electron .\"",
     "electron:fresh": "npm run build && npm run electron",
     "build:win": "npm run build && electron-builder --win dir && xcopy /s /e /i /y .next\\standalone\\node_modules dist\\win-unpacked\\resources\\next-standalone\\node_modules",
     "lint": "eslint"

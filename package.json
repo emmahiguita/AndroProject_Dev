@@ -1,0 +1,13 @@
+{
+  "name": "androproject-root",
+  "version": "2.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "npm --prefix androproject-gui run dev",
+    "build": "npm --prefix androproject-gui run build",
+    "start": "npm --prefix androproject-gui start",
+    "electron": "npm --prefix androproject-gui run electron",
+    "electron:dev": "npm --prefix androproject-gui run electron:dev",
+    "electron:build": "npm --prefix androproject-gui run electron:build"
+  }
+}

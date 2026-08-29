@@ -1,4 +1,5 @@
 {
+  "0": "types.ts",
   "1": "safeExec",
   "2": "devDependencies",
   "3": "config.ts",
@@ -57,6 +58,7 @@
   "56": "samsung-adb.ps1",
   "57": "debloat.ps1",
   "58": "AGENTS.md",
+  "59": "route.ts",
   "60": "index.ts",
   "61": "Button.tsx",
   "62": "DeviceInfoFetcher",
@@ -87,5 +89,13 @@
   "87": "debug_uxplay.js",
   "88": "stress_test_airplay.js",
   "89": "DashboardView.tsx",
-  "90": "launch_ios_projection.ps1"
+  "90": "launch_ios_projection.ps1",
+  "91": "detect.ts",
+  "92": "apps.ts",
+  "93": "diagnostics.ts",
+  "94": "ConfigView.tsx",
+  "95": "page.tsx",
+  "96": "launch_native_ios_projector.ps1",
+  "97": "run_airplay_server.ps1",
+  "98": "run_uxplay_clean.ps1"
 }
