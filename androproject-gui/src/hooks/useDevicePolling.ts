@@ -33,6 +33,7 @@ export function useDevicePolling(): UseDevicePollingResult {
   const storeSetActiveSerial = useAppStore((s) => s.setActiveSerial);
   const selectedRef = useRef(selectedSerial);
   selectedRef.current = selectedSerial;
+  const prevDeviceStrRef = useRef<string>('');
 
   const refresh = useCallback(async () => {
     try {
@@ -60,8 +61,12 @@ export function useDevicePolling(): UseDevicePollingResult {
           ? activeDevice
           : devList.find((d: DeviceInfo) => d.serial === active) || devList[0];
 
-        setDevice(fullDevice);
-        storeSetDevice(fullDevice);
+        const str = JSON.stringify(fullDevice);
+        if (str !== prevDeviceStrRef.current) {
+          prevDeviceStrRef.current = str;
+          setDevice(fullDevice);
+          storeSetDevice(fullDevice);
+        }
       } else {
         setDevice(null);
         storeSetDevice(null);

@@ -111,8 +111,9 @@ export function ConfigView({ addLog }: ConfigViewProps = {}) {
           <div className="space-y-1">
             <NavRow dark={dark} icon={<Settings size={12} />} label="Gestión de apps" onClick={() => setActiveNav('apps')} />
             <NavRow dark={dark} icon={<FolderOpen size={12} />} label="Transferencia de archivos" onClick={() => setActiveNav('archivos')} />
-            <NavRow dark={dark} icon={<Wrench size={12} />} label="Herramientas avanzadas" onClick={() => setActiveNav('herramientas')} />
-            <NavRow dark={dark} icon={<Camera size={12} />} label="Proyección de pantalla" onClick={() => setActiveNav('proyeccion')} />
+            {/* FIX: 'herramientas' y 'proyeccion' no existen en NavSection — corregido a 'tools' y 'projection' */}
+            <NavRow dark={dark} icon={<Wrench size={12} />} label="Herramientas avanzadas" onClick={() => setActiveNav('tools')} />
+            <NavRow dark={dark} icon={<Camera size={12} />} label="Proyección de pantalla" onClick={() => setActiveNav('projection')} />
           </div>
         </Card>
       </div>
@@ -137,8 +138,9 @@ function ConfigRow({ icon, label, value, dark }: {
   };
 
   return (
-    <div className={`flex items-center gap-2 py-1.5 border-b ${dark ? 'border-white/5' : 'border-slate-100'} last:border-0 transition-colors ${dark ? 'hover:bg-white/[0.02]' : 'hover:bg-slate-50'} -mx-1 px-1 rounded-lg`}>
+    <div className={`flex items-center gap-2 py-1.5 border-b ${dark ? 'border-white/5' : 'border-slate-100'} last:border-0 transition-colors ${dark ? 'hover:bg-white/[0.02]' : 'hover:bg-slate-50'} px-1 rounded-lg min-w-0 w-full`}>
       <div className={`shrink-0 ${dark ? 'text-white/35' : 'text-slate-400'}`}>{icon}</div>
+
       <div className="flex-1 min-w-0">
         <p className={`text-[10px] ${dark ? 'text-white/45' : 'text-slate-400'}`}>{label}</p>
         <p className={`text-[10px] font-mono truncate ${dark ? 'text-white/75' : 'text-slate-700'}`} title={value}>{value}</p>

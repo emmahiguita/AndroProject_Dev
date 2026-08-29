@@ -3,9 +3,10 @@
 import React, { useState, useEffect, useMemo, useId } from 'react';
 import {
   Thermometer, Cpu, Activity, Database,
-  RefreshCw, ChevronRight, Terminal, Info, MonitorPlay,
-  Search, Trash2,
+  RefreshCw, ChevronRight, Wrench, Info, MonitorPlay,
+  Search, Trash2, BarChart3, X, Maximize2,
 } from 'lucide-react';
+
 import { useAppStore } from '@/stores';
 import { useTheme } from '@/hooks/useTheme';
 import { useActions } from '@/hooks/useActions';
@@ -139,13 +140,15 @@ export function DashboardView({ device: propDevice, onNavigate }: DashboardViewP
 
   const [appsSearchDash, setAppsSearchDash] = useState('');
   const [appsFilterDash, setAppsFilterDash] = useState<AppsFilterDash>('all');
+  const [showMetricsSheet, setShowMetricsSheet] = useState(false);
 
-  // Fetch apps on mount and every 30s
+  // FIX: Fetch de apps solo al montar (o cuando el device cambia).
+  // El poller cada 30s estaba duplicado — AppsView tiene el suyo propio.
   useEffect(() => {
-    fetchApps();
-    const interval = setInterval(fetchApps, 30000);
-    return () => clearInterval(interval);
-  }, [fetchApps]);
+    if (device) fetchApps();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [device?.serial]);
+
 
   // Filtered + searched apps for dashboard
   const filteredDashApps = useMemo(() => {
@@ -225,51 +228,148 @@ export function DashboardView({ device: propDevice, onNavigate }: DashboardViewP
           </div>
         </div>
 
-        {/* System metrics — 4 compact cards */}
+        {/* ═══ Nano Strip de Telemetría (Ultra Delgado - 24px) ═══ */}
         {device && (
-          <div>
-            <h2 className={`text-xs font-bold mb-2 ${dark ? 'text-white/60' : 'text-slate-600'}`}>Estado del sistema</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-              <MetricCard
-                dark={dark}
-                icon={<Cpu size={14} className="text-emerald-500" />}
-                label="CPU"
-                value={`${cpuPercent}%`}
-                status={cpuStatus}
-                statusColor={cpuStatusColor}
-                data={cpuHistory}
-                sparkColor="#10b981"
-              />
-              <MetricCard
-                dark={dark}
-                icon={<Activity size={14} className="text-blue-500" />}
-                label="RAM"
-                value={`${ramPercent}%`}
-                status={ramStatus}
-                statusColor={ramStatusColor}
-                data={ramHistory}
-                sparkColor="#3b82f6"
-              />
-              <MetricCard
-                dark={dark}
-                icon={<Thermometer size={14} className="text-orange-500" />}
-                label="Temperatura"
-                value={`${tempCelsius}°C`}
-                status={tempStatus}
-                statusColor={tempStatusColor}
-                data={tempHistory}
-                sparkColor="#f97316"
-              />
-              <MetricCard
-                dark={dark}
-                icon={<Database size={14} className="text-purple-500" />}
-                label="Almacenamiento"
-                value={`${storagePercent}%`}
-                status={storStatus}
-                statusColor="purple"
-                data={storHistory}
-                sparkColor="#a855f7"
-              />
+          <div className="flex items-center gap-1.5 overflow-x-auto custom-scrollbar py-0.5">
+            <button
+              type="button"
+              onClick={() => setShowMetricsSheet(true)}
+              className={`flex items-center gap-1.5 px-2 py-1 rounded-full border text-[10px] font-bold transition-all shrink-0 ${
+                dark ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/20' : 'bg-emerald-50 border-emerald-200 text-emerald-700'
+              }`}
+              title="CPU usage — Click para gráficas completas"
+            >
+              <Cpu size={11} />
+              <span>CPU: {cpuPercent}%</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setShowMetricsSheet(true)}
+              className={`flex items-center gap-1.5 px-2 py-1 rounded-full border text-[10px] font-bold transition-all shrink-0 ${
+                dark ? 'bg-blue-500/10 border-blue-500/20 text-blue-400 hover:bg-blue-500/20' : 'bg-blue-50 border-blue-200 text-blue-700'
+              }`}
+              title="RAM usage — Click para análisis de memoria"
+            >
+              <Activity size={11} />
+              <span>RAM: {ramPercent}%</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setShowMetricsSheet(true)}
+              className={`flex items-center gap-1.5 px-2 py-1 rounded-full border text-[10px] font-bold transition-all shrink-0 ${
+                dark ? 'bg-orange-500/10 border-orange-500/20 text-orange-400 hover:bg-orange-500/20' : 'bg-orange-50 border-orange-200 text-orange-700'
+              }`}
+              title="Temperatura del dispositivo"
+            >
+              <Thermometer size={11} />
+              <span>TEMP: {tempCelsius}°C</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setShowMetricsSheet(true)}
+              className={`flex items-center gap-1.5 px-2 py-1 rounded-full border text-[10px] font-bold transition-all shrink-0 ${
+                dark ? 'bg-purple-500/10 border-purple-500/20 text-purple-400 hover:bg-purple-500/20' : 'bg-purple-50 border-purple-200 text-purple-700'
+              }`}
+              title="Almacenamiento interno"
+            >
+              <Database size={11} />
+              <span>DISCO: {storagePercent}%</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setShowMetricsSheet(true)}
+              className={`flex items-center gap-1 px-2 py-1 rounded-full border text-[10px] font-bold shrink-0 transition-all ${
+                dark ? 'bg-white/5 border-white/10 text-white/60 hover:text-white hover:bg-white/10' : 'bg-slate-100 border-slate-200 text-slate-600 hover:bg-slate-200'
+              }`}
+              title="Ver ficha técnica completa"
+            >
+              <BarChart3 size={11} className="text-[#22c97d]" />
+              <span>Detalles</span>
+            </button>
+          </div>
+        )}
+
+        {/* ═══ Modal / Sheet de Telemetría Completa ═══ */}
+        {showMetricsSheet && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-md p-4 animate-in fade-in duration-150">
+            <div className={`w-full max-w-3xl rounded-2xl border p-4 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto custom-scrollbar ${
+              dark ? 'bg-[#0b0f19] border-white/10 text-white' : 'bg-white border-slate-200 text-slate-900'
+            }`}>
+              <div className="flex items-center justify-between pb-3 border-b border-white/10">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-xl bg-emerald-500/15 text-emerald-400 flex items-center justify-center">
+                    <BarChart3 size={16} />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold">Telemetría Completa del Sistema</h3>
+                    <p className="text-[10px] opacity-60">Métricas en tiempo real, histórico de curvas y hardware de Android</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowMetricsSheet(false)}
+                  className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-white/60 hover:text-white transition-colors"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                <MetricCard
+                  dark={dark}
+                  icon={<Cpu size={14} className="text-emerald-500" />}
+                  label="CPU"
+                  value={`${cpuPercent}%`}
+                  status={cpuStatus}
+                  statusColor={cpuStatusColor}
+                  data={cpuHistory}
+                  sparkColor="#10b981"
+                />
+                <MetricCard
+                  dark={dark}
+                  icon={<Activity size={14} className="text-blue-500" />}
+                  label="RAM"
+                  value={`${ramPercent}%`}
+                  status={ramStatus}
+                  statusColor={ramStatusColor}
+                  data={ramHistory}
+                  sparkColor="#3b82f6"
+                />
+                <MetricCard
+                  dark={dark}
+                  icon={<Thermometer size={14} className="text-orange-500" />}
+                  label="Temperatura"
+                  value={`${tempCelsius}°C`}
+                  status={tempStatus}
+                  statusColor={tempStatusColor}
+                  data={tempHistory}
+                  sparkColor="#f97316"
+                />
+                <MetricCard
+                  dark={dark}
+                  icon={<Database size={14} className="text-purple-500" />}
+                  label="Almacenamiento"
+                  value={`${storagePercent}%`}
+                  status={storStatus}
+                  statusColor="purple"
+                  data={storHistory}
+                  sparkColor="#a855f7"
+                />
+              </div>
+
+              <div className="flex justify-end pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowMetricsSheet(false)}
+                  className="px-4 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black text-xs font-bold shadow-lg shadow-emerald-500/20"
+                >
+                  Cerrar Ficha
+                </button>
+              </div>
             </div>
           </div>
         )}
@@ -290,11 +390,12 @@ export function DashboardView({ device: propDevice, onNavigate }: DashboardViewP
               />
               <ActionRow
                 dark={dark}
-                icon={<Terminal size={14} />}
-                title="Abrir Shell ADB"
-                sub="Acceso directo interactivo"
+                icon={<Wrench size={14} />}
+                title="Herramientas del sistema"
+                sub="Reinicios y diagnósticos"
                 onClick={() => nav('tools')}
               />
+
               <ActionRow
                 dark={dark}
                 icon={<RefreshCw size={14} />}
@@ -367,9 +468,9 @@ export function DashboardView({ device: propDevice, onNavigate }: DashboardViewP
                   Cargando aplicaciones...
                 </div>
               ) : filteredDashApps.length > 0 ? (
-                filteredDashApps.map((app) => (
+                filteredDashApps.map((app, idx) => (
                   <div
-                    key={app.packageName}
+                    key={app.packageName ? `${app.packageName}-${idx}` : `app-${idx}`}
                     className={`flex items-center gap-2 px-2 py-1.5 rounded-lg transition-colors group ${dark ? 'hover:bg-white/[0.03]' : 'hover:bg-slate-50'}`}
                   >
                     <div

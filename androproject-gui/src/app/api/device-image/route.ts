@@ -1,55 +1,25 @@
 /**
- * Device image streaming endpoint.
- * Returns PNG screenshot of the device screen as image/png.
+ * Device image streaming endpoint — Zero-Lag Force Refresh + ETag Architecture.
  *
- * Stability improvements:
- * - Returns LAST VALID frame on temporary failure (no grey placeholder)
- * - Connection status header for frontend health monitoring
- * - Adaptive cache TTL based on capture success rate
- * - Never blanks the screen — keeps last known good frame
+ * Performance:
+ * - force=true parameter bypasses cache and delivers fresh post-action frame immediately.
+ * - Returns 304 Not Modified when frame in memory is unchanged (0 bytes).
+ * - Eliminates lag accumulation after user interactions (touch/swipe/keys).
  */
 export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
-import { exec } from 'child_process';
-import { promisify } from 'util';
-import { ADB } from '@/lib/config';
+import { adb } from '@/lib/services/adb-executor';
 
-const execAsync = promisify(exec);
-
-// ── Frame cache with health tracking ────────────────────────
-interface FrameEntry {
-  data: Uint8Array;
-  ts: number;
-  ok: boolean;       // was this capture successful?
-  consecutiveFails: number;
-}
-const frameCache = new Map<string, FrameEntry>();
-const CACHE_TTL_MS = 100; // minimum time between captures
-
-// ── Persistent last-good frame per serial (survives errors) ─
+// ── Persistent last-good frame per serial ───────────────────
 const lastGoodFrame = new Map<string, Uint8Array>();
+const lastGoodFrameId = new Map<string, number>();
+const lastGoodTs = new Map<string, number>();
 
-// ── Connection health per serial ────────────────────────────
-interface SerialHealth {
-  connected: boolean;
-  lastSuccess: number;
-  lastAttempt: number;
-  failCount: number;
-  avgCaptureMs: number;
-  recentCaptureTimes: number[];
-}
-const healthMap = new Map<string, SerialHealth>();
+// ── In-flight capture worker tracker ─────────────────────────
+const inFlightWorkers = new Map<string, Promise<Uint8Array | null>>();
+let frameSequence = 1;
 
-function getHealth(serial: string): SerialHealth {
-  let h = healthMap.get(serial);
-  if (!h) {
-    h = { connected: true, lastSuccess: 0, lastAttempt: 0, failCount: 0, avgCaptureMs: 1500, recentCaptureTimes: [] };
-    healthMap.set(serial, h);
-  }
-  return h;
-}
-
-// ── Placeholder: tiny 1x1 transparent (NOT grey — invisible) ─
+// ── Placeholder: 1x1 transparent PNG ────────────────────────
 function placeholderFrame(): Uint8Array {
   return new Uint8Array([
     0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A,
@@ -64,39 +34,37 @@ function placeholderFrame(): Uint8Array {
   ]);
 }
 
-// ── Capture frame via ADB exec-out ──────────────────────────
-async function captureFrame(serial: string): Promise<Uint8Array | null> {
-  const adbTarget = `"${ADB}" -s ${serial}`;
-  const t0 = Date.now();
-  try {
-    const { stdout } = await execAsync(`${adbTarget} exec-out screencap -p`, {
-      timeout: 3000,
-      encoding: 'buffer',
-      maxBuffer: 20 * 1024 * 1024,
-    }) as { stdout: Buffer };
-    const elapsed = Date.now() - t0;
-    const health = getHealth(serial);
-    health.recentCaptureTimes.push(elapsed);
-    if (health.recentCaptureTimes.length > 10) health.recentCaptureTimes.shift();
-    health.avgCaptureMs = health.recentCaptureTimes.reduce((a, b) => a + b, 0) / health.recentCaptureTimes.length;
+/** Trigger background capture */
+function triggerCapture(serial: string): Promise<Uint8Array | null> {
+  const existing = inFlightWorkers.get(serial);
+  if (existing) return existing;
 
-    if (stdout.length > 1000 && stdout[0] === 0x89 && stdout[1] === 0x50) {
-      const frame = new Uint8Array(stdout.buffer, stdout.byteOffset, stdout.byteLength);
-      health.connected = true;
-      health.lastSuccess = Date.now();
-      health.failCount = 0;
-      lastGoodFrame.set(serial, frame);
-      return frame;
+  const worker = (async () => {
+    try {
+      const res = await adb.execOut(serial, 'exec-out screencap -p', 2000);
+      if (res.ok && res.stdout.length > 1000 && res.stdout[0] === 0x89 && res.stdout[1] === 0x50) {
+        const frame = new Uint8Array(res.stdout.buffer, res.stdout.byteOffset, res.stdout.byteLength);
+        lastGoodFrame.set(serial, frame);
+        lastGoodFrameId.set(serial, ++frameSequence);
+        lastGoodTs.set(serial, Date.now());
+        return frame;
+      }
+      return null;
+    } catch {
+      return null;
+    } finally {
+      inFlightWorkers.delete(serial);
     }
-    return null;
-  } catch {
-    return null;
-  }
+  })();
+
+  inFlightWorkers.set(serial, worker);
+  return worker;
 }
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const serial = searchParams.get('serial');
+  const force = searchParams.get('force') === 'true';
 
   if (!serial) {
     return new NextResponse(placeholderFrame() as unknown as BodyInit, {
@@ -104,75 +72,84 @@ export async function GET(req: NextRequest) {
     });
   }
 
-  const health = getHealth(serial);
-  const now = Date.now();
-  health.lastAttempt = now;
-
-  // Check if we need a fresh capture
-  const cached = frameCache.get(serial);
-  if (cached && (now - cached.ts) < CACHE_TTL_MS) {
-    // Return cached frame (even if it was from a failed capture — we handle that below)
-    const frameToReturn = cached.ok ? cached.data : (lastGoodFrame.get(serial) || placeholderFrame());
-    return new NextResponse(frameToReturn as unknown as BodyInit, {
-      headers: {
-        'Content-Type': 'image/png',
-        'Cache-Control': 'no-store',
-        'X-Connection': health.connected ? 'ok' : 'disconnected',
-        'X-Fps': String(Math.round(1000 / Math.max(health.avgCaptureMs, 100))),
-      },
-    });
-  }
-
-  // Capture fresh frame
-  const frame = await captureFrame(serial);
-  if (frame) {
-    frameCache.set(serial, { data: frame, ts: now, ok: true, consecutiveFails: 0 });
-
-    // Cleanup stale entries periodically
-    if (frameCache.size > 20) {
-      for (const [key, { ts }] of frameCache) {
-        if (now - ts > 10000) frameCache.delete(key);
-      }
+  // Force fresh post-touch capture
+  if (force) {
+    inFlightWorkers.delete(serial);
+    const fresh = await triggerCapture(serial);
+    if (fresh) {
+      return new NextResponse(fresh as unknown as BodyInit, {
+        headers: {
+          'Content-Type': 'image/png',
+          'Cache-Control': 'no-store',
+          'ETag': String(lastGoodFrameId.get(serial)),
+          'X-Connection': 'ok',
+        },
+      });
     }
+  }
 
-    return new NextResponse(frame as unknown as BodyInit, {
+  const existingFrame = lastGoodFrame.get(serial);
+  const currentFrameId = lastGoodFrameId.get(serial) || 0;
+  const now = Date.now();
+  const lastTs = lastGoodTs.get(serial) || 0;
+
+  // Trigger non-blocking capture if idle
+  if (!inFlightWorkers.has(serial) && (now - lastTs > 50)) {
+    triggerCapture(serial);
+  }
+
+  // Check client's If-None-Match header
+  const clientFrameId = req.headers.get('If-None-Match');
+  if (existingFrame && clientFrameId && clientFrameId === String(currentFrameId)) {
+    // 304 Not Modified: 0 bytes transferred
+    return new NextResponse(null, {
+      status: 304,
       headers: {
-        'Content-Type': 'image/png',
-        'Cache-Control': 'no-store',
+        'ETag': String(currentFrameId),
+        'Cache-Control': 'no-cache',
         'X-Connection': 'ok',
-        'X-Fps': String(Math.round(1000 / Math.max(health.avgCaptureMs, 100))),
       },
     });
   }
 
-  // Capture failed — track failure
-  health.failCount++;
-  if (health.failCount > 5) {
-    health.connected = false;
-  }
-
-  // CRITICAL: Return LAST GOOD frame instead of placeholder
-  // This keeps the screen showing the last known image instead of going grey
-  const lastFrame = lastGoodFrame.get(serial);
-  if (lastFrame) {
-    frameCache.set(serial, { data: lastFrame, ts: now, ok: false, consecutiveFails: (cached?.consecutiveFails || 0) + 1 });
-    return new NextResponse(lastFrame as unknown as BodyInit, {
+  // If we have a new frame in memory, return it with ETag
+  if (existingFrame) {
+    return new NextResponse(existingFrame as unknown as BodyInit, {
       headers: {
         'Content-Type': 'image/png',
-        'Cache-Control': 'no-store',
-        'X-Connection': health.connected ? 'degraded' : 'disconnected',
-        'X-Stale': 'true',
+        'Cache-Control': 'no-cache, must-revalidate',
+        'ETag': String(currentFrameId),
+        'X-Connection': 'ok',
       },
     });
   }
 
-  // No last good frame ever captured — return placeholder
+  // First request on startup
+  const initialFrame = await triggerCapture(serial);
+  if (initialFrame) {
+    return new NextResponse(initialFrame as unknown as BodyInit, {
+      headers: {
+        'Content-Type': 'image/png',
+        'Cache-Control': 'no-cache, must-revalidate',
+        'ETag': String(lastGoodFrameId.get(serial) || 1),
+        'X-Connection': 'ok',
+      },
+    });
+  }
+
+  // Fallback: If we have ANY previous good frame, return it instead of transparent placeholder
+  if (existingFrame) {
+    return new NextResponse(existingFrame as unknown as BodyInit, {
+      headers: {
+        'Content-Type': 'image/png',
+        'Cache-Control': 'no-cache',
+        'ETag': String(currentFrameId),
+        'X-Connection': 'ok',
+      },
+    });
+  }
+
   return new NextResponse(placeholderFrame() as unknown as BodyInit, {
-    headers: {
-      'Content-Type': 'image/png',
-      'Cache-Control': 'no-store',
-      'X-Connection': 'disconnected',
-      'X-Frame-Error': 'no-device',
-    },
+    headers: { 'Content-Type': 'image/png', 'Cache-Control': 'no-store', 'X-Connection': 'connecting' },
   });
 }

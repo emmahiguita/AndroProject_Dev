@@ -21,11 +21,11 @@ export interface IAdbExecutor {
   /** Execute an ADB command with timeout. Never throws. */
   exec(args: string, timeoutMs?: number): Promise<AdbExecResult>;
   /** Execute an ADB command against a specific device */
-  execFor(serial: string, args: string, timeoutMs?: number): Promise<AdbExecResult>;
+  execFor(serial?: string, args?: string, timeoutMs?: number): Promise<AdbExecResult>;
   /** Execute a shell command on the device */
-  shell(serial: string, cmd: string, timeoutMs?: number): Promise<AdbExecResult>;
+  shell(serial?: string, cmd?: string, timeoutMs?: number): Promise<AdbExecResult>;
   /** Execute exec-out (for binary data like screencap) */
-  execOut(serial: string, args: string, timeoutMs?: number): Promise<{ ok: boolean; stdout: Buffer; err: string }>;
+  execOut(serial?: string, args?: string, timeoutMs?: number): Promise<{ ok: boolean; stdout: Buffer; err: string }>;
 }
 
 export class AdbExecutor implements IAdbExecutor {
@@ -43,18 +43,21 @@ export class AdbExecutor implements IAdbExecutor {
     }
   }
 
-  async execFor(serial: string, args: string, timeoutMs: number = 10000): Promise<AdbExecResult> {
-    return this.exec(`-s ${serial} ${args}`, timeoutMs);
+  async execFor(serial?: string, args: string = '', timeoutMs: number = 10000): Promise<AdbExecResult> {
+    const prefix = (serial && serial !== 'undefined' && serial !== 'default') ? `-s ${serial} ` : '';
+    return this.exec(`${prefix}${args}`, timeoutMs);
   }
 
-  async shell(serial: string, cmd: string, timeoutMs: number = 15000): Promise<AdbExecResult> {
+  async shell(serial?: string, cmd: string = '', timeoutMs: number = 15000): Promise<AdbExecResult> {
     const safeCmd = cmd.replace(/"/g, '\\"');
-    return this.execFor(serial, `shell "${safeCmd}"`, timeoutMs);
+    const prefix = (serial && serial !== 'undefined' && serial !== 'default') ? `-s ${serial} ` : '';
+    return this.exec(`${prefix}shell "${safeCmd}"`, timeoutMs);
   }
 
-  async execOut(serial: string, args: string, timeoutMs: number = 20000): Promise<{ ok: boolean; stdout: Buffer; err: string }> {
+  async execOut(serial?: string, args: string = '', timeoutMs: number = 20000): Promise<{ ok: boolean; stdout: Buffer; err: string }> {
+    const prefix = (serial && serial !== 'undefined' && serial !== 'default') ? `-s ${serial} ` : '';
     try {
-      const { stdout } = await execAsync(`"${this.adbPath}" -s ${serial} ${args}`, {
+      const { stdout } = await execAsync(`"${this.adbPath}" ${prefix}${args}`, {
         timeout: timeoutMs,
         encoding: 'buffer',
         maxBuffer: 20 * 1024 * 1024,

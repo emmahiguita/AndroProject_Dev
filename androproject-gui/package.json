@@ -15,6 +15,11 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@yume-chan/adb": "^2.6.3",
+    "@yume-chan/adb-scrcpy": "^2.3.2",
+    "@yume-chan/adb-server-node-tcp": "^2.5.2",
+    "@yume-chan/scrcpy": "^2.3.0",
+    "@yume-chan/scrcpy-decoder-webcodecs": "^2.5.3",
     "electron-updater": "^6.8.9",
     "lucide-react": "^1.18.0",
     "next": "16.2.9",

@@ -54,7 +54,8 @@ export function useActions() {
     }
     if (logResult) addLog(`Ejecutando: ${desc}...`);
     try {
-      const dIP = (activeSerial && activeSerial.includes(':5555'))
+      // FIX BUG#7: extraer IP de cualquier puerto (mDNS usa puertos dinamicos como :33085)
+      const dIP = activeSerial?.includes(':') 
         ? activeSerial.split(':')[0]
         : deviceIP;
       const r = await fetch('/api/actions', {
@@ -131,8 +132,10 @@ export function useActions() {
     _setIsPatching: (v: boolean) => void,
     _setPatchLogs: (l: string) => void,
   ) => {
-    const pkg = targetPackage || useAppStore.getState().patchPackage;
-    const isClone = useAppStore.getState().isCloneMode;
+    // FIX BUG#8: leer estado del store directamente sin violar reglas de Hooks
+    const state = useAppStore.getState();
+    const pkg = targetPackage || state.patchPackage;
+    const isClone = state.isCloneMode;
     if (!pkg) {
       _setPatchLogs('Ingresa un nombre de paquete válido');
       return;

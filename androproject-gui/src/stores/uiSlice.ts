@@ -1,15 +1,18 @@
 // ── UI Slice — theming, navigation, logs, config ──────────────────
 import type { StateCreator } from 'zustand';
+import type { NavSection } from '@/features/types';
 
 export interface UISlice {
   dark: boolean;
-  activeNav: string;
+  // FIX: tipo estricto NavSection en lugar de string genérico
+  // Previene errores en tiempo de ejecución como setActiveNav('proyeccion') (clave inexistente)
+  activeNav: NavSection;
   logs: string[];
   configData: Record<string, string>;
   uploadProgress: Record<string, number>;
 
   setDark: (v: boolean) => void;
-  setActiveNav: (nav: string) => void;
+  setActiveNav: (nav: NavSection) => void;
   addLog: (msg: string, ts?: Date) => void;
   setLogs: (l: string[]) => void;
   setConfigData: (d: Record<string, string>) => void;
@@ -18,7 +21,7 @@ export interface UISlice {
 
 export const createUISlice: StateCreator<UISlice, [], [], UISlice> = (set) => ({
   dark: typeof window === 'undefined'
-    ? false
+    ? true
     : window.localStorage.getItem('androproject-theme') !== 'light',
   activeNav: 'dashboard',
   logs: [],

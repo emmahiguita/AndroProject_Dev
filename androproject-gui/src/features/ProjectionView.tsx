@@ -1,9 +1,8 @@
 'use client';
 
 import React from 'react';
-import { Maximize, Minimize, RefreshCw, Smartphone } from 'lucide-react';
+import { Maximize, Minimize } from 'lucide-react';
 import { useTheme } from '@/hooks/useTheme';
-import { useActions } from '@/hooks/useActions';
 import { useSplitPanel } from '@/hooks/useSplitPanel';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { useProjection } from '@/hooks/useProjection';
@@ -12,34 +11,30 @@ import { SplitDivider } from '@/components/projection/SplitDivider';
 import { EmptyState } from '@/components/projection/EmptyState';
 import { DeviceFrame } from '@/components/layout/DeviceFrame';
 import { DeviceInfoPanel } from '@/components/projection/DeviceInfoPanel';
-import type { DeviceInfo, NavSection } from './types';
+import type { DeviceInfo } from './types';
 
 interface ProjectionViewProps {
   device?: DeviceInfo | null;
-  addLog?: (msg: string, type?: 'info' | 'success' | 'error') => void;
-  onNavigate?: (section: NavSection) => void;
 }
 
 /**
- * ProjectionView — Real-time device screen projection.
+ * ProjectionView — Real-time device screen projection studio.
  *
- * Composes:
- *   - useSplitPanel   (drag-to-resize)
- *   - useMediaQuery   (responsive breakpoint)
- *   - useProjection   (scrcpy lifecycle, fullscreen, ADB commands)
- *   - DeviceFrame     (live screen + interaction)
- *   - DeviceInfoPanel (device details + controls)
+ * Clean Architecture (SOLID):
+ *   - DeviceFrame: Screen canvas + touch/gestures + drag & drop + phone nav bar.
+ *   - DeviceInfoPanel: scrcpy native 60 FPS studio, screen recorder, quick tools.
+ *   - Zero duplicate components across panels.
  */
 export function ProjectionView({ device }: ProjectionViewProps) {
   const { dark } = useTheme();
   const isMobile = useMediaQuery('(max-width: 768px)');
-  const { ratio, isDragging, containerRef, onPointerDown, onPointerMove, onPointerUp, onKeyDown } = useSplitPanel({ defaultRatio: 0.60 });
+  const { ratio, isDragging, containerRef, onPointerDown, onPointerMove, onPointerUp, onKeyDown } = useSplitPanel({ defaultRatio: 0.62 });
   const projection = useProjection(device);
 
   if (!device) {
     return (
       <ViewShell navId="projection" fill>
-        <EmptyState dark={dark} />
+        <EmptyState dark={dark} onConnectAdb={projection.connectAdb} isConnecting={projection.isConnecting} />
       </ViewShell>
     );
   }
@@ -60,18 +55,39 @@ export function ProjectionView({ device }: ProjectionViewProps) {
         {/* Page header */}
         <div className="flex items-center justify-between shrink-0 pb-2">
           <div>
-            <h1 className={`text-lg font-bold ${dark ? 'text-white' : 'text-slate-900'}`}>Proyeccion</h1>
+            <div className="flex items-center gap-2">
+              <h1 className={`text-lg font-bold ${dark ? 'text-white' : 'text-slate-900'}`}>
+                Proyección y Control
+              </h1>
+              {projection.scrcpyActive && (
+                <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[9px] font-bold text-emerald-400">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> scrcpy 60 FPS
+                </span>
+              )}
+              {projection.isRecording && (
+                <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-500/10 border border-red-500/20 text-[9px] font-bold text-red-400 animate-pulse">
+                  REC
+                </span>
+              )}
+            </div>
             <p className={`text-[10px] ${dark ? 'text-white/40' : 'text-slate-400'}`}>
-              Pantalla del dispositivo en tiempo real
+              Pantalla interactiva en tiempo real con transmisión nativa por aceleración de hardware
             </p>
           </div>
+
           <div className="flex items-center gap-2">
-            {projection.scrcpyActive && (
-              <span className="flex items-center gap-1 px-2 py-1 rounded-full bg-green-500/10 border border-green-500/20">
-                <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                <span className="text-[9px] font-semibold text-green-400">en vivo</span>
-              </span>
-            )}
+            <button
+              type="button"
+              onClick={projection.toggleFullscreen}
+              title={projection.fullscreen ? 'Salir de pantalla completa' : 'Pantalla completa'}
+              className={`p-1.5 rounded-xl border transition-all ${
+                dark
+                  ? 'bg-white/5 border-white/10 text-white/60 hover:text-white hover:bg-white/10'
+                  : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+              }`}
+            >
+              {projection.fullscreen ? <Minimize size={14} /> : <Maximize size={14} />}
+            </button>
           </div>
         </div>
 
@@ -85,9 +101,16 @@ export function ProjectionView({ device }: ProjectionViewProps) {
           onPointerUp={onPointerUp}
           style={{ userSelect: isDragging ? 'none' : 'auto' }}
         >
-          {/* LEFT — Device screen */}
+          {/* LEFT — Interactive Device Frame */}
           <div className="flex flex-col min-w-0 min-h-0" style={{ width: `${ratio * 100}%` }}>
-            <DeviceFrame device={device} expanded={true} compact={false} onSendKey={projection.sendKey} />
+            <DeviceFrame
+              device={device}
+              expanded={true}
+              compact={false}
+              onSendKey={projection.sendKey}
+              scrcpyActive={projection.scrcpyActive}
+              onToggleScrcpy={projection.toggleScrcpy}
+            />
           </div>
 
           {/* DIVIDER */}
@@ -99,21 +122,32 @@ export function ProjectionView({ device }: ProjectionViewProps) {
             ratio={ratio}
           />
 
-          {/* RIGHT — Info panel */}
+          {/* RIGHT — Studio Tools Panel */}
           <div className="flex flex-col min-h-0 overflow-y-auto overflow-x-hidden" style={{ width: `${(1 - ratio) * 100}%`, minWidth: 0 }}>
             <DeviceInfoPanel
               device={device}
               dark={dark}
               scrcpyActive={projection.scrcpyActive}
               onToggleScrcpy={projection.toggleScrcpy}
+              scrcpyOptions={projection.scrcpyOptions}
+              setScrcpyOptions={projection.setScrcpyOptions}
+              isRecording={projection.isRecording}
+              recordingSeconds={projection.recordingSeconds}
+              onToggleRecord={projection.toggleRecord}
               onScreenshot={projection.screenshot}
               onPowerOff={projection.powerOff}
               onReboot={projection.reboot}
-              onGoBack={projection.goBack}
-              onGoHome={projection.goHome}
-              onOpenRecent={projection.openRecent}
-              onVolumeUp={projection.volumeUp}
-              onVolumeDown={projection.volumeDown}
+              onTogglePowerScreen={projection.togglePowerScreen}
+              onWakeScreen={projection.wakeScreen}
+              onOpenAllApps={projection.openAllApps}
+              onExpandNotifications={projection.expandNotifications}
+              onExpandQuickSettings={projection.expandQuickSettings}
+              onSetOrientation={projection.setOrientation}
+              isBusy={projection.isBusy}
+              onConnectAdb={projection.connectAdb}
+              isConnecting={projection.isConnecting}
+              autoProject={projection.autoProject}
+              onToggleAutoProject={projection.setAutoProject}
             />
           </div>
         </div>
@@ -137,16 +171,12 @@ function MobileProjection({
         dark ? 'border-white/5 bg-white/[0.025]' : 'border-slate-200 bg-slate-50'
       }`}>
         <div className="flex items-center gap-2">
-          <div className={`w-2 h-2 rounded-full ${projection.scrcpyActive ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`} />
+          <div className={`w-2 h-2 rounded-full ${projection.scrcpyActive ? 'bg-green-500 animate-pulse' : 'bg-[#22c97d]'}`} />
           <span className={`text-[11px] font-bold ${dark ? 'text-white' : 'text-slate-900'}`}>{device.model}</span>
         </div>
-        <div className="flex items-center gap-1">
-          {projection.scrcpyActive && (
-            <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-500/10 border border-green-500/20">
-              <span className="text-[8px] font-semibold text-green-400">EN VIVO</span>
-            </span>
-          )}
+        <div className="flex items-center gap-1.5">
           <button
+            type="button"
             onClick={projection.toggleFullscreen}
             className={`p-1.5 rounded-lg transition-all ${
               dark ? 'bg-white/5 text-white/50 hover:bg-white/10' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
@@ -160,63 +190,6 @@ function MobileProjection({
       {/* Device screen */}
       <div className="flex-1 flex items-center justify-center bg-black min-h-0">
         <DeviceFrame device={device} expanded={true} compact={true} onSendKey={projection.sendKey} />
-      </div>
-
-      {/* Bottom navigation bar */}
-      <div className={`shrink-0 border-t px-3 py-2 ${dark ? 'border-white/5 bg-white/[0.025]' : 'border-slate-200 bg-slate-50'}`}>
-        <div className="grid grid-cols-3 gap-2 mb-2">
-          <button
-            onClick={projection.goBack}
-            className={`flex items-center justify-center gap-1.5 py-2 rounded-xl text-[10px] font-semibold transition-all ${
-              dark
-                ? 'bg-white/[0.03] text-white/50 border border-white/[0.06] active:bg-white/[0.08]'
-                : 'bg-white text-slate-500 border border-slate-200 active:bg-slate-50'
-            }`}
-          >
-            <Smartphone size={12} /> Atrás
-          </button>
-          <button
-            onClick={projection.goHome}
-            className={`flex items-center justify-center gap-1.5 py-2 rounded-xl text-[10px] font-semibold transition-all ${
-              dark
-                ? 'bg-[#1bae6e]/15 text-[#22c97d] border border-[#1bae6e]/25 active:bg-[#1bae6e]/30'
-                : 'bg-emerald-50 text-emerald-600 border border-emerald-200 active:bg-emerald-100'
-            }`}
-          >
-            <Smartphone size={12} /> Inicio
-          </button>
-          <button
-            onClick={projection.openRecent}
-            className={`flex items-center justify-center gap-1.5 py-2 rounded-xl text-[10px] font-semibold transition-all ${
-              dark
-                ? 'bg-white/[0.03] text-white/50 border border-white/[0.06] active:bg-white/[0.08]'
-                : 'bg-white text-slate-500 border border-slate-200 active:bg-slate-50'
-            }`}
-          >
-            <Smartphone size={12} /> Recientes
-          </button>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <button
-            onClick={projection.toggleScrcpy}
-            className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-[11px] font-bold transition-all ${
-              projection.scrcpyActive
-                ? (dark ? 'bg-red-500/10 text-red-400 border border-red-500/20' : 'bg-red-50 text-red-600 border border-red-200')
-                : (dark ? 'bg-[#22c97d]/10 text-[#22c97d] border border-[#22c97d]/20' : 'bg-emerald-50 text-emerald-600 border border-emerald-200')
-            }`}
-          >
-            {projection.scrcpyActive ? 'Detener' : 'scrcpy'}
-          </button>
-          <button
-            onClick={projection.screenshot}
-            className={`flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-[11px] font-bold transition-all ${
-              dark ? 'bg-white/5 text-white/60 border border-white/10 active:bg-white/10' : 'bg-slate-100 text-slate-600 border border-slate-200 active:bg-slate-200'
-            }`}
-          >
-            Captura
-          </button>
-        </div>
       </div>
     </div>
   );

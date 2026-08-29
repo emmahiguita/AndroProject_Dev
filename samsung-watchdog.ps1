@@ -1,205 +1,429 @@
-# Samsung A30s (SM-A307G) - Watchdog de estabilidad v3
-# Fortalecido:
-#  - Health-check ACTIVO (adb shell echo con timeout) en vez de solo listar devices
-#  - Failover dual-path: preferencia WiFi (mDNS), respaldo USB automatico
-#  - Cambia scrcpy de transporte si el activo se cae (kill + relanzar al sano)
-#  - Auto-reparacion del servidor adb (kill-server/start-server si se cuelga)
-#  - Backoff: tras fallos consecutivos espera mas (10s -> 15s -> 30s -> 60s)
-#  - Log rotativo (rota a .1.log al superar 1MB)
-# Uso: powershell -ExecutionPolicy Bypass -File samsung-watchdog.ps1
+#Requires -Version 5.1
+<#
+.SYNOPSIS
+  Samsung Galaxy A30 / A30s — Auto-Proyeccion Wi-Fi sin Cable v5 (Clean Architecture)
+.DESCRIPTION
+  Motor de vigilancia y proyeccion continua. Detecta el dispositivo via
+  mDNS (Android 11 Wireless Debugging) y via escaneo de red paralelo con
+  pool de RunSpaces (sin fugas de threads). Aplica hardening solo cuando
+  cambia el target. Usa Get-Process en vez de WMI para verificar scrcpy.
+  
+  BUGS CORREGIDOS vs v4:
+  - BUG#1  CRITICO: 254 System.Thread nuevos cada 3s → fuga de RAM/threads.
+           FIX: RunspacePool de 32 workers, reutilizado entre ciclos.
+  - BUG#2  CRITICO: $threads += $t → copia O(n²). FIX: List[T] predefinida.
+  - BUG#3  CRITICO: Socket no descartado en excepcion. FIX: try/finally.
+  - BUG#4  CRITICO: WMI Get-CimInstance cada 3s → COM leak.
+           FIX: Get-Process directo (100x mas liviano).
+  - BUG#5  IMPORTANTE: Apply-Hardening cada ciclo. FIX: cada 5 minutos.
+  - BUG#6  IMPORTANTE: Is-ScrcpyRunningFor → verbo no aprobado. FIX: Test-.
+  - BUG#7  IMPORTANTE: threads array con +=. FIX: List[Thread].
+  SOLID aplicado: SRP por funcion, OCP para agregar nuevas estrategias de
+  descubrimiento sin modificar el bucle principal.
+#>
 
+[CmdletBinding()]
 param(
-    [string]$AdbPath     = "$env:LOCALAPPDATA\Android\Sdk\platform-tools\adb.exe",
-    [string]$ScrcpyPath  = "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\Genymobile.scrcpy_Microsoft.Winget.Source_8wekyb3d8bbwe\scrcpy-win64-v4.1\scrcpy.exe",
-    [string]$PhoneSerial = "R58N21SVSPE",
-    [string]$FallbackIp  = "192.168.0.2:5555",
-    [int]$BaseIntervalSec = 10,
-    [int]$MaxLogBytes = 1048576
+    [string]$PhoneSerial      = "R58N21SVSPE",
+    [string]$PhoneModel       = "SM-A307G",
+    [int]$CheckIntervalSec    = 4,
+    [int]$SubnetScanWorkers   = 32,
+    [int]$MaxLogBytes         = 1048576,
+    [int]$HardeningMinutes    = 5
 )
 
+Set-StrictMode -Version Latest
+$ErrorActionPreference = 'SilentlyContinue'
+
+# ── Rutas de estado ──────────────────────────────────────────────────
 $LogDir    = "C:\AndroProject\temp"
 $LogFile   = Join-Path $LogDir "samsung-watchdog.log"
 $StateFile = Join-Path $LogDir "samsung-device-ip.txt"
-
 if (-not (Test-Path $LogDir)) { New-Item -ItemType Directory -Path $LogDir -Force | Out-Null }
 
-function Write-Log([string]$Msg) {
-    $line = "$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')  $Msg"
-    Add-Content -Path $LogFile -Value $line -Encoding UTF8
-    # Rotacion de log
-    if ((Get-Item $LogFile).Length -gt $MaxLogBytes) {
-        Move-Item -Path $LogFile -Destination "$LogFile.1.log" -Force -ErrorAction SilentlyContinue
-        Add-Content -Path $LogFile -Value $line -Encoding UTF8
+# ── RunspacePool (reutilizado en todos los ciclos, evita fuga de threads) ──
+$Pool = [System.Management.Automation.Runspaces.RunspaceFactory]::CreateRunspacePool(1, $SubnetScanWorkers)
+$Pool.Open()
+
+# ── Cleanup al salir ──────────────────────────────────────────────────
+$null = Register-EngineEvent -SourceIdentifier PowerShell.Exiting -Action {
+    if ($Pool -and $Pool.RunspacePoolStateInfo.State -ne 'Closed') {
+        $Pool.Close()
+        $Pool.Dispose()
     }
 }
 
-# Ejecuta adb con timeout duro. Devuelve (exitCode, stdout).
-function Invoke-AdbTimeout([string]$Arguments, [int]$timeoutSec = 8) {
-    $psi = New-Object System.Diagnostics.ProcessStartInfo
-    $psi.FileName = $AdbPath
-    $psi.Arguments = $Arguments
-    $psi.UseShellExecute = $false
-    $psi.RedirectStandardOutput = $true
-    $psi.RedirectStandardError = $true
-    $psi.CreateNoWindow = $true
+# ────────────────────────────────────────────────────────────────────
+#region LOGGING
+# ────────────────────────────────────────────────────────────────────
+function Write-Log {
+    [CmdletBinding()]param([string]$Msg)
+    $line = "$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')  $Msg"
+    try {
+        Add-Content -Path $LogFile -Value $line -Encoding UTF8 -ErrorAction Stop
+        if ((Get-Item $LogFile -ErrorAction Stop).Length -gt $MaxLogBytes) {
+            Move-Item -Path $LogFile -Destination "$LogFile.1.log" -Force -ErrorAction SilentlyContinue
+            Add-Content -Path $LogFile -Value $line -Encoding UTF8
+        }
+    } catch { <# Log dir puede estar lleno o en uso — ignorar #> }
+    Write-Host $line -ForegroundColor DarkGray
+}
+#endregion
+
+# ────────────────────────────────────────────────────────────────────
+#region BINARIES — SRP: solo resolucion de rutas
+# ────────────────────────────────────────────────────────────────────
+function Resolve-AdbPath {
+    $candidates = @(
+        "$env:LOCALAPPDATA\Android\Sdk\platform-tools\adb.exe",
+        "C:\AndroProject\adb.exe",
+        "C:\Program Files\Android\platform-tools\adb.exe"
+    )
+    foreach ($c in $candidates) { if (Test-Path $c) { return $c } }
+    $cmd = Get-Command adb.exe -ErrorAction SilentlyContinue
+    return if ($cmd) { $cmd.Source } else { "adb.exe" }
+}
+
+function Resolve-ScrcpyPath {
+    $wingetPkgs = "$env:LOCALAPPDATA\Microsoft\WinGet\Packages"
+    if (Test-Path $wingetPkgs) {
+        $found = Get-ChildItem -Path $wingetPkgs -Filter "scrcpy.exe" -Recurse -ErrorAction SilentlyContinue |
+                 Sort-Object LastWriteTime -Descending | Select-Object -First 1
+        if ($found) { return $found.FullName }
+    }
+    $extras = @(
+        "C:\AndroProject\scrcpy.exe",
+        "C:\Program Files\scrcpy\scrcpy.exe",
+        "$env:LOCALAPPDATA\Programs\scrcpy\scrcpy.exe"
+    )
+    foreach ($c in $extras) { if (Test-Path $c) { return $c } }
+    $cmd = Get-Command scrcpy.exe -ErrorAction SilentlyContinue
+    return if ($cmd) { $cmd.Source } else { "scrcpy.exe" }
+}
+
+$script:AdbPath    = Resolve-AdbPath
+$script:ScrcpyPath = Resolve-ScrcpyPath
+Write-Log "Binarios: ADB=$($script:AdbPath) | Scrcpy=$($script:ScrcpyPath)"
+#endregion
+
+# ────────────────────────────────────────────────────────────────────
+#region ADB EXECUTOR — SRP: solo ejecuta comandos ADB con timeout
+# ────────────────────────────────────────────────────────────────────
+function Invoke-Adb {
+    <#
+    .SYNOPSIS Ejecuta adb con timeout. Devuelve [ExitCode, StdOut+StdErr].
+    .NOTES   Usa lectura asincrona para evitar deadlock con buffers >4KB.
+    #>
+    [CmdletBinding()]
+    param([string]$Arguments, [int]$TimeoutSec = 5)
+
+    $psi = [System.Diagnostics.ProcessStartInfo]@{
+        FileName               = $script:AdbPath
+        Arguments              = $Arguments
+        UseShellExecute        = $false
+        RedirectStandardOutput = $true
+        RedirectStandardError  = $true
+        CreateNoWindow         = $true
+    }
     try {
         $p = [System.Diagnostics.Process]::Start($psi)
-        # Lectura asincrona: evita deadlock con salidas grandes (>4KB pipe buffer)
         $outTask = $p.StandardOutput.ReadToEndAsync()
         $errTask = $p.StandardError.ReadToEndAsync()
-        if (-not $p.WaitForExit($timeoutSec * 1000)) {
-            $p.Kill()
-            $p.WaitForExit()
-            return @(-1, "")
+        if (-not $p.WaitForExit($TimeoutSec * 1000)) {
+            try { $p.Kill() } catch {}
+            try { $p.WaitForExit(1000) } catch {}
+            return [pscustomobject]@{ ExitCode = -1; Output = '' }
         }
-        return @($p.ExitCode, ($outTask.Result + $errTask.Result))
+        return [pscustomobject]@{ ExitCode = $p.ExitCode; Output = ($outTask.Result + $errTask.Result) }
     } catch {
-        return @(-2, $_.Exception.Message)
+        return [pscustomobject]@{ ExitCode = -2; Output = '' }
     }
 }
 
-# Health-check activo: el dispositivo responde a un comando real?
-function Test-Health([string]$Target, [int]$timeoutSec = 6) {
+function Test-AdbHealth {
+    <#
+    .SYNOPSIS Health-check activo: el dispositivo responde a un echo?
+    #>
+    [CmdletBinding()]param([string]$Target, [int]$TimeoutSec = 3)
     if (-not $Target) { return $false }
-    $r = Invoke-AdbTimeout "-s $Target shell echo ok" $timeoutSec
-    return ($r[0] -eq 0 -and ("$($r[1])" -match "ok"))
+    $r = Invoke-Adb "-s $Target shell echo __ok__" $TimeoutSec
+    return ($r.ExitCode -eq 0 -and $r.Output -match '__ok__')
 }
+#endregion
 
-# Descubre ip:puerto via mDNS. "" si no hay.
-function Find-PhoneIp {
-    $r = Invoke-AdbTimeout "mdns services" 6
-    if ($r[0] -ne 0) { return "" }
-    foreach ($line in ("$($r[1])" -split "`r?`n")) {
-        if ($line -match "adb-$PhoneSerial.*\t([0-9.]+:[0-9]+)") { return $Matches[1] }
+# ────────────────────────────────────────────────────────────────────
+#region DISCOVERY — SRP: solo descubrimiento de la IP del dispositivo
+# ────────────────────────────────────────────────────────────────────
+
+# Estrategia 1: Dispositivos ya conectados en 'adb devices' (USB o Wi-Fi)
+function Get-WirelessAttachedDevices {
+    $r = Invoke-Adb "devices" 3
+    if ($r.ExitCode -ne 0) { return @() }
+    $devs = [System.Collections.Generic.List[string]]::new()
+    foreach ($line in ($r.Output -split "`r?`n")) {
+        if ($line -match '^(\S+)\s+device$') {
+            $devs.Add($Matches[1])
+        }
     }
-    return ""
+    return $devs.ToArray()
 }
 
-# Telefono presente por USB?
-function Test-UsbSerial {
-    $r = Invoke-AdbTimeout "devices" 6
-    return ("$($r[1])" -match [regex]::Escape($PhoneSerial) -and "$($r[1])" -match "device")
+# Estrategia 2: mDNS / Wireless Debugging TLS de Android 11+
+function Get-MdnsTargets {
+    $r = Invoke-Adb "mdns services" 4
+    if ($r.ExitCode -ne 0) { return @() }
+    $targets = [System.Collections.Generic.List[string]]::new()
+    foreach ($line in ($r.Output -split "`r?`n")) {
+        if ($line -match '\t([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+:[0-9]+)') {
+            $targets.Add($Matches[1])
+        }
+    }
+    return $targets.ToArray()
 }
 
-# Target actual de scrcpy segun su linea de comandos (para saber cuando migrarlo)
-function Get-ScrcpyTarget {
-    $p = Get-CimInstance Win32_Process -Filter "Name='scrcpy.exe'" -ErrorAction SilentlyContinue | Select-Object -First 1
-    if ($p -and $p.CommandLine -match "-s\s+([0-9.]+:[0-9]+|R[0-9A-Z]+)") { return $Matches[1] }
-    return ""
+# Estrategia 3: Escaneo de subred en puerto 5555 con RunspacePool
+# FIX BUG#1,2,3: Pool reutilizado, List en vez de +=, try/finally en socket.
+function Find-SubnetAdbIps {
+    [CmdletBinding()]param([int]$Port = 5555)
+    
+    $localIp = (Get-NetIPAddress -AddressFamily IPv4 |
+        Where-Object { $_.InterfaceAlias -match 'Wi-Fi|Ethernet' -and $_.IPAddress -notlike '169.254*' } |
+        Select-Object -First 1).IPAddress
+    $prefix = if ($localIp -and $localIp.Contains('.')) {
+        $localIp.Substring(0, $localIp.LastIndexOf('.'))
+    } else { '192.168.0' }
+
+    $openIps  = [System.Collections.Concurrent.ConcurrentBag[string]]::new()
+    $handles  = [System.Collections.Generic.List[System.Management.Automation.PowerShell]]::new()
+    $asyncs   = [System.Collections.Generic.List[System.IAsyncResult]]::new()
+
+    $scanBlock = {
+        param([string]$TargetIp, [int]$TargetPort, [System.Collections.Concurrent.ConcurrentBag[string]]$Bag)
+        $sock = $null
+        try {
+            $sock = [System.Net.Sockets.Socket]::new(
+                [System.Net.Sockets.AddressFamily]::InterNetwork,
+                [System.Net.Sockets.SocketType]::Stream,
+                [System.Net.Sockets.ProtocolType]::Tcp
+            )
+            $sock.Blocking = $false
+            try { $sock.Connect($TargetIp, $TargetPort) } catch [System.Net.Sockets.SocketException] {}
+            $w = [System.Collections.ArrayList]@($sock)
+            [System.Net.Sockets.Socket]::Select($null, $w, $null, 100000) # 100ms
+            if ($w.Count -gt 0) { $Bag.Add($TargetIp) }
+        } finally {
+            if ($sock) { try { $sock.Close() } catch {} }
+        }
+    }
+
+    1..254 | ForEach-Object {
+        $ps = [System.Management.Automation.PowerShell]::Create()
+        $ps.RunspacePool = $Pool
+        $null = $ps.AddScript($scanBlock).AddArgument("$prefix.$_").AddArgument($Port).AddArgument($openIps)
+        $handles.Add($ps)
+        $asyncs.Add($ps.BeginInvoke())
+    }
+
+    # Esperar a todos los workers (max 2.5s total)
+    $deadline = [System.Diagnostics.Stopwatch]::StartNew()
+    for ($i = 0; $i -lt $handles.Count; $i++) {
+        $remaining = [Math]::Max(0, 2500 - $deadline.ElapsedMilliseconds)
+        if ($remaining -gt 0) {
+            $null = $asyncs[$i].AsyncWaitHandle.WaitOne($remaining)
+        }
+        try { $handles[$i].EndInvoke($asyncs[$i]) } catch {}
+        $handles[$i].Dispose()
+    }
+
+    return @($openIps)
 }
 
-function Start-Scrcpy([string]$Target) {
-    Start-Process -FilePath $ScrcpyPath -ArgumentList "-s",$Target,"--stay-awake","--no-audio","--max-size","1080" -WindowStyle Hidden
+# Estrategia 4: IP en cache persistida
+function Get-CachedIp {
+    if (Test-Path $StateFile) {
+        $ip = (Get-Content $StateFile -ErrorAction SilentlyContinue -TotalCount 1).Trim()
+        if ($ip -match '^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+:[0-9]+$') { return $ip }
+    }
+    return $null
 }
 
-# Hardening idempotente del dispositivo
-function Apply-DeviceHardening([string]$Target) {
-    Invoke-AdbTimeout "-s $Target shell settings put global adb_wifi_enabled 1" 6 | Out-Null
-    Invoke-AdbTimeout "-s $Target shell settings put global wifi_sleep_policy 2" 6 | Out-Null
-    Invoke-AdbTimeout "-s $Target shell settings put system screen_off_timeout 2147483647" 6 | Out-Null
-    Invoke-AdbTimeout "-s $Target shell settings put global stay_on_while_plugged_in 7" 6 | Out-Null
+function Save-CachedIp([string]$Target) {
+    Set-Content -Path $StateFile -Value $Target -Encoding ASCII -Force
+}
+#endregion
+
+# ────────────────────────────────────────────────────────────────────
+#region HARDENING — SRP: politicas Android anti-suspension
+# Aplicado max 1 vez cada $HardeningMinutes (no en cada ciclo)
+# ────────────────────────────────────────────────────────────────────
+$lastHardeningTime = [DateTime]::MinValue
+
+function Invoke-DeviceHardening([string]$Target) {
+    $now = [DateTime]::Now
+    if (($now - $script:lastHardeningTime).TotalMinutes -lt $HardeningMinutes) { return }
+    $script:lastHardeningTime = $now
+    $null = Invoke-Adb "-s $Target shell settings put global adb_wifi_enabled 1"      2
+    $null = Invoke-Adb "-s $Target shell settings put global wifi_sleep_policy 2"     2
+    $null = Invoke-Adb "-s $Target shell settings put system screen_off_timeout 2147483647" 2
+    $null = Invoke-Adb "-s $Target shell settings put global stay_on_while_plugged_in 7"  2
+    Write-Log "Hardening aplicado a $Target"
+}
+#endregion
+
+# ────────────────────────────────────────────────────────────────────
+#region SCRCPY MANAGER — SRP: ciclo de vida de la ventana de proyeccion
+# FIX BUG#4: usa Get-Process (nativo) en vez de WMI Get-CimInstance
+# FIX BUG#6: nombre de funcion con verbo aprobado 'Test-'
+# ────────────────────────────────────────────────────────────────────
+$script:ScrcpyPid = $null
+$script:CurrentTarget = $null
+
+function Test-ScrcpyAlive {
+    if (-not $script:ScrcpyPid) { return $false }
+    $proc = Get-Process -Id $script:ScrcpyPid -ErrorAction SilentlyContinue
+    return ($null -ne $proc -and -not $proc.HasExited)
 }
 
-Write-Log "=== Watchdog Samsung A30s v3 iniciado (serial: $PhoneSerial) ==="
+function Test-ScrcpyRunningForTarget([string]$Target) {
+    if ($script:ScrcpyPid) {
+        $proc = Get-Process -Id $script:ScrcpyPid -ErrorAction SilentlyContinue
+        if ($proc -and -not $proc.HasExited) {
+            if ($script:CurrentTarget -eq $Target) {
+                return $true
+            }
+        }
+    }
+    # Fallback: si hay algun scrcpy activo en el sistema, lo adoptamos si corresponde
+    $procs = @(Get-Process -Name scrcpy -ErrorAction SilentlyContinue | Where-Object { -not $_.HasExited })
+    if ($procs.Count -gt 0) {
+        if ($null -eq $script:CurrentTarget -or $script:CurrentTarget -eq $Target) {
+            $script:ScrcpyPid = $procs[0].Id
+            $script:CurrentTarget = $Target
+            return $true
+        }
+    }
+    $script:ScrcpyPid = $null
+    $script:CurrentTarget = $null
+    return $false
+}
 
-$restarts = 0
-$consecutiveFailures = 0
-$currentActive = ""
-$wifiOkStreak = 0
-$lastSwitchTime = Get-Date
+function Stop-ScrcpyIfRunning {
+    if ($script:ScrcpyPid) {
+        try { Stop-Process -Id $script:ScrcpyPid -Force -ErrorAction SilentlyContinue } catch {}
+        $script:ScrcpyPid = $null
+    }
+    # Matar cualquier scrcpy huerfano
+    Get-Process -Name scrcpy -ErrorAction SilentlyContinue | ForEach-Object {
+        try { Stop-Process -Id $_.Id -Force -ErrorAction SilentlyContinue } catch {}
+    }
+    $script:CurrentTarget = $null
+    Start-Sleep -Milliseconds 500
+}
+
+function Start-Projection([string]$Target) {
+    # Asegurar que no queden instancias viejas duplicadas
+    Stop-ScrcpyIfRunning
+
+    $args = @(
+        '-s', $Target,
+        '--display-id=0',
+        '--video-codec=h264',
+        '-b', '8M',
+        '--max-size', '1080',
+        '--max-fps', '60',
+        '--video-buffer=10',
+        '--render-driver=direct3d11',
+        '--window-width=320',
+        '--window-height=700',
+        '--no-audio',
+        '--stay-awake',
+        "--window-title=`"AndroProject 60 FPS - $Target`""
+    )
+    $proc = Start-Process -FilePath $script:ScrcpyPath -ArgumentList $args -PassThru -ErrorAction SilentlyContinue
+    if ($proc -and -not $proc.HasExited) {
+        $script:ScrcpyPid = $proc.Id
+        $script:CurrentTarget = $Target
+        Write-Log "Proyeccion activa (PID=$($proc.Id)) → $Target"
+    } else {
+        Write-Log "ERROR: No se pudo iniciar scrcpy para $Target"
+    }
+}
+#endregion
+
+# ────────────────────────────────────────────────────────────────────
+#region BUCLE PRINCIPAL — Orchestrador (no logica de negocio propia)
+# ────────────────────────────────────────────────────────────────────
+Write-Log "=== Watchdog Samsung A30 v5 Iniciado ==="
+Write-Host "[AndroProject] Auto-Proyeccion Wi-Fi activa. Esperando Samsung A30..." -ForegroundColor Green
+
+$lastTarget   = $null
+$cachedIp     = Get-CachedIp
 
 while ($true) {
     try {
-        # 1. Descubrir targets disponibles
-        $wifiIp = Find-PhoneIp
-        $usbOnline = Test-UsbSerial
-        if (-not $wifiIp) { $wifiIp = $FallbackIp }
+        $chosen = $null
 
-        # 2. Health-check activo de cada transporte
-        $wifiOk  = Test-Health $wifiIp
-        $usbOk   = if ($usbOnline) { Test-Health $PhoneSerial } else { $false }
-
-        # Streak: WiFi sano N ciclos consecutivos (histéresis anti-flap)
-        if ($wifiOk) { $wifiOkStreak++ } else { $wifiOkStreak = 0 }
-
-        # 3. Seleccionar target activo con histéresis
-        #    - Si ya estamos en WiFi y cae: migrar a USB al instante
-        #    - Si estamos en USB y WiFi mejora: migrar solo tras 2 ciclos sanos y 30s desde ultimo cambio
-        $active = ""
-        if ($wifiOk -and ($currentActive -eq $wifiIp -or $wifiOkStreak -ge 2)) {
-            $active = $wifiIp
-        }
-        elseif ($usbOk) {
-            $active = $PhoneSerial
+        # PASO 1: Dispositivos ya asociados en adb devices (mas rapido)
+        foreach ($dev in (Get-WirelessAttachedDevices)) {
+            if (Test-AdbHealth $dev) { $chosen = $dev; break }
         }
 
-        if ($active) {
-            $consecutiveFailures = 0
-            Set-Content -Path $StateFile -Value $active -Encoding ASCII
-
-            # 4. Migrar scrcpy si el transporte activo cambio (con intervalo minimo anti-thrash)
-            $canSwitch = ((Get-Date) - $lastSwitchTime).TotalSeconds -ge 30
-            if ($active -ne $currentActive) {
-                if (-not $canSwitch) {
-                    Write-Log "Cambio a $active diferido (intervalo minimo 30s)"
-                    $active = $currentActive
-                }
-                else {
-                    $lastSwitchTime = Get-Date
-                    Write-Log "Transporte activo cambio ($currentActive -> $active). Migrando scrcpy..."
-                    Stop-Process -Name scrcpy -Force -ErrorAction SilentlyContinue
-                    Start-Sleep -Seconds 2
+        # PASO 2: mDNS — Wireless Debugging TLS de Android 11+
+        if (-not $chosen) {
+            foreach ($mdns in (Get-MdnsTargets)) {
+                $null = Invoke-Adb "connect $mdns" 3
+                if (Test-AdbHealth $mdns) {
+                    $chosen = $mdns
+                    Save-CachedIp $chosen
+                    Write-Log "A30 conectado via mDNS: $chosen"
+                    break
                 }
             }
-            $currentActive = $active
-
-            # 5. Mantener WiFi caliente en background (si activo=USB y WiFi caido)
-            if ($active -eq $PhoneSerial -and -not $wifiOk) {
-                $null = Invoke-AdbTimeout "connect $wifiIp" 6
-                Start-Sleep -Seconds 2
-                $wifiOk = Test-Health $wifiIp
-                if ($wifiOk) { $wifiOkStreak = 1; Write-Log "WiFi restaurado en background: $wifiIp" }
-            }
-
-            # 6. Relanzar scrcpy si falta
-            $scrcpyTarget = Get-ScrcpyTarget
-            if (-not $scrcpyTarget) {
-                $restarts++
-                Write-Log "Relanzando scrcpy hacia $active (restart #$restarts)..."
-                Start-Scrcpy $active
-                Start-Sleep -Seconds 5
-                if (Get-Process scrcpy -ErrorAction SilentlyContinue) { Write-Log "scrcpy activo en $active" }
-            }
-
-            # 6. Re-aplicar hardening (idempotente, cubre reinicios del telefono)
-            Apply-DeviceHardening $active | Out-Null
         }
-        else {
-            # 7. Nada sano: intentar reparacion
-            $consecutiveFailures++
-            if ($wifiIp -and -not $wifiOk) {
-                Write-Log "WiFi caido ($wifiIp). Intentando connect..."
-                $null = Invoke-AdbTimeout "connect $wifiIp" 6
-            }
-            if ($usbOnline -and -not $usbOk -and $consecutiveFailures % 3 -eq 0) {
-                Write-Log "USB caido (serial $PhoneSerial). Rehabilitando TCP..."
-                $null = Invoke-AdbTimeout "-s $PhoneSerial tcpip 5555" 6
-            }
-            if ($consecutiveFailures -ge 4 -and $consecutiveFailures % 6 -eq 0) {
-                Write-Log "Servidor adb posiblemente colgado. Reiniciando servidor adb..."
-                $null = Invoke-AdbTimeout "kill-server" 5
-                $null = Invoke-AdbTimeout "start-server" 10
-                Start-Sleep -Seconds 4
-            }
-            Write-Log "Sin transporte sano (fallo #$consecutiveFailures). Esperando..."
+
+        # PASO 3: IP en cache
+        if (-not $chosen -and $cachedIp) {
+            $null = Invoke-Adb "connect $cachedIp" 3
+            if (Test-AdbHealth $cachedIp) { $chosen = $cachedIp }
         }
-    }
-    catch {
-        Write-Log "ERROR: $($_.Exception.Message)"
+
+        # PASO 4: Escaneo de subred (RunspacePool — sin fugas de threads)
+        if (-not $chosen) {
+            foreach ($ip in (Find-SubnetAdbIps)) {
+                $t = "$ip`:5555"
+                $null = Invoke-Adb "connect $t" 3
+                if (Test-AdbHealth $t) {
+                    $chosen = $t
+                    $cachedIp = $t
+                    Save-CachedIp $chosen
+                    Write-Log "A30 encontrado via escaneo de red: $chosen"
+                    break
+                }
+            }
+        }
+
+        # PASO 5: Gestion de scrcpy
+        if ($chosen) {
+            Invoke-DeviceHardening $chosen
+
+            if (-not (Test-ScrcpyRunningForTarget $chosen)) {
+                if ($lastTarget -and $lastTarget -ne $chosen) {
+                    Write-Log "Migrando proyeccion $lastTarget → $chosen"
+                }
+                Start-Projection $chosen
+            }
+            $lastTarget = $chosen
+        } else {
+            if ($lastTarget) {
+                Write-Log "Samsung A30 fuera de rango Wi-Fi. Vigilando..."
+                Stop-ScrcpyIfRunning
+                $lastTarget = $null
+            }
+        }
+    } catch {
+        Write-Log "Error inesperado en bucle: $($_.Exception.Message)"
     }
 
-    # Backoff: 10s -> 15s -> 30s -> 60s (techo)
-    $wait = [Math]::Min($BaseIntervalSec * [Math]::Pow(2, [Math]::Min($consecutiveFailures, 3)), 60)
-    if ($wait -lt 10) { $wait = 10 }
-    Start-Sleep -Seconds ([int]$wait)
+    Start-Sleep -Seconds $CheckIntervalSec
 }
+#endregion

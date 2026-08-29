@@ -10,5 +10,6 @@ export type { IDeviceInfoFetcher, DeviceInfo } from './device-info-fetcher';
 export { DeviceInfoFetcher } from './device-info-fetcher';
 export type { IScreenCapture, CaptureResult } from './screen-capture';
 export { ScreenCapture } from './screen-capture';
-export type { IScrcpyManager, ScrcpyInstance, ScrcpyOptions } from './scrcpy-manager';
-export { ScrcpyManager } from './scrcpy-manager';
+export type { IScrcpyEngine, ScrcpyEngineOptions, ScrcpyStreamResult } from './scrcpy-engine';
+export { ScrcpyEngine, scrcpyEngine } from './scrcpy-engine';
+

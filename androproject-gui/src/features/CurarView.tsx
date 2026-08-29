@@ -16,7 +16,7 @@ interface CurarViewProps {
   addLog?: (msg: string, type?: 'info' | 'success' | 'error') => void;
 }
 
-export function CurarView({}: CurarViewProps = {}) {
+export function CurarView({ addLog: propAddLog }: CurarViewProps = {}) {
   const { dark } = useTheme();
   const curarSubTab = useAppStore((s) => s.curarSubTab);
   const setCurarSubTab = useAppStore((s) => s.setCurarSubTab);
@@ -43,7 +43,7 @@ export function CurarView({}: CurarViewProps = {}) {
           {tab('screenshot', <Shield size={12} />, 'Capturas')}
         </div>
 
-        {curarSubTab === 'antivirus' ? <AntivirusPanel /> : <ScreenshotPanel />}
+        {curarSubTab === 'antivirus' ? <AntivirusPanel propAddLog={propAddLog} /> : <ScreenshotPanel />}
       </div>
     </ViewShell>
   );
@@ -51,13 +51,14 @@ export function CurarView({}: CurarViewProps = {}) {
 
 // ── Antivirus Sub-panel ────────────────────────────────────────────
 
-function AntivirusPanel() {
+function AntivirusPanel({ propAddLog }: { propAddLog?: (msg: string, type?: 'info' | 'success' | 'error') => void }) {
   const { t, dark } = useTheme();
   const appsList = useAppStore((s) => s.appsList);
   const appsLoading = useAppStore((s) => s.appsLoading);
   const device = useAppStore((s) => s.device);
   const activeSerial = useAppStore((s) => s.activeSerial);
-  const addLog = useAppStore((s) => s.addLog);
+  const storeAddLog = useAppStore((s) => s.addLog);
+  const addLog = propAddLog || storeAddLog;
   const { fetchApps } = useActions();
 
   return (
@@ -144,8 +145,8 @@ function AntivirusPanel() {
             </Card>
 
             <div className="flex flex-col gap-3">
-              {malwareApps.map((app) => (
-                <Card key={app.packageName}>
+              {malwareApps.map((app, idx) => (
+                <Card key={app.packageName ? `${app.packageName}-${idx}` : `malware-${idx}`}>
                   <div className="flex flex-col gap-4">
                     <div className="flex items-start">
                       <div className="flex items-start gap-3">

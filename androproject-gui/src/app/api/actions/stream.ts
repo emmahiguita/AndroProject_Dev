@@ -1,155 +1,120 @@
 import { NextResponse } from 'next/server';
-import { exec, spawn } from 'child_process';
+import { spawn } from 'child_process';
 import path from 'path';
 import fs from 'fs';
-import { safeExec, getErrorMessage } from './_lib/helpers';
 import { ActionContext } from './_lib/context';
 import {
   ANDROPROJECT_BIN, ANDROPROJECT_HOME, SCREENSHOTS_DIR, ADB,
   SCRCPY_SERVER_PATH, SCRCPY_ICON_PATH,
-  getLockFile, getRecordLockFile,
+  getRecordLockFile,
   writeLock, readLock, deleteLock, isLockAlive, killLockedProcess,
 } from '@/lib/config';
+import { scrcpyEngine } from '@/lib/services/scrcpy-engine';
+import { adb } from '@/lib/services/adb-executor';
 
 // ── Screen Streaming (scrcpy) ──────────────────────────────────────
 
-export async function openScreen(ctx: ActionContext, body: { videoSource?: string }) {
+export async function openScreen(ctx: ActionContext, body: {
+  videoSource?: string;
+  displayId?: number | string;
+  maxSize?: number | string;
+  maxFps?: number | string;
+  bitRate?: string;
+  turnScreenOff?: boolean;
+  stayAwake?: boolean;
+  alwaysOnTop?: boolean;
+  videoBuffer?: number | string;
+}) {
   const targetSerial = ctx.targetSerial;
   if (!targetSerial) {
     return NextResponse.json({ success: false, error: 'No hay un dispositivo Android conectado' }, { status: 400 });
   }
-  if (!fs.existsSync(ANDROPROJECT_BIN)) {
-    return NextResponse.json({ success: false, error: `No se encontró el motor de transmisión en ${ANDROPROJECT_BIN}` }, { status: 503 });
-  }
 
-  const streamLockFile = getLockFile(targetSerial);
-  const alive = await isLockAlive(streamLockFile, 'scrcpy');
-  if (alive) {
-    return NextResponse.json({ success: true, alive: true, message: 'La transmisión ya está activa' });
-  }
-  deleteLock(streamLockFile);
-
-  const streamArgs = [
-    '-s', String(targetSerial),
-    '--video-bit-rate=16M', '--max-size=1920', '--max-fps=60',
-    '--stay-awake', '--window-title', `AndroProject - ${targetSerial}`,
-  ];
-  if (body.videoSource === 'camera') {
-    streamArgs.push('--video-source=camera', '--camera-facing=back', '--no-audio');
-  }
-
-  const streamProcess = spawn(ANDROPROJECT_BIN, streamArgs, {
-    cwd: ANDROPROJECT_HOME,
-    env: { ...process.env, ADB },
-    windowsHide: false,
+  const result = await scrcpyEngine.start({
+    serial: targetSerial,
+    displayId: body.displayId,
+    maxSize: body.maxSize,
+    maxFps: body.maxFps,
+    bitRate: body.bitRate,
+    turnScreenOff: body.turnScreenOff,
+    stayAwake: body.stayAwake,
+    alwaysOnTop: body.alwaysOnTop,
+    videoBuffer: body.videoBuffer,
+    videoSource: body.videoSource as 'display' | 'camera',
   });
 
-  if (!streamProcess.pid) {
-    return NextResponse.json({ success: false, error: 'No se pudo iniciar el motor de transmisión' }, { status: 500 });
+  if (!result.success) {
+    return NextResponse.json({ success: false, error: result.error || 'Error al iniciar transmisión' }, { status: 500 });
   }
 
-  writeLock(streamLockFile, { pid: streamProcess.pid, serial: targetSerial });
-  const cleanup = () => { deleteLock(streamLockFile); };
-  streamProcess.once('exit', cleanup);
-  streamProcess.once('error', cleanup);
-
-  return NextResponse.json({
-    success: true, alive: true, pid: streamProcess.pid,
-    message: body.videoSource === 'camera'
-      ? 'Cámara del dispositivo abierta en el PC'
-      : 'Pantalla del dispositivo proyectándose en el PC',
-  });
+  return NextResponse.json(result);
 }
 
 export async function checkOrStopScreen(ctx: ActionContext, action: 'check_screen' | 'stop_screen') {
-  const streamLockFile = getLockFile(ctx.targetSerial || 'default');
+  const serial = ctx.targetSerial || 'default';
 
-  if (!fs.existsSync(streamLockFile)) {
-    return NextResponse.json({ success: true, alive: false, reason: 'La transmisión no está activa' });
+  if (action === 'check_screen') {
+    const alive = await scrcpyEngine.checkAlive(serial);
+    return NextResponse.json({ success: true, alive });
   }
 
-  const alive = await isLockAlive(streamLockFile, 'scrcpy');
-
-  if (action === 'stop_screen' && alive) {
-    await killLockedProcess(streamLockFile);
-    return NextResponse.json({ success: true, alive: false, message: 'Transmisión detenida' });
+  if (action === 'stop_screen') {
+    const stopped = await scrcpyEngine.stop(serial);
+    return NextResponse.json({
+      success: true,
+      alive: false,
+      message: stopped ? 'Transmisión detenida correctamente' : 'No había transmisión activa',
+    });
   }
 
-  if (!alive) deleteLock(streamLockFile);
-  return NextResponse.json({
-    success: true, alive,
-    reason: alive ? undefined : 'El motor de transmisión se cerró',
-  });
+  return NextResponse.json({ success: false, error: 'Acción no válida' }, { status: 400 });
 }
 
 // ── Screenshot ─────────────────────────────────────────────────────
-/** Minimum valid screenshot size to detect FLAG_SECURE captures */
-const MIN_SCREENSHOT_SIZE = 10240;
 
-function validateScreenshotFile(localPath: string): number | null {
-  try {
-    const stats = fs.statSync(localPath);
-    return stats.size >= MIN_SCREENSHOT_SIZE ? stats.size : null;
-  } catch { return null; }
-}
-
-function removeLocalFile(localPath: string): void {
-  try { if (fs.existsSync(localPath)) fs.unlinkSync(localPath); } catch { /* ignore */ }
-}
+const MIN_SCREENSHOT_SIZE = 1024;
 
 export async function screenshot(ctx: ActionContext) {
   if (!fs.existsSync(SCREENSHOTS_DIR)) fs.mkdirSync(SCREENSHOTS_DIR, { recursive: true });
 
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-  const devicePath = `/sdcard/screenshot_${timestamp}.png`;
-  const altDevicePath = `/data/local/tmp/screenshot_${timestamp}.png`;
   const localPath = path.join(SCREENSHOTS_DIR, `screenshot_${timestamp}.png`);
+  const serial = ctx.targetSerial || '';
 
-  // Method 1 (preferred): exec-out pipes PNG directly to PC
-  const r1 = await safeExec(`${ctx.adbTarget} exec-out screencap -p > "${localPath}"`, 15000);
-  const size1 = validateScreenshotFile(localPath);
-  if (size1 !== null) {
-    return NextResponse.json({ success: true, message: 'Captura guardada en Capturas\\', path: localPath, size: size1 });
+  // Primary method: raw binary screencap via exec-out
+  const res = await adb.execOut(serial, 'exec-out screencap -p');
+  if (res.ok && res.stdout.length > MIN_SCREENSHOT_SIZE && res.stdout[0] === 0x89 && res.stdout[1] === 0x50) {
+    fs.writeFileSync(localPath, res.stdout);
+    return NextResponse.json({
+      success: true,
+      message: `Captura guardada en Capturas\\screenshot_${timestamp}.png`,
+      path: localPath,
+      size: res.stdout.length,
+    });
   }
-  removeLocalFile(localPath);
-  if (!r1.ok) console.error('[screenshot] exec-out falló:', r1.err?.trim() || '(sin stderr)');
 
-  // Method 2: file-based via /sdcard
-  const r2 = await safeExec(`${ctx.adbTarget} shell screencap -p "${devicePath}"`, 15000);
-  if (r2.ok) {
-    await safeExec(`${ctx.adbTarget} pull "${devicePath}" "${localPath}"`, 15000);
-    await safeExec(`${ctx.adbTarget} shell rm -f "${devicePath}"`);
-    const size2 = validateScreenshotFile(localPath);
-    if (size2 !== null) {
-      return NextResponse.json({ success: true, message: 'Captura guardada en Capturas\\', path: localPath, size: size2 });
+  // Fallback method: on-device /sdcard capture
+  const devicePath = `/sdcard/screenshot_${timestamp}.png`;
+  await adb.shell(serial, `screencap -p "${devicePath}"`);
+  await adb.execFor(serial, `pull "${devicePath}" "${localPath}"`);
+  await adb.shell(serial, `rm -f "${devicePath}"`);
+
+  if (fs.existsSync(localPath)) {
+    const stat = fs.statSync(localPath);
+    if (stat.size >= MIN_SCREENSHOT_SIZE) {
+      return NextResponse.json({
+        success: true,
+        message: `Captura guardada en Capturas\\screenshot_${timestamp}.png`,
+        path: localPath,
+        size: stat.size,
+      });
     }
-    removeLocalFile(localPath);
+    try { fs.unlinkSync(localPath); } catch {}
   }
-
-  // Method 3: file-based via /data/local/tmp
-  const r3 = await safeExec(`${ctx.adbTarget} shell screencap -p "${altDevicePath}"`, 15000);
-  if (r3.ok) {
-    await safeExec(`${ctx.adbTarget} pull "${altDevicePath}" "${localPath}"`, 15000);
-    await safeExec(`${ctx.adbTarget} shell rm -f "${altDevicePath}"`);
-    const size3 = validateScreenshotFile(localPath);
-    if (size3 !== null) {
-      return NextResponse.json({ success: true, message: 'Captura guardada en Capturas\\', path: localPath, size: size3 });
-    }
-    removeLocalFile(localPath);
-  } else {
-    await safeExec(`${ctx.adbTarget} shell rm -f "${altDevicePath}"`);
-  }
-
-  const details = [r1, r2, r3]
-    .filter(r => !r.ok && r.err?.trim())
-    .map(r => r.err!.trim())
-    .join(' | ');
 
   return NextResponse.json({
     success: false,
-    error: 'No se pudo capturar la pantalla con ningún método.',
-    hint: 'Verificá que: (1) el dispositivo esté conectado, (2) la pantalla esté encendida, (3) no haya una app con FLAG_SECURE en primer plano.',
-    detail: details || 'Sin diagnóstico adicional',
+    error: 'No se pudo capturar la pantalla. Verifica que el dispositivo esté desbloqueado.',
   }, { status: 422 });
 }
 
@@ -172,12 +137,15 @@ export async function startRecord(ctx: ActionContext, body: { videoSource?: stri
   const recordArgs: string[] = [];
   if (ctx.targetSerial) recordArgs.push('-s', String(ctx.targetSerial));
   recordArgs.push(
-    '--video-codec', 'h265', '-b', '128M', '--max-fps', '60', '--max-size', '0',
-    '--audio-codec', 'opus', '--audio-bit-rate', '192k', '--audio-buffer', '4',
-    '--no-window', '--record', recordPath,
+    '--video-codec=h264',
+    '-b=16M',
+    '--max-fps=60',
+    '--max-size=0',
+    '--no-playback',
+    `--record=${recordPath}`,
   );
   if (body.videoSource === 'camera') {
-    recordArgs.push('--video-source', 'camera', '--no-audio');
+    recordArgs.push('--video-source=camera', '--camera-facing=back', '--no-audio');
   }
 
   const proc = spawn(ANDROPROJECT_BIN, recordArgs, {
@@ -194,7 +162,8 @@ export async function startRecord(ctx: ActionContext, body: { videoSource?: stri
   }
 
   return NextResponse.json({
-    success: true, message: 'Grabación silenciosa iniciada',
+    success: true,
+    message: 'Grabación MP4 iniciada',
     recordPath,
   });
 }

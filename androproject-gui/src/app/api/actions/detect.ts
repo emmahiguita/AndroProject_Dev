@@ -53,14 +53,19 @@ async function listDevices(): Promise<DeviceInfo[]> {
 
 // ── Utility: deduplicate devices (prefer Wi-Fi) ──────────────────
 function deduplicate(list: DeviceInfo[]): DeviceInfo[] {
+  const online = list.filter(d => d.state === 'device');
+  const pool = online.length > 0 ? online : list;
+
   const unique = new Map<string, DeviceInfo>();
-  for (const d of list) {
+  for (const d of pool) {
     const existing = unique.get(d.model);
     if (!existing || (d.connectionType === 'Wi-Fi' && existing.connectionType !== 'Wi-Fi')) {
       unique.set(d.model, d);
     }
   }
   return Array.from(unique.values()).sort((a, b) => {
+    if (a.state === 'device' && b.state !== 'device') return -1;
+    if (b.state === 'device' && a.state !== 'device') return 1;
     if (a.connectionType === 'Wi-Fi' && b.connectionType !== 'Wi-Fi') return -1;
     if (b.connectionType === 'Wi-Fi' && a.connectionType !== 'Wi-Fi') return 1;
     return 0;

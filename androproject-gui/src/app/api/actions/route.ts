@@ -33,8 +33,10 @@ const registry: Record<string, ActionHandler> = {
   get_foreground_app:   (ctx) => device.getForegroundApp(ctx),
   keyevent:             (ctx, body) => device.keyevent(ctx, body as { keycode: string }),
   adb_shell:            (ctx, body) => device.adbShell(ctx, body as { cmd: string }),
+  input_text:           (ctx, body) => device.inputText(ctx, body as { text: string }),
   input_tap:            (ctx, body) => device.inputTap(ctx, body as { x: number; y: number }),
   input_swipe:          (ctx, body) => device.inputSwipe(ctx, body as { x1: number; y1: number; x2: number; y2: number; duration?: number }),
+
   // Device detection / listing
   detect:               (_ctx, body) => detect.detect(body),
   list_apps:            (ctx, _body) => apps.listApps(ctx),
@@ -78,11 +80,12 @@ const registry: Record<string, ActionHandler> = {
   set_bluetooth_absolute_volume: (ctx, body) => tweaks.setBluetoothAbsoluteVolume(ctx, body as { disable: string }),
   set_shade_style:            (ctx, body) => tweaks.setShadeStyle(ctx, body as Record<string, unknown>),
 
-  // Stream
-  open_screen:    (ctx, body) => stream.openScreen(ctx, body as { videoSource?: string }),
-  close_screen:   (ctx) => stream.checkOrStopScreen(ctx, 'stop_screen'), // alias for useActions
+  // Stream — close_screen es alias de stop_screen, usar stop_screen directamente
+  open_screen:    (ctx, body) => stream.openScreen(ctx, body as any),
   check_screen:   (ctx) => stream.checkOrStopScreen(ctx, 'check_screen'),
   stop_screen:    (ctx) => stream.checkOrStopScreen(ctx, 'stop_screen'),
+  close_screen:   (ctx) => stream.checkOrStopScreen(ctx, 'stop_screen'), // alias retrocompatible
+
   screenshot:     (ctx) => stream.screenshot(ctx),
   start_record:   (ctx, body) => stream.startRecord(ctx, body as { videoSource?: string }),
   stop_record:    (ctx) => stream.stopRecord(ctx),

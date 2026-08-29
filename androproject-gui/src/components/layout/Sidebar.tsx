@@ -38,10 +38,11 @@ const groups: { label: string; items: NavItemDef[] }[] = [
   {
     label: 'HERRAMIENTAS',
     items: [
-      { id: 'tools',     label: 'Terminal', icon: <Terminal size={16} /> },
+      { id: 'tools',     label: 'Herramientas', icon: <Wrench size={16} /> },
       { id: 'flasher',   label: 'Flasheador', icon: <Zap size={16} /> },
     ],
   },
+
   {
     label: 'SISTEMA',
     items: [
@@ -62,12 +63,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeNav, onSelectNav, collap
       <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar py-3">
         {/* Logo row */}
         <div className={`flex items-center px-3 mb-5 ${collapsed ? 'justify-center' : 'gap-2.5'}`}>
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#1bae6e] to-[#0ea5e9] flex items-center justify-center shadow-md shadow-[#1bae6e]/20 shrink-0">
-            <Smartphone size={16} className="text-white" />
+          <div className="w-8 h-8 rounded-full overflow-hidden border border-[#22c97d]/40 shadow-md shadow-[#1bae6e]/20 shrink-0 bg-black flex items-center justify-center">
+            <img src="/logo.png" alt="Dexterand Logo" className="w-full h-full object-cover" />
           </div>
           {!collapsed && (
             <div className="min-w-0">
-              <h1 className={`text-sm font-bold tracking-wide ${isDark ? 'text-white' : 'text-slate-800'}`}>AndroProject</h1>
+              <h1 className={`text-sm font-bold tracking-wide ${isDark ? 'text-white' : 'text-slate-800'}`}>Dexterand</h1>
             </div>
           )}
         </div>
@@ -141,14 +142,18 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeNav, onSelectNav, collap
           }`}>
             <div className="flex items-center gap-1.5 mb-1">
               <Sparkles size={11} className={isDark ? 'text-[#22c97d]' : 'text-emerald-600'} />
-              <span className={`text-[10px] font-bold ${isDark ? 'text-white/70' : 'text-slate-700'}`}>AndroProject Pro</span>
+              <span className={`text-[10px] font-bold ${isDark ? 'text-white/70' : 'text-slate-700'}`}>Dexterand Pro</span>
             </div>
             <p className={`text-[9px] leading-relaxed mb-2 ${isDark ? 'text-white/30' : 'text-slate-400'}`}>
               Desbloquea funciones avanzadas y soporte.
             </p>
-            <button className="w-full py-1.5 rounded-lg bg-[#1bae6e] hover:bg-[#22c97d] text-white text-[10px] font-bold transition-colors shadow-sm shadow-[#1bae6e]/20">
-              Actualizar
+            <button
+              onClick={() => onSelectNav('config')}
+              className="w-full py-1.5 rounded-lg bg-[#1bae6e] hover:bg-[#22c97d] text-white text-[10px] font-bold transition-colors shadow-sm shadow-[#1bae6e]/20"
+            >
+              Ajustes del sistema
             </button>
+
           </div>
         )}
       </div>

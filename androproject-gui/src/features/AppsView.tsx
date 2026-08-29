@@ -557,8 +557,8 @@ function ManagerPanel({
         </div>
       ) : appsViewMode === 'grid' ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2.5">
-          {filteredApps.map((app) => (
-            <AppCard key={app.packageName}
+          {filteredApps.map((app, idx) => (
+            <AppCard key={app.packageName ? `${app.packageName}-${idx}` : `app-${idx}`}
               app={app} dark={dark}
               selected={selectedPackages.has(app.packageName)}
               onToggleSelect={() => togglePackageSelection(app.packageName)}
@@ -571,8 +571,8 @@ function ManagerPanel({
         </div>
       ) : (
         <div className="space-y-1.5">
-          {filteredApps.map((app) => (
-            <AppRow key={app.packageName}
+          {filteredApps.map((app, idx) => (
+            <AppRow key={app.packageName ? `${app.packageName}-${idx}` : `app-${idx}`}
               app={app} dark={dark}
               selected={selectedPackages.has(app.packageName)}
               onToggleSelect={() => togglePackageSelection(app.packageName)}

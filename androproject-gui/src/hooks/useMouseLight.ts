@@ -17,18 +17,24 @@ export function useMouseLight(targetRef?: React.RefObject<HTMLElement | null>) {
     const root = document.documentElement;
 
     function animate() {
-      // Lerp towards target for smooth movement
-      cxRef.current += (txRef.current - cxRef.current) * 0.08;
-      cyRef.current += (tyRef.current - cyRef.current) * 0.08;
+      const dx = Math.abs(txRef.current - cxRef.current);
+      const dy = Math.abs(tyRef.current - cyRef.current);
 
-      // Map -0.5..0.5 to 20%..80% for CSS custom properties
-      const lightX = `${(cxRef.current + 0.5) * 100}%`;
-      const lightY = `${(cyRef.current + 0.5) * 100}%`;
+      if (dx > 0.001 || dy > 0.001) {
+        // Lerp towards target for smooth movement
+        cxRef.current += (txRef.current - cxRef.current) * 0.08;
+        cyRef.current += (tyRef.current - cyRef.current) * 0.08;
 
-      root.style.setProperty('--lightX', lightX);
-      root.style.setProperty('--lightY', lightY);
+        const lightX = `${(cxRef.current + 0.5) * 100}%`;
+        const lightY = `${(cyRef.current + 0.5) * 100}%`;
 
-      rafRef.current = requestAnimationFrame(animate);
+        root.style.setProperty('--lightX', lightX);
+        root.style.setProperty('--lightY', lightY);
+
+        rafRef.current = requestAnimationFrame(animate);
+      } else {
+        rafRef.current = 0;
+      }
     }
 
     function handlePointerMove(e: PointerEvent) {
@@ -36,15 +42,18 @@ export function useMouseLight(targetRef?: React.RefObject<HTMLElement | null>) {
       const rect = el.getBoundingClientRect();
       txRef.current = (e.clientX - rect.left) / rect.width - 0.5;
       tyRef.current = (e.clientY - rect.top) / rect.height - 0.5;
+      if (!rafRef.current) {
+        rafRef.current = requestAnimationFrame(animate);
+      }
     }
 
     function handlePointerLeave() {
       txRef.current = 0;
       tyRef.current = 0;
+      if (!rafRef.current) {
+        rafRef.current = requestAnimationFrame(animate);
+      }
     }
-
-    // Start animation loop
-    rafRef.current = requestAnimationFrame(animate);
 
     // Listen on document for global light, or on target element
     const listenerTarget = targetRef?.current || document;

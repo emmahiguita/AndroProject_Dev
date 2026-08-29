@@ -1,207 +1,459 @@
-// ── DeviceInfoPanel — device details + controls ──────────────
-// SRP: displays device information and action buttons.
-// No stats grid — those are in Dashboard (avoids duplication).
+// ── DeviceInfoPanel — Projection Engine & Studio Control Hub ──────────────
+// Single authoritative Scrcpy 60 FPS studio controller,
+// MP4 video recorder, screen orientation selector, and quick system tools.
 
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
-  Battery, Clock, Play, Camera, Power, RotateCcw,
-  ArrowLeft, Home, Layers, Volume2, VolumeX, Monitor,
-  Cpu, Thermometer, Activity,
+  Play, Square, Video, Camera, Power, RotateCcw,
+  Sliders, Bell, Zap, EyeOff,
+  Sun, Maximize2, Sparkles, Circle, LayoutGrid,
+  CheckCircle2,
 } from 'lucide-react';
 import type { DeviceInfo } from '@/features/types';
+import type { ScrcpyOptions } from '@/hooks/useProjection';
 
 interface DeviceInfoPanelProps {
   device: DeviceInfo;
   dark: boolean;
   scrcpyActive: boolean;
-  onToggleScrcpy: () => void;
-  onScreenshot: () => void;
+  onToggleScrcpy: (opts?: Partial<ScrcpyOptions>) => void;
+  scrcpyOptions: ScrcpyOptions;
+  setScrcpyOptions: React.Dispatch<React.SetStateAction<ScrcpyOptions>>;
+  isRecording: boolean;
+  recordingSeconds: number;
+  onToggleRecord: () => void;
+  onScreenshot: () => Promise<string | null> | void;
   onPowerOff: () => void;
   onReboot: () => void;
-  onGoBack: () => void;
-  onGoHome: () => void;
-  onOpenRecent: () => void;
-  onVolumeUp: () => void;
-  onVolumeDown: () => void;
+  onTogglePowerScreen: () => void;
+  onWakeScreen?: () => void;
+  onOpenAllApps?: () => void;
+  onExpandNotifications: () => void;
+  onExpandQuickSettings: () => void;
+  onSetOrientation: (mode: 'auto' | 'portrait' | 'landscape') => void;
+  isBusy: boolean;
+  onConnectAdb?: (ip: string, port?: string) => Promise<{ success: boolean; message?: string }>;
+  isConnecting?: boolean;
+  autoProject?: boolean;
+  onToggleAutoProject?: (v: boolean) => void;
 }
 
 export const DeviceInfoPanel: React.FC<DeviceInfoPanelProps> = ({
-  device, dark, scrcpyActive,
-  onToggleScrcpy, onScreenshot, onPowerOff, onReboot,
-  onGoBack, onGoHome, onOpenRecent, onVolumeUp, onVolumeDown,
+  dark,
+  scrcpyActive,
+  onToggleScrcpy,
+  scrcpyOptions,
+  setScrcpyOptions,
+  isRecording,
+  recordingSeconds,
+  onToggleRecord,
+  onScreenshot,
+  onPowerOff,
+  onReboot,
+  onTogglePowerScreen,
+  onWakeScreen,
+  onOpenAllApps,
+  onExpandNotifications,
+  onExpandQuickSettings,
+  onSetOrientation,
+  isBusy,
+  autoProject = false,
+  onToggleAutoProject,
 }) => {
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 3000);
+  };
+
+  const handleScreenshotClick = async () => {
+    showToast('Capturando pantalla HD...');
+    const path = await onScreenshot();
+    if (path) {
+      showToast('Captura guardada en Capturas');
+    }
+  };
+
   const cardBg = dark ? 'bg-white/[0.025]' : 'bg-white';
   const cardBorder = dark ? 'border-white/[0.07]' : 'border-slate-200';
   const cardShadow = dark ? '' : 'shadow-sm';
 
-  // Parse temperature (handles both "34.0" °C and raw "340" tenths of °C)
-  const parseTemp = (t?: string) => {
-    if (!t || t === '--') return '--';
-    let val = parseFloat(t);
-    if (isNaN(val)) return '--';
-    if (val > 100) val = val / 10;
-    return val.toFixed(0);
+  const formatTime = (secs: number) => {
+    const m = Math.floor(secs / 60);
+    const s = secs % 60;
+    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
   };
-  const tempCelsius = parseTemp(device.temperature);
 
   return (
-    <div className="p-2 space-y-2">
-      {/* ═══ Quick Stats — compact inline from device data ═══ */}
-      <div className="grid grid-cols-4 gap-1">
-        <MiniStat
-          dark={dark}
-          icon={<Battery size={10} className="text-green-500" />}
-          value={`${device.battery ?? '--'}%`}
-        />
-        <MiniStat
-          dark={dark}
-          icon={<Cpu size={10} className="text-blue-500" />}
-          value={`${device.cpuUsagePercent ?? 0}%`}
-        />
-        <MiniStat
-          dark={dark}
-          icon={<Thermometer size={10} className="text-orange-500" />}
-          value={tempCelsius !== '--' ? `${tempCelsius}°` : '--'}
-        />
-        <MiniStat
-          dark={dark}
-          icon={<Activity size={10} className="text-purple-500" />}
-          value={`${device.ramUsagePercent ?? 0}%`}
-        />
-      </div>
-
-      {/* ═══ Device Details ═══ */}
-      <div className={`rounded-xl border p-2.5 ${cardBg} ${cardBorder} ${cardShadow}`}>
-        <h3 className={`text-[10px] font-bold mb-2 uppercase tracking-wider ${dark ? 'text-white/50' : 'text-slate-400'}`}>
-          Dispositivo
-        </h3>
-        <div className="space-y-1.5">
-          <DetailRow dark={dark} label="Modelo" value={device.model || '--'} />
-          <DetailRow dark={dark} label="Serial" value={device.serial || '--'} mono />
-          <DetailRow dark={dark} label="Android" value={device.androidVersion || '--'} />
-          <DetailRow dark={dark} label="Resolución" value={device.resolution || '--'} />
-          <DetailRow dark={dark} label="Conexión" value={device.connectionType || 'USB'} />
-          <DetailRow dark={dark} label="Almacenamiento" value={
-            device.storageFreeGB ? `${device.storageFreeGB} GB libres` : '--'
-          } />
+    <div className="p-3 space-y-3 relative">
+      {/* Toast notification overlay */}
+      {toastMessage && (
+        <div className="sticky top-2 z-30 flex items-center justify-center animate-in fade-in slide-in-from-top-1 duration-150">
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-black/90 border border-emerald-500/40 text-emerald-300 text-xs font-semibold shadow-xl">
+            <CheckCircle2 size={13} />
+            <span>{toastMessage}</span>
+          </div>
         </div>
-      </div>
+      )}
 
-      {/* ═══ Navigation Controls ═══ */}
-      <div className={`rounded-xl border p-2.5 ${cardBg} ${cardBorder} ${cardShadow}`}>
-        <h3 className={`text-[10px] font-bold mb-2 uppercase tracking-wider ${dark ? 'text-white/50' : 'text-slate-400'}`}>
-          Navegación
-        </h3>
-        <div className="grid grid-cols-3 gap-1">
-          <NavBtn dark={dark} icon={<ArrowLeft size={14} />} label="Atrás" onClick={onGoBack} />
-          <NavBtn dark={dark} icon={<Home size={14} />} label="Inicio" onClick={onGoHome} primary />
-          <NavBtn dark={dark} icon={<Layers size={14} />} label="Recientes" onClick={onOpenRecent} />
+      {/* ═══ Motor de Transmisión Nativo 60 FPS (scrcpy) ═══ */}
+      <div className={`rounded-xl border p-3 ${cardBg} ${cardBorder} ${cardShadow} space-y-3`}>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-1.5">
+            <Sparkles size={14} className="text-[#22c97d]" />
+            <h3 className={`text-xs font-bold ${dark ? 'text-white' : 'text-slate-900'}`}>
+              Transmisión Ultra HD 60 FPS
+            </h3>
+          </div>
+          {scrcpyActive && (
+            <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[9px] font-bold text-emerald-400 shrink-0">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> ACTIVO
+            </span>
+          )}
         </div>
-        <div className="grid grid-cols-2 gap-1 mt-1">
-          <NavBtn dark={dark} icon={<VolumeX size={14} />} label="Vol-" onClick={onVolumeDown} />
-          <NavBtn dark={dark} icon={<Volume2 size={14} />} label="Vol+" onClick={onVolumeUp} />
-        </div>
-      </div>
 
-      {/* ═══ Quick Actions ═══ */}
-      <div className={`rounded-xl border p-2.5 ${cardBg} ${cardBorder} ${cardShadow}`}>
-        <h3 className={`text-[10px] font-bold mb-2 uppercase tracking-wider ${dark ? 'text-white/50' : 'text-slate-400'}`}>
-          Acciones
-        </h3>
-        <div className="space-y-1">
-          <ActionBtn
+        {/* Action Button */}
+        <button
+          type="button"
+          onClick={() => onToggleScrcpy()}
+          disabled={isBusy}
+          className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-bold transition-all shadow-md ${
+            scrcpyActive
+              ? 'bg-red-500/15 text-red-400 hover:bg-red-500/25 border border-red-500/30'
+              : 'bg-[#1bae6e] hover:bg-[#22c97d] text-white shadow-[#1bae6e]/20 active:scale-[0.98]'
+          }`}
+        >
+          {scrcpyActive ? <Square size={13} fill="currentColor" /> : <Play size={13} fill="currentColor" />}
+          <span>{scrcpyActive ? 'Finalizar Proyección Externa' : 'Iniciar Proyección Externa (60 FPS)'}</span>
+        </button>
+
+        {/* Streaming Controls Configuration */}
+        <div className="grid grid-cols-3 gap-2 pt-1">
+          <div>
+            <label className={`text-[10px] block font-semibold mb-1 ${dark ? 'text-white/50' : 'text-slate-500'}`}>
+              Resolución
+            </label>
+            <select
+              value={scrcpyOptions.maxSize}
+              onChange={(e) => setScrcpyOptions((o) => ({ ...o, maxSize: e.target.value }))}
+              disabled={scrcpyActive}
+              className={`w-full py-1 px-1.5 rounded-lg text-[10px] font-medium border ${
+                dark ? 'bg-white/[0.04] border-white/10 text-white' : 'bg-slate-50 border-slate-200 text-slate-800'
+              }`}
+            >
+              <option value="1920">FHD (1080p)</option>
+              <option value="1280">HD (720p)</option>
+              <option value="800">SD (480p)</option>
+              <option value="0">Nativo Max</option>
+            </select>
+          </div>
+
+          <div>
+            <label className={`text-[10px] block font-semibold mb-1 ${dark ? 'text-white/50' : 'text-slate-500'}`}>
+              Tasa FPS
+            </label>
+            <select
+              value={scrcpyOptions.maxFps}
+              onChange={(e) => setScrcpyOptions((o) => ({ ...o, maxFps: e.target.value }))}
+              disabled={scrcpyActive}
+              className={`w-full py-1 px-1.5 rounded-lg text-[10px] font-medium border ${
+                dark ? 'bg-white/[0.04] border-white/10 text-white' : 'bg-slate-50 border-slate-200 text-slate-800'
+              }`}
+            >
+              <option value="60">60 FPS</option>
+              <option value="30">30 FPS</option>
+              <option value="15">15 FPS</option>
+            </select>
+          </div>
+
+          <div>
+            <label className={`text-[10px] block font-semibold mb-1 ${dark ? 'text-white/50' : 'text-slate-500'}`}>
+              Bitrate
+            </label>
+            <select
+              value={scrcpyOptions.bitRate}
+              onChange={(e) => setScrcpyOptions((o) => ({ ...o, bitRate: e.target.value }))}
+              disabled={scrcpyActive}
+              className={`w-full py-1 px-1.5 rounded-lg text-[10px] font-medium border ${
+                dark ? 'bg-white/[0.04] border-white/10 text-white' : 'bg-slate-50 border-slate-200 text-slate-800'
+              }`}
+            >
+              <option value="16M">16 Mbps</option>
+              <option value="8M">8 Mbps</option>
+              <option value="4M">4 Mbps</option>
+              <option value="2M">2 Mbps</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Toggles */}
+        <div className="space-y-1.5 pt-1">
+          <ToggleRow
             dark={dark}
-            icon={scrcpyActive ? <Monitor size={11} /> : <Play size={11} />}
-            label={scrcpyActive ? 'scrcpy activo' : 'Iniciar scrcpy'}
-            onClick={onToggleScrcpy}
-            active={scrcpyActive}
+            icon={<EyeOff size={11} className="text-amber-400" />}
+            label="Apagar pantalla física al proyectar"
+            description="Ahorra batería y evita sobrecalentamiento"
+            checked={scrcpyOptions.turnScreenOff}
+            onChange={(checked) => setScrcpyOptions((o) => ({ ...o, turnScreenOff: checked }))}
+            disabled={scrcpyActive}
           />
-          <ActionBtn dark={dark} icon={<Camera size={11} />} label="Captura" onClick={onScreenshot} />
-          <ActionBtn dark={dark} icon={<RotateCcw size={11} />} label="Reiniciar" onClick={onReboot} />
-          <ActionBtn dark={dark} icon={<Power size={11} />} label="Apagar" onClick={onPowerOff} danger />
+          <ToggleRow
+            dark={dark}
+            icon={<Sun size={11} className="text-yellow-400" />}
+            label="Mantener pantalla activa"
+            description="Evita que el dispositivo entre en suspensión"
+            checked={scrcpyOptions.stayAwake}
+            onChange={(checked) => setScrcpyOptions((o) => ({ ...o, stayAwake: checked }))}
+            disabled={scrcpyActive}
+          />
+          <ToggleRow
+            dark={dark}
+            icon={<Maximize2 size={11} className="text-sky-400" />}
+            label="Ventana siempre al frente"
+            description="Mantiene la ventana de scrcpy fija encima"
+            checked={scrcpyOptions.alwaysOnTop}
+            onChange={(checked) => setScrcpyOptions((o) => ({ ...o, alwaysOnTop: checked }))}
+            disabled={scrcpyActive}
+          />
+          <ToggleRow
+            dark={dark}
+            icon={<Camera size={11} className="text-emerald-400" />}
+            label="Transmitir Cámara Trasera"
+            description="Usa el sensor de cámara en lugar de la pantalla"
+            checked={scrcpyOptions.videoSource === 'camera'}
+            onChange={(checked) => setScrcpyOptions((o) => ({ ...o, videoSource: checked ? 'camera' : 'display' }))}
+            disabled={scrcpyActive}
+          />
+          {onToggleAutoProject && (
+            <ToggleRow
+              dark={dark}
+              icon={<Zap size={11} className="text-[#22c97d]" />}
+              label="Auto-proyectar al detectar dispositivo"
+              description="Inicia la ventana nativa scrcpy automáticamente"
+              checked={autoProject}
+              onChange={onToggleAutoProject}
+            />
+          )}
+        </div>
+      </div>
+
+      {/* ═══ Grabador de Pantalla HD en Segundo Plano ═══ */}
+      <div className={`rounded-xl border p-3 ${cardBg} ${cardBorder} ${cardShadow} space-y-2`}>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-1.5">
+            <Video size={14} className={isRecording ? 'text-red-400 animate-pulse' : 'text-purple-400'} />
+            <h3 className={`text-xs font-bold ${dark ? 'text-white' : 'text-slate-900'}`}>
+              Grabador de Pantalla MP4
+            </h3>
+          </div>
+          {isRecording && (
+            <span className="font-mono text-[10px] text-red-400 font-bold px-2 py-0.5 rounded-full bg-red-500/10 border border-red-500/20">
+              REC {formatTime(recordingSeconds)}
+            </span>
+          )}
+        </div>
+
+        <button
+          type="button"
+          onClick={onToggleRecord}
+          disabled={isBusy}
+          className={`w-full flex items-center justify-center gap-2 py-2 rounded-xl text-xs font-bold transition-all ${
+            isRecording
+              ? 'bg-red-500 hover:bg-red-600 text-white shadow-lg shadow-red-500/25'
+              : dark
+                ? 'bg-purple-500/15 text-purple-300 hover:bg-purple-500/25 border border-purple-500/30'
+                : 'bg-purple-50 text-purple-700 hover:bg-purple-100 border border-purple-200'
+          }`}
+        >
+          {isRecording ? <Square size={12} fill="currentColor" /> : <Circle size={12} fill="currentColor" />}
+          <span>{isRecording ? 'Detener y Guardar Grabación' : 'Iniciar Grabación HD (H.265)'}</span>
+        </button>
+      </div>
+
+      {/* ═══ Herramientas de Control & Sistema ═══ */}
+      <div className={`rounded-xl border p-3 ${cardBg} ${cardBorder} ${cardShadow} space-y-2.5`}>
+        <h3 className={`text-[10px] font-bold uppercase tracking-wider ${dark ? 'text-white/40' : 'text-slate-400'}`}>
+          Herramientas y Sistema
+        </h3>
+
+        {/* Orientation Selector */}
+        <div>
+          <span className={`text-[10px] block font-semibold mb-1 ${dark ? 'text-white/50' : 'text-slate-500'}`}>
+            Orientación de Pantalla
+          </span>
+          <div className="grid grid-cols-3 gap-1">
+            <button
+              type="button"
+              onClick={() => { onSetOrientation('auto'); showToast('Orientación: Automática'); }}
+              className={`py-1.5 rounded-lg text-[10px] font-semibold border transition-all text-center ${
+                dark ? 'bg-white/[0.03] border-white/5 text-white/70 hover:bg-white/[0.08]' : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
+              }`}
+            >
+              Auto
+            </button>
+            <button
+              type="button"
+              onClick={() => { onSetOrientation('portrait'); showToast('Orientación: Vertical fija'); }}
+              className={`py-1.5 rounded-lg text-[10px] font-semibold border transition-all text-center ${
+                dark ? 'bg-white/[0.03] border-white/5 text-white/70 hover:bg-white/[0.08]' : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
+              }`}
+            >
+              Vertical
+            </button>
+            <button
+              type="button"
+              onClick={() => { onSetOrientation('landscape'); showToast('Orientación: Horizontal fija'); }}
+              className={`py-1.5 rounded-lg text-[10px] font-semibold border transition-all text-center ${
+                dark ? 'bg-white/[0.03] border-white/5 text-white/70 hover:bg-white/[0.08]' : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
+              }`}
+            >
+              Horizontal
+            </button>
+          </div>
+        </div>
+
+        {/* Quick System Buttons Grid */}
+        <div className="grid grid-cols-2 gap-1.5 pt-1">
+          <ToolButton
+            dark={dark}
+            icon={<Camera size={12} className="text-emerald-400" />}
+            label="Captura HD"
+            onClick={handleScreenshotClick}
+          />
+          {onOpenAllApps && (
+            <ToolButton
+              dark={dark}
+              icon={<LayoutGrid size={12} className="text-emerald-400" />}
+              label="Todas las Apps"
+              onClick={() => { onOpenAllApps(); showToast('Abriendo menú de aplicaciones'); }}
+            />
+          )}
+          <ToolButton
+            dark={dark}
+            icon={<Bell size={12} className="text-sky-400" />}
+            label="Notificaciones"
+            onClick={() => { onExpandNotifications(); showToast('Desplegando notificaciones'); }}
+          />
+          <ToolButton
+            dark={dark}
+            icon={<Sliders size={12} className="text-violet-400" />}
+            label="Ajustes Rápidos"
+            onClick={() => { onExpandQuickSettings(); showToast('Desplegando ajustes rápidos'); }}
+          />
+          <ToolButton
+            dark={dark}
+            icon={<Power size={12} className="text-amber-400" />}
+            label="Bloquear Pantalla"
+            onClick={() => { onTogglePowerScreen(); showToast('Bloqueando pantalla'); }}
+          />
+          {onWakeScreen && (
+            <ToolButton
+              dark={dark}
+              icon={<Sun size={12} className="text-yellow-400" />}
+              label="Despertar Pantalla"
+              onClick={() => { onWakeScreen(); showToast('Despertando pantalla'); }}
+            />
+          )}
+          <ToolButton
+            dark={dark}
+            icon={<RotateCcw size={12} className="text-blue-400" />}
+            label="Reiniciar"
+            onClick={() => { onReboot(); showToast('Enviando orden de reinicio...'); }}
+          />
+          <ToolButton
+            dark={dark}
+            icon={<Power size={12} className="text-red-400" />}
+            label="Apagar"
+            onClick={() => { onPowerOff(); showToast('Enviando orden de apagado...'); }}
+            danger
+          />
         </div>
       </div>
     </div>
   );
 };
 
-/* ── MiniStat — compact inline stat ──────────────────────── */
-function MiniStat({ dark, icon, value }: {
-  dark: boolean; icon: React.ReactNode; value: string;
+/* ── ToggleRow Subcomponent ──────────────────────────── */
+function ToggleRow({
+  dark,
+  icon,
+  label,
+  description,
+  checked,
+  onChange,
+  disabled,
+}: {
+  dark: boolean;
+  icon: React.ReactNode;
+  label: string;
+  description?: string;
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+  disabled?: boolean;
 }) {
   return (
-    <div className={`flex items-center gap-1 px-1.5 py-1 rounded-lg ${
-      dark ? 'bg-white/[0.03] border border-white/5' : 'bg-slate-50 border border-slate-200'
-    }`}>
-      {icon}
-      <span className={`text-[9px] font-bold ${dark ? 'text-white/60' : 'text-slate-600'}`}>{value}</span>
-    </div>
-  );
-}
-
-/* ── DetailRow ──────────────────────────────────────────── */
-function DetailRow({ dark, label, value, mono }: {
-  dark: boolean; label: string; value: string; mono?: boolean;
-}) {
-  return (
-    <div className="flex items-center justify-between gap-1">
-      <span className={`text-[9px] shrink-0 ${dark ? 'text-white/40' : 'text-slate-500'}`}>{label}</span>
-      <span className={`text-[9px] font-semibold truncate ${mono ? 'font-mono' : ''} ${dark ? 'text-white/70' : 'text-slate-700'}`}>
-        {value}
-      </span>
-    </div>
-  );
-}
-
-/* ── NavBtn ─────────────────────────────────────────────── */
-function NavBtn({ dark, icon, label, onClick, primary }: {
-  dark: boolean; icon: React.ReactNode; label: string; onClick: () => void; primary?: boolean;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className={`flex flex-col items-center justify-center gap-1 py-2 rounded-xl transition-all text-[9px] font-semibold ${
-        primary
-          ? dark
-            ? 'bg-[#1bae6e]/15 text-[#22c97d] border border-[#1bae6e]/25 hover:bg-[#1bae6e]/25'
-            : 'bg-emerald-50 text-emerald-600 border border-emerald-200 hover:bg-emerald-100'
-          : dark
-            ? 'bg-white/[0.03] text-white/50 border border-white/[0.06] hover:bg-white/[0.06] hover:text-white/70'
-            : 'bg-slate-50 text-slate-500 border border-slate-200 hover:bg-slate-100 hover:text-slate-700'
+    <label
+      className={`flex items-center justify-between p-1.5 rounded-lg cursor-pointer select-none transition-colors ${
+        disabled ? 'opacity-50 cursor-not-allowed' : dark ? 'hover:bg-white/[0.03]' : 'hover:bg-slate-50'
       }`}
-      title={label}
     >
-      {icon}
-      <span>{label}</span>
-    </button>
+      <div className="flex items-center gap-2 min-w-0 pr-2">
+        <span className="shrink-0">{icon}</span>
+        <div className="min-w-0">
+          <span className={`text-[10px] font-semibold block leading-tight ${dark ? 'text-white/80' : 'text-slate-800'}`}>
+            {label}
+          </span>
+          {description && (
+            <span className={`text-[9px] block leading-tight ${dark ? 'text-white/40' : 'text-slate-400'}`}>
+              {description}
+            </span>
+          )}
+        </div>
+      </div>
+      <input
+        type="checkbox"
+        checked={checked}
+        disabled={disabled}
+        onChange={(e) => onChange(e.target.checked)}
+        className="w-3.5 h-3.5 rounded accent-[#22c97d] cursor-pointer"
+      />
+    </label>
   );
 }
 
-/* ── ActionBtn ──────────────────────────────────────────── */
-function ActionBtn({ dark, icon, label, onClick, active, danger }: {
-  dark: boolean; icon: React.ReactNode; label: string; onClick: () => void; active?: boolean; danger?: boolean;
+/* ── ToolButton Subcomponent ──────────────────────────── */
+function ToolButton({
+  dark,
+  icon,
+  label,
+  onClick,
+  danger,
+}: {
+  dark: boolean;
+  icon: React.ReactNode;
+  label: string;
+  onClick: () => void;
+  danger?: boolean;
 }) {
   return (
     <button
+      type="button"
       onClick={onClick}
-      className={`w-full flex items-center gap-2 px-2.5 py-2 rounded-xl text-left transition-all text-[10px] font-semibold ${
+      className={`flex items-center gap-2 px-2.5 py-2 rounded-xl text-left transition-all text-[10px] font-semibold border ${
         danger
           ? dark
-            ? 'text-red-400 hover:bg-red-500/10 border border-red-500/20 hover:border-red-500/30'
-            : 'text-red-600 hover:bg-red-50 border border-red-200 hover:border-red-300'
-          : active
-            ? dark
-              ? 'text-green-400 bg-green-500/10 border border-green-500/20'
-              : 'text-green-600 bg-green-50 border border-green-200'
-            : dark
-              ? 'text-white/60 hover:bg-white/5 border border-white/[0.06] hover:border-white/10'
-              : 'text-slate-600 hover:bg-slate-50 border border-slate-200 hover:border-slate-300'
+            ? 'text-red-400 bg-red-500/5 hover:bg-red-500/15 border-red-500/20'
+            : 'text-red-600 bg-red-50 hover:bg-red-100 border-red-200'
+          : dark
+            ? 'text-white/70 bg-white/[0.02] hover:bg-white/[0.06] border-white/5 hover:text-white'
+            : 'text-slate-700 bg-slate-50 hover:bg-slate-100 border-slate-200'
       }`}
     >
       <span className="shrink-0">{icon}</span>
-      <span>{label}</span>
+      <span className="truncate">{label}</span>
     </button>
   );
 }

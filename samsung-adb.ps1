@@ -54,22 +54,33 @@ function Invoke-AdbTimeout([string]$Arguments, [int]$timeoutSec = 15) {
 }
 
 function Resolve-Target {
-    # WiFi via mDNS
-    $r = Invoke-AdbTimeout "mdns services" 6
+    # 1. State file de IP descubierta
+    $stateFile = Join-Path $TempDir "samsung-device-ip.txt"
+    if (Test-Path $stateFile) {
+        $ip = (Get-Content $stateFile -ErrorAction SilentlyContinue).Trim()
+        if ($ip) {
+            $null = Invoke-AdbTimeout "connect $ip" 3
+            $h = Invoke-AdbTimeout "-s $ip shell echo ok" 3
+            if ($h[0] -eq 0) { return $ip }
+        }
+    }
+    # 2. USB como respaldo
+    $h = Invoke-AdbTimeout "-s $PhoneSerial shell echo ok" 3
+    if ($h[0] -eq 0) { return $PhoneSerial }
+    # 3. WiFi via mDNS
+    $r = Invoke-AdbTimeout "mdns services" 4
     if ($r[0] -eq 0) {
         foreach ($line in ("$($r[1])" -split "`r?`n")) {
             if ($line -match "adb-$PhoneSerial.*\t([0-9.]+:[0-9]+)") {
                 $ip = $Matches[1]
-                $h = Invoke-AdbTimeout "-s $ip shell echo ok" 5
+                $h = Invoke-AdbTimeout "-s $ip shell echo ok" 3
                 if ($h[0] -eq 0) { return $ip }
             }
         }
     }
-    # USB como respaldo
-    $h = Invoke-AdbTimeout "-s $PhoneSerial shell echo ok" 5
-    if ($h[0] -eq 0) { return $PhoneSerial }
-    # Ultimo recurso: fallback fijo
-    $h = Invoke-AdbTimeout "-s $FallbackIp shell echo ok" 5
+    # 4. Fallback fijo
+    $null = Invoke-AdbTimeout "connect $FallbackIp" 3
+    $h = Invoke-AdbTimeout "-s $FallbackIp shell echo ok" 3
     if ($h[0] -eq 0) { return $FallbackIp }
     return $null
 }

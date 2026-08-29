@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import { MonitorPlay, X } from 'lucide-react';
 import { Header } from './Header';
 import { Sidebar } from './Sidebar';
-import { SystemTerminal } from './SystemTerminal';
 import { WirelessConnectModal } from './WirelessConnectModal';
 import { useAppTheme } from '../ThemeProvider';
 import { useMouseLight } from '../../hooks/useMouseLight';
@@ -53,6 +53,51 @@ export const AppShell: React.FC<AppShellProps> = ({
   const [connectModal, setConnectModal] = useState(false);
   const [viewportMedium, setViewportMedium] = useState(true);
   const sceneRef = useRef<HTMLDivElement>(null);
+
+  // Auto-detection toast state
+  const [detectedToast, setDetectedToast] = useState<DeviceInfo | null>(null);
+  const prevSerialsRef = useRef<string>('');
+
+  // Detect when new device appears
+  useEffect(() => {
+    const activeDevs = devices.filter(d => d.state === 'device');
+    const currentSerials = activeDevs.map(d => d.serial).join(',');
+
+    if (activeDevs.length > 0 && currentSerials !== prevSerialsRef.current) {
+      // Find newly added device
+      const newlyAdded = activeDevs.find(d => !prevSerialsRef.current.includes(d.serial)) || activeDevs[0];
+      setDetectedToast(newlyAdded);
+    }
+    prevSerialsRef.current = currentSerials;
+  }, [devices]);
+
+  // Launch scrcpy and switch to projection
+  const handleConfirmTransmit = async () => {
+    if (!detectedToast) return;
+    const targetSerial = detectedToast.serial;
+    setDetectedToast(null);
+    onSelectSerial(targetSerial);
+    onNavigate('projection');
+
+    try {
+      await fetch('/api/actions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'open_screen',
+          serial: targetSerial,
+          maxSize: '1080',
+          maxFps: '60',
+          bitRate: '16M',
+          stayAwake: true,
+          alwaysOnTop: true,
+        }),
+      });
+      addLog(`✓ Transmisión iniciada para ${detectedToast.model}`, 'success');
+    } catch {
+      addLog(`✗ Error al iniciar transmisión`, 'error');
+    }
+  };
 
   // Cosmic 3D: dynamic lighting follows cursor
   useMouseLight(sceneRef);
@@ -121,13 +166,38 @@ export const AppShell: React.FC<AppShellProps> = ({
           onToggleAutoConnect={onToggleAutoConnect}
         />
 
-        <main className={`relative flex-1 min-w-0 ${
+        {/* ═══ AUTO-DETECTION CONFIRMATION TOAST BANNER ═══ */}
+        {detectedToast && (
+          <div className="absolute top-14 right-4 z-40 flex items-center gap-3 px-3.5 py-2.5 rounded-xl bg-[#0b0f1a]/95 border border-[#22c97d]/40 text-white shadow-2xl backdrop-blur-md animate-in fade-in slide-in-from-top-2 duration-200">
+            <div className="w-2.5 h-2.5 rounded-full bg-[#22c97d] animate-pulse shrink-0" />
+            <div className="text-xs">
+              <p className="font-bold text-white">Dispositivo detectado</p>
+              <p className="text-[10px] text-white/50">{detectedToast.model} ({detectedToast.connectionType})</p>
+            </div>
+            <button
+              onClick={handleConfirmTransmit}
+              className="px-3 py-1 rounded-lg bg-[#1bae6e] hover:bg-[#22c97d] text-white text-[11px] font-bold transition-all flex items-center gap-1 shadow-sm shrink-0"
+            >
+              <MonitorPlay size={12} />
+              <span>Transmitir Ahora (60 FPS)</span>
+            </button>
+            <button
+              onClick={() => setDetectedToast(null)}
+              className="p-1 text-white/40 hover:text-white transition-colors"
+              title="Cerrar notificación"
+            >
+              <X size={13} />
+            </button>
+          </div>
+        )}
+
+        <main className={`relative flex-1 min-w-0 overflow-x-hidden ${
           activeNav === 'projection' ? 'overflow-hidden p-0' : 'overflow-y-auto custom-scrollbar p-2 md:p-3'
         } ${isDark ? '' : 'bg-white'}`}>
+
           {/* Cosmic ground glow at bottom of content */}
           {isDark && <div className="cosmic-ground-glow" />}
           {children}
-          {activeNav !== 'projection' && activeNav !== 'tools' && <SystemTerminal logs={logs} onClearLogs={clearLogs} />}
         </main>
       </div>
 

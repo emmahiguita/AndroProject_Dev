@@ -126,7 +126,11 @@ export const OptimizerView: React.FC<OptimizerViewProps> = ({ device, addLog }) 
             <p className="text-base font-bold font-mono text-text-primary mt-1">
               {device?.ram || '--'}
             </p>
-            <p className="text-[10px] text-text-secondary">{device ? 'RAM total' : 'No detectado'}</p>
+            <p className="text-[10px] text-text-secondary">
+              {device?.ramUsagePercent != null
+                ? `${device.ramUsagePercent}% en uso`
+                : device ? 'RAM total' : 'No detectado'}
+            </p>
           </Card>
 
           <Card padding="sm">
@@ -137,24 +141,32 @@ export const OptimizerView: React.FC<OptimizerViewProps> = ({ device, addLog }) 
             <p className="text-base font-bold font-mono text-text-primary mt-1">
               {device?.storage || '--'}
             </p>
-            <p className="text-[10px] text-text-secondary">{device ? 'Capacidad total' : '--'}</p>
+            <p className="text-[10px] text-text-secondary">
+              {device?.storageFreeGB != null
+                ? `${device.storageFreeGB} GB libres`
+                : device ? 'Capacidad total' : '--'}
+            </p>
           </Card>
 
+          {/* FIX: reemplazado componente muerto por CPU % real */}
           <Card padding="sm">
             <div className="flex items-center justify-between text-text-secondary">
-              <span className="text-[9px] font-semibold uppercase tracking-wider">Procesos Fondo</span>
+              <span className="text-[9px] font-semibold uppercase tracking-wider">CPU</span>
               <RefreshCw size={14} className="text-amber-400" />
             </div>
             <p className="text-base font-bold font-mono text-text-primary mt-1">
-              {device ? '—' : '--'}
+              {device?.cpuUsagePercent != null ? `${device.cpuUsagePercent}%` : '--'}
             </p>
-            <p className="text-[10px] text-text-secondary">{device ? 'Se optimizan al acelerar' : '--'}</p>
+            <p className="text-[10px] text-text-secondary">
+              {device ? 'Uso de procesador' : '--'}
+            </p>
           </Card>
         </div>
 
         <p className="text-[9px] text-text-tertiary flex items-center gap-1">
-          <Sparkles size={10} /> Sin métricas en vivo: datos reales del dispositivo.
+          <Sparkles size={10} /> Lectura y optimización en tiempo real mediante comandos ADB nativos.
         </p>
+
       </div>
     </ViewShell>
   );

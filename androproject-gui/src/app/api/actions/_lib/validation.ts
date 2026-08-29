@@ -6,24 +6,28 @@ export const baseActionSchema = z.object({
   serial: z.string().optional(),
   ip: z.string().optional(),
   videoSource: z.enum(['display', 'camera']).optional(),
-});
+}).passthrough();
 
 // ── Device actions ────────────────────────────────────────────────────
 export const keyeventSchema = z.object({ keycode: z.string().min(1) });
 export const adbShellSchema = z.object({ cmd: z.string().min(1).max(512) });
 
-// ── Touch input actions ───────────────────────────────────────────────
+// ── Touch / text input actions ───────────────────────────────────────
+export const inputTextSchema = z.object({
+  text: z.string().max(2048),
+});
 export const inputTapSchema = z.object({
-  x: z.number().int().min(0).max(10000),
-  y: z.number().int().min(0).max(10000),
+  x: z.coerce.number().min(0).max(10000),
+  y: z.coerce.number().min(0).max(10000),
 });
 export const inputSwipeSchema = z.object({
-  x1: z.number().int().min(0).max(10000),
-  y1: z.number().int().min(0).max(10000),
-  x2: z.number().int().min(0).max(10000),
-  y2: z.number().int().min(0).max(10000),
-  duration: z.number().int().min(0).max(5000).optional(),
+  x1: z.coerce.number().min(0).max(10000),
+  y1: z.coerce.number().min(0).max(10000),
+  x2: z.coerce.number().min(0).max(10000),
+  y2: z.coerce.number().min(0).max(10000),
+  duration: z.coerce.number().min(0).max(10000).optional(),
 });
+
 
 // ── Network actions ───────────────────────────────────────────────────
 export const wifiScanIntervalSchema = z.object({
@@ -90,8 +94,10 @@ export const shadeStyleSchema = z.object({
 export const actionSchemas: Record<string, z.ZodType<unknown>> = {
   keyevent:                  keyeventSchema,
   adb_shell:                 adbShellSchema,
+  input_text:                inputTextSchema,
   input_tap:                 inputTapSchema,
   input_swipe:               inputSwipeSchema,
+
   set_wifi_scan_interval:    wifiScanIntervalSchema,
   set_wifi_power_save:       wifiPowerSaveSchema,
   set_private_dns:           privateDnsSchema,

@@ -30,12 +30,13 @@ function ActiveView({
 }) {
   switch (nav) {
     case 'dashboard':  return <DashboardView device={device} addLog={addLog} onNavigate={onNavigate} />;
-    case 'projection': return <ProjectionView device={device} addLog={addLog} onNavigate={onNavigate} />;
+    case 'projection': return <ProjectionView device={device} />;
+
     case 'apps':       return <AppsView device={device} addLog={addLog} />;
     case 'flasher':    return <FlasherView device={device} addLog={addLog} />;
     case 'curar':      return <CurarView device={device} addLog={addLog} />;
     case 'archivos':   return <ArchivosView device={device} addLog={addLog} />;
-    case 'tools':      return <ToolsView device={device} addLog={addLog} />;
+    case 'tools':      return <ToolsView device={device} />;
     case 'optimizer':  return <OptimizerView device={device} addLog={addLog} />;
     case 'config':     return <ConfigView addLog={addLog} />;
     default:           return <DashboardView device={device} addLog={addLog} onNavigate={onNavigate} />;
@@ -43,11 +44,19 @@ function ActiveView({
 }
 
 export default function Page() {
-  const activeNav = (useAppStore((s) => s.activeNav) as NavSection) || 'dashboard';
+  const [mounted, setMounted] = React.useState(false);
+  React.useEffect(() => { setMounted(true); }, []);
+
+  const activeNav = useAppStore((s) => s.activeNav) ?? 'dashboard';
+
   const setActiveNav = useAppStore((s) => s.setActiveNav);
   const { devices, device, selectedSerial, setSelectedSerial, isScanning, scanRadar, refresh } = useDevicePolling();
   const { logs, addLog, clearLogs } = useSystemLogs();
   const adb = useAdbConnection();
+
+  if (!mounted) {
+    return <div className="h-screen w-screen bg-[#070913]" suppressHydrationWarning />;
+  }
 
   return (
     <AppShell

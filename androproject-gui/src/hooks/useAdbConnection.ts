@@ -258,11 +258,16 @@ export function useAdbConnection() {
 
   // Auto-reconnect: if a registered Wi-Fi device disappears, try to reconnect
   useEffect(() => {
-    if (!serverRunning || devices.length > 0) return;
-
-    const registered = loadRegisteredDevices();
-    const wifiDevices = registered.filter(d => d.autoConnect && d.connectionType === 'Wi-Fi' && d.ip && d.port);
+    // FIX BUG#6: reconnect si no hay dispositivos o si todos son offline/unauthorized
+    const activeDevices = devices.filter(d => d.state === 'device');
+    const wifiDevices = registeredDevices.filter(d => d.autoConnect && d.connectionType === 'Wi-Fi' && d.ip && d.port);
     if (wifiDevices.length === 0) return;
+
+    // Solo intentar si no hay conexion activa para esos dispositivos
+    const alreadyActive = wifiDevices.some(rd =>
+      activeDevices.some(ad => ad.serial === rd.serial)
+    );
+    if (alreadyActive) return;
 
     reconnectRef.current = setTimeout(async () => {
       for (const dev of wifiDevices) {
@@ -275,7 +280,8 @@ export function useAdbConnection() {
     return () => {
       if (reconnectRef.current) clearTimeout(reconnectRef.current);
     };
-  }, [serverRunning, devices, connectToIp]);
+  }, [serverRunning, devices, registeredDevices, connectToIp]);
+
 
   // Check initial ADB status on mount
   useEffect(() => {

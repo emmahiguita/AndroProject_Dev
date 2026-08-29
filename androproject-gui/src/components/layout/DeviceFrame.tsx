@@ -1,9 +1,12 @@
 'use client';
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Smartphone, ZoomIn, ZoomOut, RotateCcw, RefreshCw, Wifi, Usb } from 'lucide-react';
-import { useDeviceStream } from '@/hooks/useDeviceStream';
+import {
+  RefreshCw, Wifi, Usb, ArrowLeft, Home, Layers,
+  Volume2, VolumeX, Power, Send, Type, MonitorPlay, LayoutGrid,
+} from 'lucide-react';
 import { useActions } from '@/hooks/useActions';
+import { ProjectionCanvas, ZoomState } from '@/components/projection/ProjectionCanvas';
 import type { DeviceInfo } from '../../features/types';
 
 interface DeviceFrameProps {
@@ -11,420 +14,297 @@ interface DeviceFrameProps {
   expanded: boolean;
   compact?: boolean;
   onSendKey?: (keycode: string) => void;
-}
-
-interface ZoomState {
-  scale: number;
-  ox: number;
-  oy: number;
+  scrcpyActive?: boolean;
+  onToggleScrcpy?: () => void;
 }
 
 const MIN_SCALE = 1;
 const MAX_SCALE = 4;
-const TAP_MOVE_PX = 10;
-const TAP_MAX_MS = 500;
-const MIN_SWIPE_DEVICE_PX = 8;
-const WHEEL_DEBOUNCE_MS = 80;
-
-const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v));
-const clamp01 = (v: number) => clamp(v, 0, 1);
+const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
 
 /**
- * DeviceFrame — Real-time device screen with streaming + interaction.
- *
- * Streaming:
- *   ADB screencap polling via /api/device-image (~6fps)
- *   Always works on any device, no scrcpy dependency for display.
- *
- * States:
- *   connected + streaming = show live screen
- *   connected + no stream = show connecting
- *   disconnected = show reconnect UI
- *   error = show retry UI
+ * DeviceFrame — Interactive hardware enclosure with bezel, hardware keys,
+ * text input synthesizer, and embedded ProjectionCanvas viewport.
  */
-export const DeviceFrame: React.FC<DeviceFrameProps> = ({ device, expanded, compact, onSendKey }) => {
-  const imgRef = useRef<HTMLImageElement>(null);
-  const screenRef = useRef<HTMLDivElement>(null);
-  const { frameUrl, error, fps, connected, mode } = useDeviceStream(device.serial, expanded);
+export const DeviceFrame: React.FC<DeviceFrameProps> = ({
+  device,
+  expanded,
+  onSendKey,
+  scrcpyActive,
+  onToggleScrcpy,
+}) => {
   const { run } = useActions();
+  const [useMjpegStream, setUseMjpegStream] = useState(true);
+  const [currentFps, setCurrentFps] = useState(0);
 
-  // Touch gestures must target THIS device's serial, not the store's activeSerial.
-  const tapDevice = useCallback(async (x: number, y: number) => {
-    await run('input_tap', 'Tap', { x, y, serial: device.serial }, false);
-  }, [run, device.serial]);
-
-  const swipeDevice = useCallback(async (
-    x1: number, y1: number, x2: number, y2: number, duration: number = 120,
-  ) => {
-    await run('input_swipe', 'Gesto', { x1, y1, x2, y2, duration, serial: device.serial }, false);
-  }, [run, device.serial]);
-
-  const tapRef = useRef(tapDevice);
-  const swipeRef = useRef(swipeDevice);
-  useEffect(() => {
-    tapRef.current = tapDevice;
-    swipeRef.current = swipeDevice;
-  });
-
+  // Zoom state passed down to ProjectionCanvas
   const [zoom, setZoom] = useState<ZoomState>({ scale: 1, ox: 0.5, oy: 0.5 });
-  const [retryCount, setRetryCount] = useState(0);
-  const dragRef = useRef<null | {
-    id: number;
-    startX: number; startY: number; startT: number;
-    moved: boolean;
-    lastX: number; lastY: number;
-  }>(null);
-  const wheelLockRef = useRef(0);
+  const [textInput, setTextInput] = useState('');
+  const [sendingText, setSendingText] = useState(false);
 
-  const toDevice = useCallback((clientX: number, clientY: number) => {
-    const img = imgRef.current;
-    if (!img || !img.naturalWidth || !img.naturalHeight) return null;
-    const rect = img.getBoundingClientRect();
-    const s = zoom.scale;
-    const w0 = img.clientWidth || rect.width / s;
-    const h0 = img.clientHeight || rect.height / s;
-    const left0 = rect.left + zoom.ox * rect.width - zoom.ox * w0 * s;
-    const top0 = rect.top + zoom.oy * rect.height - zoom.oy * h0 * s;
-    const nx = (clientX - left0) / w0;
-    const ny = (clientY - top0) / h0;
-    if (nx < 0 || ny < 0 || nx > 1 || ny > 1) return null;
-    return {
-      x: clamp(Math.round(nx * img.naturalWidth), 0, img.naturalWidth - 1),
-      y: clamp(Math.round(ny * img.naturalHeight), 0, img.naturalHeight - 1),
-    };
-  }, [zoom]);
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  const zoomBy = useCallback((factor: number) => {
-    setZoom((z) => ({ ...z, scale: clamp(z.scale * factor, MIN_SCALE, MAX_SCALE) }));
-  }, []);
+  // ── Hardware Key Handlers ──
+  const handleKey = useCallback(async (keycode: string) => {
+    if (onSendKey) {
+      onSendKey(keycode);
+    } else if (device.serial) {
+      await run('keyevent', '', { keycode, serial: device.serial }, false);
+    }
+  }, [onSendKey, device.serial, run]);
 
-  // ── Wake screen command ──
-  const wakeScreen = useCallback(async () => {
-    if (!device.serial) return;
-    // Power button to wake screen
-    await run('keyevent', 'Despertando pantalla', { keycode: 'KEYCODE_WAKEUP' }, false);
-    // Small delay then check
-    setTimeout(() => setRetryCount(c => c + 1), 500);
-  }, [device.serial, run]);
-
-  // ── Retry connection ──
-  const retryConnection = useCallback(() => {
-    setRetryCount(c => c + 1);
-  }, []);
-
-  const toDeviceRef = useRef(toDevice);
-  const frameUrlRef = useRef(frameUrl);
-  const errorRef = useRef(error);
-
+  // Global keyboard shortcuts when device is expanded
   useEffect(() => {
-    toDeviceRef.current = toDevice;
-    frameUrlRef.current = frameUrl;
-    errorRef.current = error;
-  });
-
-  // ── Mouse wheel for scrolling/zooming ──
-  useEffect(() => {
-    const el = screenRef.current;
+    if (!expanded) return;
+    const el = containerRef.current;
     if (!el) return;
-    const onWheel = (e: WheelEvent) => {
-      if (!frameUrlRef.current || errorRef.current) return;
-      e.preventDefault();
-      const imgNow = imgRef.current;
-      if (!imgNow || !imgNow.naturalWidth) return;
-
-      if (e.ctrlKey || e.metaKey) {
-        const factor = Math.exp(-e.deltaY * 0.002);
-        setZoom((z) => {
-          const rect = imgNow.getBoundingClientRect();
-          return {
-            scale: clamp(z.scale * factor, MIN_SCALE, MAX_SCALE),
-            ox: clamp01((e.clientX - rect.left) / rect.width),
-            oy: clamp01((e.clientY - rect.top) / rect.height),
-          };
-        });
-        return;
-      }
-
-      const now = performance.now();
-      if (now - wheelLockRef.current < WHEEL_DEBOUNCE_MS) return;
-      wheelLockRef.current = now;
-
-      const p = toDeviceRef.current(e.clientX, e.clientY);
-      if (!p) return;
-      const nw = imgNow.naturalWidth;
-      const nh = imgNow.naturalHeight;
-      const steps = clamp(Math.round(Math.max(Math.abs(e.deltaX), Math.abs(e.deltaY)) / 60), 1, 6);
-      const amount = 90 * steps;
-      if (Math.abs(e.deltaY) >= Math.abs(e.deltaX)) {
-        const dir = e.deltaY > 0 ? 1 : -1;
-        swipeRef.current(p.x, clamp(p.y + dir * amount, 0, nh), p.x, clamp(p.y - dir * amount, 0, nh), 160);
-      } else {
-        const dir = e.deltaX > 0 ? 1 : -1;
-        swipeRef.current(clamp(p.x - dir * amount, 0, nw), p.y, clamp(p.x + dir * amount, 0, nw), p.y, 160);
-      }
-    };
-    el.addEventListener('wheel', onWheel, { passive: false });
-    return () => el.removeEventListener('wheel', onWheel);
-  }, []);
-
-  // ── Keyboard handler for hardware keys ──
-  useEffect(() => {
-    if (!expanded || !onSendKey) return;
-    const el = screenRef.current;
-    if (!el) return;
-
-    // Make the screen container focusable so keydown events reach it.
     el.setAttribute('tabindex', '0');
-    el.focus();
 
-    const KEYMAP: Record<string, string> = {
-      'ArrowUp': 'KEYCODE_DPAD_UP',
-      'ArrowDown': 'KEYCODE_DPAD_DOWN',
-      'ArrowLeft': 'KEYCODE_DPAD_LEFT',
-      'ArrowRight': 'KEYCODE_DPAD_RIGHT',
-      'Enter': 'KEYCODE_DPAD_CENTER',
-      'Escape': 'KEYCODE_BACK',
-      'Backspace': 'KEYCODE_DEL',
+    const MAP: Record<string, string> = {
+      ArrowUp: 'KEYCODE_DPAD_UP',
+      ArrowDown: 'KEYCODE_DPAD_DOWN',
+      ArrowLeft: 'KEYCODE_DPAD_LEFT',
+      ArrowRight: 'KEYCODE_DPAD_RIGHT',
+      Enter: 'KEYCODE_DPAD_CENTER',
+      Escape: 'KEYCODE_BACK',
+      Backspace: 'KEYCODE_DEL',
       ' ': 'KEYCODE_SPACE',
-      'Home': 'KEYCODE_HOME',
+      Home: 'KEYCODE_HOME',
     };
 
     const onKeyDown = (e: KeyboardEvent) => {
       if ((e.target as HTMLElement)?.tagName === 'INPUT') return;
-      const keycode = KEYMAP[e.key];
-      if (keycode) {
+      const k = MAP[e.key];
+      if (k) {
         e.preventDefault();
-        onSendKey(keycode);
+        handleKey(k);
       }
     };
-
-    const onMouseDown = () => el.focus();
 
     el.addEventListener('keydown', onKeyDown);
-    el.addEventListener('mousedown', onMouseDown);
-    return () => {
-      el.removeEventListener('keydown', onKeyDown);
-      el.removeEventListener('mousedown', onMouseDown);
-    };
-  }, [expanded, onSendKey]);
+    return () => el.removeEventListener('keydown', onKeyDown);
+  }, [expanded, handleKey]);
+
+  // ── Text input transmitter ──
+  const handleSendText = useCallback(async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!textInput.trim() || !device.serial || sendingText) return;
+    setSendingText(true);
+    try {
+      await run('input_text', 'Texto', { text: textInput, serial: device.serial }, false);
+      setTextInput('');
+    } finally {
+      setSendingText(false);
+    }
+  }, [textInput, device.serial, sendingText, run]);
+
+  const toggleStreamMode = useCallback(() => {
+    setUseMjpegStream((prev) => !prev);
+  }, []);
 
   if (!expanded) return null;
-
-  // ── Pointer interaction handlers ──
-  const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (e.button !== 0 || !frameUrl || dragRef.current) return;
-    e.currentTarget.setPointerCapture?.(e.pointerId);
-    dragRef.current = {
-      id: e.pointerId,
-      startX: e.clientX, startY: e.clientY, startT: performance.now(),
-      moved: false,
-      lastX: e.clientX, lastY: e.clientY,
-    };
-  };
-
-  const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    const d = dragRef.current;
-    if (!d || d.id !== e.pointerId) return;
-    if (!d.moved && Math.hypot(e.clientX - d.startX, e.clientY - d.startY) >= TAP_MOVE_PX) {
-      d.moved = true;
-    }
-    if (zoom.scale > 1) {
-      const img = imgRef.current;
-      if (img) {
-        const rect = img.getBoundingClientRect();
-        if (rect.width > 0 && rect.height > 0) {
-          setZoom((z) => ({
-            ...z,
-            ox: clamp01(z.ox - (e.clientX - d.lastX) / rect.width),
-            oy: clamp01(z.oy - (e.clientY - d.lastY) / rect.height),
-          }));
-        }
-      }
-    }
-    d.lastX = e.clientX;
-    d.lastY = e.clientY;
-  };
-
-  const onPointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
-    const d = dragRef.current;
-    if (!d || d.id !== e.pointerId) return;
-    dragRef.current = null;
-    e.currentTarget.releasePointerCapture?.(e.pointerId);
-
-    if (!d.moved && performance.now() - d.startT < TAP_MAX_MS) {
-      const p = toDevice(d.startX, d.startY);
-      if (p) tapRef.current(p.x, p.y);
-    } else if (d.moved && zoom.scale === 1) {
-      const a = toDevice(d.startX, d.startY);
-      const b = toDevice(e.clientX, e.clientY);
-      if (a && b && Math.hypot(b.x - a.x, b.y - a.y) >= MIN_SWIPE_DEVICE_PX) {
-        const dist = Math.hypot(b.x - a.x, b.y - a.y);
-        swipeRef.current(a.x, a.y, b.x, b.y, clamp(Math.round(dist * 1.2), 60, 600));
-      }
-    }
-  };
-
-  const onPointerCancel = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (dragRef.current?.id === e.pointerId) dragRef.current = null;
-  };
 
   const zoomed = zoom.scale > 1;
   const zoomLabel = `${Math.round(zoom.scale * 100)}%`;
   const isWifi = device.connectionType === 'Wi-Fi';
-  const isDisconnected = !connected || device.state !== 'device';
+  const isDisconnected = device.state !== 'device';
 
   return (
-    <div className="flex flex-col flex-1 min-h-0 min-w-0">
-      {/* Device info bar */}
-      <div className={`flex items-center justify-between px-2.5 py-1.5 border-b border-white/5 shrink-0 ${compact ? 'px-2 py-1' : ''}`}>
-        <div className="flex items-center gap-1.5 min-w-0">
-          <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${
-            isDisconnected ? 'bg-red-500' :
-            error ? 'bg-yellow-400' :
-            'bg-[#22c97d]'
-          } ${!isDisconnected && !error ? 'animate-pulse' : ''}`} />
-          <span className="font-bold truncate text-white text-[10px]" title={device.model}>
+    <div ref={containerRef} className="flex flex-col flex-1 min-h-0 min-w-0 bg-[#080b11] outline-none">
+
+      {/* ═══ Header Bar ═══ */}
+      <div className="flex items-center justify-between px-3 py-2 border-b border-white/5 shrink-0 bg-white/[0.02]">
+        <div className="flex items-center gap-2 min-w-0">
+          <span className={`w-2 h-2 rounded-full shrink-0 ${
+            isDisconnected ? 'bg-red-500' : 'bg-[#22c97d] animate-pulse'
+          }`} />
+          <span className="font-bold truncate text-white text-xs" title={device.model}>
             {device.model?.split(' ').slice(0, 3).join(' ') || device.serial?.slice(0, 14)}
           </span>
         </div>
-        <div className="flex items-center gap-1.5">
+
+        <div className="flex items-center gap-2">
           {isWifi ? (
-            <Wifi size={10} className="text-white/30" />
+            <span className="flex items-center gap-1 text-[10px] text-emerald-400/80 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+              <Wifi size={11} /> Wi-Fi
+            </span>
           ) : (
-            <Usb size={10} className="text-white/30" />
+            <span className="flex items-center gap-1 text-[10px] text-white/50 bg-white/5 px-2 py-0.5 rounded-full border border-white/10">
+              <Usb size={11} /> USB
+            </span>
           )}
+
           {isDisconnected && (
-            <span className="font-mono rounded-full bg-red-500/10 shrink-0 text-[9px] px-1.5 py-0.5 text-red-400">
-              sin conexión
+            <span className="font-mono rounded-full bg-red-500/10 shrink-0 text-[9px] px-2 py-0.5 text-red-400 border border-red-500/20">
+              desconectado
             </span>
           )}
-          {!isDisconnected && error && (
-            <span className="font-mono rounded-full bg-yellow-500/10 shrink-0 text-[9px] px-1.5 py-0.5 text-yellow-400">
-              reconectando
-            </span>
-          )}
-          <span className={`font-mono rounded-full bg-white/[0.05] shrink-0 text-[10px] px-1.5 py-0.5 ${
-            error ? 'text-yellow-400' : 'text-white/50'
+
+          {/* Live Stream Mode & FPS Badge */}
+          <div className={`flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full border ${
+            useMjpegStream
+              ? 'text-emerald-400/90 bg-emerald-500/10 border-emerald-500/20'
+              : 'text-white/60 bg-white/5 border-white/10'
           }`}>
-            {connected ? `${fps} img/s` : '--'}
-          </span>
+            <span className={`w-1.5 h-1.5 rounded-full ${useMjpegStream ? 'bg-emerald-400 animate-ping' : 'bg-white/40'}`} />
+            <span className="font-mono text-[9px]">
+              {useMjpegStream ? (currentFps > 0 ? `STREAM ${currentFps} FPS` : 'STREAM 30 FPS') : (currentFps > 0 ? `${currentFps} FPS` : 'POLLING')}
+            </span>
+          </div>
+
+          {/* Stream Mode Switcher Button */}
+          <button
+            type="button"
+            onClick={toggleStreamMode}
+            className={`p-1 rounded-lg transition-colors ${
+              useMjpegStream
+                ? 'text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10'
+                : 'text-white/60 hover:text-white hover:bg-white/10'
+            }`}
+            title={useMjpegStream ? 'Modo actual: MJPEG Stream (Clic para cambiar a Polling)' : 'Modo actual: Polling Snapshot (Clic para cambiar a MJPEG)'}
+          >
+            <MonitorPlay size={12} />
+          </button>
+
+          {/* Scrcpy 60 FPS Native Active/Launcher Badge */}
+          {onToggleScrcpy && (
+            <button
+              type="button"
+              onClick={onToggleScrcpy}
+              className={`flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-xl transition-all shadow-sm ${
+                scrcpyActive
+                  ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 hover:bg-red-500/20 hover:text-red-300 hover:border-red-500/40'
+                  : 'bg-[#1bae6e] text-white hover:bg-[#22c97d] shadow-[#1bae6e]/20 active:scale-95'
+              }`}
+              title={scrcpyActive ? 'Cerrar ventana nativa 60 FPS' : 'Iniciar ventana nativa con aceleración por hardware (60 FPS)'}
+            >
+              <MonitorPlay size={11} className={scrcpyActive ? 'animate-pulse' : ''} />
+              <span>{scrcpyActive ? '60 FPS ACTIVO' : 'Soltar 60 FPS'}</span>
+            </button>
+          )}
+
           {zoomed && (
-            <span className="font-mono rounded-full bg-white/[0.05] shrink-0 text-[10px] px-1.5 py-0.5 text-white/50">
+            <span className="font-mono rounded-full bg-white/[0.05] shrink-0 text-[10px] px-2 py-0.5 text-white/50">
               {zoomLabel}
             </span>
           )}
         </div>
       </div>
 
-      {/* Interactive screen */}
-      <div className={`flex-1 flex items-center justify-center bg-black/60 min-h-0 ${compact ? 'p-1' : 'p-2'}`}>
-        <div
-          ref={screenRef}
-          onPointerDown={onPointerDown}
-          onPointerMove={onPointerMove}
-          onPointerUp={onPointerUp}
-          onPointerCancel={onPointerCancel}
-          className={`relative w-full h-full rounded-lg overflow-hidden bg-black/80 select-none touch-none ${
-            frameUrl
-              ? (zoomed ? 'cursor-grab active:cursor-grabbing' : 'cursor-crosshair')
-              : 'cursor-default'
-          }`}
-        >
-          {/* ═══ STATE: Live stream ═══ */}
-          {frameUrl && (
-            <>
-              <div className="absolute inset-0 flex items-center justify-center">
-                <img
-                  ref={imgRef}
-                  src={frameUrl}
-                  alt={`Pantalla ${device.model}`}
-                  draggable={false}
-                  className="max-h-full max-w-full object-contain pointer-events-none"
-                  style={{
-                    transform: `scale(${zoom.scale})`,
-                    transformOrigin: `${zoom.ox * 100}% ${zoom.oy * 100}%`,
-                  }}
-                />
-              </div>
+      {/* ═══ Interactive Screen Viewport ═══ */}
+      <div className="flex-1 flex items-center justify-center bg-gradient-to-b from-[#06080e] via-[#090d15] to-[#06080e] min-h-0 p-2.5 relative overflow-hidden">
+        {/* Smartphone Bezel Enclosure */}
+        <div className="relative h-full max-h-full aspect-[9/19.8] max-w-full rounded-[34px] p-2 bg-[#121620] border-[2.5px] border-white/10 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9),0_0_0_1px_rgba(255,255,255,0.06)] flex flex-col items-center justify-center">
 
-              {/* Zoom bar */}
-              <div className={`absolute top-1.5 right-1.5 flex items-center gap-0.5 rounded-lg bg-black/60 backdrop-blur-sm border border-white/10 p-0.5 ${compact ? 'scale-90 origin-top-right' : ''}`}>
-                <button
-                  type="button"
-                  onClick={() => zoomBy(1 / 1.25)}
-                  title="Alejar"
-                  className="p-1 rounded-md text-white/60 hover:text-white hover:bg-white/10 transition-colors"
-                >
-                  <ZoomOut size={12} />
-                </button>
-                <span className="min-w-[2.5rem] text-center text-[10px] font-mono text-white/70">{zoomLabel}</span>
-                <button
-                  type="button"
-                  onClick={() => zoomBy(1.25)}
-                  title="Acercar"
-                  className="p-1 rounded-md text-white/60 hover:text-white hover:bg-white/10 transition-colors"
-                >
-                  <ZoomIn size={12} />
-                </button>
-                {zoomed && (
-                  <button
-                    type="button"
-                    onClick={() => setZoom({ scale: 1, ox: 0.5, oy: 0.5 })}
-                    title="Restablecer zoom"
-                    className="p-1 rounded-md text-white/60 hover:text-white hover:bg-white/10 transition-colors ml-0.5 border-l border-white/10"
-                  >
-                    <RotateCcw size={12} />
-                  </button>
-                )}
-              </div>
-
-              {/* Error overlay */}
-              {error && (
-                <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-2 py-1 rounded-full bg-black/70 backdrop-blur-sm pointer-events-none">
-                  <span className="w-1.5 h-1.5 rounded-full bg-yellow-400 animate-pulse" />
-                  <span className="text-[9px] text-yellow-400 font-medium">Reconectando...</span>
-                </div>
-              )}
-            </>
-          )}
-
-          {/* ═══ STATE: No device connected ═══ */}
-          {!frameUrl && isDisconnected && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
-              <div className="flex flex-col items-center gap-1.5">
-                <Smartphone size={28} className="text-white/15" />
-                <span className="text-[11px] font-semibold text-white/30">Sin dispositivo</span>
-                <span className="text-[9px] text-white/15">Conecta un dispositivo para ver la pantalla</span>
-              </div>
-              <button
-                onClick={retryConnection}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-white/50 hover:text-white/70 hover:bg-white/10 transition-all text-[10px] font-semibold"
-              >
-                <RefreshCw size={11} /> Reconectar
-              </button>
+          {/* Camera Notch */}
+          <div className="absolute top-3 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-black/90 border border-white/15 shadow-md">
+            <div className="w-2.5 h-2.5 rounded-full bg-[#0a0d13] border border-white/20 flex items-center justify-center">
+              <div className="w-1 h-1 rounded-full bg-blue-500/80" />
             </div>
-          )}
+            {scrcpyActive && <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />}
+          </div>
 
-          {/* ═══ STATE: Connecting / no frame yet ═══ */}
-          {!frameUrl && !isDisconnected && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
-              <div className="flex flex-col items-center gap-1.5">
-                <div className="w-8 h-8 rounded-full border-2 border-white/10 border-t-[#22c97d] animate-spin" />
-                <span className="text-[11px] font-semibold text-white/30">Conectando pantalla...</span>
-                <span className="text-[9px] text-white/15">
-                  Conectando transmisión...
-                </span>
-              </div>
-              <button
-                onClick={wakeScreen}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#22c97d]/10 border border-[#22c97d]/20 text-[#22c97d]/70 hover:text-[#22c97d] hover:bg-[#22c97d]/15 transition-all text-[10px] font-semibold"
-              >
-                <RefreshCw size={11} /> Despertar pantalla
-              </button>
-            </div>
-          )}
+          {/* Hardware Accelerated Interactive Projection Canvas */}
+          <ProjectionCanvas
+            device={device}
+            useMjpegStream={useMjpegStream}
+            scrcpyActive={scrcpyActive}
+            onToggleScrcpy={onToggleScrcpy}
+            zoom={zoom}
+            setZoom={setZoom}
+            onFpsUpdate={setCurrentFps}
+          />
         </div>
       </div>
+
+      {/* ═══ Text Input Bar ═══ */}
+      <form onSubmit={handleSendText} className="flex items-center gap-2 px-3 py-2 border-t border-white/5 bg-white/[0.015] shrink-0">
+        <div className="relative flex-1">
+          <Type size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-white/30" />
+          <input
+            type="text"
+            value={textInput}
+            onChange={(e) => setTextInput(e.target.value)}
+            placeholder="Escribir texto en el dispositivo Android..."
+            className="w-full pl-8 pr-3 py-1.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-xs placeholder:text-white/25 focus:outline-none focus:border-[#22c97d]/50"
+          />
+        </div>
+        <button
+          type="submit"
+          disabled={!textInput.trim() || sendingText}
+          className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-[#1bae6e] hover:bg-[#22c97d] disabled:opacity-40 text-white text-xs font-bold transition-all shadow-sm shadow-[#1bae6e]/20"
+        >
+          <Send size={11} /> Enviar
+        </button>
+      </form>
+
+      {/* ═══ Hardware Navigation Bar ═══ */}
+      <div className="grid grid-cols-7 gap-1 px-2 py-1.5 border-t border-white/5 bg-black/40 shrink-0">
+        <button
+          type="button"
+          onClick={() => handleKey('KEYCODE_BACK')}
+          title="Atrás (Escape)"
+          className="flex flex-col items-center justify-center gap-0.5 py-1 px-0.5 rounded-xl text-[9px] font-semibold bg-white/[0.03] text-white/60 hover:text-white hover:bg-white/[0.08] border border-white/5 transition-all min-w-0"
+        >
+          <ArrowLeft size={12} className="shrink-0" />
+          <span className="truncate w-full text-center">Atrás</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => handleKey('KEYCODE_HOME')}
+          title="Inicio (Home)"
+          className="flex flex-col items-center justify-center gap-0.5 py-1 px-0.5 rounded-xl text-[9px] font-bold bg-[#1bae6e]/15 text-[#22c97d] hover:bg-[#1bae6e]/25 border border-[#1bae6e]/25 transition-all min-w-0"
+        >
+          <Home size={12} className="shrink-0" />
+          <span className="truncate w-full text-center">Inicio</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => handleKey('KEYCODE_ALL_APPS')}
+          title="Menú de Aplicaciones (App Drawer)"
+          className="flex flex-col items-center justify-center gap-0.5 py-1 px-0.5 rounded-xl text-[9px] font-bold bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/20 transition-all min-w-0"
+        >
+          <LayoutGrid size={12} className="shrink-0" />
+          <span className="truncate w-full text-center">Apps</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => handleKey('KEYCODE_APP_SWITCH')}
+          title="Aplicaciones Recientes"
+          className="flex flex-col items-center justify-center gap-0.5 py-1 px-0.5 rounded-xl text-[9px] font-semibold bg-white/[0.03] text-white/60 hover:text-white hover:bg-white/[0.08] border border-white/5 transition-all min-w-0"
+        >
+          <Layers size={12} className="shrink-0" />
+          <span className="truncate w-full text-center">Recientes</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => handleKey('KEYCODE_POWER')}
+          title="Suspender / Despertar Pantalla"
+          className="flex flex-col items-center justify-center gap-0.5 py-1 px-0.5 rounded-xl text-[9px] font-semibold bg-white/[0.03] text-amber-400/80 hover:text-amber-300 hover:bg-white/[0.08] border border-white/5 transition-all min-w-0"
+        >
+          <Power size={12} className="shrink-0" />
+          <span className="truncate w-full text-center">Pantalla</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => handleKey('KEYCODE_VOLUME_DOWN')}
+          title="Bajar Volumen"
+          className="flex flex-col items-center justify-center gap-0.5 py-1 px-0.5 rounded-xl text-[9px] font-semibold bg-white/[0.03] text-white/60 hover:text-white hover:bg-white/[0.08] border border-white/5 transition-all min-w-0"
+        >
+          <VolumeX size={12} className="shrink-0" />
+          <span className="truncate w-full text-center">Vol-</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => handleKey('KEYCODE_VOLUME_UP')}
+          title="Subir Volumen"
+          className="flex flex-col items-center justify-center gap-0.5 py-1 px-0.5 rounded-xl text-[9px] font-semibold bg-white/[0.03] text-white/60 hover:text-white hover:bg-white/[0.08] border border-white/5 transition-all min-w-0"
+        >
+          <Volume2 size={12} className="shrink-0" />
+          <span className="truncate w-full text-center">Vol+</span>
+        </button>
+      </div>
+
     </div>
   );
 };
