@@ -115,8 +115,8 @@
     "semantic_hash": "5195a01e817aeba2789f906907064289"
   },
   "androproject-gui/src/app/api/device/route.ts": {
-    "mtime": 1788026556.4545088,
-    "ast_hash": "479481d7b7d8a97f79ea7e06c4bd0013",
+    "mtime": 1788028431.8320224,
+    "ast_hash": "adb75fb9dcdc0ef3cbf926741dcc2901",
     "semantic_hash": ""
   },
   "androproject-gui/src/app/api/flash/route.ts": {

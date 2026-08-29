@@ -176,7 +176,15 @@ class AirPlayReceiverEngine implements IAirPlayReceiverEngine {
       // 2. Start Bonjour / mDNS Broadcaster
       try {
         // eslint-disable-next-line @typescript-eslint/no-require-imports
-        const mdns = require('multicast-dns')();
+        const mdns = require('multicast-dns')({
+          interface: localIp,
+          multicast: true,
+          port: 5353,
+          ip: '224.0.0.251',
+          ttl: 255,
+          loopback: true,
+          reuseAddr: true,
+        });
         this.mdnsInstance = mdns;
 
         const broadcastAnnouncement = () => {
