@@ -25,8 +25,7 @@ const ERROR_RETRY_MS = 500;
  */
 export function useDeviceStream(
   serial: string | null,
-  enabled: boolean,
-  scrcpyActive?: boolean,
+  enabled: boolean = true,
 ): UseDeviceStreamResult {
   const [frameUrl, setFrameUrl] = useState<string | null>(null);
   const [fps, setFps]           = useState(0);
@@ -68,7 +67,7 @@ export function useDeviceStream(
   }, [serial, revokePrev]);
 
   useEffect(() => {
-    if (!enabled || !serial || scrcpyActive) {
+    if (!enabled || !serial) {
       runningRef.current = false;
       revokePrev();
       lastEtagRef.current = null;
@@ -174,8 +173,9 @@ export function useDeviceStream(
       runningRef.current = false;
       isPolling = false;
       clearTimeout(timeoutId);
+      revokePrev();
     };
-  }, [enabled, serial, revokePrev, scrcpyActive]);
+  }, [enabled, serial, revokePrev]);
 
   return {
     frameUrl,

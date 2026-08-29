@@ -4,6 +4,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   RefreshCw, Wifi, Usb, ArrowLeft, Home, Layers,
   Volume2, VolumeX, Power, Send, Type, MonitorPlay, LayoutGrid,
+  Activity, Minus, Square, X,
 } from 'lucide-react';
 import { useActions } from '@/hooks/useActions';
 import { ProjectionCanvas, ZoomState } from '@/components/projection/ProjectionCanvas';
@@ -34,13 +35,20 @@ export const DeviceFrame: React.FC<DeviceFrameProps> = ({
   onToggleScrcpy,
 }) => {
   const { run } = useActions();
-  const [useMjpegStream, setUseMjpegStream] = useState(true);
+  const [useMjpegStream, setUseMjpegStream] = useState(false);
   const [currentFps, setCurrentFps] = useState(0);
 
   // Zoom state passed down to ProjectionCanvas
   const [zoom, setZoom] = useState<ZoomState>({ scale: 1, ox: 0.5, oy: 0.5 });
   const [textInput, setTextInput] = useState('');
   const [sendingText, setSendingText] = useState(false);
+
+  // Dynamic screen ratio from device resolution (e.g. 1080x2400 -> 0.45)
+  const [resW, resH] = (device?.resolution || '')
+    .split(/[×xX]/)
+    .map((s) => parseFloat(s.trim()))
+    .filter((n) => Number.isFinite(n) && n > 0);
+  const deviceRatio = resW && resH ? resW / resH : 9 / 20;
 
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -112,89 +120,94 @@ export const DeviceFrame: React.FC<DeviceFrameProps> = ({
   return (
     <div ref={containerRef} className="flex flex-col flex-1 min-h-0 min-w-0 bg-[#080b11] outline-none">
 
-      {/* ═══ Header Bar ═══ */}
-      <div className="flex items-center justify-between px-3 py-2 border-b border-white/5 shrink-0 bg-white/[0.02]">
-        <div className="flex items-center gap-2 min-w-0">
-          <span className={`w-2 h-2 rounded-full shrink-0 ${
-            isDisconnected ? 'bg-red-500' : 'bg-[#22c97d] animate-pulse'
-          }`} />
-          <span className="font-bold truncate text-white text-xs" title={device.model}>
-            {device.model?.split(' ').slice(0, 3).join(' ') || device.serial?.slice(0, 14)}
-          </span>
-        </div>
-
-        <div className="flex items-center gap-2">
-          {isWifi ? (
-            <span className="flex items-center gap-1 text-[10px] text-emerald-400/80 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
-              <Wifi size={11} /> Wi-Fi
-            </span>
-          ) : (
-            <span className="flex items-center gap-1 text-[10px] text-white/50 bg-white/5 px-2 py-0.5 rounded-full border border-white/10">
-              <Usb size={11} /> USB
-            </span>
-          )}
-
-          {isDisconnected && (
-            <span className="font-mono rounded-full bg-red-500/10 shrink-0 text-[9px] px-2 py-0.5 text-red-400 border border-red-500/20">
-              desconectado
-            </span>
-          )}
-
-          {/* Live Stream Mode & FPS Badge */}
-          <div className={`flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full border ${
-            useMjpegStream
-              ? 'text-emerald-400/90 bg-emerald-500/10 border-emerald-500/20'
-              : 'text-white/60 bg-white/5 border-white/10'
-          }`}>
-            <span className={`w-1.5 h-1.5 rounded-full ${useMjpegStream ? 'bg-emerald-400 animate-ping' : 'bg-white/40'}`} />
-            <span className="font-mono text-[9px]">
-              {useMjpegStream ? (currentFps > 0 ? `STREAM ${currentFps} FPS` : 'STREAM 30 FPS') : (currentFps > 0 ? `${currentFps} FPS` : 'POLLING')}
-            </span>
+      {/* ═══ Futuristic Cybernetic Header Bar (AndroProject Reverse Agent Bridge) ═══ */}
+      <div className="mx-2.5 mt-2 mb-1 px-3.5 py-2 rounded-2xl border border-[#00e5ff]/35 bg-gradient-to-r from-[#070e1a] via-[#0a182c] to-[#040912] shadow-[0_8px_25px_-5px_rgba(0,229,255,0.2)] flex items-center justify-between relative overflow-hidden backdrop-blur-xl shrink-0 ring-1 ring-white/10">
+        
+        {/* Left Side: Squircle Logo + AndroProject Title + Pulse Badge */}
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div className="w-8 h-8 rounded-xl border border-[#00e5ff]/50 bg-black/70 shadow-md shadow-[#00e5ff]/25 p-0.5 flex items-center justify-center shrink-0 ring-1 ring-white/20">
+            <img src="/logo.png" alt="AndroProject" className="w-full h-full object-cover rounded-lg" />
           </div>
 
-          {/* Stream Mode Switcher Button */}
-          <button
-            type="button"
-            onClick={toggleStreamMode}
-            className={`p-1 rounded-lg transition-colors ${
-              useMjpegStream
-                ? 'text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10'
-                : 'text-white/60 hover:text-white hover:bg-white/10'
-            }`}
-            title={useMjpegStream ? 'Modo actual: MJPEG Stream (Clic para cambiar a Polling)' : 'Modo actual: Polling Snapshot (Clic para cambiar a MJPEG)'}
-          >
-            <MonitorPlay size={12} />
-          </button>
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="font-extrabold text-white text-sm md:text-base tracking-wide drop-shadow-[0_2px_8px_rgba(0,229,255,0.5)] truncate">
+              AndroProject
+            </span>
 
-          {/* Scrcpy 60 FPS Native Active/Launcher Badge */}
+            {/* Reverse Agent Bridge Monitor Heartbeat Badge */}
+            <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#00e5ff]/10 border border-[#00e5ff]/30 text-[10px] font-semibold text-[#00e5ff] shadow-sm shadow-[#00e5ff]/15">
+              <Activity size={11} className="text-[#00e5ff] animate-pulse" />
+              <span className="truncate">Reverse Agent Bridge Monitor</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Side: Device status + VisionNano + Cybernetic Window Controls */}
+        <div className="flex items-center gap-1.5 shrink-0">
+          {/* Device model / Connection badge */}
+          <div className="hidden lg:flex items-center gap-1 px-2 py-0.5 rounded-lg bg-white/5 border border-white/10 text-[10px] text-white/70">
+            <span className={`w-1.5 h-1.5 rounded-full ${isDisconnected ? 'bg-red-400' : 'bg-emerald-400 animate-pulse'}`} />
+            <span className="truncate max-w-[100px] font-medium">{device.model || 'Android'}</span>
+          </div>
+
+          {/* Quick VisionNano Toggle */}
           {onToggleScrcpy && (
             <button
               type="button"
               onClick={onToggleScrcpy}
-              className={`flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-xl transition-all shadow-sm ${
+              className={`flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-lg border transition-all ${
                 scrcpyActive
-                  ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 hover:bg-red-500/20 hover:text-red-300 hover:border-red-500/40'
-                  : 'bg-[#1bae6e] text-white hover:bg-[#22c97d] shadow-[#1bae6e]/20 active:scale-95'
+                  ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 shadow-sm shadow-emerald-500/30 hover:bg-red-500/20 hover:text-red-300 hover:border-red-500/40'
+                  : 'bg-[#00e5ff]/10 text-[#00e5ff] border-[#00e5ff]/25 hover:bg-[#00e5ff]/20'
               }`}
-              title={scrcpyActive ? 'Cerrar ventana nativa 60 FPS' : 'Iniciar ventana nativa con aceleración por hardware (60 FPS)'}
+              title={scrcpyActive ? 'VisionNano Direct3D11 Activo (Clic para cerrar)' : 'Abrir VisionNano 60 FPS Direct3D11'}
             >
-              <MonitorPlay size={11} className={scrcpyActive ? 'animate-pulse' : ''} />
-              <span>{scrcpyActive ? '60 FPS ACTIVO' : 'Soltar 60 FPS'}</span>
+              <MonitorPlay size={11} className={scrcpyActive ? 'text-emerald-400 animate-pulse' : 'text-[#00e5ff]'} />
+              <span className="hidden xl:inline">{scrcpyActive ? '60 FPS Activo' : 'VisionNano'}</span>
             </button>
           )}
 
-          {zoomed && (
-            <span className="font-mono rounded-full bg-white/[0.05] shrink-0 text-[10px] px-2 py-0.5 text-white/50">
-              {zoomLabel}
-            </span>
-          )}
+          {/* Cybernetic Window Action Buttons */}
+          <div className="flex items-center gap-1 pl-1">
+            {/* Minimize / Zoom reset */}
+            <button
+              type="button"
+              onClick={() => setZoom({ scale: 1, ox: 0.5, oy: 0.5 })}
+              className="w-6 h-6 rounded-md border border-[#00e5ff]/25 bg-[#081220]/90 text-[#00e5ff]/80 hover:text-[#00e5ff] hover:bg-[#00e5ff]/20 hover:border-[#00e5ff]/50 flex items-center justify-center transition-all active:scale-95 cursor-pointer"
+              title="Restablecer vista"
+            >
+              <Minus size={12} strokeWidth={2.5} />
+            </button>
+
+            {/* Maximize / Zoom toggle */}
+            <button
+              type="button"
+              onClick={() => setZoom(z => ({ ...z, scale: z.scale > 1 ? 1 : 2 }))}
+              className="w-6 h-6 rounded-md border border-[#00e5ff]/25 bg-[#081220]/90 text-[#00e5ff]/80 hover:text-[#00e5ff] hover:bg-[#00e5ff]/20 hover:border-[#00e5ff]/50 flex items-center justify-center transition-all active:scale-95 cursor-pointer"
+              title="Maximizar escala de proyección"
+            >
+              <Square size={10} strokeWidth={2.5} />
+            </button>
+
+            {/* Close / Stop projection */}
+            <button
+              type="button"
+              onClick={() => {
+                if (scrcpyActive && onToggleScrcpy) onToggleScrcpy();
+              }}
+              className="w-6 h-6 rounded-md border border-[#00e5ff]/25 bg-[#081220]/90 text-[#00e5ff]/80 hover:text-rose-300 hover:bg-rose-500/25 hover:border-rose-500/50 flex items-center justify-center transition-all active:scale-95 cursor-pointer"
+              title="Detener proyección VisionNano"
+            >
+              <X size={12} strokeWidth={2.5} />
+            </button>
+          </div>
         </div>
       </div>
 
       {/* ═══ Interactive Screen Viewport ═══ */}
       <div className="flex-1 flex items-center justify-center bg-gradient-to-b from-[#06080e] via-[#090d15] to-[#06080e] min-h-0 p-2.5 relative overflow-hidden">
         {/* Smartphone Bezel Enclosure */}
-        <div className="relative h-full max-h-full aspect-[9/19.8] max-w-full rounded-[34px] p-2 bg-[#121620] border-[2.5px] border-white/10 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9),0_0_0_1px_rgba(255,255,255,0.06)] flex flex-col items-center justify-center">
+        <div style={{ aspectRatio: `${deviceRatio}` }} className="relative h-full max-h-full max-w-full rounded-[34px] p-2 bg-[#121620] border-[2.5px] border-white/10 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9),0_0_0_1px_rgba(255,255,255,0.06)] flex flex-col items-center justify-center">
 
           {/* Camera Notch */}
           <div className="absolute top-3 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-black/90 border border-white/15 shadow-md">

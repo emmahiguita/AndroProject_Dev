@@ -138,7 +138,7 @@ const MjpegStreamView: React.FC<MjpegStreamViewProps> = ({
  */
 export const ProjectionCanvas: React.FC<ProjectionCanvasProps> = ({
   device,
-  useMjpegStream = true,
+  useMjpegStream = false,
   scrcpyActive,
   onToggleScrcpy,
   zoom,
@@ -149,7 +149,7 @@ export const ProjectionCanvas: React.FC<ProjectionCanvasProps> = ({
   const imgRef = useRef<HTMLImageElement>(null);
   const screenRef = useRef<HTMLDivElement>(null);
 
-  const { frameUrl, connected, fps, refreshNow } = useDeviceStream(device.serial, true, scrcpyActive);
+  const { frameUrl, connected, fps, refreshNow } = useDeviceStream(device.serial, true);
   const { run } = useActions();
 
   const [ripples, setRipples] = useState<TouchRipple[]>([]);
@@ -162,6 +162,18 @@ export const ProjectionCanvas: React.FC<ProjectionCanvasProps> = ({
   const [isSyncing, setIsSyncing] = useState(false);
   const [imgError, setImgError] = useState(false);
   const [mjpegError, setMjpegError] = useState(false);
+  const [isLaunching, setIsLaunching] = useState(false);
+
+  const handleToggleScrcpy = async (e: React.MouseEvent | React.PointerEvent) => {
+    e.stopPropagation();
+    if (!onToggleScrcpy || isLaunching) return;
+    setIsLaunching(true);
+    try {
+      await onToggleScrcpy();
+    } finally {
+      setTimeout(() => setIsLaunching(false), 1200);
+    }
+  };
 
   useEffect(() => {
     onFpsUpdate?.(fps);
@@ -175,27 +187,30 @@ export const ProjectionCanvas: React.FC<ProjectionCanvasProps> = ({
 
   // ── Touch & gesture dispatchers ──
   const tapDevice = useCallback(async (x: number, y: number) => {
+    if (!device?.serial || !Number.isFinite(x) || !Number.isFinite(y)) return;
     setIsSyncing(true);
-    await run('input_tap', 'Tap', { x, y, serial: device.serial }, false);
+    await run('input_tap', 'Tap', { x: Math.round(x), y: Math.round(y), serial: device.serial }, false);
     refreshNow();
     setIsSyncing(false);
-  }, [run, device.serial, refreshNow]);
+  }, [run, device?.serial, refreshNow]);
 
   const longPressDevice = useCallback(async (x: number, y: number) => {
+    if (!device?.serial || !Number.isFinite(x) || !Number.isFinite(y)) return;
     setIsSyncing(true);
-    await run('input_swipe', 'Long Press', { x1: x, y1: y, x2: x, y2: y, duration: 1000, serial: device.serial }, false);
+    await run('input_swipe', 'Long Press', { x1: Math.round(x), y1: Math.round(y), x2: Math.round(x), y2: Math.round(y), duration: 1000, serial: device.serial }, false);
     refreshNow();
     setIsSyncing(false);
-  }, [run, device.serial, refreshNow]);
+  }, [run, device?.serial, refreshNow]);
 
   const swipeDevice = useCallback(async (
     x1: number, y1: number, x2: number, y2: number, duration = 120,
   ) => {
+    if (!device?.serial || !Number.isFinite(x1) || !Number.isFinite(y1) || !Number.isFinite(x2) || !Number.isFinite(y2)) return;
     setIsSyncing(true);
-    await run('input_swipe', 'Gesto', { x1, y1, x2, y2, duration, serial: device.serial }, false);
+    await run('input_swipe', 'Gesto', { x1: Math.round(x1), y1: Math.round(y1), x2: Math.round(x2), y2: Math.round(y2), duration, serial: device.serial }, false);
     refreshNow();
     setIsSyncing(false);
-  }, [run, device.serial, refreshNow]);
+  }, [run, device?.serial, refreshNow]);
 
   const tapRef = useRef(tapDevice);
   const longPressRef = useRef(longPressDevice);
@@ -245,6 +260,8 @@ export const ProjectionCanvas: React.FC<ProjectionCanvasProps> = ({
       oy = (rect.height - rh) / 2;
     }
 
+    if (rw <= 0 || rh <= 0) return null;
+
     const s = zoom.scale;
     const el = rect.left + ox;
     const et = rect.top + oy;
@@ -259,11 +276,11 @@ export const ProjectionCanvas: React.FC<ProjectionCanvasProps> = ({
       ny = (cy - et) / rh;
     }
 
-    if (nx < -0.05 || ny < -0.05 || nx > 1.05 || ny > 1.05) return null;
-    return {
-      x: clamp(Math.round(clamp01(nx) * nw), 0, nw - 1),
-      y: clamp(Math.round(clamp01(ny) * nh), 0, nh - 1),
-    };
+    if (!Number.isFinite(nx) || !Number.isFinite(ny) || nx < -0.05 || ny < -0.05 || nx > 1.05 || ny > 1.05) return null;
+    const x = clamp(Math.round(clamp01(nx) * nw), 0, nw - 1);
+    const y = clamp(Math.round(clamp01(ny) * nh), 0, nh - 1);
+    if (!Number.isFinite(x) || !Number.isFinite(y)) return null;
+    return { x, y };
   }, [zoom]);
 
   const toDeviceRef = useRef(toDevice);
@@ -367,6 +384,9 @@ export const ProjectionCanvas: React.FC<ProjectionCanvasProps> = ({
   // ── Pointer interaction handlers ──
   const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     if (e.button !== 0 || imgError || dragRef.current) return;
+    const target = e.target as HTMLElement;
+    if (target.closest('button') || target.closest('select') || target.closest('input')) return;
+
     e.currentTarget.setPointerCapture?.(e.pointerId);
 
     const clientX = e.clientX;
@@ -402,6 +422,9 @@ export const ProjectionCanvas: React.FC<ProjectionCanvasProps> = ({
   };
 
   const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    const target = e.target as HTMLElement;
+    if (target.closest('button') || target.closest('select') || target.closest('input')) return;
+
     const d = dragRef.current;
     if (!d || d.id !== e.pointerId) return;
 
@@ -431,6 +454,18 @@ export const ProjectionCanvas: React.FC<ProjectionCanvasProps> = ({
   };
 
   const onPointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    const target = e.target as HTMLElement;
+    if (target.closest('button') || target.closest('select') || target.closest('input')) {
+      if (dragRef.current) {
+        if (dragRef.current.longPressTimer) {
+          clearTimeout(dragRef.current.longPressTimer);
+          dragRef.current.longPressTimer = undefined;
+        }
+        dragRef.current = null;
+      }
+      return;
+    }
+
     const d = dragRef.current;
     if (!d || d.id !== e.pointerId) return;
 
@@ -497,7 +532,7 @@ export const ProjectionCanvas: React.FC<ProjectionCanvasProps> = ({
             style={{
               width: '100%',
               height: '100%',
-              objectFit: 'contain',
+              objectFit: 'fill',
               pointerEvents: 'none',
               imageRendering: 'auto',
               willChange: 'transform',
@@ -518,7 +553,7 @@ export const ProjectionCanvas: React.FC<ProjectionCanvasProps> = ({
               draggable={false}
               onLoad={() => setImgError(false)}
               onError={() => setImgError(true)}
-              className={`w-full h-full object-contain pointer-events-none transition-transform duration-75 ${imgError ? 'hidden' : ''}`}
+              className={`w-full h-full object-fill pointer-events-none transition-transform duration-75 ${imgError ? 'hidden' : ''}`}
               style={{
                 transform: `scale(${zoom.scale})`,
                 transformOrigin: `${zoom.ox * 100}% ${zoom.oy * 100}%`,
@@ -557,32 +592,48 @@ export const ProjectionCanvas: React.FC<ProjectionCanvasProps> = ({
           </div>
         )}
 
-        {/* ── Floating 60 FPS Launcher Pill Overlay ── */}
-        {onToggleScrcpy && showLiveStream && (
-          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 flex items-center justify-center">
+        {/* ── Mobile Projection Action Button & Live Status ── */}
+        {onToggleScrcpy && Boolean(device?.serial) && (
+          <div
+            className="absolute bottom-4 left-1/2 -translate-x-1/2 z-40 flex items-center justify-center max-w-[92%] pointer-events-auto"
+            onPointerDown={(e) => e.stopPropagation()}
+            onPointerUp={(e) => e.stopPropagation()}
+          >
             {scrcpyActive ? (
               <button
                 type="button"
-                onClick={onToggleScrcpy}
-                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-emerald-950/90 backdrop-blur-md border border-emerald-500/50 text-emerald-300 text-[11px] font-bold shadow-xl hover:bg-red-950/80 hover:text-red-300 hover:border-red-500/50 transition-all active:scale-95"
-                title="Hacer clic para cerrar la ventana 60 FPS"
+                onClick={handleToggleScrcpy}
+                disabled={isLaunching}
+                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-emerald-950/95 backdrop-blur-md border border-emerald-500/60 text-emerald-300 text-[11px] font-bold shadow-2xl hover:bg-red-950/90 hover:text-red-300 hover:border-red-500/60 transition-all active:scale-95 whitespace-nowrap cursor-pointer select-none"
+                title="Hacer clic para detener VisionNano 60 FPS"
               >
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-                <span>Direct3D11 60 FPS Activo</span>
+                {isLaunching ? (
+                  <Loader2 size={12} className="animate-spin text-emerald-400" />
+                ) : (
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+                )}
+                <span>VisionNano 60 FPS Activo (Detener)</span>
               </button>
             ) : (
               <button
                 type="button"
-                onClick={onToggleScrcpy}
-                className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#1bae6e] hover:bg-[#22c97d] text-white text-[12px] font-bold shadow-xl shadow-[#1bae6e]/40 transition-transform active:scale-95 border border-white/20 animate-pulse"
-                title="Iniciar ventana con aceleración por hardware GPU a 60 FPS sin retraso"
+                onClick={handleToggleScrcpy}
+                disabled={isLaunching}
+                className="flex items-center gap-2 px-4 py-2 rounded-full bg-[#1bae6e] hover:bg-[#22c97d] text-white text-[12px] font-bold shadow-2xl shadow-[#1bae6e]/50 transition-all active:scale-95 border border-white/30 animate-pulse whitespace-nowrap cursor-pointer select-none"
+                title="Iniciar proyección VisionNano con aceleración GPU Direct3D11 a 60 FPS sin lag"
               >
-                <MonitorPlay size={14} />
-                <span>Activar 60 FPS Sin Lag</span>
+                {isLaunching ? (
+                  <Loader2 size={14} className="animate-spin" />
+                ) : (
+                  <MonitorPlay size={14} />
+                )}
+                <span>{isLaunching ? 'Lanzando VisionNano...' : 'Activar VisionNano 60 FPS'}</span>
               </button>
             )}
           </div>
         )}
+
+
 
         {/* ── STATE: Connecting ── */}
         {!useMjpegStream && !frameUrl && !isDisconnected && (

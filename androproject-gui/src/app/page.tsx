@@ -44,19 +44,12 @@ function ActiveView({
 }
 
 export default function Page() {
-  const [mounted, setMounted] = React.useState(false);
-  React.useEffect(() => { setMounted(true); }, []);
-
   const activeNav = useAppStore((s) => s.activeNav) ?? 'dashboard';
 
   const setActiveNav = useAppStore((s) => s.setActiveNav);
   const { devices, device, selectedSerial, setSelectedSerial, isScanning, scanRadar, refresh } = useDevicePolling();
   const { logs, addLog, clearLogs } = useSystemLogs();
   const adb = useAdbConnection();
-
-  if (!mounted) {
-    return <div className="h-screen w-screen bg-[#070913]" suppressHydrationWarning />;
-  }
 
   return (
     <AppShell

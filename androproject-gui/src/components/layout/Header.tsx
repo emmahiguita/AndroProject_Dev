@@ -4,11 +4,12 @@ import React, { useState, useRef, useEffect } from 'react';
 import {
   Smartphone, Radio, RefreshCw, Wifi, Sun, Moon,
   Menu, PanelRightOpen, PanelRightClose,
-  Power, Plus, X, Link2, Unlink, ChevronDown,
+  Power, Plus, X, Link2, Unlink, ChevronDown, Zap,
 } from 'lucide-react';
 import { DeviceInfo } from '../../features/types';
 import { useAppTheme } from '../ThemeProvider';
 import type { RegisteredDevice } from '../../hooks/useAdbConnection';
+import type { RescueSyncConfig, RescueSyncStatus } from '../../hooks/useRescueSync';
 
 interface HeaderProps {
   devices: DeviceInfo[];
@@ -31,6 +32,11 @@ interface HeaderProps {
   onRegisterDevice?: (serial: string, model: string, connectionType: 'USB' | 'Wi-Fi', ip?: string, port?: string) => void;
   onUnregisterDevice?: (serial: string) => void;
   onToggleAutoConnect?: (serial: string) => void;
+  /** Rescue Always-On Sync State */
+  rescueConfig?: RescueSyncConfig;
+  rescueStatus?: RescueSyncStatus;
+  rescueMsg?: string;
+  onToggleRescue?: () => void;
 }
 
 const btnBase = "flex items-center gap-1.5 text-[11px] font-semibold rounded-lg transition-all duration-150 active:scale-[0.97]";
@@ -41,6 +47,7 @@ export const Header: React.FC<HeaderProps> = ({
   onToggleSidebar, sidebarOpen, projectionActive, onNavigateProjection,
   adbServerRunning = false, onToggleAdb, isAdbConnecting = false,
   registeredDevices = [], onRegisterDevice, onUnregisterDevice, onToggleAutoConnect,
+  rescueConfig, rescueStatus, rescueMsg, onToggleRescue,
 }) => {
   const { isDark, toggleTheme } = useAppTheme();
   const currentDevice = devices.find((d) => d.serial === selectedSerial) || devices[0];
@@ -231,12 +238,36 @@ export const Header: React.FC<HeaderProps> = ({
         )}
       </div>
 
-      {/* Radar */}
-      <button onClick={onScanRadar} disabled={isScanning} title="Escanear red en busca de celulares Android"
-        className={`${btnBase} px-2.5 py-1.5 bg-[#1bae6e]/10 hover:bg-[#1bae6e]/18 text-[#22c97d] border border-[#1bae6e]/25`}>
-        <Radio size={13} className={isScanning ? 'animate-spin' : ''} />
-        <span className="hidden sm:inline">{isScanning ? 'Escanear' : 'Radar'}</span>
-      </button>
+        {/* Always-On Rescue Device Auto-Sync Switch */}
+        {onToggleRescue && rescueConfig && (
+          <button
+            suppressHydrationWarning
+            onClick={onToggleRescue}
+            title={
+              rescueConfig.enabled
+                ? `⚡ Modo Rescate (${rescueConfig.targetModel}) ACTIVO · ${rescueMsg || 'Sincronización permanente Wi-Fi / USB'}`
+                : `Activar sincronización automática permanente para dispositivo secundario (Galaxy A30)`
+            }
+            className={`${btnBase} px-2.5 py-1.5 border transition-all ${
+              rescueConfig.enabled
+                ? (isDark ? 'bg-amber-500/15 text-amber-300 border-amber-500/35 shadow-sm shadow-amber-500/20' : 'bg-amber-50 text-amber-700 border-amber-300')
+                : (isDark ? 'bg-white/[0.04] text-white/40 border-white/8 hover:text-white/70 hover:bg-white/[0.08]' : 'bg-slate-100 text-slate-500 border-slate-200 hover:bg-slate-200')
+            }`}
+          >
+            <Zap size={13} className={rescueConfig.enabled ? 'text-amber-400 animate-pulse' : 'text-white/40'} />
+            <span className="hidden md:inline font-semibold">Rescate A30</span>
+            {rescueConfig.enabled && (
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping" />
+            )}
+          </button>
+        )}
+
+        {/* Radar */}
+        <button onClick={onScanRadar} disabled={isScanning} title="Escanear red en busca de celulares Android"
+          className={`${btnBase} px-2.5 py-1.5 bg-[#1bae6e]/10 hover:bg-[#1bae6e]/18 text-[#22c97d] border border-[#1bae6e]/25`}>
+          <Radio size={13} className={isScanning ? 'animate-spin' : ''} />
+          <span className="hidden sm:inline">{isScanning ? 'Escanear' : 'Radar'}</span>
+        </button>
 
       {/* Refresh */}
       <button onClick={onRefresh} title="Actualizar estado de dispositivos"

@@ -29,6 +29,36 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es" className={`${inter.variable} ${plusJakartaSans.variable} antialiased`} suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var removeExtAttrs = function() {
+                    var els = document.querySelectorAll('[bis_skin_checked]');
+                    for (var i = 0; i < els.length; i++) {
+                      els[i].removeAttribute('bis_skin_checked');
+                    }
+                  };
+                  removeExtAttrs();
+                  if (typeof MutationObserver !== 'undefined') {
+                    var obs = new MutationObserver(function(mutations) {
+                      for (var i = 0; i < mutations.length; i++) {
+                        var m = mutations[i];
+                        if (m.type === 'attributes' && m.attributeName === 'bis_skin_checked' && m.target && m.target.removeAttribute) {
+                          m.target.removeAttribute('bis_skin_checked');
+                        }
+                      }
+                    });
+                    obs.observe(document.documentElement, { attributes: true, subtree: true, attributeFilter: ['bis_skin_checked'] });
+                  }
+                } catch (e) {}
+              })();
+            `,
+          }}
+        />
+      </head>
       <body className="font-sans" suppressHydrationWarning>
         <ThemeProvider>
           {children}

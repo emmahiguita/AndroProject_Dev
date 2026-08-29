@@ -150,6 +150,7 @@ async function connectAdb(body: Record<string, unknown>) {
 export async function POST(req: Request) {
   try {
     const raw = await req.json();
+    console.log(`[API Action] Executing action: "${raw.action}" with serial: "${raw.serial}"`, raw);
 
     // Validate and sanitize all inputs before any handler runs
     let body: Record<string, unknown>;
@@ -158,6 +159,7 @@ export async function POST(req: Request) {
     } catch (err: unknown) {
       if (err instanceof ZodError) {
         const issues = err.issues.map(i => `${i.path.join('.')}: ${i.message}`).join('; ');
+        console.warn(`[API Action 400] Validation failed for "${raw.action}": ${issues}`);
         return NextResponse.json({ success: false, error: `Validación fallida: ${issues}` }, { status: 400 });
       }
       throw err; // re-throw unexpected errors
@@ -165,13 +167,16 @@ export async function POST(req: Request) {
 
     const handler = registry[body.action as string];
     if (!handler) {
+      console.warn(`[API Action 400] Unrecognized action: "${body.action}"`);
       return NextResponse.json({ success: false, error: 'Acción no reconocida' }, { status: 400 });
     }
 
     const context = await buildContext(body);
-    return handler(context, body);
+    const response = await handler(context, body);
+    console.log(`[API Action 200] Completed action: "${body.action}"`);
+    return response;
   } catch (error: unknown) {
-    console.error('[Actions API] Error:', getErrorMessage(error));
+    console.error('[Actions API 500] Error:', getErrorMessage(error));
     return NextResponse.json({ success: false, error: getErrorMessage(error) }, { status: 500 });
   }
 }

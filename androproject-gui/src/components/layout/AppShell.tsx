@@ -7,6 +7,7 @@ import { Sidebar } from './Sidebar';
 import { WirelessConnectModal } from './WirelessConnectModal';
 import { useAppTheme } from '../ThemeProvider';
 import { useMouseLight } from '../../hooks/useMouseLight';
+import { useRescueSync } from '../../hooks/useRescueSync';
 import type { DeviceInfo, SystemLogs, NavSection } from '@/features/types';
 import type { RegisteredDevice } from '../../hooks/useAdbConnection';
 
@@ -53,6 +54,9 @@ export const AppShell: React.FC<AppShellProps> = ({
   const [connectModal, setConnectModal] = useState(false);
   const [viewportMedium, setViewportMedium] = useState(true);
   const sceneRef = useRef<HTMLDivElement>(null);
+
+  // Rescue Sync hook: keeps designated secondary device (e.g. Galaxy A30) permanently connected
+  const rescueSync = useRescueSync(devices, onRefresh);
 
   // Auto-detection toast state
   const [detectedToast, setDetectedToast] = useState<DeviceInfo | null>(null);
@@ -164,10 +168,14 @@ export const AppShell: React.FC<AppShellProps> = ({
           onRegisterDevice={onRegisterDevice}
           onUnregisterDevice={onUnregisterDevice}
           onToggleAutoConnect={onToggleAutoConnect}
+          rescueConfig={rescueSync.config}
+          rescueStatus={rescueSync.status}
+          rescueMsg={rescueSync.lastSyncMsg}
+          onToggleRescue={rescueSync.toggleRescueSync}
         />
 
         {/* ═══ AUTO-DETECTION CONFIRMATION TOAST BANNER ═══ */}
-        {detectedToast && (
+        {detectedToast && activeNav !== 'projection' && (
           <div className="absolute top-14 right-4 z-40 flex items-center gap-3 px-3.5 py-2.5 rounded-xl bg-[#0b0f1a]/95 border border-[#22c97d]/40 text-white shadow-2xl backdrop-blur-md animate-in fade-in slide-in-from-top-2 duration-200">
             <div className="w-2.5 h-2.5 rounded-full bg-[#22c97d] animate-pulse shrink-0" />
             <div className="text-xs">

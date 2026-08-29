@@ -61,7 +61,7 @@ export function ProjectionView({ device }: ProjectionViewProps) {
               </h1>
               {projection.scrcpyActive && (
                 <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[9px] font-bold text-emerald-400">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> scrcpy 60 FPS
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> VisionNano 60 FPS
                 </span>
               )}
               {projection.isRecording && (
@@ -140,6 +140,10 @@ export function ProjectionView({ device }: ProjectionViewProps) {
               onTogglePowerScreen={projection.togglePowerScreen}
               onWakeScreen={projection.wakeScreen}
               onOpenAllApps={projection.openAllApps}
+              onToggleMute={projection.toggleMute}
+              onMediaPlayPause={projection.mediaPlayPause}
+              onOpenSettings={projection.openSettings}
+              onCollapsePanels={projection.collapsePanels}
               onExpandNotifications={projection.expandNotifications}
               onExpandQuickSettings={projection.expandQuickSettings}
               onSetOrientation={projection.setOrientation}

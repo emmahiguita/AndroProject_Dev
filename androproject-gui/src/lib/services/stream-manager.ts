@@ -7,6 +7,7 @@
  * - Clean resource cleanup
  */
 import { ChildProcess, spawn } from 'child_process';
+import path from 'path';
 import { ADB } from '@/lib/config';
 import { BinaryResolver } from './binary-resolver';
 import { MjpegFrameHandler } from './mjpeg-frame-handler';
@@ -91,6 +92,10 @@ export class StreamManager {
   ): { scrcpy: ChildProcess; ffmpeg: ChildProcess } {
     const { serial, maxSize = '720', maxFps = '30', bitRate = '4M' } = config;
 
+    const scrcpyDir = path.dirname(this.scrcpyPath);
+    const adbDir = path.dirname(ADB);
+    const envPath = `${scrcpyDir};${adbDir};${process.env.PATH || ''}`;
+
     const scrcpy = spawn(this.scrcpyPath, [
       '-s', serial,
       '--no-playback',
@@ -105,11 +110,13 @@ export class StreamManager {
       '--record=-',
       '--record-format=mkv',
     ], {
-      env: { ...process.env, ADB },
+      cwd: scrcpyDir,
+      env: { ...process.env, PATH: envPath, ADB },
       stdio: ['ignore', 'pipe', 'pipe'],
       windowsHide: true,
     });
 
+    const ffmpegDir = path.dirname(this.ffmpegPath);
     const ffmpeg = spawn(this.ffmpegPath, [
       '-f', 'matroska',
       '-i', 'pipe:0',
@@ -123,6 +130,8 @@ export class StreamManager {
       '-tune', 'zerolatency', // Zero latency tuning
       'pipe:1',
     ], {
+      cwd: ffmpegDir,
+      env: { ...process.env, PATH: `${ffmpegDir};${envPath}` },
       stdio: ['pipe', 'pipe', 'pipe'],
       windowsHide: true,
     });

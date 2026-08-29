@@ -9,7 +9,7 @@ import {
   Play, Square, Video, Camera, Power, RotateCcw,
   Sliders, Bell, Zap, EyeOff,
   Sun, Maximize2, Sparkles, Circle, LayoutGrid,
-  CheckCircle2,
+  CheckCircle2, Settings, VolumeX, PlayCircle, ChevronUp, Layers,
 } from 'lucide-react';
 import type { DeviceInfo } from '@/features/types';
 import type { ScrcpyOptions } from '@/hooks/useProjection';
@@ -30,6 +30,10 @@ interface DeviceInfoPanelProps {
   onTogglePowerScreen: () => void;
   onWakeScreen?: () => void;
   onOpenAllApps?: () => void;
+  onToggleMute?: () => void;
+  onMediaPlayPause?: () => void;
+  onOpenSettings?: () => void;
+  onCollapsePanels?: () => void;
   onExpandNotifications: () => void;
   onExpandQuickSettings: () => void;
   onSetOrientation: (mode: 'auto' | 'portrait' | 'landscape') => void;
@@ -55,6 +59,10 @@ export const DeviceInfoPanel: React.FC<DeviceInfoPanelProps> = ({
   onTogglePowerScreen,
   onWakeScreen,
   onOpenAllApps,
+  onToggleMute,
+  onMediaPlayPause,
+  onOpenSettings,
+  onCollapsePanels,
   onExpandNotifications,
   onExpandQuickSettings,
   onSetOrientation,
@@ -99,18 +107,18 @@ export const DeviceInfoPanel: React.FC<DeviceInfoPanelProps> = ({
         </div>
       )}
 
-      {/* ═══ Motor de Transmisión Nativo 60 FPS (scrcpy) ═══ */}
+      {/* ═══ Motor de Transmisión Nativo VisionNano 60 FPS ═══ */}
       <div className={`rounded-xl border p-3 ${cardBg} ${cardBorder} ${cardShadow} space-y-3`}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5">
             <Sparkles size={14} className="text-[#22c97d]" />
             <h3 className={`text-xs font-bold ${dark ? 'text-white' : 'text-slate-900'}`}>
-              Transmisión Ultra HD 60 FPS
+              VisionNano Engine (Direct3D11 60 FPS)
             </h3>
           </div>
           {scrcpyActive && (
             <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[9px] font-bold text-emerald-400 shrink-0">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> ACTIVO
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> VISIONNANO ACTIVO
             </span>
           )}
         </div>
@@ -127,7 +135,7 @@ export const DeviceInfoPanel: React.FC<DeviceInfoPanelProps> = ({
           }`}
         >
           {scrcpyActive ? <Square size={13} fill="currentColor" /> : <Play size={13} fill="currentColor" />}
-          <span>{scrcpyActive ? 'Finalizar Proyección Externa' : 'Iniciar Proyección Externa (60 FPS)'}</span>
+          <span>{scrcpyActive ? 'Detener VisionNano 60 FPS' : 'Lanzar VisionNano 60 FPS (Direct3D11)'}</span>
         </button>
 
         {/* Streaming Controls Configuration */}
@@ -216,6 +224,15 @@ export const DeviceInfoPanel: React.FC<DeviceInfoPanelProps> = ({
             description="Mantiene la ventana de scrcpy fija encima"
             checked={scrcpyOptions.alwaysOnTop}
             onChange={(checked) => setScrcpyOptions((o) => ({ ...o, alwaysOnTop: checked }))}
+            disabled={scrcpyActive}
+          />
+          <ToggleRow
+            dark={dark}
+            icon={<Layers size={11} className="text-[#00e5ff]" />}
+            label="Ventana Cibernética Sin Bordes (Borderless)"
+            description="Elimina la barra clásica de Windows para proyección pura edge-to-edge"
+            checked={scrcpyOptions.borderless}
+            onChange={(checked) => setScrcpyOptions((o) => ({ ...o, borderless: checked }))}
             disabled={scrcpyActive}
           />
           <ToggleRow
@@ -355,6 +372,38 @@ export const DeviceInfoPanel: React.FC<DeviceInfoPanelProps> = ({
               icon={<Sun size={12} className="text-yellow-400" />}
               label="Despertar Pantalla"
               onClick={() => { onWakeScreen(); showToast('Despertando pantalla'); }}
+            />
+          )}
+          {onOpenSettings && (
+            <ToolButton
+              dark={dark}
+              icon={<Settings size={12} className="text-slate-300" />}
+              label="Ajustes Sistema"
+              onClick={() => { onOpenSettings(); showToast('Abriendo Ajustes de Android'); }}
+            />
+          )}
+          {onToggleMute && (
+            <ToolButton
+              dark={dark}
+              icon={<VolumeX size={12} className="text-amber-400" />}
+              label="Silenciar"
+              onClick={() => { onToggleMute(); showToast('Alternando Silencio'); }}
+            />
+          )}
+          {onMediaPlayPause && (
+            <ToolButton
+              dark={dark}
+              icon={<PlayCircle size={12} className="text-[#22c97d]" />}
+              label="Play / Pausa"
+              onClick={() => { onMediaPlayPause(); showToast('Play / Pausa multimedia'); }}
+            />
+          )}
+          {onCollapsePanels && (
+            <ToolButton
+              dark={dark}
+              icon={<ChevronUp size={12} className="text-sky-300" />}
+              label="Cerrar Paneles"
+              onClick={() => { onCollapsePanels(); showToast('Cerrando paneles desplegados'); }}
             />
           )}
           <ToolButton

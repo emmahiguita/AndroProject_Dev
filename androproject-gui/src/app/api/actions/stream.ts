@@ -23,6 +23,7 @@ export async function openScreen(ctx: ActionContext, body: {
   turnScreenOff?: boolean;
   stayAwake?: boolean;
   alwaysOnTop?: boolean;
+  borderless?: boolean;
   videoBuffer?: number | string;
 }) {
   const targetSerial = ctx.targetSerial;
@@ -39,6 +40,7 @@ export async function openScreen(ctx: ActionContext, body: {
     turnScreenOff: body.turnScreenOff,
     stayAwake: body.stayAwake,
     alwaysOnTop: body.alwaysOnTop,
+    borderless: body.borderless,
     videoBuffer: body.videoBuffer,
     videoSource: body.videoSource as 'display' | 'camera',
   });

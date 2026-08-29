@@ -63,12 +63,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeNav, onSelectNav, collap
       <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar py-3">
         {/* Logo row */}
         <div className={`flex items-center px-3 mb-5 ${collapsed ? 'justify-center' : 'gap-2.5'}`}>
-          <div className="w-8 h-8 rounded-full overflow-hidden border border-[#22c97d]/40 shadow-md shadow-[#1bae6e]/20 shrink-0 bg-black flex items-center justify-center">
+          <div className="w-9 h-9 rounded-xl overflow-hidden border border-[#22c97d]/50 shadow-lg shadow-[#1bae6e]/30 shrink-0 bg-black flex items-center justify-center ring-1 ring-white/10 hover:scale-105 transition-transform">
             <img src="/logo.png" alt="Dexterand Logo" className="w-full h-full object-cover" />
           </div>
           {!collapsed && (
             <div className="min-w-0">
               <h1 className={`text-sm font-bold tracking-wide ${isDark ? 'text-white' : 'text-slate-800'}`}>Dexterand</h1>
+              <p className="text-[10px] text-emerald-400 font-semibold tracking-wider uppercase">VisionNano</p>
             </div>
           )}
         </div>

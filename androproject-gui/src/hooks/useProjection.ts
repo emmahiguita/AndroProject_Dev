@@ -16,6 +16,7 @@ export interface ScrcpyOptions {
   turnScreenOff: boolean;
   stayAwake: boolean;
   alwaysOnTop: boolean;
+  borderless: boolean;
   videoSource: 'display' | 'camera';
 }
 
@@ -41,6 +42,10 @@ export interface UseProjectionReturn {
   openAllApps: () => Promise<void>;
   togglePowerScreen: () => Promise<void>;
   wakeScreen: () => Promise<void>;
+  toggleMute: () => Promise<void>;
+  mediaPlayPause: () => Promise<void>;
+  openSettings: () => Promise<void>;
+  collapsePanels: () => Promise<void>;
   expandNotifications: () => Promise<void>;
   expandQuickSettings: () => Promise<void>;
   setOrientation: (mode: 'auto' | 'portrait' | 'landscape') => Promise<void>;
@@ -60,6 +65,7 @@ const DEFAULT_OPTIONS: ScrcpyOptions = {
   turnScreenOff: false,
   stayAwake: true,
   alwaysOnTop: true,
+  borderless: false,
   videoSource: 'display',
 };
 
@@ -170,7 +176,7 @@ export function useProjection(device: DeviceInfo | null | undefined): UseProject
         await run('stop_screen', 'Deteniendo scrcpy', { serial });
         setScrcpyActive(false);
       } else {
-        await run('open_screen', 'Iniciando scrcpy nativo 60 FPS...', {
+        await run('open_screen', 'Iniciando AndroProject nativo 60 FPS...', {
           serial,
           maxSize: opts.maxSize,
           maxFps: opts.maxFps,
@@ -178,6 +184,7 @@ export function useProjection(device: DeviceInfo | null | undefined): UseProject
           turnScreenOff: opts.turnScreenOff,
           stayAwake: opts.stayAwake,
           alwaysOnTop: opts.alwaysOnTop,
+          borderless: opts.borderless,
           videoSource: opts.videoSource,
         });
         setScrcpyActive(true);
@@ -243,8 +250,20 @@ export function useProjection(device: DeviceInfo | null | undefined): UseProject
   }, [serial, run]);
   const volumeUp = useCallback(() => sendKey('KEYCODE_VOLUME_UP'), [sendKey]);
   const volumeDown = useCallback(() => sendKey('KEYCODE_VOLUME_DOWN'), [sendKey]);
+  const toggleMute = useCallback(() => sendKey('KEYCODE_VOLUME_MUTE'), [sendKey]);
+  const mediaPlayPause = useCallback(() => sendKey('KEYCODE_MEDIA_PLAY_PAUSE'), [sendKey]);
   const togglePowerScreen = useCallback(() => sendKey('KEYCODE_POWER'), [sendKey]);
   const wakeScreen = useCallback(() => sendKey('KEYCODE_WAKEUP'), [sendKey]);
+  const openSettings = useCallback(async () => {
+    if (!serial) return;
+    await run('adb_shell', 'Abrir Ajustes', { cmd: 'am start -a android.settings.SETTINGS', serial }, false);
+  }, [serial, run]);
+
+  const collapsePanels = useCallback(async () => {
+    if (!serial) return;
+    await run('adb_shell', 'Contraer Paneles', { cmd: 'cmd statusbar collapse', serial }, false);
+  }, [serial, run]);
+
   const expandNotifications = useCallback(async () => {
     if (!serial) return;
     await run('adb_shell', 'Notificaciones', { cmd: 'cmd statusbar expand-notifications', serial }, false);
@@ -311,6 +330,10 @@ export function useProjection(device: DeviceInfo | null | undefined): UseProject
     openAllApps,
     togglePowerScreen,
     wakeScreen,
+    toggleMute,
+    mediaPlayPause,
+    openSettings,
+    collapsePanels,
     expandNotifications,
     expandQuickSettings,
     setOrientation,

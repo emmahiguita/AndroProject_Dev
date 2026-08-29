@@ -5,7 +5,7 @@
 
 'use client';
 
-import { useRef } from 'react';
+import { useRef, useCallback } from 'react';
 import { useAppStore } from '@/stores';
 
 export function useActions() {
@@ -42,7 +42,7 @@ export function useActions() {
   const recordingSecondsRef = useRef(0);
 
   // ── Core action runner ─────────────────────────────────────────
-  const run = async (
+  const run = useCallback(async (
     action: string,
     desc: string,
     extraBody: Record<string, unknown> = {},
@@ -74,7 +74,7 @@ export function useActions() {
       if (logResult) addLog('✗ Error de conexión');
       return { success: false, error: 'Error de conexión' };
     }
-  };
+  }, [activeSerial, deviceIP, addLog]);
 
   // ── Device detection ───────────────────────────────────────────
   const fetchDevice = async () => {

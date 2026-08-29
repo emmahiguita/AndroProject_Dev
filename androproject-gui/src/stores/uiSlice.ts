@@ -20,9 +20,7 @@ export interface UISlice {
 }
 
 export const createUISlice: StateCreator<UISlice, [], [], UISlice> = (set) => ({
-  dark: typeof window === 'undefined'
-    ? true
-    : window.localStorage.getItem('androproject-theme') !== 'light',
+  dark: true,
   activeNav: 'dashboard',
   logs: [],
   configData: {},

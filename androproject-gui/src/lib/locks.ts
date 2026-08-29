@@ -56,7 +56,7 @@ export async function killLockedProcess(lockFile: string): Promise<boolean> {
   if (!lock?.pid) { deleteLock(lockFile); return false; }
 
   try {
-    await execAsync(`taskkill /PID ${lock.pid} /T`);
+    await execAsync(`taskkill /F /PID ${lock.pid} /T`);
     deleteLock(lockFile);
     return true;
   } catch {
