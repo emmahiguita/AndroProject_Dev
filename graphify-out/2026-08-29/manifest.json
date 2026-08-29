@@ -35,8 +35,8 @@
     "semantic_hash": "afc587292005979ce431099f4a1a981e"
   },
   "androproject-gui/package.json": {
-    "mtime": 1788027606.8508117,
-    "ast_hash": "cb83e0684cdd20099c1e91a74c7122f2",
+    "mtime": 1788034937.2499325,
+    "ast_hash": "714e647bfa77ee28b79c61f4ae1ae0f4",
     "semantic_hash": ""
   },
   "androproject-gui/postcss.config.mjs": {
@@ -90,8 +90,8 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/app/api/actions/stream.ts": {
-    "mtime": 1788027247.5309708,
-    "ast_hash": "da3b6d86ea71e097f3d23484103f2798",
+    "mtime": 1788035718.5704417,
+    "ast_hash": "71fb913dc3549928bf2a31dd2628f283",
     "semantic_hash": ""
   },
   "androproject-gui/src/app/api/actions/tweaks.ts": {
@@ -825,8 +825,8 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/lib/services/airplay-engine.ts": {
-    "mtime": 1788031731.9889834,
-    "ast_hash": "266101bfe38be60bfe380774b2e8de5a",
+    "mtime": 1788035713.3924785,
+    "ast_hash": "5aafff34280473f0eec0b7940a37d4ab",
     "semantic_hash": ""
   },
   "androproject-gui/src/lib/services/projection-coordinator.ts": {
@@ -902,6 +902,11 @@
   "scratch/run_uxplay_clean.ps1": {
     "mtime": 1788033299.3115227,
     "ast_hash": "af36148342abf436e90c455746366676",
+    "semantic_hash": ""
+  },
+  "package.json": {
+    "mtime": 1788034928.7005565,
+    "ast_hash": "3d17b2a0f80c2dbc9e27e410e4a78b28",
     "semantic_hash": ""
   }
 }

@@ -890,8 +890,8 @@
     "semantic_hash": ""
   },
   "launch_native_ios_projector.ps1": {
-    "mtime": 1788034447.1135964,
-    "ast_hash": "efe6d7542952393b3cc58c8c328a2f5e",
+    "mtime": 1788035843.9366696,
+    "ast_hash": "8457f0807eaea22b78f75fe2da443ebb",
     "semantic_hash": ""
   },
   "scratch/run_airplay_server.ps1": {
@@ -907,6 +907,11 @@
   "package.json": {
     "mtime": 1788034928.7005565,
     "ast_hash": "3d17b2a0f80c2dbc9e27e410e4a78b28",
+    "semantic_hash": ""
+  },
+  "create_ios_desktop_shortcut.ps1": {
+    "mtime": 1788035945.4475574,
+    "ast_hash": "f80a394afba4664d12f9780080ade868",
     "semantic_hash": ""
   }
 }
