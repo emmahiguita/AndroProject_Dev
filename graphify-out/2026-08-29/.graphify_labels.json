@@ -75,6 +75,14 @@
   "73": "route.ts",
   "74": "route.ts",
   "75": "build",
+  "76": "types.ts",
   "77": "scripts",
-  "80": "package.json"
+  "78": "airplay-engine.ts",
+  "79": "ArchivosView.tsx",
+  "80": "package.json",
+  "81": "DeviceInfo",
+  "82": "DashboardView.tsx",
+  "83": "AppsView.tsx",
+  "84": "useSystemLogs.ts",
+  "85": "dashboard-components.tsx"
 }

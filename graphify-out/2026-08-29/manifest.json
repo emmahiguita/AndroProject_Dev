@@ -55,8 +55,8 @@
     "semantic_hash": "fa81320f84d2ed199c192282da920476"
   },
   "androproject-gui/src/app/api/actions/_lib/validation.ts": {
-    "mtime": 1787891049.3704307,
-    "ast_hash": "a31f7d1d2e6d630aa24d990154c27676",
+    "mtime": 1788027234.0261216,
+    "ast_hash": "109f03897431ec6c6015dd79e5875afe",
     "semantic_hash": ""
   },
   "androproject-gui/src/app/api/actions/device.ts": {
@@ -90,8 +90,8 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/app/api/actions/stream.ts": {
-    "mtime": 1788024392.5254965,
-    "ast_hash": "31ecebd1026a1772caed794fb5dfd856",
+    "mtime": 1788027247.5309708,
+    "ast_hash": "da3b6d86ea71e097f3d23484103f2798",
     "semantic_hash": ""
   },
   "androproject-gui/src/app/api/actions/tweaks.ts": {
@@ -450,8 +450,8 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/app/api/device-image/route.ts": {
-    "mtime": 1787979662.496782,
-    "ast_hash": "3c7509bf7dfddd9b5001a26470549ce0",
+    "mtime": 1788027370.4147196,
+    "ast_hash": "47f331d218ddd2fe9601fdbdf1a2b75c",
     "semantic_hash": ""
   },
   "androproject-gui/src/components/ThemeProvider.tsx": {
@@ -825,8 +825,8 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/lib/services/airplay-engine.ts": {
-    "mtime": 1788026804.0082154,
-    "ast_hash": "5a2ddb8c8adc6b0bc1f4b726a177dd9f",
+    "mtime": 1788027359.5367599,
+    "ast_hash": "bb7bd6119486d0092ac57338ae19f50d",
     "semantic_hash": ""
   },
   "androproject-gui/src/lib/services/projection-coordinator.ts": {
