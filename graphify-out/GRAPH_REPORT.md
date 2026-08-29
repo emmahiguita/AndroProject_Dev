@@ -1,16 +1,16 @@
 # Graph Report - AndroProject_Dev  (2026-08-29)
 
 ## Corpus Check
-- 155 files · ~258,275 words
+- 156 files · ~258,492 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1038 nodes · 1717 edges · 90 communities (69 shown, 21 thin omitted)
+- 1039 nodes · 1717 edges · 91 communities (70 shown, 21 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 6 edges (avg confidence: 0.65)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `d38627c0`
+- Built from commit: `f2b09209`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -115,7 +115,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (90 total, 21 thin omitted)
+## Communities (91 total, 21 thin omitted)
 
 ### Community 0 - "page.tsx"
 Cohesion: 0.43
@@ -330,7 +330,7 @@ Nodes (4): APP_COLORS, AppsFilterDash, DashboardView(), getAppColor()
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `DeviceInfo` connect `cn` to `paths.ts`, `ViewShell.tsx`, `CommandResult`, `page.tsx`, `ProjectionCanvas.tsx`, `DeviceInfo`, `AppsView.tsx`, `route.ts`, `detect.ts`, `projection-coordinator.ts`, `index.ts`, `DashboardView.tsx`, `DeviceInfoFetcher`?**
-  _High betweenness centrality (0.084) - this node is a cross-community bridge._
+  _High betweenness centrality (0.085) - this node is a cross-community bridge._
 - **What connects `INSTALL-OPPO-DIRECTO.sh script`, `{ app, BrowserWindow, Tray, Menu, nativeImage, shell, dialog }`, `{ spawn }` to the rest of the system?**
   _348 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `safeExec` be split into smaller, more focused modules?**

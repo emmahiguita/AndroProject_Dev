@@ -49,10 +49,24 @@ export function useDevicePolling(): UseDevicePollingResult {
       const activeDevice: DeviceInfo | null = data.activeDevice || null;
 
       if (devList.length > 0) {
-        const current = selectedRef.current;
-        const active = current && devList.some((d: DeviceInfo) => d.serial === current)
-          ? current
-          : devList[0].serial;
+        let active = selectedRef.current;
+        if (!active && typeof window !== 'undefined') {
+          const urlParams = new URLSearchParams(window.location.search);
+          const preferIos = urlParams.get('device') === 'ios' || urlParams.get('platform') === 'ios';
+          const requestedSerial = urlParams.get('serial');
+          if (preferIos) {
+            const iosDev = devList.find((d: DeviceInfo) => d.platform === 'ios' || d.serial?.startsWith('airplay-'));
+            if (iosDev) active = iosDev.serial;
+          } else if (requestedSerial) {
+            const match = devList.find((d: DeviceInfo) => d.serial === requestedSerial);
+            if (match) active = match.serial;
+          }
+        }
+
+        if (!active || !devList.some((d: DeviceInfo) => d.serial === active)) {
+          active = devList[0].serial;
+        }
+
         setSelectedSerial(active);
         storeSetActiveSerial(active);
 

@@ -51,6 +51,16 @@ export default function Page() {
   const { logs, addLog, clearLogs } = useSystemLogs();
   const adb = useAdbConnection();
 
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const requestedNav = params.get('nav') as NavSection | null;
+      if (requestedNav && ['projection', 'dashboard', 'apps', 'flasher', 'curar', 'archivos', 'tools', 'optimizer', 'config'].includes(requestedNav)) {
+        setActiveNav(requestedNav);
+      }
+    }
+  }, [setActiveNav]);
+
   return (
     <AppShell
       devices={devices}
