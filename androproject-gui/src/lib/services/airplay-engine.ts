@@ -121,13 +121,15 @@ class AirPlayReceiverEngine implements IAirPlayReceiverEngine {
       const airplayExe = path.join(process.cwd(), 'bin', 'airplay', 'AirPlayServer.exe');
       if (fs.existsSync(airplayExe)) {
         try {
-          this.serverProcess = spawn(airplayExe, [], {
+          this.serverProcess = spawn('cmd.exe', ['/c', 'start', '""', `"${airplayExe}"`], {
             cwd: path.dirname(airplayExe),
             detached: true,
             stdio: 'ignore',
+            windowsHide: false,
+            shell: true,
           });
           this.serverProcess.unref();
-          console.log(`[AirPlay Engine] Proceso nativo AirPlayServer iniciado con Bonjour (PID ${this.serverProcess.pid})`);
+          console.log(`[AirPlay Engine] Ventana nativa AirPlayServer abierta en el escritorio con Bonjour`);
         } catch (e: unknown) {
           const msg = e instanceof Error ? e.message : String(e);
           console.warn('[AirPlay Engine] Advertencia al iniciar binario nativo:', msg);
