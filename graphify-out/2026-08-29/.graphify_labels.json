@@ -86,6 +86,5 @@
   "84": "projection-coordinator.ts",
   "85": "run_uxplay_standalone.js",
   "86": "test_uxplay_live.js",
-  "87": "debug_uxplay.js",
-  "88": "IVisionNanoEngine"
+  "87": "debug_uxplay.js"
 }
