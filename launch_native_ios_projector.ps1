@@ -12,6 +12,6 @@ Write-Host "==========================================================" -Foregro
 # Iniciar proceso nativo de proyección Direct3D / SDL2 en el escritorio interactivo
 $proc = Start-Process -FilePath ".\AirPlayServer.exe" -WorkingDirectory $AirPlayDir -PassThru
 
-Write-Host "`n✅ Proyector nativo iOS (AirPlay 2) iniciado con PID: $($proc.Id)" -ForegroundColor Green
+Write-Host "`n✅ Proyector nativo iOS [AirPlay 2] iniciado con PID: $($proc.Id)" -ForegroundColor Green
 Write-Host "📱 En tu iPhone: Centro de Control -> Duplicar Pantalla -> 'AndroProject [PC]'" -ForegroundColor Yellow
 Write-Host "La ventana nativa de duplicación aparecerá directamente en tu pantalla.`n" -ForegroundColor Cyan
