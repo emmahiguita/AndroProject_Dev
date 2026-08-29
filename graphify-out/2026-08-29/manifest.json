@@ -155,8 +155,8 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/app/page.tsx": {
-    "mtime": 1788019146.43302,
-    "ast_hash": "f882b5b99d530bbec850856b49142caf",
+    "mtime": 1788032301.3746839,
+    "ast_hash": "561f53fdb5ad38161798cef1c88074b7",
     "semantic_hash": ""
   },
   "androproject-gui/src/components/ViewShell.tsx": {
@@ -475,8 +475,8 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/hooks/useDevicePolling.ts": {
-    "mtime": 1787983199.4422073,
-    "ast_hash": "cfc2f1b91a83bffe3ce8a4d0de8078f8",
+    "mtime": 1788032330.5073211,
+    "ast_hash": "53e73e1e3817768ad996a1479bc7f764",
     "semantic_hash": ""
   },
   "androproject-gui/src/hooks/useSystemLogs.ts": {
@@ -875,8 +875,8 @@
     "semantic_hash": ""
   },
   "launch_ios_projection.ps1": {
-    "mtime": 1788032122.0639968,
-    "ast_hash": "6607a61e8ab97ad601cd5a46a8d422f9",
+    "mtime": 1788032311.8992388,
+    "ast_hash": "a042cbce5f9c99074e29da3c2059a6cb",
     "semantic_hash": ""
   }
 }

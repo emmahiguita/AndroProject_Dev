@@ -1,4 +1,4 @@
-const { app, BrowserWindow, Tray, Menu, nativeImage, shell, dialog } = require('electron');
+const { app, BrowserWindow, Tray, Menu, nativeImage, shell, dialog, desktopCapturer, session } = require('electron');
 const { spawn } = require('child_process');
 const path = require('path');
 const fs = require('fs');
@@ -32,6 +32,164 @@ let mainWindow;
 let tray;
 let serverProcess;
 let isQuitting = false;
+
+// ── iOS AirPlay 2 Receiver & Mirroring ──────────────────────────────────
+let airPlayProcess = null;
+let iosMirrorWindow = null;
+let iosMonitorTimer = null;
+
+function getAirPlayServerPath() {
+  if (app.isPackaged) {
+    const p1 = path.join(process.resourcesPath, 'bin', 'airplay', 'AirPlayServer.exe');
+    if (fs.existsSync(p1)) return p1;
+    return path.join(process.resourcesPath, 'native', 'ios', 'AirPlayServer.exe');
+  }
+  const p1 = path.join(__dirname, '..', 'bin', 'airplay', 'AirPlayServer.exe');
+  if (fs.existsSync(p1)) return p1;
+  return path.join(__dirname, '..', 'native', 'ios', 'AirPlayServer.exe');
+}
+
+function startAirPlayReceiver() {
+  const executable = getAirPlayServerPath();
+  if (!fs.existsSync(executable)) {
+    console.error('[iOS] AirPlayServer.exe no encontrado:', executable);
+    return false;
+  }
+  if (airPlayProcess && !airPlayProcess.killed) {
+    return true;
+  }
+  console.log('[iOS] Iniciando receptor AirPlay...');
+  const airplayDir = path.dirname(executable);
+  airPlayProcess = spawn(executable, [], {
+    cwd: airplayDir,
+    windowsHide: false,
+    stdio: ['ignore', 'pipe', 'pipe'],
+    env: {
+      ...process.env,
+      PATH: airplayDir + ';' + path.join(airplayDir, 'lib') + ';' + process.env.PATH,
+    }
+  });
+
+  airPlayProcess.stdout?.on('data', data => {
+    console.log('[AirPlay]', data.toString().trim());
+  });
+
+  airPlayProcess.stderr?.on('data', data => {
+    console.error('[AirPlay]', data.toString().trim());
+  });
+
+  airPlayProcess.on('exit', code => {
+    console.log(`[iOS] Receptor AirPlay terminado: ${code}`);
+    airPlayProcess = null;
+    if (iosMirrorWindow && !iosMirrorWindow.isDestroyed()) {
+      iosMirrorWindow.close();
+      iosMirrorWindow = null;
+    }
+  });
+
+  return true;
+}
+
+async function findIOSFeed() {
+  try {
+    const sources = await desktopCapturer.getSources({
+      types: ['window'],
+      thumbnailSize: { width: 0, height: 0 },
+      fetchWindowIcons: false,
+    });
+    return sources.find(source =>
+      source.name === 'AirPlay Receiver - Clean Feed' ||
+      source.name.includes('AirPlay Receiver') ||
+      source.name.includes('AirPlay')
+    );
+  } catch (err) {
+    return null;
+  }
+}
+
+function createIOSMirrorWindow() {
+  if (iosMirrorWindow && !iosMirrorWindow.isDestroyed()) {
+    iosMirrorWindow.focus();
+    return;
+  }
+
+  iosMirrorWindow = new BrowserWindow({
+    width: 430,
+    height: 900,
+    minWidth: 320,
+    minHeight: 650,
+    frame: false,
+    transparent: true,
+    backgroundColor: '#00000000',
+    resizable: true,
+    movable: true,
+    alwaysOnTop: false,
+    title: 'DEXTERAND — iPhone',
+    show: false,
+    webPreferences: {
+      contextIsolation: true,
+      nodeIntegration: false,
+      sandbox: true,
+      backgroundThrottling: false,
+    },
+  });
+
+  iosMirrorWindow.loadURL(`${SERVER_URL}/ios-mirror`);
+
+  iosMirrorWindow.once('ready-to-show', () => {
+    iosMirrorWindow?.show();
+    iosMirrorWindow?.focus();
+  });
+
+  iosMirrorWindow.on('closed', () => {
+    iosMirrorWindow = null;
+  });
+}
+
+async function monitorIOSProjection() {
+  try {
+    const source = await findIOSFeed();
+    if (source) {
+      if (!iosMirrorWindow || iosMirrorWindow.isDestroyed()) {
+        console.log('[iOS] Stream detectado:', source.name);
+        createIOSMirrorWindow();
+      }
+    } else {
+      if (iosMirrorWindow && !iosMirrorWindow.isDestroyed()) {
+        console.log('[iOS] Stream finalizado');
+        iosMirrorWindow.close();
+        iosMirrorWindow = null;
+      }
+    }
+  } catch (error) {
+    console.error('[iOS] Error detectando stream:', error);
+  }
+}
+
+function startIOSMonitor() {
+  if (iosMonitorTimer) {
+    clearInterval(iosMonitorTimer);
+  }
+  iosMonitorTimer = setInterval(monitorIOSProjection, 1000);
+}
+
+function setupIOSCaptureHandler() {
+  session.defaultSession.setDisplayMediaRequestHandler(async (request, callback) => {
+    try {
+      const source = await findIOSFeed();
+      if (!source) {
+        console.log('[iOS] No existe Clean Feed');
+        callback({});
+        return;
+      }
+      console.log('[iOS] Permitiendo captura:', source.name);
+      callback({ video: source });
+    } catch (error) {
+      console.error('[iOS] Error concediendo captura:', error);
+      callback({});
+    }
+  });
+}
 
 const PORT = parseInt(process.env.NEXTJS_PORT || process.env.PORT || '3001', 10);
 const SERVER_URL = `http://127.0.0.1:${PORT}`;
@@ -275,6 +433,13 @@ app.whenReady().then(async () => {
     autoUpdater.checkForUpdatesAndNotify().catch(() => {});
   }
   createTray();
+
+  // ── iOS AirPlay Setup ──
+  setupIOSCaptureHandler();
+  startAirPlayReceiver();
+  startIOSMonitor();
+
+  // ── Next.js / Android Setup ──
   const alreadyRunning = await isServerRunning();
   if (!alreadyRunning) {
     console.log('[Init] Starting Next.js server...');

@@ -1,5 +1,4 @@
 {
-  "0": "page.tsx",
   "1": "safeExec",
   "2": "devDependencies",
   "3": "config.ts",
@@ -58,7 +57,6 @@
   "56": "samsung-adb.ps1",
   "57": "debloat.ps1",
   "58": "AGENTS.md",
-  "59": "cn",
   "60": "index.ts",
   "61": "Button.tsx",
   "62": "DeviceInfoFetcher",
