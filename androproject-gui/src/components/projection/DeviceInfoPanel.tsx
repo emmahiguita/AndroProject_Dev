@@ -147,37 +147,50 @@ export const DeviceInfoPanel: React.FC<DeviceInfoPanelProps> = ({
             </div>
           </div>
 
-          <button
-            type="button"
-            onClick={async () => {
-              showToast('Abriendo ventana nativa de AirPlay...');
-              try {
-                await fetch('/api/airplay', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ action: 'open_native_window' }),
-                });
-                showToast('Ventana nativa de AirPlay abierta');
-              } catch {
-                showToast('Error al abrir ventana nativa');
-              }
-            }}
-            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-bold transition-all shadow-md bg-gradient-to-r from-[#00b4d8] to-[#0077b6] hover:from-[#0096c7] hover:to-[#023e8a] text-white active:scale-[0.98] cursor-pointer"
-          >
-            <Maximize2 size={13} />
-            <span>Abrir Ventana Flotante de AirPlay en Escritorio</span>
-          </button>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={async () => {
+                showToast('Abriendo ventana flotante...');
+                try {
+                  await fetch('/api/airplay', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'open_native_window' }),
+                  });
+                  showToast('Ventana flotante abierta');
+                } catch {
+                  showToast('Error al abrir ventana');
+                }
+              }}
+              className="flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-xl text-xs font-bold transition-all shadow-md bg-gradient-to-r from-[#00b4d8] to-[#0077b6] hover:from-[#0096c7] hover:to-[#023e8a] text-white active:scale-[0.98] cursor-pointer"
+            >
+              <Maximize2 size={13} />
+              <span>Ventana Libre</span>
+            </button>
 
-          <div className="p-3 rounded-xl bg-[#00e5ff]/5 border border-[#00e5ff]/20 text-[11px] text-white/80 space-y-1.5">
-            <div className="font-bold text-[#00e5ff] flex items-center gap-1">
-              <span>📱 Cómo conectar tu iPhone / iPad:</span>
+            <button
+              type="button"
+              onClick={() => {
+                showToast('Control de ratón activado. Usa el cursor sobre la pantalla.');
+              }}
+              className="flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-xl text-xs font-bold transition-all shadow-md bg-white/10 hover:bg-white/15 text-white border border-white/10 active:scale-[0.98] cursor-pointer"
+            >
+              <Sparkles size={13} className="text-emerald-400" />
+              <span>Control Ratón</span>
+            </button>
+          </div>
+
+          <div className="p-3 rounded-xl bg-emerald-500/5 border border-emerald-500/20 text-[11px] text-white/90 space-y-2">
+            <div className="font-bold text-emerald-400 flex items-center gap-1.5">
+              <span>🖱️ Manejo con Cursor y Ratón desde el PC:</span>
             </div>
-            <ol className="list-decimal list-inside space-y-1 text-[10px] text-white/70">
-              <li>Abre el <strong>Centro de Control</strong> deslizando hacia abajo.</li>
-              <li>Toca el icono de <strong>Duplicar Pantalla</strong>.</li>
-              <li>Selecciona <strong>AndroProject [PC]</strong> de la lista.</li>
-              <li>La pantalla y el audio se proyectarán en vivo en este marco.</li>
-            </ol>
+            <p className="text-[10px] text-white/70 leading-relaxed">
+              Puedes hacer <strong>click</strong>, <strong>arrastrar</strong> o usar la <strong>rueda del ratón</strong> sobre el marco del iPhone. Para ver el cursor circular nativo en tu iPhone:
+            </p>
+            <div className="p-2 rounded-lg bg-black/40 border border-white/5 text-[10px] font-mono text-emerald-300">
+              Ajustes &gt; Accesibilidad &gt; Tocar &gt; AssistiveTouch &gt; ACTIVAR
+            </div>
           </div>
         </div>
       ) : (

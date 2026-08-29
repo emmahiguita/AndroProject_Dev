@@ -92,9 +92,19 @@
   "90": "launch_ios_projection.ps1",
   "91": "detect.ts",
   "92": "create_ios_desktop_shortcut.ps1",
+  "93": "types.ts",
   "94": "ConfigView.tsx",
   "95": "page.tsx",
   "96": "launch_native_ios_projector.ps1",
   "97": "run_airplay_server.ps1",
-  "98": "run_uxplay_clean.ps1"
+  "98": "run_uxplay_clean.ps1",
+  "99": "AppShell.tsx",
+  "100": "Header.tsx",
+  "101": "bonjour_broadcaster.js",
+  "102": "airplay-engine.ts",
+  "103": "optimizerSlice.ts",
+  "104": "useAdbConnection.ts",
+  "105": "daemon.js",
+  "106": "inspect_mdns_discovery.js",
+  "107": "check_all_services.ps1"
 }

@@ -91,6 +91,7 @@
   "89": "DashboardView.tsx",
   "90": "launch_ios_projection.ps1",
   "91": "detect.ts",
+  "92": "create_ios_desktop_shortcut.ps1",
   "94": "ConfigView.tsx",
   "95": "page.tsx",
   "96": "launch_native_ios_projector.ps1",

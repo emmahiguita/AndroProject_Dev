@@ -1,16 +1,16 @@
 # Graph Report - AndroProject_Dev  (2026-08-29)
 
 ## Corpus Check
-- 162 files · ~260,321 words
+- 163 files · ~260,411 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1066 nodes · 1751 edges · 97 communities (75 shown, 22 thin omitted)
+- 1067 nodes · 1751 edges · 98 communities (76 shown, 22 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 7 edges (avg confidence: 0.63)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `63311344`
+- Built from commit: `848fac9b`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -117,7 +117,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (97 total, 22 thin omitted)
+## Communities (98 total, 22 thin omitted)
 
 ### Community 0 - "types.ts"
 Cohesion: 0.31
@@ -336,7 +336,7 @@ Nodes (7): deduplicate(), detect(), DeviceInfo, execAsync, fetchDeviceDetails(),
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `DeviceInfo` connect `index.ts` to `types.ts`, `paths.ts`, `ViewShell.tsx`, `CommandResult`, `page.tsx`, `DeviceInfo`, `AppsView.tsx`, `route.ts`, `detect.ts`, `projection-coordinator.ts`, `index.ts`, `DashboardView.tsx`, `DeviceInfoFetcher`?**
-  _High betweenness centrality (0.116) - this node is a cross-community bridge._
+  _High betweenness centrality (0.115) - this node is a cross-community bridge._
 - **Why does `Page()` connect `types.ts` to `page.tsx`, `Button.tsx`, `index.ts`?**
   _High betweenness centrality (0.068) - this node is a cross-community bridge._
 - **Why does `dependencies` connect `Button.tsx` to `package.json`?**
