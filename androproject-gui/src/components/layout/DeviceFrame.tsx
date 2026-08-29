@@ -4,7 +4,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   RefreshCw, Wifi, Usb, ArrowLeft, Home, Layers,
   Volume2, VolumeX, Power, Send, Type, MonitorPlay, LayoutGrid,
-  Activity, Minus, Square, X,
+  Activity, Minus, Square, X, ExternalLink,
 } from 'lucide-react';
 import { useActions } from '@/hooks/useActions';
 import { ProjectionCanvas, ZoomState } from '@/components/projection/ProjectionCanvas';
@@ -188,6 +188,19 @@ export const DeviceFrame: React.FC<DeviceFrameProps> = ({
               title="Maximizar escala de proyección"
             >
               <Square size={10} strokeWidth={2.5} />
+            </button>
+
+            {/* Popout External Floating Window */}
+            <button
+              type="button"
+              onClick={() => {
+                const url = isIos ? '/popout?device=ios' : `/popout?serial=${encodeURIComponent(device.serial)}`;
+                window.open(url, 'DexterAnd_Popout_Screen', 'width=480,height=980,resizable=yes,scrollbars=no,status=no,toolbar=no,menubar=no,location=no');
+              }}
+              className="w-6 h-6 rounded-md border border-[#00e5ff]/25 bg-[#081220]/90 text-[#00e5ff]/80 hover:text-emerald-300 hover:bg-emerald-500/25 hover:border-emerald-500/50 flex items-center justify-center transition-all active:scale-95 cursor-pointer"
+              title="Abrir proyección en ventana flotante externa independiente"
+            >
+              <ExternalLink size={11} strokeWidth={2.5} />
             </button>
 
             {/* Close / Stop projection */}

@@ -25,12 +25,12 @@ if (-not $AirPlayRunning) {
 
 # 2. Desplegar ventana interactiva en el escritorio
 Write-Host "[2/2] Desplegando ventana de proyección en el escritorio..." -ForegroundColor Yellow
-$AppUrl = "http://localhost:3001/?nav=projection&device=ios"
+$AppUrl = "http://localhost:3001/popout?device=ios"
 
 $ChromePath = (Get-Command chrome.exe -ErrorAction SilentlyContinue).Source
 if ($ChromePath) {
-    Start-Process chrome.exe -ArgumentList "--app=$AppUrl", "--window-size=500,990", "--window-position=1150,40"
-    Write-Host " -> Ventana de proyección iOS desplegada con éxito." -ForegroundColor Green
+    Start-Process chrome.exe -ArgumentList "--app=$AppUrl", "--window-size=480,980", "--window-position=1150,40"
+    Write-Host " -> Ventana flotante de proyección iOS desplegada con éxito." -ForegroundColor Green
 } else {
     Start-Process $AppUrl
     Write-Host " -> Abierto en navegador predeterminado." -ForegroundColor Green

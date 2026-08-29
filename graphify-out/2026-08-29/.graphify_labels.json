@@ -88,5 +88,6 @@
   "86": "test_uxplay_live.js",
   "87": "debug_uxplay.js",
   "88": "stress_test_airplay.js",
-  "89": "DashboardView.tsx"
+  "89": "DashboardView.tsx",
+  "90": "launch_ios_projection.ps1"
 }
