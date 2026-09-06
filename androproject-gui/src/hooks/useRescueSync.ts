@@ -73,6 +73,7 @@ export function useRescueSync(devices: DeviceInfo[], onRefresh?: () => void) {
 
   const configRef = useRef(config);
   const devicesRef = useRef(devices);
+  const onRefreshRef = useRef(onRefresh);
 
   useEffect(() => {
     configRef.current = config;
@@ -81,6 +82,10 @@ export function useRescueSync(devices: DeviceInfo[], onRefresh?: () => void) {
   useEffect(() => {
     devicesRef.current = devices;
   }, [devices]);
+
+  useEffect(() => {
+    onRefreshRef.current = onRefresh;
+  }, [onRefresh]);
 
   // Persist config changes only after hydration
   useEffect(() => {
@@ -108,6 +113,11 @@ export function useRescueSync(devices: DeviceInfo[], onRefresh?: () => void) {
   const updateLastKnownIp = useCallback((ip: string) => {
     setConfig(prev => ({ ...prev, lastKnownIp: ip }));
   }, []);
+
+  const updateLastKnownIpRef = useRef(updateLastKnownIp);
+  useEffect(() => {
+    updateLastKnownIpRef.current = updateLastKnownIp;
+  }, [updateLastKnownIp]);
 
   // Watchdog & Reconnection loop
   useEffect(() => {
@@ -156,9 +166,9 @@ export function useRescueSync(devices: DeviceInfo[], onRefresh?: () => void) {
             const data = await res.json();
             if (data?.ip) {
               if (data.ip !== currentConfig.lastKnownIp) {
-                updateLastKnownIp(data.ip);
+                updateLastKnownIpRef.current(data.ip);
               }
-              onRefresh?.();
+              onRefreshRef.current?.();
             }
           } catch { /* ignore */ }
         }
@@ -269,7 +279,7 @@ export function useRescueSync(devices: DeviceInfo[], onRefresh?: () => void) {
               if (!isWatchdogAlive) return;
               setStatus('connected');
               setLastSyncMsg(`Reconectado a ${currentConfig.lastKnownIp}`);
-              onRefresh?.();
+              onRefreshRef.current?.();
               return;
             }
           } catch { /* try radar */ }
@@ -290,7 +300,7 @@ export function useRescueSync(devices: DeviceInfo[], onRefresh?: () => void) {
 
           if (data?.success) {
             if (!isWatchdogAlive) return;
-            onRefresh?.();
+            onRefreshRef.current?.();
           } else {
             if (!isWatchdogAlive) return;
             setStatus('monitoring');
@@ -317,7 +327,7 @@ export function useRescueSync(devices: DeviceInfo[], onRefresh?: () => void) {
       isWatchdogAlive = false;
       clearInterval(interval);
     };
-  }, [config.enabled, config.targetModel, config.lastKnownIp, onRefresh, updateLastKnownIp]);
+  }, [config.enabled, config.targetModel]);
 
   return {
     config,

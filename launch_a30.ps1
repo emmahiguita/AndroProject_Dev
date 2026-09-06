@@ -4,13 +4,29 @@ param(
     [switch]$Multi = $false
 )
 
-$adb = "C:\Users\emman\AppData\Local\Android\Sdk\platform-tools\adb.exe"
-$scrcpy = "C:\Users\emman\AppData\Local\Microsoft\WinGet\Packages\Genymobile.scrcpy_Microsoft.Winget.Source_8wekyb3d8bbwe\scrcpy-win64-v4.1\scrcpy.exe"
+# ── Resolución dinámica de ADB (no hardcodeado) ─────────────────────────────
+$adbCandidates = @(
+    (Join-Path $env:LOCALAPPDATA 'Android\Sdk\platform-tools\adb.exe'),
+    'C:\AndroProject\adb.exe',
+    'C:\Program Files\Android\platform-tools\adb.exe'
+)
+$adb = $adbCandidates | Where-Object { Test-Path $_ } | Select-Object -First 1
+if (-not $adb) {
+    $cmd = Get-Command adb.exe -ErrorAction SilentlyContinue
+    $adb = if ($cmd) { $cmd.Source } else { 'adb.exe' }
+}
 
-if (-not (Test-Path $adb)) { $adb = "adb.exe" }
-if (-not (Test-Path $scrcpy)) {
-    $found = Get-ChildItem -Path "$env:LOCALAPPDATA\Microsoft\WinGet\Packages" -Filter 'scrcpy.exe' -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
-    if ($found) { $scrcpy = $found.FullName } else { $scrcpy = 'scrcpy.exe' }
+# ── Resolución dinámica de scrcpy/AndroProject.exe ──────────────────────────
+$scrcpyCandidates = @(
+    'C:\AndroProject\AndroProject.exe',
+    'C:\AndroProject\scrcpy.exe'
+)
+$scrcpy = $scrcpyCandidates | Where-Object { Test-Path $_ } | Select-Object -First 1
+if (-not $scrcpy) {
+    $wingetPkgs = Join-Path $env:LOCALAPPDATA 'Microsoft\WinGet\Packages'
+    $found = Get-ChildItem -Path $wingetPkgs -Filter 'scrcpy.exe' -Recurse -ErrorAction SilentlyContinue |
+             Sort-Object LastWriteTime -Descending | Select-Object -First 1
+    $scrcpy = if ($found) { $found.FullName } else { 'scrcpy.exe' }
 }
 
 Write-Host "============================================================" -ForegroundColor Cyan
@@ -107,6 +123,6 @@ if ($devs.Count -gt 0) {
     Write-Host "[ERROR] No se detecto ningun dispositivo Android conectado." -ForegroundColor Red
     Write-Host "Por favor conecta tu telefono por cable USB o activa la depuracion Wi-Fi." -ForegroundColor Yellow
     Write-Host ""
-    Write-Host "Presiona cualquier tecla para cerrar..."
-    [Console]::ReadKey($true) | Out-Null
+    Write-Host "Cerrando en 5 segundos..." -ForegroundColor DarkGray
+    Start-Sleep -Seconds 5
 }
