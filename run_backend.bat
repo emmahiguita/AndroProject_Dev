@@ -7,5 +7,3 @@ echo   Puerto: 8000
 echo ============================================================
 echo.
 .venv\Scripts\python.exe main.py
-pause
-

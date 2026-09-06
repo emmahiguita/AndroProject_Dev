@@ -35,6 +35,10 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'SilentlyContinue'
 
+$createdNew = $false
+$script:WatchdogMutex = [System.Threading.Mutex]::new($true, 'Global\AndroProject_SamsungA30_Watchdog', [ref]$createdNew)
+if (-not $createdNew) { exit 0 }
+
 # ── Rutas de estado ──────────────────────────────────────────────────
 $LogDir    = "C:\AndroProject\temp"
 $LogFile   = Join-Path $LogDir "samsung-watchdog.log"
@@ -50,6 +54,10 @@ $null = Register-EngineEvent -SourceIdentifier PowerShell.Exiting -Action {
     if ($Pool -and $Pool.RunspacePoolStateInfo.State -ne 'Closed') {
         $Pool.Close()
         $Pool.Dispose()
+    }
+    if ($script:WatchdogMutex) {
+        try { $script:WatchdogMutex.ReleaseMutex() } catch {}
+        try { $script:WatchdogMutex.Dispose() } catch {}
     }
 }
 
@@ -307,6 +315,8 @@ function Invoke-DeviceHardening([string]$Target) {
 # ────────────────────────────────────────────────────────────────────
 $script:SamsungScrcpyPid = $null
 $script:CurrentTarget = $null
+$script:ProjectionFailures = 0
+$script:NextProjectionAttempt = [DateTime]::MinValue
 
 function Test-ScrcpyAlive {
     if (-not $script:SamsungScrcpyPid) { return $false }
@@ -338,7 +348,10 @@ function Stop-ScrcpyIfRunning {
 }
 
 function Start-Projection([string]$Target) {
-    # Asegurar que no queden instancias viejas duplicadas de ESTE dispositivo
+    if ([DateTime]::Now -lt $script:NextProjectionAttempt) {
+        return
+    }
+
     Stop-ScrcpyIfRunning
 
     $args = @(
@@ -355,16 +368,44 @@ function Start-Projection([string]$Target) {
         '--no-audio',
         '--stay-awake',
         '--port=27183:27195',
-        "--window-title=`"AndroProject - Samsung A30 ($Target)`""
+        "--window-title=AndroProject - Samsung A30 ($Target)"
     )
-    $proc = Start-Process -FilePath $script:ScrcpyPath -ArgumentList $args -PassThru -ErrorAction SilentlyContinue
-    if ($proc -and -not $proc.HasExited) {
-        $script:SamsungScrcpyPid = $proc.Id
-        $script:CurrentTarget = $Target
-        Write-Log "Proyeccion Samsung activa (PID=$($proc.Id)) -> $Target [Port 27183]"
-    } else {
-        Write-Log "ERROR: No se pudo iniciar scrcpy para Samsung en $Target"
-    }
+
+    $quotedArgs = @($args | ForEach-Object {
+        $arg = [string]$_
+        if ($arg -match '[\s"]') {
+            '"' + ($arg -replace '"', '\"') + '"'
+        } else {
+            $arg
+        }
+    })
+
+    $psi = New-Object System.Diagnostics.ProcessStartInfo
+    $psi.FileName = $script:ScrcpyPath
+    $psi.Arguments = ($quotedArgs -join ' ')
+    $psi.UseShellExecute = $false
+    $psi.CreateNoWindow = $true
+    $scrcpyDir = Split-Path -Parent $script:ScrcpyPath
+    if ($scrcpyDir) { $psi.WorkingDirectory = $scrcpyDir }
+
+    try {
+        $proc = [System.Diagnostics.Process]::Start($psi)
+        Start-Sleep -Milliseconds 350
+        if ($proc -and -not $proc.HasExited) {
+            $script:SamsungScrcpyPid = $proc.Id
+            $script:CurrentTarget = $Target
+            $script:ProjectionFailures = 0
+            $script:NextProjectionAttempt = [DateTime]::MinValue
+            Write-Log "Proyeccion Samsung activa (PID=$($proc.Id)) -> $Target [Port 27183]"
+            return
+        }
+    } catch {}
+
+    $script:ProjectionFailures++
+    $pow = [Math]::Min($script:ProjectionFailures - 1, 4)
+    $delaySec = [Math]::Min(120, 5 * [Math]::Pow(2, $pow))
+    $script:NextProjectionAttempt = [DateTime]::Now.AddSeconds($delaySec)
+    Write-Log "ERROR: scrcpy Samsung no inicio estable. Reintento en $([int]$delaySec)s"
 }
 #endregion
 

@@ -62,7 +62,7 @@ function startAirPlayReceiver() {
   const airplayDir = path.dirname(executable);
   airPlayProcess = spawn(executable, [], {
     cwd: airplayDir,
-    windowsHide: false,
+    windowsHide: true,
     stdio: ['ignore', 'pipe', 'pipe'],
     env: {
       ...process.env,
@@ -309,7 +309,8 @@ function startNextServer() {
       const logStream = fs.createWriteStream(logPath, { flags: 'a' });
       serverProcess = spawn(process.execPath, [path.join(process.resourcesPath, 'next-standalone', 'server.js')], {
         cwd: path.join(process.resourcesPath, 'next-standalone'),
-        env: { ...process.env, PORT: String(PORT), NODE_ENV: 'production', ELECTRON_RUN_AS_NODE: '1' }
+        env: { ...process.env, PORT: String(PORT), NODE_ENV: 'production', ELECTRON_RUN_AS_NODE: '1' },
+        windowsHide: true,
       });
       serverProcess.stdout.pipe(logStream);
       serverProcess.stderr.pipe(logStream);
@@ -320,6 +321,7 @@ function startNextServer() {
       env: { ...process.env, PORT: String(PORT) },
       stdio: 'ignore',
       shell: true,
+      windowsHide: true,
     });
   }
 }
@@ -406,7 +408,8 @@ async function createWindow() {
 async function initializeADBAndRadar() {
   console.log('[Init] Checking ADB server...');
   const { exec } = require('child_process');
-  exec(`"${ADB}" start-server`, () => {
+  const execHidden = (command, callback) => exec(command, { windowsHide: true }, callback);
+  execHidden(`"${ADB}" start-server`, () => {
     console.log('[Init] ADB server started. Scanning subnet for devices...');
     const psScript = `
       $localIp = (Get-NetIPAddress -AddressFamily IPv4 | Where-Object { $_.InterfaceAlias -match "Wi-Fi|Ethernet" -and $_.IPAddress -notlike "169.254*" } | Select-Object -First 1).IPAddress
@@ -428,7 +431,7 @@ async function initializeADBAndRadar() {
       }
     `;
     const encoded = Buffer.from(psScript, 'utf16le').toString('base64');
-    exec(`powershell -ExecutionPolicy Bypass -NoProfile -EncodedCommand ${encoded}`, (err, stdout) => {
+    execHidden(`powershell -ExecutionPolicy Bypass -NoProfile -EncodedCommand ${encoded}`, (err, stdout) => {
       const foundIps = (stdout || '')
         .split(/\r?\n/)
         .map(s => s.trim())
@@ -437,7 +440,7 @@ async function initializeADBAndRadar() {
       if (foundIps.length > 0) {
         console.log(`[Init] Radar found ${foundIps.length} device(s): ${foundIps.join(', ')}`);
         foundIps.forEach(ip => {
-          exec(`"${ADB}" connect ${ip}:5555`, (err, out) => {
+          execHidden(`"${ADB}" connect ${ip}:5555`, (err, out) => {
             console.log(`[Init] Connected to ${ip}:5555 -> ${(out || '').trim()}`);
           });
         });
@@ -470,18 +473,19 @@ function cleanupChildProcesses() {
   }
   // Clean up any active scrcpy processes tracked in .androproject/locks
   try {
-    const locksDir = path.join(__dirname, '..', '.androproject', 'locks');
+    const locksDir = process.env.ANDROPROJECT_HOME || 'C:\\AndroProject';
     if (fs.existsSync(locksDir)) {
       const files = fs.readdirSync(locksDir);
       for (const file of files) {
-        if (file.endsWith('.lock')) {
+        if (file.startsWith('.androproject_active_') || file.startsWith('.androproject_record_')) {
           const lockPath = path.join(locksDir, file);
           try {
             const raw = fs.readFileSync(lockPath, 'utf8');
             const data = JSON.parse(raw);
-            if (data && data.pid) {
-              try { process.kill(data.pid); } catch {}
+            if (!data || !data.pid || !['vision-nano', 'recording'].includes(data.owner)) {
+              continue;
             }
+            try { process.kill(data.pid); } catch {}
             fs.unlinkSync(lockPath);
           } catch {}
         }

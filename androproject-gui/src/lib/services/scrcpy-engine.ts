@@ -66,6 +66,7 @@ export class VisionNanoEngine implements IVisionNanoEngine {
     const maxSize = options.maxSize && options.maxSize !== '0' ? String(options.maxSize) : '960';
     const maxFps = options.maxFps ? String(options.maxFps) : '60';
     const displayId = options.displayId !== undefined ? String(options.displayId) : '0';
+    const videoBuffer = options.videoBuffer !== undefined ? String(options.videoBuffer) : '0';
 
     const args: string[] = ['-s', String(serial)];
 
@@ -93,7 +94,7 @@ export class VisionNanoEngine implements IVisionNanoEngine {
       '-b', bitRate,
       '--max-size', maxSize,
       `--max-fps=${maxFps}`,
-      '--video-buffer=0',
+      `--video-buffer=${videoBuffer}`,
       '--render-driver=direct3d11',
       '--window-width=380',
       '--window-height=820',
@@ -135,14 +136,14 @@ export class VisionNanoEngine implements IVisionNanoEngine {
       return { success: false, alive: false, error: 'Dispositivo no especificado' };
     }
 
-    if (!fs.existsSync(ANDROPROJECT_BIN)) {
+    if (ANDROPROJECT_BIN !== 'scrcpy' && !fs.existsSync(ANDROPROJECT_BIN)) {
       return { success: false, alive: false, error: `Binario VisionNano no encontrado en ${ANDROPROJECT_BIN}` };
     }
 
     const lockFile = getLockFile(serial, options.displayId, options.videoSource);
 
     // Idempotency: verify if already running
-    const alreadyAlive = await isLockAlive(lockFile, 'scrcpy');
+    const alreadyAlive = await isLockAlive(lockFile);
     if (alreadyAlive) {
       const lockData = readLock(lockFile);
       return {
@@ -171,14 +172,19 @@ export class VisionNanoEngine implements IVisionNanoEngine {
       env: { ...process.env, PATH: envPath, ADB },
       detached: true,
       stdio: 'ignore',
-      windowsHide: false,
+      windowsHide: true,
     });
 
     if (!child.pid) {
       return { success: false, alive: false, error: 'No se pudo generar el proceso VisionNano' };
     }
 
-    writeLock(lockFile, { pid: child.pid, serial });
+    writeLock(lockFile, {
+      pid: child.pid,
+      serial,
+      processName: path.basename(ANDROPROJECT_BIN),
+      owner: 'vision-nano',
+    });
     VisionNanoEngine.activePids.set(lockFile, child.pid);
     child.unref();
 
@@ -206,7 +212,7 @@ export class VisionNanoEngine implements IVisionNanoEngine {
    */
   public async checkAlive(serial: string, displayId: number | string = 0, source: string = 'display'): Promise<boolean> {
     const lockFile = getLockFile(serial, displayId, source);
-    return await isLockAlive(lockFile, 'scrcpy');
+    return await isLockAlive(lockFile);
   }
 
   /**

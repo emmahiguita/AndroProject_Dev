@@ -7,4 +7,3 @@ echo   Puerto: 3001
 echo ============================================================
 echo.
 call npm run electron
-pause

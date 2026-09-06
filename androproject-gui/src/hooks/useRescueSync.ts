@@ -62,6 +62,7 @@ export function useRescueSync(devices: DeviceInfo[], onRefresh?: () => void) {
   const [lastSyncMsg, setLastSyncMsg] = useState<string>('En espera');
   const isSyncingRef = useRef<boolean>(false);
   const [isSyncing, setIsSyncing] = useState<boolean>(false);
+  const projectionRetryRef = useRef<Map<string, { failures: number; nextAttemptAt: number }>>(new Map());
 
   // Load from localStorage on mount (eliminates SSR hydration mismatch)
   useEffect(() => {
@@ -162,36 +163,75 @@ export function useRescueSync(devices: DeviceInfo[], onRefresh?: () => void) {
           } catch { /* ignore */ }
         }
 
-        // Auto-Project: Check if screen projection is enabled for this device
+        // Auto-Project with bounded retries. A failed scrcpy must not relaunch every 7s forever.
         try {
           const prefKey = `androproject_stream_pref_${matchedDevice.serial}`;
           const savedPref = typeof window !== 'undefined' ? localStorage.getItem(prefKey) : null;
-          // Default to ON for A30 or if preference is true
           const shouldStream = savedPref !== null ? savedPref === 'true' : true;
 
-          if (shouldStream) {
+          if (!shouldStream) {
+            projectionRetryRef.current.delete(matchedDevice.serial);
+          } else {
             const checkRes = await fetch('/api/actions', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ action: 'check_screen', serial: matchedDevice.serial }),
             });
-            const checkData = await checkRes.json();
-            if (!checkData?.alive) {
-              await fetch('/api/actions', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  action: 'open_screen',
-                  serial: matchedDevice.serial,
-                  maxSize: '1080',
-                  maxFps: '60',
-                  bitRate: matchedDevice.connectionType === 'Wi-Fi' ? '8M' : '16M',
-                  videoBuffer: matchedDevice.connectionType === 'Wi-Fi' ? '10' : '0',
-                }),
-              });
+            const checkData = await checkRes.json().catch(() => null);
+
+            if (checkRes.ok && checkData?.alive) {
+              projectionRetryRef.current.delete(matchedDevice.serial);
+            } else if (checkRes.ok) {
+              const now = Date.now();
+              const previous = projectionRetryRef.current.get(matchedDevice.serial);
+
+              if (!previous || now >= previous.nextAttemptAt) {
+                const openRes = await fetch('/api/actions', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    action: 'open_screen',
+                    serial: matchedDevice.serial,
+                    maxSize: '1080',
+                    maxFps: '60',
+                    bitRate: matchedDevice.connectionType === 'Wi-Fi' ? '8M' : '16M',
+                    videoBuffer: matchedDevice.connectionType === 'Wi-Fi' ? '10' : '0',
+                  }),
+                });
+                const openData = await openRes.json().catch(() => null);
+
+                if (openRes.ok && openData?.success && openData?.alive !== false) {
+                  projectionRetryRef.current.set(matchedDevice.serial, {
+                    failures: 0,
+                    nextAttemptAt: now + 30_000,
+                  });
+                } else {
+                  const failures = (previous?.failures ?? 0) + 1;
+                  const delayMs = Math.min(120_000, 10_000 * (2 ** Math.min(failures - 1, 3)));
+                  projectionRetryRef.current.set(matchedDevice.serial, {
+                    failures,
+                    nextAttemptAt: now + delayMs,
+                  });
+                  if (isWatchdogAlive) {
+                    setStatus('error');
+                    setLastSyncMsg(
+                      `Proyección no inició: ${openData?.error || `HTTP ${openRes.status}`}. Reintento en ${Math.ceil(delayMs / 1000)}s`,
+                    );
+                  }
+                }
+              }
             }
           }
-        } catch { /* ignore */ }
+        } catch {
+          const now = Date.now();
+          const previous = projectionRetryRef.current.get(matchedDevice.serial);
+          const failures = (previous?.failures ?? 0) + 1;
+          const delayMs = Math.min(120_000, 10_000 * (2 ** Math.min(failures - 1, 3)));
+          projectionRetryRef.current.set(matchedDevice.serial, {
+            failures,
+            nextAttemptAt: now + delayMs,
+          });
+        }
 
         // Keep-alive ping
         if (currentConfig.keepAlivePing && matchedDevice.connectionType === 'Wi-Fi') {

@@ -1,10 +1,12 @@
 $WshShell = New-Object -ComObject WScript.Shell
+$Root = $PSScriptRoot
+$Root = $PSScriptRoot
 $Desktop = [System.Environment]::GetFolderPath('Desktop')
 $ShortcutPath = Join-Path $Desktop "Proyectar Movil.lnk"
 $Shortcut = $WshShell.CreateShortcut($ShortcutPath)
 $Shortcut.TargetPath = "powershell.exe"
-$Shortcut.Arguments = "-NoExit -ExecutionPolicy Bypass -File `"c:\Users\emman\Desktop\Proyectos\AndroProject_Dev\launch_a30.ps1`""
-$Shortcut.WorkingDirectory = "c:\Users\emman\Desktop\Proyectos\AndroProject_Dev"
+$Shortcut.Arguments = "-WindowStyle Hidden -NoProfile -ExecutionPolicy Bypass -File `"$Root\launch_a30.ps1`""
+$Shortcut.WorkingDirectory = $Root
 
 $scrcpyPath = "C:\Users\emman\AppData\Local\Microsoft\WinGet\Packages\Genymobile.scrcpy_Microsoft.Winget.Source_8wekyb3d8bbwe\scrcpy-win64-v4.1\scrcpy.exe"
 if (Test-Path $scrcpyPath) {

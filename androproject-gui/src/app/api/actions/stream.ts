@@ -186,7 +186,13 @@ export async function startRecord(ctx: ActionContext, body: { videoSource?: stri
   });
 
   if (proc.pid) {
-    writeLock(recordLockFile, { pid: proc.pid, serial: targetSerial, path: recordPath });
+    writeLock(recordLockFile, {
+      pid: proc.pid,
+      serial: targetSerial,
+      path: recordPath,
+      processName: path.basename(ANDROPROJECT_BIN),
+      owner: 'recording',
+    });
     const cleanup = () => { deleteLock(recordLockFile); };
     proc.on('exit', cleanup);
     proc.on('error', cleanup);

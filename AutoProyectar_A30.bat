@@ -17,6 +17,5 @@ echo  Iniciando vigilancia y auto-proyeccion continua...
 echo ===============================================================================
 echo.
 
-powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0samsung-watchdog.ps1"
-
-pause
+start "" powershell.exe -WindowStyle Hidden -NoProfile -ExecutionPolicy Bypass -File "%~dp0samsung-watchdog.ps1"
+exit /b 0

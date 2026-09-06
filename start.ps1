@@ -32,11 +32,11 @@ Start-Sleep -Seconds 1
 
 # -- Iniciar Backend (ventana cmd independiente) --
 Write-Host "  Backend  :$BACKEND_PORT " -NoNewline
-Start-Process "cmd.exe" -ArgumentList "/k", "`"$BACKEND_BAT`"" -WorkingDirectory $ROOT
+Start-Process "cmd.exe" -ArgumentList "/c", "`"$BACKEND_BAT`"" -WorkingDirectory $ROOT -WindowStyle Hidden
 
 # -- Iniciar Frontend Desktop App (ventana cmd independiente) --
 Write-Host "  Desktop  :$FRONTEND_PORT " -NoNewline
-Start-Process "cmd.exe" -ArgumentList "/k", "`"$FRONTEND_BAT`"" -WorkingDirectory $ROOT
+Start-Process "cmd.exe" -ArgumentList "/c", "`"$FRONTEND_BAT`"" -WorkingDirectory $ROOT -WindowStyle Hidden
 
 # -- Health checks --
 Write-Host ""

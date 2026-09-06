@@ -86,7 +86,20 @@ if ($devs.Count -gt 0) {
             "--window-title=$title"
         )
 
-        Start-Process -FilePath $scrcpy -ArgumentList $scrcpyArgs
+        $quotedArgs = @($scrcpyArgs | ForEach-Object {
+            $arg = [string]$_
+            if ($arg -match '[\s"]') {
+                '"' + ($arg -replace '"', '\"') + '"'
+            } else {
+                $arg
+            }
+        })
+        $psi = New-Object System.Diagnostics.ProcessStartInfo
+        $psi.FileName = $scrcpy
+        $psi.Arguments = ($quotedArgs -join ' ')
+        $psi.UseShellExecute = $false
+        $psi.CreateNoWindow = $true
+        $null = [System.Diagnostics.Process]::Start($psi)
         $index++
         Start-Sleep -Milliseconds 400
     }

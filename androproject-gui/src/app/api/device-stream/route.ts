@@ -262,7 +262,7 @@ function tryScrcpyNamedPipePipeline(
         `--video-bit-rate=${targetFps >= 30 ? '4M' : '2M'}`,
         `--record=${pipePath}`,
         '--record-format=mkv',
-      ], { windowsHide: false, stdio: ['ignore', 'ignore', 'ignore'] });
+      ], { windowsHide: true, stdio: ['ignore', 'ignore', 'ignore'] });
 
       scrcpyProc.on('error', () => { if (!gotFirstFrame) onFailed(); });
     });

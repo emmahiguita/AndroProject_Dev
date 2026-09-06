@@ -121,14 +121,13 @@ class AirPlayReceiverEngine implements IAirPlayReceiverEngine {
       const airplayExe = path.join(process.cwd(), 'bin', 'airplay', 'AirPlayServer.exe');
       if (fs.existsSync(airplayExe)) {
         try {
-          this.serverProcess = spawn('cmd.exe', ['/c', 'start', '""', `"${airplayExe}"`], {
+          this.serverProcess = spawn(airplayExe, [], {
             cwd: path.dirname(airplayExe),
-            detached: true,
+            detached: false,
             stdio: 'ignore',
-            windowsHide: false,
-            shell: true,
+            windowsHide: true,
+            shell: false,
           });
-          this.serverProcess.unref();
           console.log(`[AirPlay Engine] Ventana nativa AirPlayServer abierta en el escritorio con Bonjour`);
         } catch (e: unknown) {
           const msg = e instanceof Error ? e.message : String(e);
@@ -262,7 +261,14 @@ class AirPlayReceiverEngine implements IAirPlayReceiverEngine {
       }
 
       this.isRunning = true;
-      writeLock(lockFile, { pid: process.pid, serial: 'airplay' });
+      if (this.serverProcess?.pid) {
+        writeLock(lockFile, {
+          pid: this.serverProcess.pid,
+          serial: 'airplay',
+          processName: path.basename(airplayExe),
+          owner: 'airplay',
+        });
+      }
       console.log(`[AirPlay Engine] Servidor AirPlay y Bonjour transmitiendo para iPhone en "${this.currentOptions.serverName}" (${localIp}:7000)`);
 
       return this.getStatus();
@@ -356,9 +362,10 @@ class AirPlayReceiverEngine implements IAirPlayReceiverEngine {
         }
       `;
       const encoded = Buffer.from(psCommand, 'utf16le').toString('base64');
-      spawn('powershell.exe', ['-ExecutionPolicy', 'Bypass', '-NoProfile', '-EncodedCommand', encoded], {
+      spawn('powershell.exe', ['-WindowStyle', 'Hidden', '-ExecutionPolicy', 'Bypass', '-NoProfile', '-EncodedCommand', encoded], {
         detached: true,
         stdio: 'ignore',
+        windowsHide: true,
       }).unref();
       return true;
     } catch (e) {
