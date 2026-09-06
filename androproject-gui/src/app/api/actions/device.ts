@@ -144,13 +144,30 @@ export async function inputText(ctx: ActionContext, body: { text: string }) {
   }
 
   const target = ctx.targetSerial || '';
+  if (!target) {
+    return NextResponse.json({ success: false, error: 'Serial de dispositivo requerido' }, { status: 400 });
+  }
+
   if (target.startsWith('airplay-')) {
     const { airPlayReceiverEngine } = await import('@/lib/services/airplay-engine');
     const res = await airPlayReceiverEngine.injectText(text);
     return NextResponse.json(res);
   }
 
-  // Escape shell characters and spaces for adb shell input text
+  const hasUnicodeOrNewline = /[^\x20-\x7E]|\n|\r/.test(text);
+
+  // If text contains Unicode (tildes, ñ, emojis), newlines, or is a paragraph (>60 chars),
+  // use high-fidelity clipboard injection + paste keyevent.
+  if (hasUnicodeOrNewline || text.length > 60) {
+    const escapedSh = text.replace(/'/g, "'\\''");
+    const clipRes = await adb.shell(target, `cmd clipboard set '${escapedSh}'`);
+    if (clipRes.ok) {
+      await adb.shell(target, 'input keyevent 279');
+      return NextResponse.json({ success: true, message: 'Texto inyectado fielmente vía portapapeles' });
+    }
+  }
+
+  // Direct ASCII fallback for simple words
   const escaped = text.replace(/([\\$`"!\s])/g, (char) => (char === ' ' ? '%s' : `\\${char}`));
   await adb.shell(target, `input text "${escaped}"`);
   return NextResponse.json({ success: true, message: 'Texto enviado al dispositivo' });

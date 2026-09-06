@@ -253,6 +253,37 @@ function Save-CachedIp([string]$Target) {
 #endregion
 
 # ────────────────────────────────────────────────────────────────────
+# Helper to check if a device is specifically our Samsung
+function Test-IsSamsungA30([string]$Device) {
+    if (-not $Device) { return $false }
+    if ($Device -eq $PhoneSerial) { return $true }
+    $m = Invoke-Adb "-s $Device shell getprop ro.product.model" 2
+    if ($m.ExitCode -eq 0 -and $m.Output -match 'SM-A307|A30') { return $true }
+    return $false
+}
+
+function Get-DeviceWifiIp([string]$Device) {
+    # Method 1: ip route
+    $r = Invoke-Adb "-s $Device shell ip route" 2
+    if ($r.ExitCode -eq 0 -and $r.Output -match 'src\s+([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)') {
+        $found = $Matches[1]
+        if ($found -notlike '127.*') { return $found }
+    }
+    # Method 2: ip -f inet addr show wlan0
+    $r = Invoke-Adb "-s $Device shell ip -f inet addr show wlan0" 2
+    if ($r.ExitCode -eq 0 -and $r.Output -match 'inet\s+([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)') {
+        $found = $Matches[1]
+        if ($found -notlike '127.*') { return $found }
+    }
+    # Method 3: getprop dhcp.wlan0.ipaddress
+    $r = Invoke-Adb "-s $Device shell getprop dhcp.wlan0.ipaddress" 2
+    if ($r.ExitCode -eq 0 -and $r.Output -match '([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)') {
+        return $Matches[1].Trim()
+    }
+    return $null
+}
+
+# ────────────────────────────────────────────────────────────────────
 #region HARDENING — SRP: politicas Android anti-suspension
 # Aplicado max 1 vez cada $HardeningMinutes (no en cada ciclo)
 # ────────────────────────────────────────────────────────────────────
@@ -271,57 +302,43 @@ function Invoke-DeviceHardening([string]$Target) {
 #endregion
 
 # ────────────────────────────────────────────────────────────────────
-#region SCRCPY MANAGER — SRP: ciclo de vida de la ventana de proyeccion
-# FIX BUG#4: usa Get-Process (nativo) en vez de WMI Get-CimInstance
-# FIX BUG#6: nombre de funcion con verbo aprobado 'Test-'
+#region SCRCPY MANAGER — SRP: ciclo de vida de la ventana de proyeccion Samsung
+# Aislado exclusivamente al proceso scrcpy de Samsung (NO mata otros dispositivos)
 # ────────────────────────────────────────────────────────────────────
-$script:ScrcpyPid = $null
+$script:SamsungScrcpyPid = $null
 $script:CurrentTarget = $null
 
 function Test-ScrcpyAlive {
-    if (-not $script:ScrcpyPid) { return $false }
-    $proc = Get-Process -Id $script:ScrcpyPid -ErrorAction SilentlyContinue
+    if (-not $script:SamsungScrcpyPid) { return $false }
+    $proc = Get-Process -Id $script:SamsungScrcpyPid -ErrorAction SilentlyContinue
     return ($null -ne $proc -and -not $proc.HasExited)
 }
 
 function Test-ScrcpyRunningForTarget([string]$Target) {
-    if ($script:ScrcpyPid) {
-        $proc = Get-Process -Id $script:ScrcpyPid -ErrorAction SilentlyContinue
+    if ($script:SamsungScrcpyPid) {
+        $proc = Get-Process -Id $script:SamsungScrcpyPid -ErrorAction SilentlyContinue
         if ($proc -and -not $proc.HasExited) {
             if ($script:CurrentTarget -eq $Target) {
                 return $true
             }
         }
     }
-    # Fallback: si hay algun scrcpy activo en el sistema, lo adoptamos si corresponde
-    $procs = @(Get-Process -Name scrcpy -ErrorAction SilentlyContinue | Where-Object { -not $_.HasExited })
-    if ($procs.Count -gt 0) {
-        if ($null -eq $script:CurrentTarget -or $script:CurrentTarget -eq $Target) {
-            $script:ScrcpyPid = $procs[0].Id
-            $script:CurrentTarget = $Target
-            return $true
-        }
-    }
-    $script:ScrcpyPid = $null
+    $script:SamsungScrcpyPid = $null
     $script:CurrentTarget = $null
     return $false
 }
 
 function Stop-ScrcpyIfRunning {
-    if ($script:ScrcpyPid) {
-        try { Stop-Process -Id $script:ScrcpyPid -Force -ErrorAction SilentlyContinue } catch {}
-        $script:ScrcpyPid = $null
-    }
-    # Matar cualquier scrcpy huerfano
-    Get-Process -Name scrcpy -ErrorAction SilentlyContinue | ForEach-Object {
-        try { Stop-Process -Id $_.Id -Force -ErrorAction SilentlyContinue } catch {}
+    if ($script:SamsungScrcpyPid) {
+        try { Stop-Process -Id $script:SamsungScrcpyPid -Force -ErrorAction SilentlyContinue } catch {}
+        $script:SamsungScrcpyPid = $null
     }
     $script:CurrentTarget = $null
-    Start-Sleep -Milliseconds 500
+    Start-Sleep -Milliseconds 300
 }
 
 function Start-Projection([string]$Target) {
-    # Asegurar que no queden instancias viejas duplicadas
+    # Asegurar que no queden instancias viejas duplicadas de ESTE dispositivo
     Stop-ScrcpyIfRunning
 
     $args = @(
@@ -337,15 +354,16 @@ function Start-Projection([string]$Target) {
         '--window-height=700',
         '--no-audio',
         '--stay-awake',
-        "--window-title=`"AndroProject 60 FPS - $Target`""
+        '--port=27183:27195',
+        "--window-title=`"AndroProject - Samsung A30 ($Target)`""
     )
     $proc = Start-Process -FilePath $script:ScrcpyPath -ArgumentList $args -PassThru -ErrorAction SilentlyContinue
     if ($proc -and -not $proc.HasExited) {
-        $script:ScrcpyPid = $proc.Id
+        $script:SamsungScrcpyPid = $proc.Id
         $script:CurrentTarget = $Target
-        Write-Log "Proyeccion activa (PID=$($proc.Id)) → $Target"
+        Write-Log "Proyeccion Samsung activa (PID=$($proc.Id)) -> $Target [Port 27183]"
     } else {
-        Write-Log "ERROR: No se pudo iniciar scrcpy para $Target"
+        Write-Log "ERROR: No se pudo iniciar scrcpy para Samsung en $Target"
     }
 }
 #endregion
@@ -353,8 +371,8 @@ function Start-Projection([string]$Target) {
 # ────────────────────────────────────────────────────────────────────
 #region BUCLE PRINCIPAL — Orchestrador (no logica de negocio propia)
 # ────────────────────────────────────────────────────────────────────
-Write-Log "=== Watchdog Samsung A30 v5 Iniciado ==="
-Write-Host "[AndroProject] Auto-Proyeccion Wi-Fi activa. Esperando Samsung A30..." -ForegroundColor Green
+Write-Log "=== Watchdog Samsung A30 v6 Iniciado (Multi-Dispositivo Aislado) ==="
+Write-Host "[AndroProject] Auto-Proyeccion Wi-Fi Samsung activa. Vigilando..." -ForegroundColor Green
 
 $lastTarget   = $null
 $cachedIp     = Get-CachedIp
@@ -363,19 +381,31 @@ while ($true) {
     try {
         $chosen = $null
 
-        # PASO 1: Dispositivos ya asociados en adb devices (mas rapido)
-        foreach ($dev in (Get-WirelessAttachedDevices)) {
-            if (Test-AdbHealth $dev) { $chosen = $dev; break }
+        # PASO 1: Verificar si Samsung esta conectado por USB -> Promover automaticamente a Wi-Fi
+        $attached = Get-WirelessAttachedDevices
+        $usbSamsung = $attached | Where-Object { $_ -eq $PhoneSerial -or (Test-IsSamsungA30 $_ -and $_ -notmatch ':') } | Select-Object -First 1
+        if ($usbSamsung) {
+            $wifiIp = Get-DeviceWifiIp $usbSamsung
+            if (-not $wifiIp) { $wifiIp = "192.168.0.11" }
+            if ($wifiIp) {
+                $null = Invoke-Adb "-s $usbSamsung tcpip 5555" 3
+                Start-Sleep -Milliseconds 400
+                $targetWifi = "$wifiIp`:5555"
+                $null = Invoke-Adb "connect $targetWifi" 3
+                if (Test-AdbHealth $targetWifi) {
+                    $chosen = $targetWifi
+                    $cachedIp = $targetWifi
+                    Save-CachedIp $chosen
+                    Write-Log "Samsung detectado en USB -> Auto-promovido a Wi-Fi: $chosen"
+                }
+            }
         }
 
-        # PASO 2: mDNS — Wireless Debugging TLS de Android 11+
+        # PASO 2: Dispositivos ya asociados en adb devices que sean Samsung Wi-Fi
         if (-not $chosen) {
-            foreach ($mdns in (Get-MdnsTargets)) {
-                $null = Invoke-Adb "connect $mdns" 3
-                if (Test-AdbHealth $mdns) {
-                    $chosen = $mdns
-                    Save-CachedIp $chosen
-                    Write-Log "A30 conectado via mDNS: $chosen"
+            foreach ($dev in $attached) {
+                if ($dev -match ':' -and (Test-IsSamsungA30 $dev) -and (Test-AdbHealth $dev)) {
+                    $chosen = $dev
                     break
                 }
             }
@@ -384,38 +414,58 @@ while ($true) {
         # PASO 3: IP en cache
         if (-not $chosen -and $cachedIp) {
             $null = Invoke-Adb "connect $cachedIp" 3
-            if (Test-AdbHealth $cachedIp) { $chosen = $cachedIp }
+            if ((Test-IsSamsungA30 $cachedIp) -and (Test-AdbHealth $cachedIp)) {
+                $chosen = $cachedIp
+            }
         }
 
-        # PASO 4: Escaneo de subred (RunspacePool — sin fugas de threads)
+        # PASO 4: mDNS — Wireless Debugging TLS de Android 11+
         if (-not $chosen) {
-            foreach ($ip in (Find-SubnetAdbIps)) {
-                $t = "$ip`:5555"
-                $null = Invoke-Adb "connect $t" 3
-                if (Test-AdbHealth $t) {
-                    $chosen = $t
-                    $cachedIp = $t
+            foreach ($mdns in (Get-MdnsTargets)) {
+                $null = Invoke-Adb "connect $mdns" 3
+                if ((Test-IsSamsungA30 $mdns) -and (Test-AdbHealth $mdns)) {
+                    $chosen = $mdns
                     Save-CachedIp $chosen
-                    Write-Log "A30 encontrado via escaneo de red: $chosen"
+                    Write-Log "Samsung A30 conectado via mDNS: $chosen"
                     break
                 }
             }
         }
 
-        # PASO 5: Gestion de scrcpy
+        # PASO 5: Escaneo de subred (RunspacePool)
+        if (-not $chosen) {
+            foreach ($ip in (Find-SubnetAdbIps)) {
+                $t = "$ip`:5555"
+                $null = Invoke-Adb "connect $t" 3
+                if ((Test-IsSamsungA30 $t) -and (Test-AdbHealth $t)) {
+                    $chosen = $t
+                    $cachedIp = $t
+                    Save-CachedIp $chosen
+                    Write-Log "Samsung A30 encontrado via escaneo de red: $chosen"
+                    break
+                }
+            }
+        }
+
+        # PASO 6: Si solo esta en USB y Wi-Fi fallo, usar USB como respaldo
+        if (-not $chosen -and $usbSamsung -and (Test-AdbHealth $usbSamsung)) {
+            $chosen = $usbSamsung
+        }
+
+        # PASO 7: Gestion de scrcpy para Samsung
         if ($chosen) {
             Invoke-DeviceHardening $chosen
 
             if (-not (Test-ScrcpyRunningForTarget $chosen)) {
                 if ($lastTarget -and $lastTarget -ne $chosen) {
-                    Write-Log "Migrando proyeccion $lastTarget → $chosen"
+                    Write-Log "Migrando proyeccion Samsung $lastTarget -> $chosen"
                 }
                 Start-Projection $chosen
             }
             $lastTarget = $chosen
         } else {
             if ($lastTarget) {
-                Write-Log "Samsung A30 fuera de rango Wi-Fi. Vigilando..."
+                Write-Log "Samsung A30 fuera de alcance. Vigilando..."
                 Stop-ScrcpyIfRunning
                 $lastTarget = $null
             }

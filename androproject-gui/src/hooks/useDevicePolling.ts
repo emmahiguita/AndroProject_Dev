@@ -37,7 +37,10 @@ export function useDevicePolling(): UseDevicePollingResult {
 
   const refresh = useCallback(async () => {
     try {
-      const res = await fetch('/api/device', { cache: 'no-store' });
+      const url = selectedRef.current
+        ? `/api/device?serial=${encodeURIComponent(selectedRef.current)}`
+        : '/api/device';
+      const res = await fetch(url, { cache: 'no-store' });
       if (!res.ok) return;
       const data = await res.json();
 

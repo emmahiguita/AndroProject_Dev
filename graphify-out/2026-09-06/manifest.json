@@ -25,8 +25,8 @@
     "semantic_hash": "63ddade3e11087d26cb33ab68e4203ad"
   },
   "androproject-gui/next-env.d.ts": {
-    "mtime": 1788498151.016774,
-    "ast_hash": "2a74d3909800ca5467fa83b0ab4a4890",
+    "mtime": 1788500253.8314688,
+    "ast_hash": "d0f8375ae1199dc7acd3977fc33b78b8",
     "semantic_hash": ""
   },
   "androproject-gui/next.config.ts": {
@@ -997,11 +997,6 @@
   "androproject-gui/src/hooks/useLogcatStream.ts": {
     "mtime": 1788378010.8401694,
     "ast_hash": "9f3ce64acb236f24d1c4f93ef1e4ddaf",
-    "semantic_hash": ""
-  },
-  "test_stream.mkv": {
-    "mtime": 1788381105.5546536,
-    "ast_hash": "d41d8cd98f00b204e9800998ecf8427e",
     "semantic_hash": ""
   }
 }

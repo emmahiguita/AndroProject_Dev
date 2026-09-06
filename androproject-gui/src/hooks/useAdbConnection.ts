@@ -212,18 +212,35 @@ export function useAdbConnection() {
 
   /** Register a device for persistence and auto-connect */
   const registerDevice = useCallback((serial: string, model: string, connectionType: 'USB' | 'Wi-Fi', ip?: string, port?: string) => {
+    let targetIp = ip;
+    let targetPort = port || '5555';
+    if (!targetIp && serial.includes(':')) {
+      const [sIp, sPort] = serial.split(':');
+      targetIp = sIp;
+      if (sPort) targetPort = sPort;
+    }
+
     setRegisteredDevices(prev => {
-      const existing = prev.find(d => d.serial === serial);
+      const existing = prev.find(d => d.serial === serial || (targetIp && d.ip === targetIp));
       if (existing) {
-        // Update existing
-        return prev.map(d => d.serial === serial ? {
-          ...d, model, connectionType, ip: ip || d.ip, port: port || d.port, lastSeen: Date.now(),
+        return prev.map(d => (d.serial === serial || (targetIp && d.ip === targetIp)) ? {
+          ...d,
+          serial,
+          model: model || d.model,
+          connectionType,
+          ip: targetIp || d.ip,
+          port: targetPort || d.port,
+          lastSeen: Date.now(),
         } : d);
       }
-      // Add new
       return [...prev, {
-        serial, model, connectionType, ip, port,
-        lastSeen: Date.now(), autoConnect: connectionType === 'Wi-Fi',
+        serial,
+        model,
+        connectionType,
+        ip: targetIp,
+        port: targetPort,
+        lastSeen: Date.now(),
+        autoConnect: connectionType === 'Wi-Fi',
       }];
     });
   }, []);
@@ -256,23 +273,22 @@ export function useAdbConnection() {
     };
   }, [serverRunning, fetchStatus]);
 
-  // Auto-reconnect: if a registered Wi-Fi device disappears, try to reconnect
+  // Auto-reconnect: each registered Wi-Fi device is evaluated independently
   useEffect(() => {
-    // FIX BUG#6: reconnect si no hay dispositivos o si todos son offline/unauthorized
-    const activeDevices = devices.filter(d => d.state === 'device');
-    const wifiDevices = registeredDevices.filter(d => d.autoConnect && d.connectionType === 'Wi-Fi' && d.ip && d.port);
-    if (wifiDevices.length === 0) return;
+    const activeSerials = new Set(devices.filter(d => d.state === 'device').map(d => d.serial));
+    const disconnectedWifiDevices = registeredDevices.filter(d => {
+      if (!d.autoConnect || d.connectionType !== 'Wi-Fi' || !d.ip) return false;
+      const directMatch = activeSerials.has(d.serial);
+      const ipPortMatch = activeSerials.has(`${d.ip}:${d.port || '5555'}`);
+      return !directMatch && !ipPortMatch;
+    });
 
-    // Solo intentar si no hay conexion activa para esos dispositivos
-    const alreadyActive = wifiDevices.some(rd =>
-      activeDevices.some(ad => ad.serial === rd.serial)
-    );
-    if (alreadyActive) return;
+    if (disconnectedWifiDevices.length === 0) return;
 
     reconnectRef.current = setTimeout(async () => {
-      for (const dev of wifiDevices) {
-        if (dev.ip && dev.port) {
-          await connectToIp(dev.ip, dev.port);
+      for (const dev of disconnectedWifiDevices) {
+        if (dev.ip) {
+          await connectToIp(dev.ip, dev.port || '5555');
         }
       }
     }, RECONNECT_DELAY);

@@ -404,40 +404,46 @@ async function createWindow() {
 
 // ── ADB Radar ──────────────────────────────────────────────────────────
 async function initializeADBAndRadar() {
-  console.log('[Init] Restarting ADB server...');
+  console.log('[Init] Checking ADB server...');
   const { exec } = require('child_process');
-  exec(`"${ADB}" kill-server`, () => {
-    exec(`"${ADB}" start-server`, () => {
-      console.log('[Init] ADB server started. Scanning subnet...');
-      const psScript = `
-        $localIp = (Get-NetIPAddress -AddressFamily IPv4 | Where-Object { $_.InterfaceAlias -match "Wi-Fi|Ethernet" -and $_.IPAddress -notlike "169.254*" } | Select-Object -First 1).IPAddress
-        if (-not $localIp) { exit }
-        $base = $localIp.Substring(0, $localIp.LastIndexOf('.'))
-        $ips = 1..254 | ForEach-Object { "$base.$_" }
-        $results = @()
-        foreach ($ip in $ips) {
-            $tcp = New-Object System.Net.Sockets.TcpClient
-            $result = $tcp.BeginConnect($ip, 5555, $null, $null)
-            $results += [PSCustomObject]@{ IP = $ip; AsyncResult = $result; Tcp = $tcp }
-        }
-        Start-Sleep -Milliseconds 600
-        foreach ($r in $results) {
-            if ($r.AsyncResult.IsCompleted -and $r.Tcp.Connected) {
-                Write-Output $r.IP; $r.Tcp.Close(); exit
-            }
-            $r.Tcp.Close()
-        }
-      `;
-      const encoded = Buffer.from(psScript, 'utf16le').toString('base64');
-      exec(`powershell -ExecutionPolicy Bypass -NoProfile -EncodedCommand ${encoded}`, (err, stdout) => {
-        const ip = stdout.trim();
-        if (ip) {
-          console.log(`[Init] Radar found device at ${ip}:5555`);
-          exec(`"${ADB}" connect ${ip}:5555`, (err, out) => { console.log(`[Init] ${out.trim()}`); });
-        } else {
-          console.log('[Init] Radar: No device found.');
-        }
-      });
+  exec(`"${ADB}" start-server`, () => {
+    console.log('[Init] ADB server started. Scanning subnet for devices...');
+    const psScript = `
+      $localIp = (Get-NetIPAddress -AddressFamily IPv4 | Where-Object { $_.InterfaceAlias -match "Wi-Fi|Ethernet" -and $_.IPAddress -notlike "169.254*" } | Select-Object -First 1).IPAddress
+      if (-not $localIp) { exit }
+      $base = $localIp.Substring(0, $localIp.LastIndexOf('.'))
+      $ips = 1..254 | ForEach-Object { "$base.$_" }
+      $results = @()
+      foreach ($ip in $ips) {
+          $tcp = New-Object System.Net.Sockets.TcpClient
+          $result = $tcp.BeginConnect($ip, 5555, $null, $null)
+          $results += [PSCustomObject]@{ IP = $ip; AsyncResult = $result; Tcp = $tcp }
+      }
+      Start-Sleep -Milliseconds 600
+      foreach ($r in $results) {
+          if ($r.AsyncResult.IsCompleted -and $r.Tcp.Connected) {
+              Write-Output $r.IP
+          }
+          $r.Tcp.Close()
+      }
+    `;
+    const encoded = Buffer.from(psScript, 'utf16le').toString('base64');
+    exec(`powershell -ExecutionPolicy Bypass -NoProfile -EncodedCommand ${encoded}`, (err, stdout) => {
+      const foundIps = (stdout || '')
+        .split(/\r?\n/)
+        .map(s => s.trim())
+        .filter(s => s && /^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$/.test(s));
+
+      if (foundIps.length > 0) {
+        console.log(`[Init] Radar found ${foundIps.length} device(s): ${foundIps.join(', ')}`);
+        foundIps.forEach(ip => {
+          exec(`"${ADB}" connect ${ip}:5555`, (err, out) => {
+            console.log(`[Init] Connected to ${ip}:5555 -> ${(out || '').trim()}`);
+          });
+        });
+      } else {
+        console.log('[Init] Radar: No open 5555 devices found in subnet.');
+      }
     });
   });
 }
@@ -446,6 +452,42 @@ function isServerRunning() {
   return new Promise((resolve) => {
     http.get(SERVER_URL, (res) => resolve(res.statusCode < 500)).on('error', () => resolve(false));
   });
+}
+
+// ── Cleanup Helper ─────────────────────────────────────────────────────
+function cleanupChildProcesses() {
+  if (iosMonitorTimer) {
+    clearInterval(iosMonitorTimer);
+    iosMonitorTimer = null;
+  }
+  if (airPlayProcess && !airPlayProcess.killed) {
+    try { airPlayProcess.kill(); } catch {}
+    airPlayProcess = null;
+  }
+  if (serverProcess && !serverProcess.killed) {
+    try { serverProcess.kill(); } catch {}
+    serverProcess = null;
+  }
+  // Clean up any active scrcpy processes tracked in .androproject/locks
+  try {
+    const locksDir = path.join(__dirname, '..', '.androproject', 'locks');
+    if (fs.existsSync(locksDir)) {
+      const files = fs.readdirSync(locksDir);
+      for (const file of files) {
+        if (file.endsWith('.lock')) {
+          const lockPath = path.join(locksDir, file);
+          try {
+            const raw = fs.readFileSync(lockPath, 'utf8');
+            const data = JSON.parse(raw);
+            if (data && data.pid) {
+              try { process.kill(data.pid); } catch {}
+            }
+            fs.unlinkSync(lockPath);
+          } catch {}
+        }
+      }
+    }
+  } catch {}
 }
 
 // ── App Lifecycle ──────────────────────────────────────────────────────
@@ -484,10 +526,13 @@ app.on('window-all-closed', () => {
 
 app.on('before-quit', () => {
   isQuitting = true;
+  cleanupChildProcesses();
+});
+
+app.on('will-quit', () => {
+  cleanupChildProcesses();
 });
 
 app.on('quit', () => {
-  if (serverProcess) {
-    try { serverProcess.kill(); } catch {}
-  }
+  cleanupChildProcesses();
 });

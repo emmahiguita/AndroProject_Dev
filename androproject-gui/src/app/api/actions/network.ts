@@ -7,34 +7,59 @@ import { ADB, cleanupOrphanedLocks } from '@/lib/config';
 
 export async function enableWifi(ctx: ActionContext) {
   try {
-    // Obtener IP del dispositivo
+    let deviceIp = '';
+
+    // 1. Intentar ip route
     const rIp = await safeExec(`${ctx.adbTarget} shell ip route`);
-    if (!rIp.ok) throw new Error('Error ejecutando ip route');
-    const ipLine = rIp.out.split('\n').find(
-      (line: string) => (line.includes('wlan') || line.includes('eth')) && line.includes('src')
-    );
-    if (!ipLine) throw new Error('No se pudo encontrar la IP del celular en la interfaz inalámbrica.');
-    const match = ipLine.match(/src\s+([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})/);
-    if (!match) throw new Error('No se pudo descifrar la IP del celular.');
-    const deviceIp = match[1];
-
-    // Verificar si ya está conectado
-    const { out: devicesOut } = await safeExec(`"${ADB}" devices`);
-    if ((devicesOut || '').includes(`${deviceIp}:5555`)) {
-      return NextResponse.json({ success: true, message: `Wi-Fi silencioso ya activo (${deviceIp}).`, ip: deviceIp });
+    if (rIp.ok) {
+      const ipLine = rIp.out.split('\n').find(
+        (line: string) => (line.includes('wlan') || line.includes('eth')) && line.includes('src')
+      );
+      if (ipLine) {
+        const match = ipLine.match(/src\s+([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})/);
+        if (match) deviceIp = match[1];
+      }
     }
 
-    // Verificar si TCP/IP ya está listo
-    const rTcp = await safeExec(`${ctx.adbTarget} shell cat /proc/net/tcp`);
-    const isTcpipReady = rTcp.ok && rTcp.out.includes(':15B3');
-
-    if (!isTcpipReady) {
-      await safeExec(`${ctx.adbTarget} tcpip 5555`);
-      await new Promise(r => setTimeout(r, 2000));
+    // 2. Fallback: ip addr show wlan0
+    if (!deviceIp) {
+      const rAddr = await safeExec(`${ctx.adbTarget} shell ip -f inet addr show wlan0`);
+      if (rAddr.ok) {
+        const match = rAddr.out.match(/inet\s+([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})/);
+        if (match) deviceIp = match[1];
+      }
     }
-    await safeExec(`"${ADB}" connect ${deviceIp}:5555`);
 
-    return NextResponse.json({ success: true, message: `Conexión Wi-Fi establecida en segundo plano (${deviceIp}).`, ip: deviceIp });
+    // 3. Fallback: getprop dhcp.wlan0.ipaddress
+    if (!deviceIp) {
+      const rProp = await safeExec(`${ctx.adbTarget} shell getprop dhcp.wlan0.ipaddress`);
+      if (rProp.ok && rProp.out.trim()) {
+        const propIp = rProp.out.trim();
+        if (/^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$/.test(propIp)) {
+          deviceIp = propIp;
+        }
+      }
+    }
+
+    if (!deviceIp) {
+      throw new Error('No se pudo encontrar la dirección IP de la interfaz Wi-Fi (wlan0) en el dispositivo.');
+    }
+
+    // Activar puerto TCP/IP 5555
+    await safeExec(`${ctx.adbTarget} tcpip 5555`);
+    await new Promise((r) => setTimeout(r, 600));
+
+    // Conectar vía ADB sobre Wi-Fi
+    const connRes = await safeExec(`"${ADB}" connect ${deviceIp}:5555`);
+    const success = connRes.ok && (connRes.out.includes('connected') || connRes.out.includes('already'));
+
+    return NextResponse.json({
+      success: true,
+      message: `Conexión Wi-Fi auto-establecida (${deviceIp}:5555).`,
+      ip: deviceIp,
+      target: `${deviceIp}:5555`,
+      connected: success,
+    });
   } catch (err: unknown) {
     return NextResponse.json({ success: false, error: getErrorMessage(err) });
   }
@@ -55,26 +80,26 @@ export async function radar() {
         $ar = $tcp.BeginConnect($ip, 5555, $null, $null)
         [PSCustomObject]@{ IP = $ip; AR = $ar; TCP = $tcp }
     }
-    Start-Sleep -Milliseconds 500
+    Start-Sleep -Milliseconds 600
+    $found = @()
     foreach ($t in $tasks) {
         if ($t.AR.IsCompleted -and $t.TCP.Connected) {
-            Write-Output $t.IP
-            $t.TCP.Close()
-            exit
+            $found += $t.IP
         }
         $t.TCP.Close()
     }
+    $found | ForEach-Object { Write-Output $_ }
   `;
 
   try {
     const encoded = Buffer.from(psScript, 'utf16le').toString('base64');
     const rScan = await safeExec(`powershell -ExecutionPolicy Bypass -NoProfile -EncodedCommand ${encoded}`, 10000);
-    const ip = rScan.ok ? rScan.out.trim() : '';
-    if (ip) {
-      await safeExec(`"${ADB}" connect ${ip}:5555`);
-      return NextResponse.json({ success: true, message: `Radar exitoso. Conectado a ${ip}` });
+    const ips = rScan.ok ? rScan.out.trim().split(/\r?\n/).map(s => s.trim()).filter(Boolean) : [];
+    if (ips.length > 0) {
+      await Promise.all(ips.map(ip => safeExec(`"${ADB}" connect ${ip}:5555`)));
+      return NextResponse.json({ success: true, message: `Radar exitoso. Conectado a: ${ips.join(', ')}`, ips });
     }
-    throw new Error('No se encontraron celulares con el puerto 5555 abierto.');
+    return NextResponse.json({ success: false, error: 'No se encontraron celulares con el puerto 5555 abierto.' });
   } catch (err: unknown) {
     return NextResponse.json({ success: false, error: getErrorMessage(err) });
   }

@@ -156,17 +156,27 @@ export class DeviceInfoFetcher implements IDeviceInfoFetcher {
     let level = 0;
     let tempRaw = 0;
     let charging = false;
+    let foundLevel = false;
 
     for (const line of output.split('\n')) {
-      if (line.includes('level:')) level = parseInt(line.split(':')[1].trim()) || 0;
-      if (line.includes('temperature:')) tempRaw = parseInt(line.split(':')[1].trim()) || 0;
+      if (line.includes('level:')) {
+        level = parseInt(line.split(':')[1].trim()) || 0;
+        foundLevel = true;
+      }
+      if (line.includes('temperature:')) {
+        tempRaw = parseInt(line.split(':')[1].trim()) || 0;
+      }
       if (line.includes('status:')) {
         const s = line.split(':')[1].trim();
         if (s === '2' || s === '5') charging = true;
       }
     }
 
-    return { level: level || 85, charging, temperature: tempRaw > 0 ? (tempRaw / 10).toFixed(1) : '31.0' };
+    return {
+      level: foundLevel ? level : 0,
+      charging,
+      temperature: tempRaw > 0 ? (tempRaw / 10).toFixed(1) : '--',
+    };
   }
 
   private parseRam(output: string): { total: string; used: string; usagePercent: number } {
@@ -178,27 +188,31 @@ export class DeviceInfoFetcher implements IDeviceInfoFetcher {
       if (line.startsWith('MemAvailable:')) availKB = parseInt(line.replace(/[^0-9]/g, '')) || 0;
     }
 
-    const totalGB = Math.round(totalKB / 1024 / 1024);
-    const usedGB = totalKB > 0 ? ((totalKB - availKB) / 1024 / 1024).toFixed(1) : '0';
-    const usagePercent = totalKB > 0 ? Math.round(((totalKB - availKB) / totalKB) * 100) : 0;
+    if (totalKB <= 0) {
+      return { total: '--', used: '--', usagePercent: 0 };
+    }
 
-    return { total: `${totalGB || 8} GB`, used: `${usedGB} GB`, usagePercent: usagePercent || 45 };
+    const totalGB = Math.round(totalKB / 1024 / 1024);
+    const usedGB = ((totalKB - availKB) / 1024 / 1024).toFixed(1);
+    const usagePercent = Math.round(((totalKB - availKB) / totalKB) * 100);
+
+    return { total: `${totalGB} GB`, used: `${usedGB} GB`, usagePercent };
   }
 
   private parseCpu(output: string): number {
     const parts = output.replace('cpu', '').trim().split(/\s+/).map(Number);
-    if (parts.length < 4) return 12;
+    if (parts.length < 4) return 0;
     const idle = parts[3] || 0;
     const total = parts.reduce((a, b) => a + (b || 0), 0);
-    return total > 0 ? Math.round(((total - idle) / total) * 100) : 12;
+    return total > 0 ? Math.round(((total - idle) / total) * 100) : 0;
   }
 
   private parseStorage(output: string): { capacity: string; usedGB: number; freeGB: number; usagePercent: number } {
     const lines = output.trim().split('\n');
-    if (lines.length < 2) return { capacity: '256 GB', usedGB: 48, freeGB: 176, usagePercent: 22 };
+    if (lines.length < 2) return { capacity: '--', usedGB: 0, freeGB: 0, usagePercent: 0 };
 
     const cols = lines[1].trim().split(/\s+/);
-    if (cols.length < 4) return { capacity: '256 GB', usedGB: 48, freeGB: 176, usagePercent: 22 };
+    if (cols.length < 4) return { capacity: '--', usedGB: 0, freeGB: 0, usagePercent: 0 };
 
     const rawSize = parseFloat(cols[1].replace(/[^0-9.]/g, '')) || 0;
     const rawUsed = parseFloat(cols[2].replace(/[^0-9.]/g, '')) || 0;
@@ -210,7 +224,7 @@ export class DeviceInfoFetcher implements IDeviceInfoFetcher {
     const freeGB = Math.round(rawFree * mult);
 
     const standards = [8, 16, 32, 64, 128, 256, 512, 1024];
-    let capacity = standards[0];
+    let capacity = 0;
     for (const s of standards) {
       if (rawSize * mult <= s * 0.98) {
         capacity = s;
@@ -218,13 +232,19 @@ export class DeviceInfoFetcher implements IDeviceInfoFetcher {
       }
     }
     if (rawSize * mult > 1000) capacity = Math.ceil(rawSize * mult);
+    if (capacity === 0 && rawSize > 0) capacity = Math.round(rawSize * mult);
 
     const usagePercent = capacity > 0 ? Math.round((usedGB / capacity) * 100) : 0;
-    return { capacity: `${capacity} GB`, usedGB, freeGB, usagePercent };
+    return {
+      capacity: capacity > 0 ? `${capacity} GB` : '--',
+      usedGB,
+      freeGB,
+      usagePercent,
+    };
   }
 
   private parseResolution(output: string): string {
     const match = output.match(/Physical size:\s*(\d+x\d+)/);
-    return match ? match[1].replace('x', ' × ') : '1080 × 2400';
+    return match ? match[1].replace('x', ' × ') : '--';
   }
 }

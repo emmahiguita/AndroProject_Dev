@@ -188,18 +188,22 @@ export class StreamManager {
 
       setTimeout(() => {
         if (!state.isActive) return;
-        
+
+        // Mark old state as inactive and remove from map so create() creates a fresh pipeline
+        state.isActive = false;
         this.killProcesses(scrcpy, ffmpeg);
-        
+        const oldClients = Array.from(frameHandler.getClients());
+        this.activeStreams.delete(serial);
+
         try {
           const newFrameHandler = this.create(config);
           if (newFrameHandler) {
-            // Transfer clients from old handler to new handler
-            const oldClients = Array.from(frameHandler.getClients());
-            frameHandler.destroy(); // Clean up old handler
+            frameHandler.destroy();
             oldClients.forEach(client => {
               newFrameHandler.addClient(client);
             });
+          } else {
+            frameHandler.destroy();
           }
         } catch (error) {
           console.error(`[StreamManager] Restart failed for ${serial}:`, error);

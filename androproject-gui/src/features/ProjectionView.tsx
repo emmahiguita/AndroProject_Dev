@@ -6,6 +6,7 @@ import { useTheme } from '@/hooks/useTheme';
 import { useSplitPanel } from '@/hooks/useSplitPanel';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { useProjection } from '@/hooks/useProjection';
+import { useActions } from '@/hooks/useActions';
 import { useAppStore } from '@/stores';
 import { ViewShell } from '@/components/ViewShell';
 import { SplitDivider } from '@/components/projection/SplitDivider';
@@ -31,6 +32,7 @@ interface ProjectionViewProps {
  */
 export function ProjectionView({ device }: ProjectionViewProps) {
   const { dark } = useTheme();
+  const { run } = useActions();
   const isMobile = useMediaQuery('(max-width: 768px)');
   const { ratio, isDragging, containerRef, onPointerDown, onPointerMove, onPointerUp, onKeyDown } = useSplitPanel({ defaultRatio: 0.58 });
   const projection = useProjection(device);
@@ -113,7 +115,13 @@ export function ProjectionView({ device }: ProjectionViewProps) {
                 connected: true,
                 connectionType: d.connectionType || 'USB',
               }))}
-              onToggleScrcpy={(s) => projection.toggleScrcpy()}
+              onToggleScrcpy={(s) => {
+                if (s && s !== device?.serial) {
+                  run('open_screen', `Iniciando transmisión: ${s}...`, { serial: s });
+                } else {
+                  projection.toggleScrcpy();
+                }
+              }}
               dark={dark}
             />
           </div>

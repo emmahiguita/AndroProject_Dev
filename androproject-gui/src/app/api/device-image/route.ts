@@ -102,10 +102,10 @@ export async function GET(req: NextRequest) {
     });
   }
 
-  // Force fresh post-touch capture
+  // Force fresh post-touch capture: reuse existing in-flight capture to avoid ADB contention
   if (force) {
-    inFlightWorkers.delete(serial);
-    const fresh = await triggerCapture(serial);
+    const existing = inFlightWorkers.get(serial);
+    const fresh = existing ? await existing : await triggerCapture(serial);
     if (fresh) {
       return new NextResponse(fresh as unknown as BodyInit, {
         headers: {

@@ -14,7 +14,7 @@ import fs from 'fs';
 import path from 'path';
 import {
   ANDROPROJECT_BIN, ADB,
-  getLockFile, writeLock, isLockAlive, killLockedProcess,
+  getLockFile, writeLock, readLock, isLockAlive, killLockedProcess,
 } from '@/lib/config';
 
 export interface VisionNanoOptions {
@@ -83,6 +83,11 @@ export class VisionNanoEngine implements IVisionNanoEngine {
       ? `AndroProject — ${serial} (Cámara)`
       : `AndroProject — ${serial} (Display ${displayId})`;
 
+    // Deterministic non-colliding port range per serial (prevents port conflicts across multiple phones)
+    const serialHash = Math.abs(String(serial).split('').reduce((acc, c) => acc + c.charCodeAt(0), 0));
+    const portBase = 27180 + ((serialHash % 12) * 20);
+    const portRange = `${portBase}:${portBase + 15}`;
+
     args.push(
       '--video-codec=h264',
       '-b', bitRate,
@@ -94,7 +99,7 @@ export class VisionNanoEngine implements IVisionNanoEngine {
       '--window-height=820',
       `--window-x=${wx}`,
       `--window-y=${wy}`,
-      '--port=27183:27210',
+      `--port=${portRange}`,
       '--no-audio',
       `--window-title=${windowTitle}`,
     );
@@ -118,8 +123,11 @@ export class VisionNanoEngine implements IVisionNanoEngine {
     return args;
   }
 
+  private static activePids = new Map<string, number>();
+
   /**
    * Starts native VisionNano 60 FPS Direct3D11 GPU transmission for a target device.
+   * Idempotent: If already running for this serial, returns active status without restarting.
    */
   public async start(options: VisionNanoOptions): Promise<VisionNanoResult> {
     const { serial } = options;
@@ -132,6 +140,19 @@ export class VisionNanoEngine implements IVisionNanoEngine {
     }
 
     const lockFile = getLockFile(serial, options.displayId, options.videoSource);
+
+    // Idempotency: verify if already running
+    const alreadyAlive = await isLockAlive(lockFile, 'scrcpy');
+    if (alreadyAlive) {
+      const lockData = readLock(lockFile);
+      return {
+        success: true,
+        alive: true,
+        pid: typeof lockData?.pid === 'number' ? lockData.pid : undefined,
+        message: 'VisionNano ya se encuentra transmitiendo para este dispositivo',
+      };
+    }
+
     await killLockedProcess(lockFile);
 
     // Clean up any conflicting MJPEG stream for this serial to free hardware encoder
@@ -158,6 +179,7 @@ export class VisionNanoEngine implements IVisionNanoEngine {
     }
 
     writeLock(lockFile, { pid: child.pid, serial });
+    VisionNanoEngine.activePids.set(lockFile, child.pid);
     child.unref();
 
     return {
@@ -171,10 +193,11 @@ export class VisionNanoEngine implements IVisionNanoEngine {
   }
 
   /**
-   * Stops an active VisionNano process cleanly.
+   * Stops an active VisionNano process cleanly for this specific serial.
    */
   public async stop(serial: string, displayId: number | string = 0, source: string = 'display'): Promise<boolean> {
     const lockFile = getLockFile(serial, displayId, source);
+    VisionNanoEngine.activePids.delete(lockFile);
     return await killLockedProcess(lockFile);
   }
 
@@ -184,6 +207,21 @@ export class VisionNanoEngine implements IVisionNanoEngine {
   public async checkAlive(serial: string, displayId: number | string = 0, source: string = 'display'): Promise<boolean> {
     const lockFile = getLockFile(serial, displayId, source);
     return await isLockAlive(lockFile, 'scrcpy');
+  }
+
+  /**
+   * Cleanly stop all active sessions spawned by VisionNano.
+   */
+  public static async stopAll(): Promise<void> {
+    for (const [lockFile, pid] of VisionNanoEngine.activePids.entries()) {
+      try {
+        process.kill(pid);
+      } catch {}
+      try {
+        if (fs.existsSync(lockFile)) fs.unlinkSync(lockFile);
+      } catch {}
+    }
+    VisionNanoEngine.activePids.clear();
   }
 }
 

@@ -37,6 +37,9 @@ interface HeaderProps {
   rescueStatus?: RescueSyncStatus;
   rescueMsg?: string;
   onToggleRescue?: () => void;
+  /** Active device transmission state */
+  isTransmitting?: boolean;
+  onToggleTransmit?: () => void;
 }
 
 const btnBase = "flex items-center gap-1.5 text-[11px] font-semibold rounded-lg transition-all duration-150 active:scale-[0.97]";
@@ -48,6 +51,7 @@ export const Header: React.FC<HeaderProps> = ({
   adbServerRunning = false, onToggleAdb, isAdbConnecting = false,
   registeredDevices = [], onRegisterDevice, onUnregisterDevice, onToggleAutoConnect,
   rescueConfig, rescueStatus, rescueMsg, onToggleRescue,
+  isTransmitting = false, onToggleTransmit,
 }) => {
   const { isDark, toggleTheme } = useAppTheme();
   const currentDevice = devices.find((d) => d.serial === selectedSerial) || devices[0];
@@ -101,6 +105,24 @@ export const Header: React.FC<HeaderProps> = ({
           )}
         </select>
       </div>
+
+      {/* Per-device Transmission Toggle */}
+      {currentDevice && currentDevice.state === 'device' && onToggleTransmit && (
+        <button
+          onClick={onToggleTransmit}
+          title={isTransmitting ? `Detener transmisión de ${currentDevice.model || currentDevice.serial}` : `Iniciar transmisión scrcpy para ${currentDevice.model || currentDevice.serial}`}
+          className={`${btnBase} px-2.5 py-1.5 border transition-all ${
+            isTransmitting
+              ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/40 shadow-sm shadow-emerald-500/10'
+              : (isDark ? 'bg-zinc-900/60 hover:bg-zinc-800 text-zinc-300 border-zinc-800' : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200')
+          }`}
+        >
+          <span className={`w-2 h-2 rounded-full ${isTransmitting ? 'bg-emerald-400 animate-pulse' : 'bg-zinc-500'}`} />
+          <span className="font-semibold text-xs">
+            {isTransmitting ? 'Transmitiendo' : 'Transmitir'}
+          </span>
+        </button>
+      )}
 
       {/* Status dot */}
       <div className={`hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-medium border ${

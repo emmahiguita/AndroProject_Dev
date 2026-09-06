@@ -106,6 +106,76 @@ export const AppShell: React.FC<AppShellProps> = ({
   // Cosmic 3D: dynamic lighting follows cursor
   useMouseLight(sceneRef);
 
+  // Per-device transmission status tracking
+  const [activeStreams, setActiveStreams] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    if (!selectedSerial) return;
+    let mounted = true;
+
+    const checkStream = async () => {
+      try {
+        const res = await fetch('/api/actions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'check_screen', serial: selectedSerial }),
+        });
+        const data = await res.json();
+        if (mounted && data.success) {
+          setActiveStreams(prev => ({ ...prev, [selectedSerial]: !!data.alive }));
+        }
+      } catch {}
+    };
+
+    checkStream();
+    const interval = setInterval(checkStream, 4000);
+    return () => {
+      mounted = false;
+      clearInterval(interval);
+    };
+  }, [selectedSerial]);
+
+  const handleToggleTransmit = async () => {
+    if (!selectedSerial) return;
+    const isCurrentlyActive = !!activeStreams[selectedSerial];
+    const dev = devices.find(d => d.serial === selectedSerial);
+    const devName = dev?.model || selectedSerial;
+
+    if (isCurrentlyActive) {
+      try {
+        await fetch('/api/actions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'stop_screen', serial: selectedSerial }),
+        });
+        setActiveStreams(prev => ({ ...prev, [selectedSerial]: false }));
+        addLog(`Transmisión scrcpy detenida: ${devName}`, 'info');
+      } catch {
+        addLog(`Error al detener transmisión de ${devName}`, 'error');
+      }
+    } else {
+      try {
+        await fetch('/api/actions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'open_screen',
+            serial: selectedSerial,
+            maxSize: '1080',
+            maxFps: '60',
+            bitRate: '16M',
+            stayAwake: true,
+            alwaysOnTop: true,
+          }),
+        });
+        setActiveStreams(prev => ({ ...prev, [selectedSerial]: true }));
+        addLog(`Transmisión scrcpy 60 FPS iniciada: ${devName}`, 'success');
+      } catch {
+        addLog(`Error al iniciar transmisión de ${devName}`, 'error');
+      }
+    }
+  };
+
   useEffect(() => {
     const check = () => setViewportMedium(window.innerWidth >= BP_MED);
     check();
@@ -172,6 +242,8 @@ export const AppShell: React.FC<AppShellProps> = ({
           rescueStatus={rescueSync.status}
           rescueMsg={rescueSync.lastSyncMsg}
           onToggleRescue={rescueSync.toggleRescueSync}
+          isTransmitting={!!activeStreams[selectedSerial]}
+          onToggleTransmit={handleToggleTransmit}
         />
 
         {/* ═══ AUTO-DETECTION CONFIRMATION TOAST BANNER ═══ */}
