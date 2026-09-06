@@ -119,13 +119,16 @@ export class StreamManager {
     const ffmpegDir = path.dirname(this.ffmpegPath);
     const ffmpeg = spawn(this.ffmpegPath, [
       '-f', 'matroska',
+      '-probesize', '32768',
+      '-analyzeduration', '0',
+      '-fflags', 'nobuffer+discardcorrupt',
+      '-flags', 'low_delay',
       '-i', 'pipe:0',
       '-an',
       '-f', 'mjpeg',
-      '-q:v', '4', // Balanced quality for real-time streaming
+      '-q:v', '3', // High fidelity MJPEG for crisp text and UI
       '-r', maxFps,
-      '-g', '5', // Very small GOP for minimum latency
-      '-threads', '1', // Single thread for minimum overhead
+      '-threads', '2', // Multi-thread decoding/encoding for 60fps throughput
       '-preset', 'ultrafast',
       '-tune', 'zerolatency', // Zero latency tuning
       'pipe:1',
@@ -144,9 +147,9 @@ export class StreamManager {
       frameHandler.processChunk(chunk);
     });
 
-    // Silent error logging (only on exit)
-    scrcpy.stderr?.on('data', () => {}); // Suppress scrcpy stderr
-    ffmpeg.stderr?.on('data', () => {}); // Suppress ffmpeg stderr
+    // Log pipeline output for diagnosis
+    scrcpy.stderr?.on('data', (d: Buffer) => console.log('[scrcpy]', d.toString().trim()));
+    ffmpeg.stderr?.on('data', (d: Buffer) => console.log('[ffmpeg]', d.toString().trim()));
 
     return { scrcpy, ffmpeg };
   }

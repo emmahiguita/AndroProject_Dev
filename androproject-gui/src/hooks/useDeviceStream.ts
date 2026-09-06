@@ -111,7 +111,7 @@ export function useDeviceStream(
         if (res.status === 304) {
           setConnected(true);
           isPolling = false;
-          const interval = 200; // Ultra-fast polling for real-time sync
+          const interval = 500; // Balanced interval when screen is static
           timeoutId = setTimeout(poll, interval);
           return;
         }
@@ -148,7 +148,7 @@ export function useDeviceStream(
           }
 
           isPolling = false;
-          const interval = 150; // Ultra-fast for real-time sync
+          const interval = 300; // Optimal latency without saturating ADB bus
           timeoutId = setTimeout(poll, interval);
         } else {
           isPolling = false;

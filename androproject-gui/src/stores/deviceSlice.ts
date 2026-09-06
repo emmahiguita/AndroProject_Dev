@@ -19,6 +19,13 @@ export interface DeviceSlice {
   recordingPath: string | null;
   isScreenExpanded: boolean;
 
+  // ── Multi-Screen Concurrent Projection ──
+  activeSessions: string[];
+  multiScreenEnabled: boolean;
+  toggleMultiScreen: () => void;
+  addSession: (serial: string) => void;
+  removeSession: (serial: string) => void;
+
   setDevice: (d: DeviceData | null) => void;
   setLoading: (v: boolean) => void;
   setDeviceIP: (ip: string | null) => void;
@@ -52,10 +59,33 @@ export const createDeviceSlice: StateCreator<DeviceSlice, [], [], DeviceSlice> =
   recordingPath: null,
   isScreenExpanded: true,
 
-  setDevice: (d) => set({ device: d }),
+  // Multi-screen state
+  activeSessions: [],
+  multiScreenEnabled: false,
+  toggleMultiScreen: () => set((state) => ({ multiScreenEnabled: !state.multiScreenEnabled })),
+  addSession: (serial) => set((state) => ({
+    activeSessions: state.activeSessions.includes(serial)
+      ? state.activeSessions
+      : [...state.activeSessions, serial],
+  })),
+  removeSession: (serial) => set((state) => ({
+    activeSessions: state.activeSessions.filter((s) => s !== serial),
+  })),
+
+  setDevice: (d) => set((state) => ({
+    device: d,
+    activeSessions: d?.serial && !state.activeSessions.includes(d.serial)
+      ? [...state.activeSessions, d.serial]
+      : state.activeSessions,
+  })),
   setLoading: (v) => set({ loading: v }),
   setDeviceIP: (ip) => set({ deviceIP: ip }),
-  setActiveSerial: (s) => set({ activeSerial: s }),
+  setActiveSerial: (s) => set((state) => ({
+    activeSerial: s,
+    activeSessions: s && !state.activeSessions.includes(s)
+      ? [...state.activeSessions, s]
+      : state.activeSessions,
+  })),
   setDevicesList: (list) => set({ devicesList: list }),
   setForegroundApp: (app) => set({ foregroundApp: app }),
   setSecureAppsList: (list) => set({ secureAppsList: list, isSecureApp: list.length > 0 }),

@@ -135,7 +135,7 @@ function AntivirusPanel({ propAddLog }: { propAddLog?: (msg: string, type?: 'inf
                         });
                       } catch { /* continue */ }
                     }
-                    addLog('✓ Limpieza masiva completada.');
+                    addLog('Limpieza masiva completada.');
                     fetchApps();
                   }}
                 >
@@ -191,9 +191,9 @@ function AntivirusPanel({ propAddLog }: { propAddLog?: (msg: string, type?: 'inf
                               headers: { 'Content-Type': 'application/json' },
                             });
                             const d = await r.json();
-                            if (d.success) { addLog(`✓ Amenaza ${app.packageName} desinstalada.`); fetchApps(); }
-                            else { addLog(`✗ Error al desinstalar: ${d.error}`); }
-                          } catch { addLog(`✗ Error de red al desinstalar ${app.packageName}`); }
+                            if (d.success) { addLog(`Amenaza ${app.packageName} desinstalada.`); fetchApps(); }
+                            else { addLog(`Error al desinstalar: ${d.error}`); }
+                          } catch { addLog(`Error de red al desinstalar ${app.packageName}`); }
                         }}
                       >
                         Desinstalar aplicación
@@ -211,9 +211,9 @@ function AntivirusPanel({ propAddLog }: { propAddLog?: (msg: string, type?: 'inf
                               headers: { 'Content-Type': 'application/json' },
                             });
                             const d = await r.json();
-                            if (d.success) addLog(`✓ Proceso de ${app.packageName} detenido.`);
-                            else addLog(`✗ Error al forzar detención: ${d.error}`);
-                          } catch { addLog(`✗ Error de red al detener ${app.packageName}`); }
+                            if (d.success) addLog(`Proceso de ${app.packageName} detenido.`);
+                            else addLog(`Error al forzar detención: ${d.error}`);
+                          } catch { addLog(`Error de red al detener ${app.packageName}`); }
                         }}
                       >
                         Forzar detención
@@ -232,9 +232,9 @@ function AntivirusPanel({ propAddLog }: { propAddLog?: (msg: string, type?: 'inf
                               headers: { 'Content-Type': 'application/json' },
                             });
                             const d = await r.json();
-                            if (d.success) addLog(`✓ Almacenamiento de ${app.packageName} restablecido a cero.`);
-                            else addLog(`✗ Error al borrar datos: ${d.error}`);
-                          } catch { addLog(`✗ Error de red al borrar datos de ${app.packageName}`); }
+                            if (d.success) addLog(`Almacenamiento de ${app.packageName} restablecido a cero.`);
+                            else addLog(`Error al borrar datos: ${d.error}`);
+                          } catch { addLog(`Error de red al borrar datos de ${app.packageName}`); }
                         }}
                       >
                         Borrar datos
@@ -294,14 +294,14 @@ function ScreenshotPanel() {
 
           <label className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${
             isCloneMode
-              ? dark ? 'bg-brand/10 border-brand/30' : 'bg-emerald-50 border-emerald-200'
+              ? dark ? 'bg-brand/10 border-brand/30' : 'bg-zinc-100 border-zinc-300'
               : dark ? 'bg-white/[0.03] border-white/5' : 'bg-slate-50 border-slate-200'
           }`}>
             <input
               type="checkbox"
               checked={isCloneMode}
               onChange={(e) => setIsCloneMode(e.target.checked)}
-              className="w-4 h-4 rounded border-gray-300 text-emerald-500 focus:ring-emerald-500 cursor-pointer"
+              className="w-4 h-4 rounded border-zinc-500 text-zinc-700 focus:ring-zinc-500 cursor-pointer accent-zinc-600"
             />
             <div>
               <span className={`text-sm font-bold ${t.text}`}>Instalar en perfil de trabajo</span>
@@ -310,8 +310,9 @@ function ScreenshotPanel() {
           </label>
 
           {!isCloneMode && (
-            <p className={`text-[11px] ${t.textMuted}`}>
-              ⚠️ <strong>Reemplazo directo:</strong> Se desinstalará la app original. Perderás tus datos locales (cuentas, descargas).
+            <p className={`text-[11px] ${t.textMuted} flex items-center gap-1.5`}>
+              <AlertTriangle size={13} className="text-amber-500 shrink-0" />
+              <span><strong>Reemplazo directo:</strong> Se desinstalará la app original. Perderás tus datos locales (cuentas, descargas).</span>
             </p>
           )}
 

@@ -73,6 +73,16 @@ export class VisionNanoEngine implements IVisionNanoEngine {
       args.push(`--display-id=${displayId}`);
     }
 
+    // Dynamic window positioning in cascade to prevent stacking windows on top of each other
+    const hash = Math.abs(String(serial).split('').reduce((acc, c) => acc + c.charCodeAt(0), 0));
+    const offset = (hash + Number(displayId || 0) * 2) % 6;
+    const wx = 100 + (offset * 80);
+    const wy = 80 + (offset * 50);
+
+    const windowTitle = options.videoSource === 'camera'
+      ? `AndroProject — ${serial} (Cámara)`
+      : `AndroProject — ${serial} (Display ${displayId})`;
+
     args.push(
       '--video-codec=h264',
       '-b', bitRate,
@@ -82,8 +92,11 @@ export class VisionNanoEngine implements IVisionNanoEngine {
       '--render-driver=direct3d11',
       '--window-width=380',
       '--window-height=820',
+      `--window-x=${wx}`,
+      `--window-y=${wy}`,
+      '--port=27183:27210',
       '--no-audio',
-      `--window-title=AndroProject — Reverse Agent Bridge Monitor`,
+      `--window-title=${windowTitle}`,
     );
 
     if (options.borderless) {
@@ -118,7 +131,7 @@ export class VisionNanoEngine implements IVisionNanoEngine {
       return { success: false, alive: false, error: `Binario VisionNano no encontrado en ${ANDROPROJECT_BIN}` };
     }
 
-    const lockFile = getLockFile(serial);
+    const lockFile = getLockFile(serial, options.displayId, options.videoSource);
     await killLockedProcess(lockFile);
 
     // Clean up any conflicting MJPEG stream for this serial to free hardware encoder
@@ -160,16 +173,16 @@ export class VisionNanoEngine implements IVisionNanoEngine {
   /**
    * Stops an active VisionNano process cleanly.
    */
-  public async stop(serial: string): Promise<boolean> {
-    const lockFile = getLockFile(serial);
+  public async stop(serial: string, displayId: number | string = 0, source: string = 'display'): Promise<boolean> {
+    const lockFile = getLockFile(serial, displayId, source);
     return await killLockedProcess(lockFile);
   }
 
   /**
-   * Checks if VisionNano is currently running for a device.
+   * Checks if VisionNano is currently running for a device display.
    */
-  public async checkAlive(serial: string): Promise<boolean> {
-    const lockFile = getLockFile(serial);
+  public async checkAlive(serial: string, displayId: number | string = 0, source: string = 'display'): Promise<boolean> {
+    const lockFile = getLockFile(serial, displayId, source);
     return await isLockAlive(lockFile, 'scrcpy');
   }
 }

@@ -14,7 +14,13 @@ export const adbShellSchema = z.object({ cmd: z.string().min(1).max(512) });
 
 // ── Touch / text input actions ───────────────────────────────────────
 export const inputTextSchema = z.object({
-  text: z.string().max(2048),
+  text: z.string().max(32768),
+});
+export const setClipboardSchema = z.object({
+  text: z.string().max(32768),
+});
+export const pasteClipboardSchema = z.object({
+  text: z.string().max(32768).optional(),
 });
 export const inputTapSchema = z.object({
   x: z.coerce.number().min(0).max(10000),
@@ -95,6 +101,8 @@ export const actionSchemas: Record<string, z.ZodType<unknown>> = {
   keyevent:                  keyeventSchema,
   adb_shell:                 adbShellSchema,
   input_text:                inputTextSchema,
+  set_clipboard:             setClipboardSchema,
+  paste_clipboard:           pasteClipboardSchema,
   input_tap:                 inputTapSchema,
   input_swipe:               inputSwipeSchema,
 

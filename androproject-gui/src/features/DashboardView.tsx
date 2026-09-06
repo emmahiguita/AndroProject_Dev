@@ -209,8 +209,8 @@ export function DashboardView({ device: propDevice, onNavigate }: DashboardViewP
               onClick={() => nav('projection')}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all ${
                 dark
-                  ? 'bg-[#22c97d]/10 text-[#22c97d] hover:bg-[#22c97d]/20 border border-[#22c97d]/20'
-                  : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100 border border-emerald-200'
+                  ? 'bg-zinc-800 text-zinc-100 hover:bg-zinc-700 border border-zinc-700'
+                  : 'bg-zinc-100 text-zinc-800 hover:bg-zinc-200 border border-zinc-200'
               }`}
             >
               <MonitorPlay size={12} /> Ver pantalla
@@ -219,8 +219,8 @@ export function DashboardView({ device: propDevice, onNavigate }: DashboardViewP
               onClick={() => run('radar', 'Actualizando...')}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all ${
                 dark
-                  ? 'bg-[#1bae6e]/10 text-[#22c97d] hover:bg-[#1bae6e]/20 border border-[#1bae6e]/20'
-                  : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100 border border-emerald-200'
+                  ? 'bg-zinc-800 text-zinc-100 hover:bg-zinc-700 border border-zinc-700'
+                  : 'bg-zinc-100 text-zinc-800 hover:bg-zinc-200 border border-zinc-200'
               }`}
             >
               <RefreshCw size={12} /> Actualizar
@@ -287,7 +287,7 @@ export function DashboardView({ device: propDevice, onNavigate }: DashboardViewP
               }`}
               title="Ver ficha técnica completa"
             >
-              <BarChart3 size={11} className="text-[#22c97d]" />
+              <BarChart3 size={11} className={dark ? 'text-zinc-300' : 'text-zinc-600'} />
               <span>Detalles</span>
             </button>
           </div>
@@ -297,7 +297,7 @@ export function DashboardView({ device: propDevice, onNavigate }: DashboardViewP
         {showMetricsSheet && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-md p-4 animate-in fade-in duration-150">
             <div className={`w-full max-w-3xl rounded-2xl border p-4 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto custom-scrollbar ${
-              dark ? 'bg-[#0b0f19] border-white/10 text-white' : 'bg-white border-slate-200 text-slate-900'
+              dark ? 'bg-surface-raised border-border-default text-text-primary' : 'bg-white border-border-default text-text-primary'
             }`}>
               <div className="flex items-center justify-between pb-3 border-b border-white/10">
                 <div className="flex items-center gap-2">
@@ -365,7 +365,7 @@ export function DashboardView({ device: propDevice, onNavigate }: DashboardViewP
                 <button
                   type="button"
                   onClick={() => setShowMetricsSheet(false)}
-                  className="px-4 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black text-xs font-bold shadow-lg shadow-emerald-500/20"
+                  className="px-4 py-1.5 rounded-xl bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-950 dark:hover:bg-white text-xs font-bold transition-all shadow-sm"
                 >
                   Cerrar Ficha
                 </button>
@@ -421,7 +421,7 @@ export function DashboardView({ device: propDevice, onNavigate }: DashboardViewP
               </h3>
               <button
                 onClick={() => nav('apps')}
-                className={`text-[10px] font-semibold ${dark ? 'text-[#22c97d] hover:text-[#2edc8a]' : 'text-emerald-600 hover:text-emerald-700'}`}
+                className={`text-[10px] font-semibold ${dark ? 'text-zinc-300 hover:text-white' : 'text-zinc-700 hover:text-zinc-900'}`}
               >
                 Ver todas
               </button>
@@ -452,7 +452,7 @@ export function DashboardView({ device: propDevice, onNavigate }: DashboardViewP
                   onClick={() => setAppsFilterDash(chip.key)}
                   className={`px-2 py-0.5 rounded-full text-[9px] font-bold transition-all ${
                     appsFilterDash === chip.key
-                      ? (dark ? 'bg-[#22c97d]/20 text-[#22c97d] border border-[#22c97d]/30' : 'bg-emerald-100 text-emerald-700 border border-emerald-300')
+                      ? (dark ? 'bg-zinc-800 text-zinc-100 border border-zinc-600' : 'bg-zinc-200 text-zinc-900 border border-zinc-300')
                       : (dark ? 'bg-white/[0.03] text-white/30 border border-white/5 hover:bg-white/[0.06]' : 'bg-slate-100 text-slate-500 border border-slate-200 hover:bg-slate-200')
                   }`}
                 >

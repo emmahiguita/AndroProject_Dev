@@ -342,7 +342,29 @@ async function createWindow() {
     },
   });
   mainWindow.setMenuBarVisibility(false);
-  mainWindow.webContents.setWindowOpenHandler(({ url }) => { shell.openExternal(url); return { action: 'deny' }; });
+  mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+    if (url.includes('/popout') || url.startsWith(SERVER_URL)) {
+      return {
+        action: 'allow',
+        overrideBrowserWindowOptions: {
+          width: 440,
+          height: 880,
+          minWidth: 320,
+          minHeight: 500,
+          autoHideMenuBar: true,
+          backgroundColor: '#05070c',
+          webPreferences: {
+            contextIsolation: true,
+            nodeIntegration: false,
+            sandbox: true,
+            backgroundThrottling: false,
+          },
+        },
+      };
+    }
+    shell.openExternal(url);
+    return { action: 'deny' };
+  });
   mainWindow.webContents.on('will-navigate', (event, url) => {
     if (!url.startsWith(SERVER_URL)) event.preventDefault();
   });

@@ -156,6 +156,64 @@ export async function inputText(ctx: ActionContext, body: { text: string }) {
   return NextResponse.json({ success: true, message: 'Texto enviado al dispositivo' });
 }
 
+export async function setClipboard(ctx: ActionContext, body: { text: string }) {
+  const { text } = body;
+  if (typeof text !== 'string') {
+    return NextResponse.json({ success: false, error: 'Texto requerido' }, { status: 400 });
+  }
+
+  const target = ctx.targetSerial || '';
+  if (!target) {
+    return NextResponse.json({ success: false, error: 'Serial de dispositivo requerido' }, { status: 400 });
+  }
+
+  if (target.startsWith('airplay-')) {
+    const { airPlayReceiverEngine } = await import('@/lib/services/airplay-engine');
+    const res = await airPlayReceiverEngine.injectText(text);
+    return NextResponse.json(res);
+  }
+
+  const escapedSh = text.replace(/'/g, "'\\''");
+  const cmdRes = await adb.shell(target, `cmd clipboard set '${escapedSh}'`);
+  if (cmdRes.ok) {
+    return NextResponse.json({ success: true, message: 'Portapapeles sincronizado con Android' });
+  }
+
+  // Fallback
+  const escaped = text.replace(/([\\$`"!\s])/g, (char) => (char === ' ' ? '%s' : `\\${char}`));
+  await adb.shell(target, `input text "${escaped}"`);
+  return NextResponse.json({ success: true, message: 'Texto inyectado en el dispositivo' });
+}
+
+export async function pasteClipboard(ctx: ActionContext, body: { text?: string }) {
+  const target = ctx.targetSerial || '';
+  if (!target) {
+    return NextResponse.json({ success: false, error: 'Serial de dispositivo requerido' }, { status: 400 });
+  }
+
+  const text = typeof body.text === 'string' ? body.text : '';
+
+  if (target.startsWith('airplay-')) {
+    if (text) {
+      const { airPlayReceiverEngine } = await import('@/lib/services/airplay-engine');
+      const res = await airPlayReceiverEngine.injectText(text);
+      return NextResponse.json(res);
+    }
+    return NextResponse.json({ success: false, error: 'Texto no proporcionado' }, { status: 400 });
+  }
+
+  if (text) {
+    const escapedSh = text.replace(/'/g, "'\\''");
+    await adb.shell(target, `cmd clipboard set '${escapedSh}'`);
+  }
+
+  await adb.shell(target, 'input keyevent 279');
+  return NextResponse.json({
+    success: true,
+    message: text ? 'Texto pegado en el dispositivo' : 'Comando Pegar ejecutado',
+  });
+}
+
 function isValidPoint(v: unknown): v is number {
   const n = typeof v === 'number' ? v : parseFloat(String(v));
   return typeof n === 'number' && Number.isFinite(n) && n >= 0 && n <= 10000;

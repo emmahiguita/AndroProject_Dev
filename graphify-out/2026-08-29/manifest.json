@@ -60,8 +60,8 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/app/api/actions/device.ts": {
-    "mtime": 1787891060.65685,
-    "ast_hash": "acbec965817cfda23e21e91ae8ce8508",
+    "mtime": 1788041345.9286628,
+    "ast_hash": "42942666bb298e0b0288f31003a9b3fb",
     "semantic_hash": ""
   },
   "androproject-gui/src/app/api/actions/diagnostics.ts": {
@@ -825,8 +825,8 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/lib/services/airplay-engine.ts": {
-    "mtime": 1788035713.3924785,
-    "ast_hash": "5aafff34280473f0eec0b7940a37d4ab",
+    "mtime": 1788041331.7578716,
+    "ast_hash": "bd53893b2cc6d7e994b71a9b4cd5a036",
     "semantic_hash": ""
   },
   "androproject-gui/src/lib/services/projection-coordinator.ts": {
@@ -890,8 +890,8 @@
     "semantic_hash": ""
   },
   "launch_native_ios_projector.ps1": {
-    "mtime": 1788036083.9633157,
-    "ast_hash": "0cbf55c7b6ef9fe01c5de039a3a21a7e",
+    "mtime": 1788036223.4235787,
+    "ast_hash": "d189df93ce6ee841db493bbb44ca86d4",
     "semantic_hash": ""
   },
   "scratch/run_airplay_server.ps1": {
@@ -912,6 +912,26 @@
   "create_ios_desktop_shortcut.ps1": {
     "mtime": 1788035945.4475574,
     "ast_hash": "f80a394afba4664d12f9780080ade868",
+    "semantic_hash": ""
+  },
+  "androproject-gui/bin/airplay/daemon.js": {
+    "mtime": 1788036217.6818397,
+    "ast_hash": "863d7492b40db0cae6e65a3b4f4d147b",
+    "semantic_hash": ""
+  },
+  "scratch/bonjour_broadcaster.js": {
+    "mtime": 1788037470.6238463,
+    "ast_hash": "fe1659f7b067123c41903cbc187d2fb9",
+    "semantic_hash": ""
+  },
+  "scratch/check_all_services.ps1": {
+    "mtime": 1788037275.8628025,
+    "ast_hash": "58446373da96bbb4825c995a302eae96",
+    "semantic_hash": ""
+  },
+  "scratch/inspect_mdns_discovery.js": {
+    "mtime": 1788037608.7698941,
+    "ast_hash": "47f82734048f5837516f999f149dac9a",
     "semantic_hash": ""
   }
 }

@@ -43,21 +43,25 @@ export class MjpegFrameHandler {
     }
   }
 
-  processChunk(chunk: Buffer): void {
-    // Optimize: Pre-allocate combined buffer size
-    const combined = Buffer.alloc(this.buffer.length + chunk.length);
-    this.buffer.copy(combined, 0);
-    chunk.copy(combined, this.buffer.length);
-    this.buffer = combined;
+  private static readonly MAX_ACCUMULATOR_BYTES = 4 * 1024 * 1024; // 4MB safety ceiling
 
+  processChunk(chunk: Buffer): void {
+    if (this.buffer.length + chunk.length > MjpegFrameHandler.MAX_ACCUMULATOR_BYTES) {
+      // Memory protection: if buffer grew too large without finding EOI, discard corrupt accumulation
+      const nextSoi = chunk.indexOf(SOI);
+      this.buffer = nextSoi !== -1 ? chunk.subarray(nextSoi) : Buffer.alloc(0);
+      return;
+    }
+
+    this.buffer = this.buffer.length === 0 ? chunk : Buffer.concat([this.buffer, chunk]);
     this.extractFrames();
   }
 
   private extractFrames(): void {
-    while (true) {
+    while (this.buffer.length > 0) {
       const soiStart = this.buffer.indexOf(SOI);
       if (soiStart === -1) {
-        // Keep last 2 bytes for potential SOI across chunks
+        // Keep last 2 bytes for potential SOI split across chunks
         this.buffer = this.buffer.length >= 2 
           ? this.buffer.subarray(this.buffer.length - 2) 
           : Buffer.alloc(0);
@@ -69,7 +73,7 @@ export class MjpegFrameHandler {
       }
 
       const eoiPos = this.buffer.indexOf(EOI, 2);
-      if (eoiPos === -1) break; // Partial frame - wait for more data
+      if (eoiPos === -1) break; // Partial frame - wait for next chunk
 
       const frame = this.buffer.subarray(0, eoiPos + 2);
       this.buffer = this.buffer.subarray(eoiPos + 2);

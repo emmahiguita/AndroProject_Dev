@@ -8,18 +8,18 @@ from processing.denoise import process_frame, CUDA_AVAILABLE
 logger = logging.getLogger(__name__)
 
 # Keep track of active peer connections (internal — use get_active_connections() to access)
-__pcs: set = set()
+_pcs: set = set()
 _stale_cleanup_started = False
 
 
 def get_active_connection_count() -> int:
     """Thread-safe accessor for active WebRTC connections count."""
-    return len(__pcs)
+    return len(_pcs)
 
 
 def get_active_connections() -> set:
     """Returns a copy of the active connection set (read-only usage)."""
-    return set(__pcs)
+    return set(_pcs)
 
 
 class VideoTransformTrack(MediaStreamTrack):

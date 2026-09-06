@@ -66,7 +66,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({ dark, onConnectAdb, isCo
         <Smartphone size={32} className={dark ? 'text-white/20' : 'text-slate-300'} />
         {/* Pulsing ring */}
         <div className={`absolute inset-0 rounded-2xl border-2 ${
-          dark ? 'border-[#22c97d]/20' : 'border-emerald-300/40'
+          dark ? 'border-zinc-700' : 'border-zinc-300'
         } animate-ping opacity-30`} />
       </div>
 
@@ -91,7 +91,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({ dark, onConnectAdb, isCo
               onKeyDown={(e) => { if (e.key === 'Enter') handleConnect(); }}
               className={`flex-1 py-2 px-3 rounded-xl text-xs border font-mono ${
                 dark
-                  ? 'bg-white/[0.04] border-white/10 text-white placeholder:text-white/25 focus:border-[#22c97d]/50'
+                  ? 'bg-white/[0.04] border-white/10 text-white placeholder:text-white/25 focus:border-zinc-500'
                   : 'bg-slate-50 border-slate-200 text-slate-800 placeholder:text-slate-400'
               } outline-none`}
             />
@@ -110,7 +110,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({ dark, onConnectAdb, isCo
               type="button"
               onClick={() => handleConnect()}
               disabled={isConnecting || !ip.trim()}
-              className="px-3.5 py-2 rounded-xl bg-[#1bae6e] hover:bg-[#22c97d] text-white text-xs font-bold transition-all disabled:opacity-40 flex items-center gap-1.5 shrink-0 shadow-sm shadow-[#1bae6e]/20"
+              className="px-3.5 py-2 rounded-xl bg-zinc-100 hover:bg-zinc-200 text-zinc-900 text-xs font-bold transition-all disabled:opacity-40 flex items-center gap-1.5 shrink-0"
             >
               {isConnecting ? <Loader2 size={12} className="animate-spin" /> : <Wifi size={12} />}
               <span>{isConnecting ? 'Conectando' : 'Conectar'}</span>
@@ -128,14 +128,14 @@ export const EmptyState: React.FC<EmptyStateProps> = ({ dark, onConnectAdb, isCo
                 : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
             }`}
           >
-            {isScanning ? <Loader2 size={12} className="animate-spin text-[#22c97d]" /> : <Radar size={12} className="text-[#22c97d]" />}
+            {isScanning ? <Loader2 size={12} className="animate-spin text-zinc-400" /> : <Radar size={12} className="text-zinc-400" />}
             <span>{isScanning ? 'Escaneando red local (Radar)...' : 'Escanear Red Local (Radar ADB)'}</span>
           </button>
 
           {/* Discovered IPs list */}
           {discoveredIps.length > 0 && (
-            <div className="w-full space-y-1.5 p-2 rounded-xl bg-[#22c97d]/5 border border-[#22c97d]/20 text-left animate-in fade-in duration-200">
-              <span className="text-[10px] font-bold text-[#22c97d] block px-1">
+            <div className="w-full space-y-1.5 p-2 rounded-xl bg-zinc-900/60 border border-zinc-800 text-left animate-in fade-in duration-200">
+              <span className="text-[10px] font-bold text-zinc-300 block px-1">
                 Dispositivos detectados en la red:
               </span>
               <div className="flex flex-col gap-1">
@@ -149,12 +149,12 @@ export const EmptyState: React.FC<EmptyStateProps> = ({ dark, onConnectAdb, isCo
                     }}
                     className={`flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-mono border transition-all ${
                       dark
-                        ? 'bg-black/40 border-white/5 text-white hover:bg-[#22c97d]/20 hover:border-[#22c97d]/40'
-                        : 'bg-white border-slate-200 text-slate-800 hover:bg-emerald-50'
+                        ? 'bg-black/40 border-white/5 text-white hover:bg-zinc-800 hover:border-zinc-700'
+                        : 'bg-white border-slate-200 text-slate-800 hover:bg-zinc-100'
                     }`}
                   >
                     <span>{discoveredIp}:5555</span>
-                    <span className="flex items-center gap-1 text-[10px] text-[#22c97d] font-sans font-bold">
+                    <span className="flex items-center gap-1 text-[10px] text-zinc-300 font-sans font-bold">
                       Conectar <ArrowRight size={10} />
                     </span>
                   </button>
@@ -167,7 +167,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({ dark, onConnectAdb, isCo
             <p className={`text-[11px] font-medium ${
               status.includes('Error') || status.includes('falló') || status.includes('No se encontraron')
                 ? 'text-red-400'
-                : 'text-[#22c97d]'
+                : 'text-emerald-500'
             }`}>
               {status}
             </p>

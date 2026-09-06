@@ -49,3 +49,7 @@ AndroProject_Installer/output/
 .DS_Store
 Thumbs.db
 *.log
+*.bin
+*.mkv
+scratch/
+**/scratch/

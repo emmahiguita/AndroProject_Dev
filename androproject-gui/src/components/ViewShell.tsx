@@ -19,12 +19,12 @@ interface ViewShellProps {
  * Each view sets its navId; the shell handles active/inactive transitions.
  */
 export function ViewShell({ children, fill }: ViewShellProps) {
-  const fillClass = fill ? 'h-full' : '';
-
-  return (
-    <div className={`w-full min-w-0 max-w-full overflow-x-hidden transition-all duration-200 opacity-100 translate-y-0 relative z-0 ${fillClass}`}>
-      {children}
-    </div>
-  );
+  const fillClass = fill ? 'h-full flex-1 flex flex-col min-h-0' : '';
+ 
+   return (
+     <div className={`w-full min-w-0 max-w-full overflow-hidden transition-all duration-200 opacity-100 translate-y-0 relative z-0 ${fillClass}`}>
+       {children}
+     </div>
+   );
 }
 

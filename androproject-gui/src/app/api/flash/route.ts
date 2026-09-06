@@ -269,7 +269,7 @@ export async function POST(req: Request) {
         }
         return NextResponse.json({
           success: true,
-          message: `✓ Partición "${partition}" flasheada correctamente con ${safeName}.`,
+          message: `Partición "${partition}" flasheada correctamente con ${safeName}.`,
         });
       } catch (error: unknown) {
         return NextResponse.json({ success: false, error: getCommandOutput(error) || getErrorMessage(error) });
@@ -296,7 +296,7 @@ export async function POST(req: Request) {
         await execAsync(`${adbTarget} sideload "${filePath}"`, { timeout: 600000 });
         return NextResponse.json({
           success: true,
-          message: `✓ Archivo ${safeName} enviado por sideload correctamente.`,
+          message: `Archivo ${safeName} enviado por sideload correctamente.`,
         });
       } catch (error: unknown) {
         return NextResponse.json({ success: false, error: getCommandOutput(error) || getErrorMessage(error) });

@@ -97,9 +97,9 @@ export const AppShell: React.FC<AppShellProps> = ({
           alwaysOnTop: true,
         }),
       });
-      addLog(`✓ Transmisión iniciada para ${detectedToast.model}`, 'success');
+      addLog(`Transmisión iniciada para ${detectedToast.model}`, 'success');
     } catch {
-      addLog(`✗ Error al iniciar transmisión`, 'error');
+      addLog(`Error al iniciar transmisión`, 'error');
     }
   };
 
@@ -118,7 +118,7 @@ export const AppShell: React.FC<AppShellProps> = ({
   }, [viewportMedium]);
 
   return (
-    <div ref={sceneRef} suppressHydrationWarning className={`relative flex h-screen w-screen overflow-hidden ${isDark ? 'bg-[#070913] text-[#e2e8f0]' : 'bg-slate-50 text-slate-900'}`}>
+    <div ref={sceneRef} suppressHydrationWarning className={`relative flex h-screen w-screen overflow-hidden ${isDark ? 'bg-zinc-950 text-zinc-100' : 'bg-slate-50 text-slate-900'}`}>
       {/* ═══ COSMIC 3D BACKGROUND ═══ */}
       {isDark && (
         <>
@@ -176,15 +176,15 @@ export const AppShell: React.FC<AppShellProps> = ({
 
         {/* ═══ AUTO-DETECTION CONFIRMATION TOAST BANNER ═══ */}
         {detectedToast && activeNav !== 'projection' && (
-          <div className="absolute top-14 right-4 z-40 flex items-center gap-3 px-3.5 py-2.5 rounded-xl bg-[#0b0f1a]/95 border border-[#22c97d]/40 text-white shadow-2xl backdrop-blur-md animate-in fade-in slide-in-from-top-2 duration-200">
-            <div className="w-2.5 h-2.5 rounded-full bg-[#22c97d] animate-pulse shrink-0" />
+          <div className="absolute top-14 right-4 z-40 flex items-center gap-3 px-3.5 py-2.5 rounded-xl bg-zinc-900/95 border border-zinc-700 text-white shadow-2xl backdrop-blur-md animate-in fade-in slide-in-from-top-2 duration-200">
+            <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
             <div className="text-xs">
               <p className="font-bold text-white">Dispositivo detectado</p>
               <p className="text-[10px] text-white/50">{detectedToast.model} ({detectedToast.connectionType})</p>
             </div>
             <button
               onClick={handleConfirmTransmit}
-              className="px-3 py-1 rounded-lg bg-[#1bae6e] hover:bg-[#22c97d] text-white text-[11px] font-bold transition-all flex items-center gap-1 shadow-sm shrink-0"
+              className="px-3 py-1 rounded-lg bg-zinc-100 hover:bg-zinc-200 text-zinc-900 text-[11px] font-bold transition-all flex items-center gap-1 shadow-sm shrink-0"
             >
               <MonitorPlay size={12} />
               <span>Transmitir Ahora (60 FPS)</span>
@@ -199,8 +199,10 @@ export const AppShell: React.FC<AppShellProps> = ({
           </div>
         )}
 
-        <main className={`relative flex-1 min-w-0 overflow-x-hidden ${
-          activeNav === 'projection' ? 'overflow-hidden p-0' : 'overflow-y-auto custom-scrollbar p-2 md:p-3'
+        <main className={`relative flex-1 min-h-0 min-w-0 ${
+          activeNav === 'projection'
+            ? 'overflow-hidden p-0 flex flex-col'
+            : 'overflow-y-auto custom-scrollbar p-2 md:p-3'
         } ${isDark ? '' : 'bg-white'}`}>
 
           {/* Cosmic ground glow at bottom of content */}

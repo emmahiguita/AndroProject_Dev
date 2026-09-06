@@ -11,7 +11,7 @@ import { DeviceInfo } from './types';
 
 interface ArchivosViewProps {
   device?: DeviceInfo | null;
-  addLog?: (msg: string, type?: 'info' | 'success' | 'error') => void;
+  addLog?: (msg: string) => void;
 }
 
 export function ArchivosView({ addLog: propAddLog }: ArchivosViewProps = {}) {
@@ -74,19 +74,21 @@ export function ArchivosView({ addLog: propAddLog }: ArchivosViewProps = {}) {
                     xhr.onload = () => {
                       try {
                         const data = JSON.parse(xhr.responseText);
-                        addLog(data.success ? `✓ ${data.message}` : `✗ Error: ${data.error}`);
-                      } catch { addLog(`✗ Error de red al procesar respuesta de ${file.name}`); }
+                        addLog(data.success ? data.message : `Error: ${data.error}`);
+                      } catch {
+                        addLog(`Error de red al procesar respuesta de ${file.name}`);
+                      }
                       cleanupProgress(file.name);
                       resolve();
                     };
                     xhr.onerror = () => {
-                      addLog(`✗ Error de red al subir ${file.name}`);
+                      addLog(`Error de red al subir ${file.name}`);
                       cleanupProgress(file.name);
                       resolve();
                     };
                     xhr.ontimeout = xhr.onerror;
                     xhr.onabort = () => {
-                      addLog(`⚠ Transferencia cancelada: ${file.name}`);
+                      addLog(`Transferencia cancelada: ${file.name}`);
                       cleanupProgress(file.name);
                       resolve();
                     };
@@ -109,11 +111,11 @@ export function ArchivosView({ addLog: propAddLog }: ArchivosViewProps = {}) {
                     {Object.entries(uploadProgress).map(([fileName, progress]) => (
                       <Card key={fileName} padding="sm" className="w-full backdrop-blur-sm transition-all">
                         <div className="flex justify-between text-[10px] mb-1.5 items-center">
-                          <span className={`truncate max-w-[80%] font-medium ${dark ? 'text-brand-light' : 'text-emerald-600'}`}>{fileName}</span>
-                          <Badge tone="brand" className={`font-bold text-[10px] ${dark ? 'text-brand-light' : 'text-emerald-700'}`}>{progress}%</Badge>
+                          <span className={`truncate max-w-[80%] font-medium ${t.text}`}>{fileName}</span>
+                          <Badge tone="brand" className="font-bold text-[10px]">{progress}%</Badge>
                         </div>
                         <div className="w-full h-1.5 bg-black/10 dark:bg-black/40 rounded-full overflow-hidden relative">
-                          <div className="absolute top-0 left-0 h-full bg-emerald-500 transition-all duration-[400ms] ease-out" style={{ width: `${progress}%` }} />
+                          <div className="absolute top-0 left-0 h-full bg-brand transition-all duration-[400ms] ease-out" style={{ width: `${progress}%` }} />
                         </div>
                       </Card>
                     ))}

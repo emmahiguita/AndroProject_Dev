@@ -204,12 +204,12 @@ export default function CameraTransmitter() {
 
       const videoSettings = mediaStream.getVideoTracks()[0]?.getSettings();
       const audioSettings = mediaStream.getAudioTracks()[0]?.getSettings();
-      addLog(`✓ Cámara ${videoSettings?.width ?? '?'}×${videoSettings?.height ?? '?'} a ${videoSettings?.frameRate ?? '?'} FPS · Audio ${audioSettings?.sampleRate ?? '?'} Hz`);
+      addLog(`Cámara ${videoSettings?.width ?? '?'}×${videoSettings?.height ?? '?'} a ${videoSettings?.frameRate ?? '?'} FPS · Audio ${audioSettings?.sampleRate ?? '?'} Hz`);
       iceFailCountRef.current = 0;
       reconnectAttemptRef.current = 0;
       return mediaStream;
     } catch (error: unknown) {
-      addLog(`✗ No se pudo iniciar la cámara: ${getErrorMessage(error)}`);
+      addLog(`No se pudo iniciar la cámara: ${getErrorMessage(error)}`);
       return null;
     }
   }, [addLog]);
@@ -256,7 +256,7 @@ export default function CameraTransmitter() {
   const startRecording = useCallback(() => {
     const remoteStream = remoteStreamRef.current;
     if (!remoteStream || remoteStream.getVideoTracks().length === 0) {
-      addLog('✗ Aún no hay video remoto disponible para grabar.');
+      addLog('Aun no hay video remoto disponible para grabar.');
       return;
     }
 
@@ -281,7 +281,7 @@ export default function CameraTransmitter() {
         if (mediaRecorderRef.current === recorder) mediaRecorderRef.current = null;
         const blob = new Blob(recordedChunksRef.current, { type: mimeType });
         if (blob.size === 0) {
-          addLog('✗ La grabación terminó sin datos.');
+          addLog('La grabacion termino sin datos.');
           return;
         }
         const url = URL.createObjectURL(blob);
@@ -290,14 +290,13 @@ export default function CameraTransmitter() {
         anchor.download = `androproject_grabacion_${new Date().toISOString().replace(/[:.]/g, '-')}.webm`;
         anchor.click();
         setTimeout(() => URL.revokeObjectURL(url), 0);
-        addLog(`✓ Grabación guardada (${(blob.size / 1024 / 1024).toFixed(1)} MB).`);
+        addLog(`Grabacion guardada (${(blob.size / 1024 / 1024).toFixed(1)} MB).`);
       };
       recorder.start(1000);
       mediaRecorderRef.current = recorder;
       setIsRecording(true);
-      addLog('Grabación iniciada en WebM.');
     } catch (error: unknown) {
-      addLog(`✗ No se pudo iniciar la grabación: ${getErrorMessage(error)}`);
+      addLog(`No se pudo iniciar la grabación: ${getErrorMessage(error)}`);
     }
   }, [addLog]);
 
@@ -371,8 +370,8 @@ export default function CameraTransmitter() {
         void remoteVideoRef.current.play().catch(() => {});
       }
       addLog(event.track.kind === 'video'
-        ? '✓ Video procesado recibido.'
-        : '✓ Audio remoto recibido.');
+        ? 'Video procesado recibido.'
+        : 'Audio remoto recibido.');
     };
 
     pc.oniceconnectionstatechange = () => {
@@ -384,15 +383,15 @@ export default function CameraTransmitter() {
         setReconnecting(false);
         reconnectAttemptRef.current = 0;
         iceFailCountRef.current = 0;
-        addLog('✓ Transmisión WebRTC activa.');
+        addLog('Transmisión WebRTC activa.');
         startStatsCollection();
       } else if (state === 'disconnected') {
         setActive(false);
-        addLog('⚠ Conexión temporalmente interrumpida; WebRTC intentará recuperarla.');
+        addLog('Conexión temporalmente interrumpida; WebRTC intentará recuperarla.');
       } else if (state === 'failed') {
         setActive(false);
         iceFailCountRef.current += 1;
-        addLog(`⚠ ICE falló (${iceFailCountRef.current}/${MAX_ICE_RETRIES}).`);
+        addLog(`ICE falló (${iceFailCountRef.current}/${MAX_ICE_RETRIES}).`);
         if (iceFailCountRef.current <= MAX_ICE_RETRIES) pc.restartIce();
         setTimeout(() => {
           if (pcRef.current === pc && pc.iceConnectionState === 'failed') {
@@ -430,12 +429,12 @@ export default function CameraTransmitter() {
       throw new Error('El servidor devolvió una respuesta SDP inválida.');
     }
     await pc.setRemoteDescription(answer);
-    addLog('✓ Negociación WebRTC completada.');
+    addLog('Negociación WebRTC completada.');
   }, [addLog, resetMetrics, serverUrl, startStatsCollection]);
 
   const attemptFullReconnection = useCallback(() => {
     if (reconnectAttemptRef.current >= MAX_RECONNECT_ATTEMPTS) {
-      addLog(`✗ Se alcanzó el límite de ${MAX_RECONNECT_ATTEMPTS} reconexiones.`);
+      addLog(`Se alcanzó el límite de ${MAX_RECONNECT_ATTEMPTS} reconexiones.`);
       stopCamera();
       return;
     }
@@ -459,7 +458,7 @@ export default function CameraTransmitter() {
         }
         await establishConnection();
       } catch (error: unknown) {
-        addLog(`✗ Reconexión fallida: ${getErrorMessage(error)}`);
+        addLog(`Reconexión fallida: ${getErrorMessage(error)}`);
         attemptFullReconnectionRef.current();
       }
     }, delay);
@@ -474,7 +473,7 @@ export default function CameraTransmitter() {
 
   const startStream = useCallback(async () => {
     if (!streamRef.current) {
-      addLog('✗ Inicia la cámara primero.');
+      addLog('Inicia la cámara primero.');
       return;
     }
 
@@ -489,7 +488,7 @@ export default function CameraTransmitter() {
       await establishConnection();
     } catch (error: unknown) {
       setActive(false);
-      addLog(`✗ No se pudo conectar: ${getErrorMessage(error)}`);
+      addLog(`No se pudo conectar: ${getErrorMessage(error)}`);
       if (pcRef.current) {
         pcRef.current.close();
         pcRef.current = null;
@@ -497,23 +496,23 @@ export default function CameraTransmitter() {
     }
   }, [addLog, establishConnection]);
   return (
-    <div className="min-h-screen bg-[#0a0c17] text-white flex flex-col font-sans p-4">
+    <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col font-sans p-4">
       {/* Header */}
-      <header className="max-w-md mx-auto w-full py-4 flex items-center justify-between border-b border-white/10 mb-6">
+      <header className="max-w-md mx-auto w-full py-4 flex items-center justify-between border-b border-zinc-800 mb-6">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400">
+          <div className="w-10 h-10 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-200">
             <Camera size={20} />
           </div>
           <div>
-            <h1 className="text-sm font-bold tracking-wide">AndroProject Cámara</h1>
-            <p className="text-[10px] text-cyan-400/70 font-semibold uppercase">Transmisión WebRTC</p>
+            <h1 className="text-sm font-bold tracking-tight text-zinc-100">AndroProject Cámara</h1>
+            <p className="text-[10px] text-zinc-400 font-semibold uppercase tracking-wider">Transmisión WebRTC</p>
           </div>
         </div>
-        <div className="flex items-center gap-1.5 bg-black/40 rounded-full px-2.5 py-1 border border-white/5">
+        <div className="flex items-center gap-1.5 bg-zinc-900/90 rounded-full px-2.5 py-1 border border-zinc-800">
           <span className={`w-1.5 h-1.5 rounded-full ${
-            active ? 'bg-green-500 animate-pulse' : reconnecting ? 'bg-amber-500 animate-pulse' : 'bg-red-500'
+            active ? 'bg-emerald-500 shadow-sm shadow-emerald-500/50 animate-pulse' : reconnecting ? 'bg-amber-500 animate-pulse' : 'bg-zinc-600'
           }`} />
-          <span className="text-[9px] font-medium tracking-wide">
+          <span className="text-[9px] font-medium tracking-wide text-zinc-300">
             {active ? 'Transmitiendo' : reconnecting ? 'Reconectando...' : 'Inactivo'}
           </span>
         </div>
@@ -522,8 +521,8 @@ export default function CameraTransmitter() {
       {/* Main content */}
       <main className="flex-1 max-w-md mx-auto w-full flex flex-col gap-5">
         <div className="grid gap-4">
-          <section className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl border border-white/10 bg-black/60 shadow-2xl">
-            <span className="absolute left-3 top-3 z-10 rounded-full border border-white/10 bg-black/60 px-2.5 py-1 text-[9px] font-semibold uppercase tracking-wider text-white/70 backdrop-blur">
+          <section className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900/40 shadow-xl">
+            <span className="absolute left-3 top-3 z-10 rounded-full border border-zinc-700 bg-zinc-900/80 px-2.5 py-1 text-[9px] font-semibold uppercase tracking-wider text-zinc-300 backdrop-blur">
               Vista local
             </span>
             {stream ? (
@@ -535,19 +534,19 @@ export default function CameraTransmitter() {
                 className="h-full w-full object-cover"
               />
             ) : (
-              <div className="flex h-full items-center justify-center p-6 text-center text-slate-500">
+              <div className="flex h-full items-center justify-center p-6 text-center text-zinc-500">
                 <div>
-                  <Video size={44} className="mx-auto mb-3 opacity-25" />
-                  <p className="text-xs font-semibold text-slate-400">Cámara apagada</p>
-                  <p className="mt-1 text-[10px] text-slate-500">Inicia la cámara para preparar la transmisión.</p>
+                  <Video size={44} className="mx-auto mb-3 opacity-20 text-zinc-400" />
+                  <p className="text-xs font-semibold text-zinc-300">Cámara apagada</p>
+                  <p className="mt-1 text-[10px] text-zinc-500">Inicia la cámara para preparar la transmisión.</p>
                 </div>
               </div>
             )}
           </section>
 
           {stream && (
-            <section className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl border border-cyan-500/15 bg-black/70 shadow-2xl">
-              <span className="absolute left-3 top-3 z-10 rounded-full border border-cyan-400/20 bg-black/60 px-2.5 py-1 text-[9px] font-semibold uppercase tracking-wider text-cyan-300 backdrop-blur">
+            <section className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900/40 shadow-xl">
+              <span className="absolute left-3 top-3 z-10 rounded-full border border-zinc-700 bg-zinc-900/80 px-2.5 py-1 text-[9px] font-semibold uppercase tracking-wider text-zinc-300 backdrop-blur">
                 Retorno del PC
               </span>
               <video
@@ -558,8 +557,8 @@ export default function CameraTransmitter() {
                 className="h-full w-full object-contain"
               />
               {!active && (
-                <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/35 px-6 text-center">
-                  <p className="text-[11px] font-medium text-white/60">
+                <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/50 px-6 text-center">
+                  <p className="text-[11px] font-medium text-zinc-400">
                     Conecta con el servidor para ver aquí el video procesado.
                   </p>
                 </div>
@@ -568,22 +567,23 @@ export default function CameraTransmitter() {
           )}
         </div>
 
-        {/* Panel de métricas en tiempo real */}        {active && (
-          <div className="bg-[#111320] border border-white/5 rounded-2xl p-4 grid grid-cols-3 gap-3 shadow-xl">
+        {/* Panel de métricas en tiempo real */}
+        {active && (
+          <div className="bg-zinc-900/70 border border-zinc-800 rounded-2xl p-4 grid grid-cols-3 gap-3 shadow-xl backdrop-blur-sm">
             {[
-              { label: 'FPS', value: metrics.fps, unit: '', color: 'text-cyan-400' },
-              { label: 'Resolución', value: metrics.resolution, unit: '', color: 'text-emerald-400' },
-              { label: 'Latencia', value: metrics.latencyMs, unit: 'ms', color: 'text-amber-400' },
-              { label: 'Pérdida', value: metrics.packetsLost, unit: 'pkg', color: metrics.packetsLost > 10 ? 'text-red-400' : 'text-gray-400' },
-              { label: 'Jitter', value: metrics.jitter, unit: 'ms', color: 'text-purple-400' },
-              { label: 'Bitrate', value: metrics.bitrate, unit: 'Mbps', color: 'text-blue-400' },
+              { label: 'FPS', value: metrics.fps, unit: '', color: 'text-zinc-100' },
+              { label: 'Resolución', value: metrics.resolution, unit: '', color: 'text-zinc-200' },
+              { label: 'Latencia', value: metrics.latencyMs, unit: 'ms', color: 'text-zinc-200' },
+              { label: 'Pérdida', value: metrics.packetsLost, unit: 'pkg', color: metrics.packetsLost > 10 ? 'text-red-400' : 'text-zinc-400' },
+              { label: 'Jitter', value: metrics.jitter, unit: 'ms', color: 'text-zinc-300' },
+              { label: 'Bitrate', value: metrics.bitrate, unit: 'Mbps', color: 'text-zinc-200' },
             ].map(({ label, value, unit, color }) => (
               <div key={label} className="flex flex-col items-center gap-1">
-                <span className="text-[9px] text-gray-500 uppercase font-bold tracking-wider">{label}</span>
+                <span className="text-[9px] text-zinc-400 uppercase font-bold tracking-wider">{label}</span>
                 <span className={`text-lg font-bold ${color} tabular-nums`}>
                   {typeof value === 'number' ? value : value || '--'}
                 </span>
-                {unit && <span className="text-[8px] text-gray-600">{unit}</span>}
+                {unit && <span className="text-[8px] text-zinc-500">{unit}</span>}
               </div>
             ))}
           </div>
@@ -598,18 +598,18 @@ export default function CameraTransmitter() {
         )}
 
         {/* Server settings card */}
-        <div className="bg-[#111320] border border-white/5 rounded-2xl p-5 flex flex-col gap-4 shadow-xl">
-          <h2 className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2">
+        <div className="bg-zinc-900/70 border border-zinc-800 rounded-2xl p-5 flex flex-col gap-4 shadow-xl">
+          <h2 className="text-xs font-bold text-zinc-300 uppercase tracking-wider flex items-center gap-2">
             <Link2 size={14} /> Conexión
           </h2>
           
           <div className="flex flex-col gap-1.5">
-            <label className="text-[10px] font-bold text-gray-500 uppercase">Servidor de destino</label>
+            <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Servidor de destino</label>
             <input
               type="text"
               value={serverUrl}
               onChange={(e) => setServerUrl(e.target.value)}
-              className="bg-black/50 border border-white/10 rounded-xl px-4 py-2.5 text-xs text-cyan-300 font-mono focus:outline-none focus:border-cyan-500/50"
+              className="bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-xs text-zinc-200 font-mono focus:outline-none focus:border-zinc-500 transition-colors"
               placeholder="http://<IP-DE-TU-PC>:8000/vision/offer"
             />
           </div>
@@ -618,7 +618,7 @@ export default function CameraTransmitter() {
             {!stream ? (
               <button
                 onClick={startCamera}
-                className="flex-1 bg-cyan-600 hover:bg-cyan-500 active:scale-95 text-white py-3 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-lg shadow-cyan-500/10"
+                className="flex-1 bg-zinc-100 hover:bg-zinc-200 active:scale-[0.98] text-zinc-900 py-3 rounded-xl font-semibold text-xs flex items-center justify-center gap-2 transition-all shadow-sm"
               >
                 <Play size={14} /> Iniciar cámara
               </button>
@@ -626,7 +626,7 @@ export default function CameraTransmitter() {
               <>
                 <button
                   onClick={stopCamera}
-                  className="flex-1 bg-red-600/20 hover:bg-red-600/30 text-red-400 border border-red-500/20 py-3 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all"
+                  className="flex-1 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 py-3 rounded-xl font-semibold text-xs flex items-center justify-center gap-2 transition-all"
                 >
                   <Square size={14} /> Apagar
                 </button>
@@ -634,7 +634,7 @@ export default function CameraTransmitter() {
                 {!active && !reconnecting && (
                   <button
                     onClick={startStream}
-                    className="flex-1 bg-cyan-500 hover:bg-cyan-400 active:scale-95 text-black py-3 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-lg shadow-cyan-500/20"
+                    className="flex-1 bg-zinc-100 hover:bg-zinc-200 active:scale-[0.98] text-zinc-900 py-3 rounded-xl font-semibold text-xs flex items-center justify-center gap-2 transition-all shadow-sm"
                   >
                     <Play size={14} /> Conectar
                   </button>
@@ -647,35 +647,41 @@ export default function CameraTransmitter() {
           {active && (
             <button
               onClick={isRecording ? stopRecording : startRecording}
-              className={`w-full py-3 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all ${
+              className={`w-full py-3 rounded-xl font-semibold text-xs flex items-center justify-center gap-2 transition-all ${
                 isRecording
-                  ? 'bg-red-600 hover:bg-red-500 text-white animate-pulse shadow-lg shadow-red-500/30'
-                  : 'bg-white/5 hover:bg-white/10 text-white/70 border border-white/10'
+                  ? 'bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/40 animate-pulse shadow-sm shadow-red-500/20'
+                  : 'bg-zinc-800/80 hover:bg-zinc-800 text-zinc-300 border border-zinc-700'
               }`}
             >
-              <span className={`w-2 h-2 rounded-full ${isRecording ? 'bg-red-400' : 'bg-gray-500'}`} />
+              <span className={`w-2 h-2 rounded-full ${isRecording ? 'bg-red-400' : 'bg-zinc-500'}`} />
               {isRecording ? 'Detener grabación' : 'Grabar video (WebM)'}
             </button>
           )}
         </div>
 
         {/* Logs */}
-        <div className="flex-1 bg-black/40 border border-white/5 rounded-2xl p-4 flex flex-col gap-2 min-h-[120px] max-h-[220px] overflow-y-auto">
-          <span className="text-[9px] font-bold text-gray-500 uppercase tracking-wider">Actividad de conexión</span>
-          <div className="flex flex-col gap-1 text-[10px] font-mono text-gray-400">
+        <div className="flex-1 bg-zinc-900/60 border border-zinc-800 rounded-2xl p-4 flex flex-col gap-2 min-h-[120px] max-h-[220px] overflow-y-auto">
+          <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-wider">Actividad de conexión</span>
+          <div className="flex flex-col gap-1 text-[10px] font-mono text-zinc-400">
             {logs.length === 0 ? (
-              <span className="opacity-40 italic">Sin actividad reciente.</span>
+              <span className="text-zinc-600 italic">Sin actividad reciente.</span>
             ) : (
-              logs.map((log, i) => (
-                <div key={i} className={
-                  log.includes('✗') ? 'text-red-400' :
-                  log.includes('✓') ? 'text-green-400' :
-                  log.includes('⚠') ? 'text-amber-400' :
-                  log.includes('⏳') ? 'text-cyan-400 animate-pulse' : ''
-                }>
-                  {log}
-                </div>
-              ))
+              logs.map((log, i) => {
+                const lower = log.toLowerCase();
+                const colorClass = (lower.includes('falló') || lower.includes('límite') || lower.includes('no se pudo'))
+                  ? 'text-red-400'
+                  : (lower.includes('activa') || lower.includes('completada') || lower.includes('recibido') || lower.includes('guardada'))
+                  ? 'text-emerald-400'
+                  : (lower.includes('interrumpida') || lower.includes('reiniciando') || lower.includes('reconectando'))
+                  ? 'text-amber-400'
+                  : 'text-zinc-400';
+
+                return (
+                  <div key={i} className={colorClass}>
+                    {log}
+                  </div>
+                );
+              })
             )}
           </div>
         </div>

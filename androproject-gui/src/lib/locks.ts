@@ -11,11 +11,17 @@ import { ANDROPROJECT_HOME } from './paths';
 const execAsync = promisify(exec);
 
 // ── Lock file paths ─────────────────────────────────────────────
-export const getLockFile = (serial: string): string =>
-  path.join(ANDROPROJECT_HOME, `.androproject_active_${serial.replace(/[:.]/g, '_')}`);
+export const getLockFile = (serial: string, displayId: number | string = 0, source: string = 'display'): string => {
+  const safeSerial = serial.replace(/[:.]/g, '_');
+  const suffix = (displayId !== 0 && displayId !== '0') || source !== 'display' ? `_d${displayId}_${source}` : '';
+  return path.join(ANDROPROJECT_HOME, `.androproject_active_${safeSerial}${suffix}`);
+};
 
-export const getRecordLockFile = (serial: string): string =>
-  path.join(ANDROPROJECT_HOME, `.androproject_record_${serial.replace(/[:.]/g, '_')}`);
+export const getRecordLockFile = (serial: string, displayId: number | string = 0): string => {
+  const safeSerial = serial.replace(/[:.]/g, '_');
+  const suffix = displayId !== 0 && displayId !== '0' ? `_d${displayId}` : '';
+  return path.join(ANDROPROJECT_HOME, `.androproject_record_${safeSerial}${suffix}`);
+};
 
 // ── Lock lifecycle ──────────────────────────────────────────────
 export function writeLock(lockFile: string, data: { pid: number; serial: string; path?: string }): void {

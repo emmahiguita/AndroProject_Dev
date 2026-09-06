@@ -64,14 +64,14 @@ export function useActions() {
         headers: { 'Content-Type': 'application/json' },
       });
       const d = await r.json();
-      if (logResult) addLog(d.success ? `✓ ${d.message}` : `✗ ${d.error}`);
+      if (logResult) addLog(d.success ? `${d.message}` : `Error: ${d.error}`);
       if (!d.success && d.error && (typeof d.error === 'string') &&
           (d.error.includes('device offline') || d.error.includes('not found'))) {
         fetchDevice();
       }
       return d;
     } catch {
-      if (logResult) addLog('✗ Error de conexión');
+      if (logResult) addLog('Error de conexión');
       return { success: false, error: 'Error de conexión' };
     }
   }, [activeSerial, deviceIP, addLog]);
@@ -89,7 +89,7 @@ export function useActions() {
       if (d.success && d.device) {
         setDevice(d.device);
         if (d.device.serial && !activeSerial) setActiveSerial(d.device.serial);
-        if (d.device.state !== 'device') addLog(`⚠ Dispositivo en estado: ${d.device.state}`);
+        if (d.device.state !== 'device') addLog(`Dispositivo en estado: ${d.device.state}`);
         if (d.device.foregroundApp) setForegroundApp(d.device.foregroundApp);
         if (d.device.secureAppsList) setSecureAppsList(d.device.secureAppsList);
         if (d.device.ip) setDeviceIP(d.device.ip);
@@ -97,7 +97,7 @@ export function useActions() {
         if (d.config) setConfigData(d.config);
       }
     } catch {
-      addLog('✗ Error detectando dispositivo');
+      addLog('Error detectando dispositivo');
     } finally {
       setLoading(false);
     }
@@ -115,12 +115,12 @@ export function useActions() {
       const d = await r.json();
       if (d.success) {
         setAppsList(d.apps || []);
-        addLog(`✓ ${(d.apps || []).length} aplicaciones cargadas`);
+        addLog(`${(d.apps || []).length} aplicaciones cargadas`);
       } else {
-        addLog(`✗ ${d.error}`);
+        addLog(`Error: ${d.error}`);
       }
     } catch {
-      addLog('✗ Error al cargar aplicaciones');
+      addLog('Error al cargar aplicaciones');
     } finally {
       setAppsLoading(false);
     }
@@ -156,16 +156,16 @@ export function useActions() {
       });
       const d = await res.json();
       if (d.success) {
-        _setPatchLogs(`✓ ${d.message || 'Proceso completado exitosamente'}`);
-        addLog(`✓ Aplicación curada: ${pkg}`);
+        _setPatchLogs(`${d.message || 'Proceso completado exitosamente'}`);
+        addLog(`Aplicación curada: ${pkg}`);
       } else {
-        _setPatchLogs(`✗ ${d.error || 'Error en el proceso de curado'}`);
-        addLog(`✗ Error parcheando ${pkg}: ${d.error}`);
+        _setPatchLogs(`Error: ${d.error || 'Error en el proceso de curado'}`);
+        addLog(`Error parcheando ${pkg}: ${d.error}`);
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
-      _setPatchLogs(`✗ Error de conexión: ${msg}`);
-      addLog(`✗ Error de conexión al parchear ${pkg}`);
+      _setPatchLogs(`Error de conexión: ${msg}`);
+      addLog(`Error de conexión al parchear ${pkg}`);
     } finally {
       _setIsPatching(false);
     }
@@ -181,8 +181,8 @@ export function useActions() {
         setScreenStreaming(false);
       } else {
         const r = await run('open_screen', 'Abriendo proyección', { videoSource }, false);
-        if (r.success) { setScreenStreaming(true); addLog('✓ Proyección iniciada'); }
-        else { addLog(`✗ ${r.error}`); }
+        if (r.success) { setScreenStreaming(true); addLog('Proyección iniciada'); }
+        else { addLog(`Error: ${r.error}`); }
       }
     } finally {
       setScreenBusy(false);
@@ -213,7 +213,7 @@ export function useActions() {
         wasScreenOpenRef.current = true;
       }
       addLog(failed === 0
-        ? `✓ Proyección iniciada en ${started} dispositivo(s)`
+        ? `Proyección iniciada en ${started} dispositivo(s)`
         : `Proyección: ${started} ok, ${failed} fallaron`);
     } finally {
       setScreenBusy(false);
@@ -241,9 +241,9 @@ export function useActions() {
           const s = (recordingSecondsRef.current % 60).toString().padStart(2, '0');
           setRecordingElapsed(`${m}:${s}`);
         }, 1000);
-        addLog('✓ Grabación iniciada');
+        addLog('Grabación iniciada');
       } else {
-        addLog(`✗ ${r.error || 'Error al grabar'}`);
+        addLog(`Error al grabar: ${r.error || ''}`);
       }
     }
   };
@@ -274,7 +274,7 @@ export function useActions() {
         addLog('Diagnóstico completo obtenido');
       }
     } catch {
-      addLog('✗ Error de diagnóstico');
+      addLog('Error de diagnóstico');
     } finally {
       useAppStore.getState().setDiagLoading(false);
     }

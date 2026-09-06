@@ -4,7 +4,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   RefreshCw, Wifi, Usb, ArrowLeft, Home, Layers,
   Volume2, VolumeX, Power, Send, Type, MonitorPlay, LayoutGrid,
-  Activity, Minus, Square, X, ExternalLink,
+  Activity, Minus, Square, X, ExternalLink, ClipboardPaste, Clipboard, Check,
 } from 'lucide-react';
 import { useActions } from '@/hooks/useActions';
 import { ProjectionCanvas, ZoomState } from '@/components/projection/ProjectionCanvas';
@@ -25,7 +25,7 @@ const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v
 
 /**
  * DeviceFrame — Interactive hardware enclosure with bezel, hardware keys,
- * text input synthesizer, and embedded ProjectionCanvas viewport.
+ * text input synthesizer, PC clipboard synchronizer, and embedded ProjectionCanvas viewport.
  */
 export const DeviceFrame: React.FC<DeviceFrameProps> = ({
   device,
@@ -35,6 +35,7 @@ export const DeviceFrame: React.FC<DeviceFrameProps> = ({
   onToggleScrcpy,
 }) => {
   const { run } = useActions();
+  const isIos = device.platform === 'ios' || device.serial?.startsWith('airplay-');
   const [useMjpegStream, setUseMjpegStream] = useState(false);
   const [currentFps, setCurrentFps] = useState(0);
 
@@ -42,6 +43,8 @@ export const DeviceFrame: React.FC<DeviceFrameProps> = ({
   const [zoom, setZoom] = useState<ZoomState>({ scale: 1, ox: 0.5, oy: 0.5 });
   const [textInput, setTextInput] = useState('');
   const [sendingText, setSendingText] = useState(false);
+  const [pastingClip, setPastingClip] = useState(false);
+  const [pastedFeedback, setPastedFeedback] = useState(false);
 
   // Dynamic screen ratio from device resolution (e.g. 1080x2400 -> 0.45)
   const [resW, resH] = (device?.resolution || '')
@@ -61,7 +64,24 @@ export const DeviceFrame: React.FC<DeviceFrameProps> = ({
     }
   }, [onSendKey, device.serial, run]);
 
-  // Global keyboard shortcuts when device is expanded
+  // ── Paste PC Clipboard to Device ──
+  const handlePasteFromPc = useCallback(async () => {
+    if (!device.serial || pastingClip) return;
+    setPastingClip(true);
+    try {
+      const text = await navigator.clipboard.readText();
+      if (!text) return;
+      await run('paste_clipboard', 'Pegar del PC', { text, serial: device.serial }, false);
+      setPastedFeedback(true);
+      setTimeout(() => setPastedFeedback(false), 2000);
+    } catch (err) {
+      console.warn('[Clipboard] Error leyendo portapapeles de la PC:', err);
+    } finally {
+      setPastingClip(false);
+    }
+  }, [device.serial, pastingClip, run]);
+
+  // Global keyboard shortcuts and clipboard paste when device is expanded
   useEffect(() => {
     if (!expanded) return;
     const el = containerRef.current;
@@ -78,10 +98,19 @@ export const DeviceFrame: React.FC<DeviceFrameProps> = ({
       Backspace: 'KEYCODE_DEL',
       ' ': 'KEYCODE_SPACE',
       Home: 'KEYCODE_HOME',
+      Notification: 'KEYCODE_NOTIFICATION',
     };
 
     const onKeyDown = (e: KeyboardEvent) => {
       if ((e.target as HTMLElement)?.tagName === 'INPUT') return;
+
+      // Ctrl + V / Cmd + V in canvas -> paste from PC clipboard
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'v') {
+        e.preventDefault();
+        handlePasteFromPc();
+        return;
+      }
+
       const k = MAP[e.key];
       if (k) {
         e.preventDefault();
@@ -89,9 +118,24 @@ export const DeviceFrame: React.FC<DeviceFrameProps> = ({
       }
     };
 
+    const onPaste = (e: ClipboardEvent) => {
+      if ((e.target as HTMLElement)?.tagName === 'INPUT') return;
+      const text = e.clipboardData?.getData('text');
+      if (text && device.serial) {
+        e.preventDefault();
+        run('paste_clipboard', 'Pegar del PC', { text, serial: device.serial }, false);
+        setPastedFeedback(true);
+        setTimeout(() => setPastedFeedback(false), 2000);
+      }
+    };
+
     el.addEventListener('keydown', onKeyDown);
-    return () => el.removeEventListener('keydown', onKeyDown);
-  }, [expanded, handleKey]);
+    el.addEventListener('paste', onPaste);
+    return () => {
+      el.removeEventListener('keydown', onKeyDown);
+      el.removeEventListener('paste', onPaste);
+    };
+  }, [expanded, handleKey, handlePasteFromPc, device.serial, run]);
 
   // ── Text input transmitter ──
   const handleSendText = useCallback(async (e?: React.FormEvent) => {
@@ -112,136 +156,99 @@ export const DeviceFrame: React.FC<DeviceFrameProps> = ({
 
   if (!expanded) return null;
 
-  const zoomed = zoom.scale > 1;
-  const zoomLabel = `${Math.round(zoom.scale * 100)}%`;
-  const isWifi = device.connectionType === 'Wi-Fi';
   const isDisconnected = device.state !== 'device';
-  const isIos = device.platform === 'ios' || device.serial?.startsWith('airplay-');
 
   return (
-    <div ref={containerRef} className="flex flex-col flex-1 min-h-0 min-w-0 bg-[#080b11] outline-none">
+    <div ref={containerRef} className="flex flex-col flex-1 min-h-0 min-w-0 bg-zinc-950 outline-none">
 
-      {/* ═══ Futuristic Cybernetic Header Bar (AndroProject Reverse Agent Bridge) ═══ */}
-      <div className="mx-2.5 mt-2 mb-1 px-3.5 py-2 rounded-2xl border border-[#00e5ff]/35 bg-gradient-to-r from-[#070e1a] via-[#0a182c] to-[#040912] shadow-[0_8px_25px_-5px_rgba(0,229,255,0.2)] flex items-center justify-between relative overflow-hidden backdrop-blur-xl shrink-0 ring-1 ring-white/10">
+      {/* ═══ Header Bar (RicoUI Minimalist Design) ═══ */}
+      <div className="mx-2 mt-1.5 mb-1 px-3 py-1.5 rounded-xl border border-zinc-800/80 bg-zinc-900/60 shadow-sm flex items-center justify-between backdrop-blur-md shrink-0">
         
-        {/* Left Side: Squircle Logo + AndroProject Title + Pulse Badge */}
-        <div className="flex items-center gap-2.5 min-w-0">
-          <div className="w-8 h-8 rounded-xl border border-[#00e5ff]/50 bg-black/70 shadow-md shadow-[#00e5ff]/25 p-0.5 flex items-center justify-center shrink-0 ring-1 ring-white/20">
-            <img src="/logo.png" alt="AndroProject" className="w-full h-full object-cover rounded-lg" />
+        {/* Left Side: Brand Logo + Device Title + Status */}
+        <div className="flex items-center gap-2 min-w-0">
+          <div className="w-5 h-5 rounded-md border border-zinc-800 bg-zinc-950 flex items-center justify-center shrink-0 overflow-hidden">
+            <img src="/logo.png" alt="AndroProject" className="w-full h-full object-cover" />
           </div>
-
           <div className="flex items-center gap-2 min-w-0">
-            <span className="font-extrabold text-white text-sm md:text-base tracking-wide drop-shadow-[0_2px_8px_rgba(0,229,255,0.5)] truncate">
-              AndroProject
+            <span className="font-semibold text-zinc-100 text-xs tracking-tight truncate">
+              {device.model || (isIos ? 'Apple Device' : 'Android Device')}
             </span>
-
-            {/* Reverse Agent Bridge Monitor Heartbeat Badge */}
-            <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#00e5ff]/10 border border-[#00e5ff]/30 text-[10px] font-semibold text-[#00e5ff] shadow-sm shadow-[#00e5ff]/15">
-              <Activity size={11} className="text-[#00e5ff] animate-pulse" />
-              <span className="truncate">{isIos ? 'Apple AirPlay 2 Receiver' : 'Reverse Agent Bridge Monitor'}</span>
+            <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-zinc-800/50 border border-zinc-700/40 text-[10px] text-zinc-400">
+              <span className={`w-1.5 h-1.5 rounded-full ${isDisconnected ? 'bg-zinc-600' : 'bg-emerald-500'}`} />
+              <span className="font-mono text-[10px] text-zinc-300">{device.serial}</span>
             </div>
           </div>
         </div>
 
-        {/* Right Side: Device status + VisionNano + Cybernetic Window Controls */}
+        {/* Right Side: VisionNano + Window Controls */}
         <div className="flex items-center gap-1.5 shrink-0">
-          {/* Device model / Connection badge */}
-          <div className="hidden lg:flex items-center gap-1 px-2 py-0.5 rounded-lg bg-white/5 border border-white/10 text-[10px] text-white/70">
-            <span className={`w-1.5 h-1.5 rounded-full ${isDisconnected ? 'bg-red-400' : 'bg-emerald-400 animate-pulse'}`} />
-            <span className="truncate max-w-[110px] font-medium">{device.model || (isIos ? 'iPhone' : 'Android')}</span>
-          </div>
-
           {/* Quick VisionNano Toggle */}
           {onToggleScrcpy && !isIos && (
             <button
               type="button"
               onClick={onToggleScrcpy}
-              className={`flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-lg border transition-all ${
+              className={`flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-lg border transition-colors ${
                 scrcpyActive
-                  ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 shadow-sm shadow-emerald-500/30 hover:bg-red-500/20 hover:text-red-300 hover:border-red-500/40'
-                  : 'bg-[#00e5ff]/10 text-[#00e5ff] border-[#00e5ff]/25 hover:bg-[#00e5ff]/20'
+                  ? 'bg-zinc-800 text-emerald-400 border-zinc-700 hover:bg-zinc-700'
+                  : 'bg-zinc-800/80 hover:bg-zinc-700/80 text-zinc-200 border-zinc-700/50'
               }`}
-              title={scrcpyActive ? 'VisionNano Direct3D11 Activo (Clic para cerrar)' : 'Abrir VisionNano 60 FPS Direct3D11'}
+              title={scrcpyActive ? 'VisionNano 60 FPS Activo (Clic para detener)' : 'Iniciar VisionNano 60 FPS nativo Direct3D11'}
             >
-              <MonitorPlay size={11} className={scrcpyActive ? 'text-emerald-400 animate-pulse' : 'text-[#00e5ff]'} />
-              <span className="hidden xl:inline">{scrcpyActive ? '60 FPS Activo' : 'VisionNano'}</span>
+              <MonitorPlay size={12} className={scrcpyActive ? 'text-emerald-400' : 'text-zinc-400'} />
+              <span className="hidden sm:inline">{scrcpyActive ? '60 FPS Activo' : 'VisionNano 60 FPS'}</span>
             </button>
           )}
 
-          {/* Cybernetic Window Action Buttons */}
-          <div className="flex items-center gap-1 pl-1">
-            {/* Minimize / Zoom reset */}
+          {/* Window Action Buttons */}
+          <div className="flex items-center gap-1 pl-1 border-l border-zinc-800/80">
+            {/* Reset Zoom */}
             <button
               type="button"
               onClick={() => setZoom({ scale: 1, ox: 0.5, oy: 0.5 })}
-              className="w-6 h-6 rounded-md border border-[#00e5ff]/25 bg-[#081220]/90 text-[#00e5ff]/80 hover:text-[#00e5ff] hover:bg-[#00e5ff]/20 hover:border-[#00e5ff]/50 flex items-center justify-center transition-all active:scale-95 cursor-pointer"
-              title="Restablecer vista"
+              className="w-6 h-6 rounded-md border border-zinc-800/80 bg-zinc-900/50 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 flex items-center justify-center transition-colors cursor-pointer"
+              title="Restablecer zoom"
             >
-              <Minus size={12} strokeWidth={2.5} />
+              <Minus size={12} />
             </button>
 
-            {/* Maximize / Zoom toggle */}
+            {/* Toggle Zoom */}
             <button
               type="button"
               onClick={() => setZoom(z => ({ ...z, scale: z.scale > 1 ? 1 : 2 }))}
-              className="w-6 h-6 rounded-md border border-[#00e5ff]/25 bg-[#081220]/90 text-[#00e5ff]/80 hover:text-[#00e5ff] hover:bg-[#00e5ff]/20 hover:border-[#00e5ff]/50 flex items-center justify-center transition-all active:scale-95 cursor-pointer"
-              title="Maximizar escala de proyección"
+              className="w-6 h-6 rounded-md border border-zinc-800/80 bg-zinc-900/50 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 flex items-center justify-center transition-colors cursor-pointer"
+              title="Alternar escala"
             >
-              <Square size={10} strokeWidth={2.5} />
+              <Square size={10} />
             </button>
 
-            {/* Popout External Floating Window */}
+            {/* Popout Window */}
             <button
               type="button"
               onClick={() => {
                 const url = isIos ? '/popout?device=ios' : `/popout?serial=${encodeURIComponent(device.serial)}`;
-                window.open(url, 'DexterAnd_Popout_Screen', 'width=480,height=980,resizable=yes,scrollbars=no,status=no,toolbar=no,menubar=no,location=no');
+                window.open(url, 'AndroProject_Popout', 'width=480,height=980,resizable=yes,scrollbars=no,status=no,toolbar=no,menubar=no,location=no');
               }}
-              className="w-6 h-6 rounded-md border border-[#00e5ff]/25 bg-[#081220]/90 text-[#00e5ff]/80 hover:text-emerald-300 hover:bg-emerald-500/25 hover:border-emerald-500/50 flex items-center justify-center transition-all active:scale-95 cursor-pointer"
-              title="Abrir proyección en ventana flotante externa independiente"
+              className="w-6 h-6 rounded-md border border-zinc-800/80 bg-zinc-900/50 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 flex items-center justify-center transition-colors cursor-pointer"
+              title="Abrir en ventana independiente"
             >
-              <ExternalLink size={11} strokeWidth={2.5} />
-            </button>
-
-            {/* Close / Stop projection */}
-            <button
-              type="button"
-              onClick={() => {
-                if (scrcpyActive && onToggleScrcpy) onToggleScrcpy();
-              }}
-              className="w-6 h-6 rounded-md border border-[#00e5ff]/25 bg-[#081220]/90 text-[#00e5ff]/80 hover:text-rose-300 hover:bg-rose-500/25 hover:border-rose-500/50 flex items-center justify-center transition-all active:scale-95 cursor-pointer"
-              title="Detener proyección"
-            >
-              <X size={12} strokeWidth={2.5} />
+              <ExternalLink size={11} />
             </button>
           </div>
         </div>
       </div>
 
       {/* ═══ Interactive Screen Viewport ═══ */}
-      <div className="flex-1 flex items-center justify-center bg-gradient-to-b from-[#06080e] via-[#090d15] to-[#06080e] min-h-0 p-2.5 relative overflow-hidden">
+      <div className="flex-1 flex items-center justify-center bg-zinc-950 min-h-0 min-w-0 p-1.5 relative overflow-hidden">
         {/* Smartphone Bezel Enclosure */}
-        <div style={{ aspectRatio: `${deviceRatio}` }} className="relative h-full max-h-full max-w-full rounded-[34px] p-2 bg-[#121620] border-[2.5px] border-white/10 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9),0_0_0_1px_rgba(255,255,255,0.06)] flex flex-col items-center justify-center">
-
-          {/* Camera Notch / Apple Dynamic Island */}
-          {isIos ? (
-            <div className="absolute top-3.5 left-1/2 -translate-x-1/2 z-20 flex items-center justify-between px-3 py-1 rounded-full bg-black border border-white/20 shadow-lg min-w-[90px]">
-              <div className="w-2 h-2 rounded-full bg-[#0a0d13] border border-white/30 flex items-center justify-center">
-                <div className="w-1 h-1 rounded-full bg-blue-500" />
-              </div>
-              <div className="flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                <span className="text-[8px] font-bold text-white/80">AirPlay</span>
-              </div>
-            </div>
-          ) : (
-            <div className="absolute top-3 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-black/90 border border-white/15 shadow-md">
-              <div className="w-2.5 h-2.5 rounded-full bg-[#0a0d13] border border-white/20 flex items-center justify-center">
-                <div className="w-1 h-1 rounded-full bg-blue-500/80" />
-              </div>
-              {scrcpyActive && <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />}
-            </div>
-          )}
+        <div
+          style={{ aspectRatio: `${deviceRatio}` }}
+          className="relative h-full max-h-full max-w-full rounded-[30px] p-2 bg-zinc-950 border border-zinc-800/80 shadow-2xl flex flex-col items-center justify-center overflow-hidden ring-1 ring-white/[0.04]"
+        >
+          {/* Subtle Camera Island */}
+          <div className="absolute top-3 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-zinc-900/90 border border-zinc-800 shadow-sm pointer-events-none">
+            <div className="w-1.5 h-1.5 rounded-full bg-zinc-950 border border-zinc-700/50" />
+            {scrcpyActive && <span className="w-1 h-1 rounded-full bg-emerald-500" />}
+          </div>
 
           {/* Hardware Accelerated Interactive Projection Canvas */}
           <ProjectionCanvas
@@ -257,33 +264,44 @@ export const DeviceFrame: React.FC<DeviceFrameProps> = ({
       </div>
 
       {/* ═══ Text Input Bar ═══ */}
-      <form onSubmit={handleSendText} className="flex items-center gap-2 px-3 py-2 border-t border-white/5 bg-white/[0.015] shrink-0">
+      <form onSubmit={handleSendText} className="flex items-center gap-2 px-3 py-1.5 bg-zinc-950/80 shrink-0 border-t border-zinc-800/80">
         <div className="relative flex-1">
-          <Type size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-white/30" />
+          <Type size={12} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
           <input
             type="text"
             value={textInput}
             onChange={(e) => setTextInput(e.target.value)}
-            placeholder={isIos ? "Escribir texto en el dispositivo Apple / AirPlay..." : "Escribir texto en el dispositivo Android..."}
-            className="w-full pl-8 pr-3 py-1.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-xs placeholder:text-white/25 focus:outline-none focus:border-[#22c97d]/50"
+            placeholder={isIos ? "Escribir en el dispositivo..." : "Escribir texto en Android..."}
+            className="w-full pl-8 pr-3 py-1.5 rounded-lg bg-zinc-900/70 border border-zinc-800 text-zinc-100 text-xs placeholder:text-zinc-500 focus:outline-none focus:border-zinc-600 transition-colors"
           />
         </div>
         <button
+          type="button"
+          onClick={handlePasteFromPc}
+          disabled={pastingClip || !device.serial}
+          title="Pegar texto copiado en la PC (Ctrl + V)"
+          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-zinc-800 bg-zinc-900/80 hover:bg-zinc-800 text-zinc-300 text-xs font-medium transition-colors cursor-pointer disabled:opacity-40"
+        >
+          {pastedFeedback ? <Check size={12} className="text-emerald-400" /> : <ClipboardPaste size={12} />}
+          <span className="hidden sm:inline">{pastedFeedback ? 'Pegado' : 'Pegar PC'}</span>
+        </button>
+        <button
           type="submit"
           disabled={!textInput.trim() || sendingText}
-          className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-[#1bae6e] hover:bg-[#22c97d] disabled:opacity-40 text-white text-xs font-bold transition-all shadow-sm shadow-[#1bae6e]/20"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-100 hover:bg-white text-zinc-950 text-xs font-semibold transition-colors disabled:opacity-40 shadow-sm cursor-pointer"
         >
-          <Send size={11} /> Enviar
+          <Send size={11} />
+          <span>Enviar</span>
         </button>
       </form>
 
-      {/* ═══ Hardware Navigation Bar ═══ */}
-      <div className="grid grid-cols-7 gap-1 px-2 py-1.5 border-t border-white/5 bg-black/40 shrink-0">
+      {/* ═══ Hardware Navigation Bar (RicoUI Monochromatic Minimalist Style) ═══ */}
+      <div className="grid grid-cols-7 gap-1 px-2.5 py-1.5 bg-zinc-950 shrink-0 border-t border-zinc-800/50">
         <button
           type="button"
           onClick={() => handleKey('KEYCODE_BACK')}
           title="Atrás (Escape)"
-          className="flex flex-col items-center justify-center gap-0.5 py-1 px-0.5 rounded-xl text-[9px] font-semibold bg-white/[0.03] text-white/60 hover:text-white hover:bg-white/[0.08] border border-white/5 transition-all min-w-0"
+          className="flex flex-col items-center justify-center gap-0.5 py-1.5 rounded-lg text-[10px] font-medium bg-zinc-900/40 hover:bg-zinc-800/80 text-zinc-400 hover:text-zinc-200 border border-zinc-800/40 transition-colors"
         >
           <ArrowLeft size={12} className="shrink-0" />
           <span className="truncate w-full text-center">Atrás</span>
@@ -292,7 +310,7 @@ export const DeviceFrame: React.FC<DeviceFrameProps> = ({
           type="button"
           onClick={() => handleKey('KEYCODE_HOME')}
           title="Inicio (Home)"
-          className="flex flex-col items-center justify-center gap-0.5 py-1 px-0.5 rounded-xl text-[9px] font-bold bg-[#1bae6e]/15 text-[#22c97d] hover:bg-[#1bae6e]/25 border border-[#1bae6e]/25 transition-all min-w-0"
+          className="flex flex-col items-center justify-center gap-0.5 py-1.5 rounded-lg text-[10px] font-medium bg-zinc-900/40 hover:bg-zinc-800/80 text-zinc-400 hover:text-zinc-200 border border-zinc-800/40 transition-colors"
         >
           <Home size={12} className="shrink-0" />
           <span className="truncate w-full text-center">Inicio</span>
@@ -301,7 +319,7 @@ export const DeviceFrame: React.FC<DeviceFrameProps> = ({
           type="button"
           onClick={() => handleKey('KEYCODE_ALL_APPS')}
           title="Menú de Aplicaciones (App Drawer)"
-          className="flex flex-col items-center justify-center gap-0.5 py-1 px-0.5 rounded-xl text-[9px] font-bold bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/20 transition-all min-w-0"
+          className="flex flex-col items-center justify-center gap-0.5 py-1.5 rounded-lg text-[10px] font-medium bg-zinc-900/40 hover:bg-zinc-800/80 text-zinc-400 hover:text-zinc-200 border border-zinc-800/40 transition-colors"
         >
           <LayoutGrid size={12} className="shrink-0" />
           <span className="truncate w-full text-center">Apps</span>
@@ -310,7 +328,7 @@ export const DeviceFrame: React.FC<DeviceFrameProps> = ({
           type="button"
           onClick={() => handleKey('KEYCODE_APP_SWITCH')}
           title="Aplicaciones Recientes"
-          className="flex flex-col items-center justify-center gap-0.5 py-1 px-0.5 rounded-xl text-[9px] font-semibold bg-white/[0.03] text-white/60 hover:text-white hover:bg-white/[0.08] border border-white/5 transition-all min-w-0"
+          className="flex flex-col items-center justify-center gap-0.5 py-1.5 rounded-lg text-[10px] font-medium bg-zinc-900/40 hover:bg-zinc-800/80 text-zinc-400 hover:text-zinc-200 border border-zinc-800/40 transition-colors"
         >
           <Layers size={12} className="shrink-0" />
           <span className="truncate w-full text-center">Recientes</span>
@@ -319,7 +337,7 @@ export const DeviceFrame: React.FC<DeviceFrameProps> = ({
           type="button"
           onClick={() => handleKey('KEYCODE_POWER')}
           title="Suspender / Despertar Pantalla"
-          className="flex flex-col items-center justify-center gap-0.5 py-1 px-0.5 rounded-xl text-[9px] font-semibold bg-white/[0.03] text-amber-400/80 hover:text-amber-300 hover:bg-white/[0.08] border border-white/5 transition-all min-w-0"
+          className="flex flex-col items-center justify-center gap-0.5 py-1.5 rounded-lg text-[10px] font-medium bg-zinc-900/40 hover:bg-zinc-800/80 text-zinc-400 hover:text-zinc-200 border border-zinc-800/40 transition-colors"
         >
           <Power size={12} className="shrink-0" />
           <span className="truncate w-full text-center">Pantalla</span>
@@ -328,7 +346,7 @@ export const DeviceFrame: React.FC<DeviceFrameProps> = ({
           type="button"
           onClick={() => handleKey('KEYCODE_VOLUME_DOWN')}
           title="Bajar Volumen"
-          className="flex flex-col items-center justify-center gap-0.5 py-1 px-0.5 rounded-xl text-[9px] font-semibold bg-white/[0.03] text-white/60 hover:text-white hover:bg-white/[0.08] border border-white/5 transition-all min-w-0"
+          className="flex flex-col items-center justify-center gap-0.5 py-1.5 rounded-lg text-[10px] font-medium bg-zinc-900/40 hover:bg-zinc-800/80 text-zinc-400 hover:text-zinc-200 border border-zinc-800/40 transition-colors"
         >
           <VolumeX size={12} className="shrink-0" />
           <span className="truncate w-full text-center">Vol-</span>
@@ -337,7 +355,7 @@ export const DeviceFrame: React.FC<DeviceFrameProps> = ({
           type="button"
           onClick={() => handleKey('KEYCODE_VOLUME_UP')}
           title="Subir Volumen"
-          className="flex flex-col items-center justify-center gap-0.5 py-1 px-0.5 rounded-xl text-[9px] font-semibold bg-white/[0.03] text-white/60 hover:text-white hover:bg-white/[0.08] border border-white/5 transition-all min-w-0"
+          className="flex flex-col items-center justify-center gap-0.5 py-1.5 rounded-lg text-[10px] font-medium bg-zinc-900/40 hover:bg-zinc-800/80 text-zinc-400 hover:text-zinc-200 border border-zinc-800/40 transition-colors"
         >
           <Volume2 size={12} className="shrink-0" />
           <span className="truncate w-full text-center">Vol+</span>

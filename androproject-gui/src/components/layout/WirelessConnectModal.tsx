@@ -53,11 +53,11 @@ export const WirelessConnectModal: React.FC<WirelessConnectModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-4">
-      <div className="glow-card rounded-2xl p-6 w-full max-w-md bg-[#0b0e17] border border-white/10 shadow-2xl space-y-5 animate-in fade-in zoom-in duration-200">
+      <div className="glow-card rounded-2xl p-6 w-full max-w-md bg-zinc-900 border border-zinc-800 shadow-2xl space-y-5 animate-in fade-in zoom-in duration-200">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 text-white font-bold text-base">
-            <Wifi size={18} className="text-[#22c97d]" />
+            <Wifi size={18} className="text-zinc-300" />
             <span>Conectar Dispositivo Wi-Fi</span>
           </div>
           <button onClick={onClose} className="p-1 rounded-lg text-white/40 hover:text-white hover:bg-white/10">
@@ -79,7 +79,7 @@ export const WirelessConnectModal: React.FC<WirelessConnectModalProps> = ({
               value={ip}
               onChange={(e) => setIp(e.target.value)}
               onKeyDown={(e) => { if (e.key === 'Enter') handleConnect(); }}
-              className="w-full bg-white/[0.04] border border-white/10 rounded-xl px-3.5 py-2 text-xs text-white placeholder:text-white/20 focus:outline-none focus:border-[#22c97d]"
+              className="w-full bg-white/[0.04] border border-white/10 rounded-xl px-3.5 py-2 text-xs text-white placeholder:text-white/20 focus:outline-none focus:border-zinc-500"
               autoFocus
             />
           </div>
@@ -90,7 +90,7 @@ export const WirelessConnectModal: React.FC<WirelessConnectModalProps> = ({
               placeholder="5555"
               value={port}
               onChange={(e) => setPort(e.target.value)}
-              className="w-full bg-white/[0.04] border border-white/10 rounded-xl px-3.5 py-2 text-xs text-white placeholder:text-white/20 focus:outline-none focus:border-[#22c97d]"
+              className="w-full bg-white/[0.04] border border-white/10 rounded-xl px-3.5 py-2 text-xs text-white placeholder:text-white/20 focus:outline-none focus:border-zinc-500"
             />
           </div>
         </div>
@@ -102,7 +102,7 @@ export const WirelessConnectModal: React.FC<WirelessConnectModalProps> = ({
             Cancelar
           </button>
           <button onClick={handleConnect} disabled={connecting || !ip.trim()}
-            className="px-5 py-2 rounded-xl bg-[#1bae6e] hover:bg-[#1bae6e]/90 text-slate-950 text-xs font-bold transition-all disabled:opacity-50">
+            className="px-5 py-2 rounded-xl bg-zinc-100 hover:bg-zinc-200 text-zinc-900 text-xs font-bold transition-all disabled:opacity-50">
             {connecting ? 'Conectando...' : 'Establecer Conexión'}
           </button>
         </div>

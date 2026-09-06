@@ -62,63 +62,44 @@ const MjpegStreamView: React.FC<MjpegStreamViewProps> = ({
 }) => {
   const internalImgRef = useRef<HTMLImageElement>(null);
   const imgRef = externalImgRef ?? internalImgRef;
-  const [connected, setConnected] = useState(false);
-  const [errored, setErrored] = useState(false);
-  const loadTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [retryKey, setRetryKey] = useState(0);
+  const retryCountRef = useRef(0);
+  const retryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  useEffect(() => {
-    if (!imgRef.current) return;
+  // Build stream URL (key forces img remount on retry)
+  const streamUrl = `/api/device-stream?serial=${encodeURIComponent(serial)}&mode=mjpeg&maxSize=720&maxFps=30`;
 
-    const img = imgRef.current;
-    const streamUrl = `/api/device-stream?serial=${encodeURIComponent(serial)}&mode=mjpeg&maxSize=720&maxFps=30&bitRate=4M`;
+  const handleLoad = () => {
+    retryCountRef.current = 0; // success — reset retry counter
+    onLoad?.();
+  };
 
-    if (loadTimeoutRef.current) {
-      clearTimeout(loadTimeoutRef.current);
-    }
-
-    img.src = streamUrl;
-    setConnected(true);
-    setErrored(false);
-
-    const handleLoad = () => {
-      setConnected(true);
-      setErrored(false);
-      onLoad?.();
-    };
-
-    const handleError = () => {
-      setConnected(false);
-      setErrored(true);
+  const handleError = () => {
+    if (retryCountRef.current < 4) {
+      // Silent retry: remount the img after a short delay
+      retryCountRef.current++;
+      const delay = 1000 * retryCountRef.current;
+      retryTimerRef.current = setTimeout(() => setRetryKey((k) => k + 1), delay);
+    } else {
+      // Give up after 4 retries — let the parent show the fallback
       onError?.();
-    };
+    }
+  };
 
-    loadTimeoutRef.current = setTimeout(() => {
-      if (!connected && !errored) {
-        setErrored(true);
-        onError?.();
-      }
-    }, 2500);
-
-    img.addEventListener('load', handleLoad);
-    img.addEventListener('error', handleError);
-
-    return () => {
-      if (loadTimeoutRef.current) {
-        clearTimeout(loadTimeoutRef.current);
-      }
-      img.removeEventListener('load', handleLoad);
-      img.removeEventListener('error', handleError);
-      img.src = '';
-    };
-  }, [serial, onError, onLoad, imgRef]);
-
-  if (errored) return null;
+  // Cleanup retry timer on unmount
+  useEffect(() => () => { if (retryTimerRef.current) clearTimeout(retryTimerRef.current); }, []);
+  // Reset retry counter when serial changes
+  useEffect(() => { retryCountRef.current = 0; setRetryKey(0); }, [serial]);
 
   return (
     <img
+      key={retryKey}
       ref={imgRef}
+      src={streamUrl}
       alt={`Stream ${serial}`}
       className={className}
+      onLoad={handleLoad}
+      onError={handleError}
       style={style ?? {
         width: '100%',
         height: '100%',
@@ -149,20 +130,25 @@ export const ProjectionCanvas: React.FC<ProjectionCanvasProps> = ({
   const imgRef = useRef<HTMLImageElement>(null);
   const screenRef = useRef<HTMLDivElement>(null);
 
-  const { frameUrl, connected, fps, refreshNow } = useDeviceStream(device.serial, true);
-  const { run } = useActions();
-
-  const [ripples, setRipples] = useState<TouchRipple[]>([]);
-  const rippleIdRef = useRef(0);
+  const [mjpegError, setMjpegError] = useState(false);
+  const [mjpegLoaded, setMjpegLoaded] = useState(false);
+  const [imgError, setImgError] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [isLaunching, setIsLaunching] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
   const [dropStatus, setDropStatus] = useState<{
     status: 'uploading' | 'success' | 'error';
     message: string;
   } | null>(null);
-  const [isSyncing, setIsSyncing] = useState(false);
-  const [imgError, setImgError] = useState(false);
-  const [mjpegError, setMjpegError] = useState(false);
-  const [isLaunching, setIsLaunching] = useState(false);
+  const [ripples, setRipples] = useState<TouchRipple[]>([]);
+  const rippleIdRef = useRef(0);
+
+  const isPollingEnabled = !useMjpegStream || mjpegError;
+  const { frameUrl, connected: pollingConnected, fps, refreshNow } = useDeviceStream(device.serial, isPollingEnabled);
+  // When MJPEG mode is active, treat device as connected if device.state is 'device'
+  // (polling hook is disabled so its `connected` value is always false)
+  const connected = useMjpegStream ? device.state === 'device' : pollingConnected;
+  const { run } = useActions();
 
   const handleToggleScrcpy = async (e: React.MouseEvent | React.PointerEvent) => {
     e.stopPropagation();
@@ -183,24 +169,32 @@ export const ProjectionCanvas: React.FC<ProjectionCanvasProps> = ({
     setImgError(false);
     setIsSyncing(false);
     setMjpegError(false);
-  }, [frameUrl]);
+    setMjpegLoaded(false);
+  }, [frameUrl, device?.serial]);
+
+  // Auto-retry MJPEG after 5s if it errored — handles cold-start compilation delays
+  useEffect(() => {
+    if (!mjpegError || !useMjpegStream) return;
+    const t = setTimeout(() => setMjpegError(false), 5000);
+    return () => clearTimeout(t);
+  }, [mjpegError, useMjpegStream]);
 
   // ── Touch & gesture dispatchers ──
   const tapDevice = useCallback(async (x: number, y: number) => {
     if (!device?.serial || !Number.isFinite(x) || !Number.isFinite(y)) return;
     setIsSyncing(true);
     await run('input_tap', 'Tap', { x: Math.round(x), y: Math.round(y), serial: device.serial }, false);
-    refreshNow();
+    if (!useMjpegStream || mjpegError) refreshNow();
     setIsSyncing(false);
-  }, [run, device?.serial, refreshNow]);
+  }, [run, device?.serial, refreshNow, useMjpegStream, mjpegError]);
 
   const longPressDevice = useCallback(async (x: number, y: number) => {
     if (!device?.serial || !Number.isFinite(x) || !Number.isFinite(y)) return;
     setIsSyncing(true);
     await run('input_swipe', 'Long Press', { x1: Math.round(x), y1: Math.round(y), x2: Math.round(x), y2: Math.round(y), duration: 1000, serial: device.serial }, false);
-    refreshNow();
+    if (!useMjpegStream || mjpegError) refreshNow();
     setIsSyncing(false);
-  }, [run, device?.serial, refreshNow]);
+  }, [run, device?.serial, refreshNow, useMjpegStream, mjpegError]);
 
   const swipeDevice = useCallback(async (
     x1: number, y1: number, x2: number, y2: number, duration = 120,
@@ -208,9 +202,9 @@ export const ProjectionCanvas: React.FC<ProjectionCanvasProps> = ({
     if (!device?.serial || !Number.isFinite(x1) || !Number.isFinite(y1) || !Number.isFinite(x2) || !Number.isFinite(y2)) return;
     setIsSyncing(true);
     await run('input_swipe', 'Gesto', { x1: Math.round(x1), y1: Math.round(y1), x2: Math.round(x2), y2: Math.round(y2), duration, serial: device.serial }, false);
-    refreshNow();
+    if (!useMjpegStream || mjpegError) refreshNow();
     setIsSyncing(false);
-  }, [run, device?.serial, refreshNow]);
+  }, [run, device?.serial, refreshNow, useMjpegStream, mjpegError]);
 
   const tapRef = useRef(tapDevice);
   const longPressRef = useRef(longPressDevice);
@@ -527,8 +521,12 @@ export const ProjectionCanvas: React.FC<ProjectionCanvasProps> = ({
           <MjpegStreamView
             serial={device.serial}
             imgRef={imgRef}
-            onError={() => setMjpegError(true)}
-            onLoad={() => setMjpegError(false)}
+            onError={() => {
+              setMjpegError(true);
+            }}
+            onLoad={() => {
+              setMjpegError(false);
+            }}
             style={{
               width: '100%',
               height: '100%',
@@ -539,6 +537,7 @@ export const ProjectionCanvas: React.FC<ProjectionCanvasProps> = ({
               transform: `scale(${zoom.scale})`,
               transformOrigin: `${zoom.ox * 100}% ${zoom.oy * 100}%`,
               display: mjpegError ? 'none' : undefined,
+              opacity: 1,
             }}
           />
         )}
@@ -563,18 +562,18 @@ export const ProjectionCanvas: React.FC<ProjectionCanvasProps> = ({
             {/* Error overlay */}
             {imgError && (
               <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 p-4 text-center bg-black/60 backdrop-blur-sm">
-                <div className="w-8 h-8 rounded-full border-2 border-white/10 border-t-yellow-400 animate-spin" />
-                <span className="text-[10px] text-yellow-400 font-medium">Reconectando captura...</span>
+                <div className="w-8 h-8 rounded-full border-2 border-white/10 border-t-zinc-400 animate-spin" />
+                <span className="text-xs text-zinc-400 font-medium">Reconectando captura...</span>
               </div>
             )}
           </>
         )}
 
-        {/* ── Touch Ripples Animation ── */}
+        {/* ── Touch Ripples Animation (RicoUI Subtle Monochrome) ── */}
         {ripples.map((r) => (
           <span
             key={r.id}
-            className="absolute rounded-full bg-white/40 pointer-events-none animate-ping"
+            className="absolute rounded-full bg-white/30 pointer-events-none animate-ping"
             style={{
               left: r.x - 12,
               top: r.y - 12,
@@ -586,62 +585,19 @@ export const ProjectionCanvas: React.FC<ProjectionCanvasProps> = ({
 
         {/* ── Live Syncing Indicator ── */}
         {isSyncing && (
-          <div className="absolute top-2 left-2 z-20 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/80 backdrop-blur-md border border-emerald-500/40 text-emerald-400 text-[10px] font-mono shadow-md animate-pulse">
-            <Loader2 size={11} className="animate-spin" />
-            <span>Sincronizando ADB...</span>
+          <div className="absolute top-3 left-3 z-20 flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-zinc-900/90 backdrop-blur-md border border-zinc-800 text-zinc-300 text-[10px] font-mono shadow-sm">
+            <Loader2 size={11} className="animate-spin text-zinc-400" />
+            <span>Sincronizando...</span>
           </div>
         )}
 
-        {/* ── Mobile Projection Action Button & Live Status ── */}
-        {onToggleScrcpy && Boolean(device?.serial) && (
-          <div
-            className="absolute bottom-4 left-1/2 -translate-x-1/2 z-40 flex items-center justify-center max-w-[92%] pointer-events-auto"
-            onPointerDown={(e) => e.stopPropagation()}
-            onPointerUp={(e) => e.stopPropagation()}
-          >
-            {scrcpyActive ? (
-              <button
-                type="button"
-                onClick={handleToggleScrcpy}
-                disabled={isLaunching}
-                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-emerald-950/95 backdrop-blur-md border border-emerald-500/60 text-emerald-300 text-[11px] font-bold shadow-2xl hover:bg-red-950/90 hover:text-red-300 hover:border-red-500/60 transition-all active:scale-95 whitespace-nowrap cursor-pointer select-none"
-                title="Hacer clic para detener VisionNano 60 FPS"
-              >
-                {isLaunching ? (
-                  <Loader2 size={12} className="animate-spin text-emerald-400" />
-                ) : (
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-                )}
-                <span>VisionNano 60 FPS Activo (Detener)</span>
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={handleToggleScrcpy}
-                disabled={isLaunching}
-                className="flex items-center gap-2 px-4 py-2 rounded-full bg-[#1bae6e] hover:bg-[#22c97d] text-white text-[12px] font-bold shadow-2xl shadow-[#1bae6e]/50 transition-all active:scale-95 border border-white/30 animate-pulse whitespace-nowrap cursor-pointer select-none"
-                title="Iniciar proyección VisionNano con aceleración GPU Direct3D11 a 60 FPS sin lag"
-              >
-                {isLaunching ? (
-                  <Loader2 size={14} className="animate-spin" />
-                ) : (
-                  <MonitorPlay size={14} />
-                )}
-                <span>{isLaunching ? 'Lanzando VisionNano...' : 'Activar VisionNano 60 FPS'}</span>
-              </button>
-            )}
-          </div>
-        )}
-
-
-
-        {/* ── STATE: Connecting ── */}
-        {!useMjpegStream && !frameUrl && !isDisconnected && (
-          <div className="flex flex-col items-center justify-center gap-4 p-4 text-center w-full h-full">
-            <div className="w-10 h-10 rounded-full border-2 border-white/10 border-t-[#22c97d] animate-spin" />
+        {/* ── STATE: Connecting / Waiting for First Frame ── */}
+        {!frameUrl && !useMjpegStream && !isDisconnected && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 p-4 text-center w-full h-full bg-zinc-950/90 backdrop-blur-sm z-30">
+            <div className="w-8 h-8 rounded-full border-2 border-zinc-800 border-t-zinc-300 animate-spin" />
             <div>
-              <span className="text-xs font-bold text-white/70 block">Iniciando proyección...</span>
-              <span className="text-[10px] text-white/30">Capturando pantalla de dispositivo Android</span>
+              <span className="text-xs font-semibold text-zinc-200 block">Conectando pantalla...</span>
+              <span className="text-[11px] text-zinc-500">Sincronizando con {device.model || 'dispositivo'}</span>
             </div>
           </div>
         )}
@@ -649,34 +605,34 @@ export const ProjectionCanvas: React.FC<ProjectionCanvasProps> = ({
         {/* ── STATE: Disconnected ── */}
         {!showLiveStream && isDisconnected && (
           <div className="flex flex-col items-center justify-center gap-3 p-4 text-center">
-            <Smartphone size={32} className="text-white/20" />
+            <Smartphone size={32} className="text-zinc-600" />
             <div>
-              <span className="text-xs font-bold text-white/60 block">Sin conexión al dispositivo</span>
-              <span className="text-[10px] text-white/30">Conecta tu Android vía USB o Wi-Fi ADB</span>
+              <span className="text-xs font-semibold text-zinc-300 block">Dispositivo no disponible</span>
+              <span className="text-[11px] text-zinc-500">Conecta tu dispositivo vía USB o Wi-Fi ADB</span>
             </div>
           </div>
         )}
 
         {/* ── Drag & Drop Overlay ── */}
         {isDragOver && (
-          <div className="absolute inset-0 bg-[#1bae6e]/20 border-2 border-dashed border-[#22c97d] backdrop-blur-sm flex flex-col items-center justify-center gap-2 z-50 animate-in fade-in duration-150">
-            <UploadCloud size={36} className="text-[#22c97d] animate-bounce" />
-            <span className="text-xs font-bold text-white">Soltar archivo para enviar al Android</span>
-            <span className="text-[10px] text-white/70">.apk se instala automáticamente · otros archivos van a /sdcard/Download/</span>
+          <div className="absolute inset-0 bg-zinc-950/90 border-2 border-dashed border-zinc-500 backdrop-blur-sm flex flex-col items-center justify-center gap-2 z-50 animate-in fade-in duration-150">
+            <UploadCloud size={32} className="text-zinc-200 animate-bounce" />
+            <span className="text-xs font-semibold text-zinc-100">Soltar archivo para enviar</span>
+            <span className="text-[11px] text-zinc-400">Los APK se instalan automáticamente</span>
           </div>
         )}
 
         {/* ── Drop Status Toast ── */}
         {dropStatus && (
-          <div className={`absolute top-4 left-1/2 -translate-x-1/2 px-4 py-2 rounded-xl backdrop-blur-md border shadow-2xl flex items-center gap-2 z-40 animate-in fade-in slide-in-from-top-2 duration-200 ${
-            dropStatus.status === 'uploading' ? 'bg-black/90 border-[#22c97d]/30 text-[#22c97d]'
-            : dropStatus.status === 'success' ? 'bg-emerald-950/90 border-emerald-500/40 text-emerald-300'
-            : 'bg-red-950/90 border-red-500/40 text-red-300'
+          <div className={`absolute top-4 left-1/2 -translate-x-1/2 px-3.5 py-1.5 rounded-lg backdrop-blur-md border shadow-lg flex items-center gap-2 z-40 animate-in fade-in slide-in-from-top-2 duration-150 ${
+            dropStatus.status === 'uploading' ? 'bg-zinc-900/95 border-zinc-700 text-zinc-200'
+            : dropStatus.status === 'success' ? 'bg-zinc-900/95 border-zinc-700 text-emerald-400'
+            : 'bg-zinc-900/95 border-red-900/50 text-red-400'
           }`}>
-            {dropStatus.status === 'uploading' && <Loader2 size={14} className="animate-spin" />}
-            {dropStatus.status === 'success' && <CheckCircle2 size={14} />}
-            {dropStatus.status === 'error' && <AlertCircle size={14} />}
-            <span className="text-xs font-semibold">{dropStatus.message}</span>
+            {dropStatus.status === 'uploading' && <Loader2 size={13} className="animate-spin text-zinc-400" />}
+            {dropStatus.status === 'success' && <CheckCircle2 size={13} />}
+            {dropStatus.status === 'error' && <AlertCircle size={13} />}
+            <span className="text-xs font-medium">{dropStatus.message}</span>
           </div>
         )}
       </div>

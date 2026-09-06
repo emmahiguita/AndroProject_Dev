@@ -5,7 +5,7 @@ import Image from 'next/image';
 import {
   Smartphone, RefreshCw, LayoutGrid, List,
   Search, Sparkles, Trash2, Eye, EyeOff,
-  Settings, Download,
+  Settings, Download, ShieldCheck, Lock, AlertTriangle,
 } from 'lucide-react';
 import { useAppStore } from '@/stores';
 import { useTheme } from '@/hooks/useTheme';
@@ -112,10 +112,10 @@ export function AppsView({ device: propDevice, addLog: propAddLog }: AppsViewPro
       if (data.success && data.apps) {
         setAppsList(data.apps);
       } else {
-        addLog(`✗ Error cargando apps: ${data.error}`);
+        addLog(`Error cargando apps: ${data.error}`);
       }
     } catch (err: unknown) {
-      addLog(`✗ Error de red cargando apps: ${getErrorMessage(err)}`);
+      addLog(`Error de red cargando apps: ${getErrorMessage(err)}`);
     } finally {
       setAppsLoading(false);
     }
@@ -183,13 +183,13 @@ export function AppsView({ device: propDevice, addLog: propAddLog }: AppsViewPro
     
     let warningMsg = `¿Desinstalar ${count} aplicaciones seleccionadas?`;
     if (criticalPkgs.length > 0) {
-      warningMsg += `\n\n⚠️ PELIGRO: ${criticalPkgs.length} son apps CRÍTICAS del sistema:`;
+      warningMsg += `\n\nPeligro: ${criticalPkgs.length} son apps críticas del sistema:`;
       warningMsg += `\n${criticalPkgs.slice(0, 5).join('\n')}`;
       if (criticalPkgs.length > 5) warningMsg += `\n... y ${criticalPkgs.length - 5} más`;
       warningMsg += `\n\nEsto puede causar inestabilidad del dispositivo.`;
     }
     if (safePkgs.length > 0) {
-      warningMsg += `\n\n✅ ${safePkgs.length} son seguras para quitar.`;
+      warningMsg += `\n\n${safePkgs.length} son seguras para quitar.`;
     }
     
     if (!confirm(warningMsg)) return;
@@ -203,12 +203,12 @@ export function AppsView({ device: propDevice, addLog: propAddLog }: AppsViewPro
           body: JSON.stringify({ action: 'uninstall', packageName: pkgName, serial: activeSerial })
         });
         const d = await res.json();
-        d.success ? sc++ : (fc++, addLog(`✗ Error en ${pkgName}: ${d.error}`));
+        d.success ? sc++ : (fc++, addLog(`Error en ${pkgName}: ${d.error}`));
       } catch (err: unknown) {
-        fc++; addLog(`✗ Error de red en ${pkgName}: ${getErrorMessage(err)}`);
+        fc++; addLog(`Error de red en ${pkgName}: ${getErrorMessage(err)}`);
       }
     }
-    addLog(`✓ Desinstalación múltiple completada: ${sc} éxitos, ${fc} fallos.`);
+    addLog(`Desinstalación múltiple completada: ${sc} éxitos, ${fc} fallos.`);
     alert(`Desinstalación en lote completada:\n\nÉxitos: ${sc}\nFallos: ${fc}`);
     setSelectedPackages(new Set());
     fetchApps();
@@ -219,11 +219,11 @@ export function AppsView({ device: propDevice, addLog: propAddLog }: AppsViewPro
     const app = appsList.find(a => a.packageName === pkgName);
     
     if (app?.criticalSystem) {
-      if (!confirm(`⚠️ PELIGRO: "${pkgName}" es una app CRÍTICA del sistema.\n\nDesinstalarla puede causar inestabilidad, bloqueos o pérdida de funcionalidad esencial.\n\n¿Continuar de todas formas?`)) return;
+      if (!confirm(`Peligro: "${pkgName}" es una app crítica del sistema.\n\nDesinstalarla puede causar inestabilidad, bloqueos o pérdida de funcionalidad esencial.\n\n¿Continuar de todas formas?`)) return;
     } else if (app?.safeToRemove) {
-      if (!confirm(`✅ "${pkgName}" es segura para desinstalar.\n\nNo afectará la funcionalidad del dispositivo.\n\n¿Desinstalar?`)) return;
+      if (!confirm(`"${pkgName}" es segura para desinstalar.\n\nNo afectará la funcionalidad del dispositivo.\n\n¿Desinstalar?`)) return;
     } else if (app?.isSystem) {
-      if (!confirm(`⚠️ "${pkgName}" es una app del sistema.\n\nSe desinstalará solo para tu usuario (se puede restaurar).\n\n¿Continuar?`)) return;
+      if (!confirm(`"${pkgName}" es una app del sistema.\n\nSe desinstalará solo para tu usuario (se puede restaurar).\n\n¿Continuar?`)) return;
     } else {
       if (!confirm(`¿Desinstalar ${pkgName}?`)) return;
     }
@@ -234,10 +234,10 @@ export function AppsView({ device: propDevice, addLog: propAddLog }: AppsViewPro
         body: JSON.stringify({ action: 'uninstall', packageName: pkgName, serial: activeSerial })
       });
       const d = await res.json();
-      if (d.success) { addLog(`✓ ${d.message}`); fetchApps(); }
-      else { addLog(`✗ Error al desinstalar: ${d.error}`); alert(`Error: ${d.error}`); }
+      if (d.success) { addLog(`${d.message}`); fetchApps(); }
+      else { addLog(`Error al desinstalar: ${d.error}`); alert(`Error: ${d.error}`); }
     } catch (err: unknown) {
-      addLog(`✗ Error de red: ${getErrorMessage(err)}`);
+      addLog(`Error de red: ${getErrorMessage(err)}`);
     } finally {
       setAppActionLoading(null);
     }
@@ -251,10 +251,10 @@ export function AppsView({ device: propDevice, addLog: propAddLog }: AppsViewPro
         body: JSON.stringify({ action: 'disable', packageName: pkgName, serial: activeSerial })
       });
       const d = await res.json();
-      if (d.success) { addLog(`✓ ${d.message}`); fetchApps(); }
-      else { addLog(`✗ Error al deshabilitar: ${d.error}`); alert(`Error: ${d.error}`); }
+      if (d.success) { addLog(`${d.message}`); fetchApps(); }
+      else { addLog(`Error al deshabilitar: ${d.error}`); alert(`Error: ${d.error}`); }
     } catch (err: unknown) {
-      addLog(`✗ Error de red: ${getErrorMessage(err)}`);
+      addLog(`Error de red: ${getErrorMessage(err)}`);
     } finally {
       setAppActionLoading(null);
     }
@@ -268,10 +268,10 @@ export function AppsView({ device: propDevice, addLog: propAddLog }: AppsViewPro
         body: JSON.stringify({ action: 'enable', packageName: pkgName, serial: activeSerial })
       });
       const d = await res.json();
-      if (d.success) { addLog(`✓ ${d.message}`); fetchApps(); }
-      else { addLog(`✗ Error al habilitar: ${d.error}`); alert(`Error: ${d.error}`); }
+      if (d.success) { addLog(`${d.message}`); fetchApps(); }
+      else { addLog(`Error al habilitar: ${d.error}`); alert(`Error: ${d.error}`); }
     } catch (err: unknown) {
-      addLog(`✗ Error de red: ${getErrorMessage(err)}`);
+      addLog(`Error de red: ${getErrorMessage(err)}`);
     } finally {
       setAppActionLoading(null);
     }
@@ -290,7 +290,7 @@ export function AppsView({ device: propDevice, addLog: propAddLog }: AppsViewPro
         <button
           onClick={() => setAppsSubTab('installer')}
           className={`pb-2 text-sm font-bold transition-all relative ${
-            appsSubTab === 'installer' ? 'text-[#22c97d] border-b-2 border-[#1bae6e]' : `${t.textMuted} ${dark ? 'hover:text-white' : 'hover:text-slate-700'}`
+            appsSubTab === 'installer' ? (dark ? 'text-zinc-100 border-b-2 border-zinc-100' : 'text-emerald-600 border-b-2 border-emerald-600') : `${t.textMuted} ${dark ? 'hover:text-white' : 'hover:text-slate-700'}`
           }`}
         >
           Instalar APK
@@ -298,7 +298,7 @@ export function AppsView({ device: propDevice, addLog: propAddLog }: AppsViewPro
         <button
           onClick={() => setAppsSubTab('manager')}
           className={`pb-2 text-sm font-bold transition-all relative ${
-            appsSubTab === 'manager' ? 'text-[#22c97d] border-b-2 border-[#1bae6e]' : `${t.textMuted} ${dark ? 'hover:text-white' : 'hover:text-slate-700'}`
+            appsSubTab === 'manager' ? (dark ? 'text-zinc-100 border-b-2 border-zinc-100' : 'text-emerald-600 border-b-2 border-emerald-600') : `${t.textMuted} ${dark ? 'hover:text-white' : 'hover:text-slate-700'}`
           }`}
         >
           Administrar Aplicaciones
@@ -371,9 +371,9 @@ function InstallerPanel({
                 try {
                   const res = await fetch('/api/install-apk', { method: 'POST', body: formData });
                   const d = await res.json();
-                  addLog(d.success ? `✓ ${d.message}` : `✗ ${d.error}`);
+                  addLog(d.success ? `${d.message}` : `Error: ${d.error}`);
                 } catch {
-                  addLog(`✗ Error al instalar ${file.name}`);
+                  addLog(`Error al instalar ${file.name}`);
                 }
               }
               e.target.value = '';
@@ -474,26 +474,26 @@ function ManagerPanel({
           <select
             value={appsFilter}
             onChange={(e) => setAppsFilter(e.target.value)}
-            className={`px-3 py-2 text-sm rounded-xl border ${dark ? 'bg-[#0a0c17] border-white/10 text-white' : 'bg-white border-slate-200 text-slate-900'} outline-none`}
+            className={`px-3 py-2 text-xs rounded-xl border ${dark ? 'bg-zinc-900 border-zinc-800 text-zinc-200' : 'bg-white border-slate-200 text-slate-800'} outline-none font-medium`}
           >
             <option value="all">Todas</option>
-            <option value="user">👤 Usuario</option>
-            <option value="system">⚙️ Sistema</option>
-            <option value="safe">✅ Seguras para quitar</option>
-            <option value="bloatware">🗑️ Bloatware</option>
+            <option value="user">Usuario</option>
+            <option value="system">Sistema</option>
+            <option value="safe">Seguras para quitar</option>
+            <option value="bloatware">Bloatware</option>
             <option value="google">Google</option>
             <option value="disabled">Deshabilitadas</option>
             <option value="hidden">Ocultas</option>
             <option value="adware">Con overlay</option>
-            <option value="malware">⚠️ Amenazas</option>
-            <option value="critical">🔒 Críticas (NO quitar)</option>
+            <option value="malware">Amenazas detectadas</option>
+            <option value="critical">Críticas del sistema</option>
           </select>
 
           {/* Sort */}
           <select
             value={appsSort}
             onChange={(e) => setAppsSort(e.target.value)}
-            className={`px-3 py-2 text-sm rounded-xl border ${dark ? 'bg-[#0a0c17] border-white/10 text-white' : 'bg-white border-slate-200 text-slate-900'} outline-none`}
+            className={`px-3 py-2 text-xs rounded-xl border ${dark ? 'bg-zinc-900 border-zinc-800 text-zinc-200' : 'bg-white border-slate-200 text-slate-800'} outline-none font-medium`}
           >
             <option value="name_asc">Nombre A-Z</option>
             <option value="name_desc">Nombre Z-A</option>
@@ -504,11 +504,11 @@ function ManagerPanel({
           </select>
 
           {/* View mode */}
-          <div className={`flex items-center gap-1 p-1 rounded-xl ${dark ? 'bg-white/[0.05] border border-white/5' : 'bg-slate-100 border border-slate-200'}`}>
-            <Button variant="ghost" size="sm" aria-label="Vista cuadrícula" onClick={() => setAppsViewMode('grid')} className={`${appsViewMode === 'grid' ? 'bg-brand/20 text-brand-light' : ''} p-1.5 h-auto`}>
+          <div className={`flex items-center gap-1 p-1 rounded-xl ${dark ? 'bg-zinc-900/80 border border-zinc-800' : 'bg-slate-100 border border-slate-200'}`}>
+            <Button variant="ghost" size="sm" aria-label="Vista cuadrícula" onClick={() => setAppsViewMode('grid')} className={`${appsViewMode === 'grid' ? (dark ? 'bg-zinc-800 text-zinc-100 shadow-xs' : 'bg-white text-zinc-900 shadow-xs') : ''} p-1.5 h-auto`}>
               <LayoutGrid size={14} />
             </Button>
-            <Button variant="ghost" size="sm" aria-label="Vista lista" onClick={() => setAppsViewMode('list')} className={`${appsViewMode === 'list' ? 'bg-brand/20 text-brand-light' : ''} p-1.5 h-auto`}>
+            <Button variant="ghost" size="sm" aria-label="Vista lista" onClick={() => setAppsViewMode('list')} className={`${appsViewMode === 'list' ? (dark ? 'bg-zinc-800 text-zinc-100 shadow-xs' : 'bg-white text-zinc-900 shadow-xs') : ''} p-1.5 h-auto`}>
               <List size={14} />
             </Button>
           </div>
@@ -606,8 +606,8 @@ function AppCard({
   return (
     <div className={`relative rounded-xl border p-2.5 flex flex-col gap-1.5 transition-all ${
       selected
-        ? (dark ? 'bg-emerald-500/10 border-emerald-500/30' : 'bg-emerald-50 border-emerald-300')
-        : (dark ? 'bg-[#0c0d18] border-white/5 hover:bg-white/[0.02]' : 'bg-white border-slate-200 hover:bg-slate-50')
+        ? (dark ? 'bg-zinc-800 border-zinc-600' : 'bg-zinc-100 border-zinc-300')
+        : (dark ? 'bg-surface-raised border-border-subtle hover:border-border-default' : 'bg-white border-slate-200 hover:bg-slate-50')
     }`}>
       {/* Select checkbox */}
       <button onClick={onToggleSelect} className={`absolute top-2 right-2 w-5 h-5 min-h-0 rounded-md border flex items-center justify-center ${dark ? 'border-white/20 bg-white/[0.03]' : 'border-slate-300 bg-white'}`}>
@@ -621,27 +621,27 @@ function AppCard({
       {/* Safety badges */}
       <div className="flex items-center gap-1 flex-wrap">
         {app.safeToRemove && (
-          <span className="text-[8px] px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 font-bold border border-emerald-500/20">
-            ✅ SEGURO
+          <span className="inline-flex items-center gap-1 text-[8px] px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 font-bold border border-emerald-500/20">
+            <ShieldCheck size={9} /> SEGURO
           </span>
         )}
         {app.criticalSystem && (
-          <span className="text-[8px] px-1.5 py-0.5 rounded-full bg-red-500/10 text-red-400 font-bold border border-red-500/20">
-            🔒 CRÍTICO
+          <span className="inline-flex items-center gap-1 text-[8px] px-1.5 py-0.5 rounded-full bg-zinc-500/10 text-zinc-300 font-bold border border-zinc-500/20">
+            <Lock size={9} /> CRÍTICO
           </span>
         )}
         {app.isBloatware && (
-          <span className="text-[8px] px-1.5 py-0.5 rounded-full bg-orange-500/10 text-orange-400 font-bold border border-orange-500/20">
-            🗑️ BLOAT
+          <span className="inline-flex items-center gap-1 text-[8px] px-1.5 py-0.5 rounded-full bg-amber-500/10 text-amber-400 font-bold border border-amber-500/20">
+            <Trash2 size={9} /> BLOAT
           </span>
         )}
         {app.isMalware && (
-          <span className="text-[8px] px-1.5 py-0.5 rounded-full bg-red-600/10 text-red-500 font-bold border border-red-600/20">
-            ⚠️ AMENAZA
+          <span className="inline-flex items-center gap-1 text-[8px] px-1.5 py-0.5 rounded-full bg-rose-500/10 text-rose-400 font-bold border border-rose-500/20">
+            <AlertTriangle size={9} /> AMENAZA
           </span>
         )}
         {app.isDisabled && (
-          <span className="text-[8px] px-1.5 py-0.5 rounded-full bg-slate-500/10 text-slate-400 font-bold border border-slate-500/20">
+          <span className="text-[8px] px-1.5 py-0.5 rounded-full bg-zinc-500/10 text-zinc-400 font-bold border border-zinc-500/20">
             DESACTIVADA
           </span>
         )}
@@ -709,8 +709,8 @@ function AppRow({
   return (
     <div className={`flex items-center gap-2.5 p-2.5 rounded-xl border transition-all ${
       selected
-        ? (dark ? 'bg-emerald-500/10 border-emerald-500/30' : 'bg-emerald-50 border-emerald-300')
-        : (dark ? 'bg-[#0c0d18] border-white/5 hover:bg-white/[0.02]' : 'bg-white border-slate-200 hover:bg-slate-50')
+        ? (dark ? 'bg-zinc-800 border-zinc-600' : 'bg-zinc-100 border-zinc-300')
+        : (dark ? 'bg-surface-raised border-border-subtle hover:border-border-default' : 'bg-white border-slate-200 hover:bg-slate-50')
     }`}>
       <button onClick={onToggleSelect} className={`w-5 h-5 min-h-0 rounded-md border flex items-center justify-center shrink-0 ${dark ? 'border-white/20 bg-white/[0.03]' : 'border-slate-300 bg-white'}`}>
         {selected && <CheckIcon />}
@@ -722,23 +722,23 @@ function AppRow({
         {/* Safety badges row */}
         <div className="flex items-center gap-1 mt-0.5 flex-wrap">
           {app.safeToRemove && (
-            <span className="text-[8px] px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 font-bold border border-emerald-500/20">
-              ✅ SEGURO
+            <span className="inline-flex items-center gap-1 text-[8px] px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 font-bold border border-emerald-500/20">
+              <ShieldCheck size={9} /> SEGURO
             </span>
           )}
           {app.criticalSystem && (
-            <span className="text-[8px] px-1.5 py-0.5 rounded-full bg-red-500/10 text-red-400 font-bold border border-red-500/20">
-              🔒 CRÍTICO
+            <span className="inline-flex items-center gap-1 text-[8px] px-1.5 py-0.5 rounded-full bg-zinc-500/10 text-zinc-300 font-bold border border-zinc-500/20">
+              <Lock size={9} /> CRÍTICO
             </span>
           )}
           {app.isBloatware && (
-            <span className="text-[8px] px-1.5 py-0.5 rounded-full bg-orange-500/10 text-orange-400 font-bold border border-orange-500/20">
-              🗑️ BLOAT
+            <span className="inline-flex items-center gap-1 text-[8px] px-1.5 py-0.5 rounded-full bg-amber-500/10 text-amber-400 font-bold border border-amber-500/20">
+              <Trash2 size={9} /> BLOAT
             </span>
           )}
           {app.isMalware && (
-            <span className="text-[8px] px-1.5 py-0.5 rounded-full bg-red-600/10 text-red-500 font-bold border border-red-600/20">
-              ⚠️ AMENAZA
+            <span className="inline-flex items-center gap-1 text-[8px] px-1.5 py-0.5 rounded-full bg-rose-500/10 text-rose-400 font-bold border border-rose-500/20">
+              <AlertTriangle size={9} /> AMENAZA
             </span>
           )}
         </div>

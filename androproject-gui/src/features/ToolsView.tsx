@@ -62,7 +62,7 @@ export function ToolsView({ device }: ToolsViewProps = {}) {
         {/* ── Page Header ── */}
         <div className={`${dark ? 'settings-panel' : `${t.panel} border ${t.border} shadow-sm`} rounded-xl px-4 py-3`}>
           <div className="flex items-center gap-2.5">
-            <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${dark ? 'bg-[#1bae6e]/15 text-[#22c97d]' : 'bg-emerald-100 text-emerald-600'}`}>
+            <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${dark ? 'bg-zinc-800 text-zinc-200' : 'bg-zinc-100 text-zinc-700'}`}>
               <Wrench size={16} />
             </div>
             <div>

@@ -68,33 +68,33 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <header className={`h-12 shrink-0 flex items-center gap-2 px-3 z-20 border-b ${
-      isDark ? 'bg-[#0b0f1a]/95 border-white/5 backdrop-blur-md' : 'bg-white/95 border-slate-200 backdrop-blur-md'
+      isDark ? 'bg-zinc-950 border-zinc-800/80 backdrop-blur-md' : 'bg-white/95 border-slate-200 backdrop-blur-md'
     }`}>
       {/* Hamburger */}
       <button onClick={onToggleSidebar} title={sidebarOpen ? 'Contraer menú lateral' : 'Expandir menú lateral'}
-        className={`p-1.5 rounded-lg transition-colors ${isDark ? 'text-white/40 hover:text-white hover:bg-white/[0.06]' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-100'}`}>
+        className={`p-1.5 rounded-lg transition-colors ${isDark ? 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-100'}`}>
         <Menu size={16} />
       </button>
 
       {/* Device selector */}
       <div className={`flex items-center gap-2 rounded-lg px-2.5 py-1.5 min-w-[190px] border ${
-        isDark ? 'bg-white/[0.03] border-white/8' : 'bg-slate-50 border-slate-200'
+        isDark ? 'bg-zinc-900/60 border-zinc-800' : 'bg-slate-50 border-slate-200'
       }`}>
-        <Smartphone size={15} className={
+        <Smartphone size={14} className={
           currentDevice?.platform === 'ios' || currentDevice?.serial.startsWith('airplay-')
-            ? 'text-[#00e5ff]'
-            : (currentDevice?.state === 'device' ? 'text-[#22c97d]' : 'opacity-35')
+            ? 'text-zinc-300'
+            : (currentDevice?.state === 'device' ? 'text-emerald-400' : 'text-zinc-600')
         } />
         <select value={selectedSerial} onChange={(e) => onSelectSerial(e.target.value)} title="Seleccionar dispositivo Android / iOS"
-          className={`bg-transparent text-[11px] font-semibold focus:outline-none cursor-pointer w-full ${isDark ? 'text-white' : 'text-slate-800'}`}>
+          className={`bg-transparent text-xs font-medium focus:outline-none cursor-pointer w-full ${isDark ? 'text-zinc-200' : 'text-slate-800'}`}>
           {devices.length === 0 ? (
             <option value="">Sin dispositivos</option>
           ) : (
             devices.map((dev) => {
               const isIos = dev.platform === 'ios' || dev.serial.startsWith('airplay-');
               return (
-                <option key={dev.serial} value={dev.serial} className={isDark ? 'bg-[#0b0e17] text-white' : 'bg-white text-slate-900'}>
-                  {isIos ? `🍏 ${dev.model || 'iPhone (AirPlay)'}` : `🤖 ${dev.model || dev.serial}`} ({dev.state || 'activo'})
+                <option key={dev.serial} value={dev.serial} className={isDark ? 'bg-zinc-900 text-zinc-200' : 'bg-white text-slate-900'}>
+                  {isIos ? `${dev.model || 'iPhone (AirPlay)'}` : `${dev.model || dev.serial}`} ({dev.state || 'activo'})
                 </option>
               );
             })
@@ -103,14 +103,12 @@ export const Header: React.FC<HeaderProps> = ({
       </div>
 
       {/* Status dot */}
-      <div className={`hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] border ${
-        isDark ? 'bg-white/[0.02] border-white/5 text-white/50' : 'bg-slate-50 border-slate-200 text-slate-500'
+      <div className={`hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-medium border ${
+        isDark ? 'bg-zinc-900/40 border-zinc-800 text-zinc-400' : 'bg-slate-50 border-slate-200 text-slate-500'
       }`} title="Estado de la conexión">
         <span className={`w-1.5 h-1.5 rounded-full ${
-          currentDevice?.platform === 'ios' || currentDevice?.serial.startsWith('airplay-')
-            ? 'bg-[#00e5ff] animate-pulse'
-            : (currentDevice?.state === 'device' ? 'dot-connected' :
-               currentDevice?.state === 'recovery' ? 'bg-amber-400' : 'bg-rose-500')
+          currentDevice?.state === 'device' ? 'bg-emerald-500' :
+          currentDevice?.state === 'recovery' ? 'bg-amber-400' : 'bg-zinc-600'
         }`} />
         {currentDevice?.platform === 'ios' ? 'AirPlay 60 FPS' : (currentDevice?.state || 'offline')}
       </div>
@@ -120,15 +118,15 @@ export const Header: React.FC<HeaderProps> = ({
 
       {/* Projection button — navigates to projection page */}
       <button onClick={onNavigateProjection}
-        className={`p-1.5 rounded-lg transition-colors ${projectionActive ? 'text-[#22c97d] bg-[#1bae6e]/10' : isDark ? 'text-white/35 hover:text-white/70' : 'text-slate-400 hover:text-slate-600'}`}
+        className={`p-1.5 rounded-lg transition-colors ${projectionActive ? 'text-zinc-100 bg-zinc-800' : isDark ? 'text-zinc-400 hover:text-zinc-200' : 'text-slate-400 hover:text-slate-600'}`}
         title="Abrir proyección en vivo">
         <PanelRightOpen size={15} />
       </button>
 
       {/* Wi-Fi connect */}
       <button onClick={onOpenConnectModal} title="Conectar dispositivo vía IP Wi-Fi"
-        className={`${btnBase} px-2.5 py-1.5 hidden sm:flex ${isDark ? 'bg-white/[0.04] hover:bg-white/[0.08] text-white/70 border-white/8' : 'bg-slate-100 hover:bg-slate-200 text-slate-600 border-slate-200'} border`}>
-        <Wifi size={13} className="text-[#22c97d]" />
+        className={`${btnBase} px-2.5 py-1.5 hidden sm:flex ${isDark ? 'bg-zinc-900/60 hover:bg-zinc-800 text-zinc-300 border-zinc-800' : 'bg-slate-100 hover:bg-slate-200 text-slate-600 border-slate-200'} border`}>
+        <Wifi size={13} className="text-zinc-400 dark:text-zinc-300" />
         <span>Wi-Fi</span>
       </button>
 
@@ -141,7 +139,7 @@ export const Header: React.FC<HeaderProps> = ({
           title={adbServerRunning ? 'ADB activo — click para desactivar' : 'ADB inactivo — click para activar'}
           className={`${btnBase} px-2.5 py-1.5 rounded-r-none border-r-0 ${
             adbServerRunning
-              ? (isDark ? 'bg-[#22c97d]/10 text-[#22c97d] border border-[#22c97d]/25' : 'bg-emerald-50 text-emerald-600 border border-emerald-200')
+              ? (isDark ? 'bg-zinc-800 text-zinc-100 border border-zinc-700' : 'bg-zinc-200 text-zinc-800 border border-zinc-300')
               : (isDark ? 'bg-white/[0.04] text-white/40 border border-white/8' : 'bg-slate-100 text-slate-400 border border-slate-200')
           } ${isAdbConnecting ? 'opacity-50 cursor-wait' : ''}`}
         >
@@ -165,10 +163,10 @@ export const Header: React.FC<HeaderProps> = ({
         {/* Device Manager Dropdown */}
         {showDeviceManager && (
           <div className={`absolute top-full right-0 mt-1 w-72 rounded-xl border shadow-xl z-50 ${
-            isDark ? 'bg-[#0b0e17] border-white/10' : 'bg-white border-slate-200'
+            isDark ? 'bg-zinc-900 border-zinc-800' : 'bg-white border-slate-200'
           }`}>
             <div className={`flex items-center justify-between px-3 py-2 border-b ${
-              isDark ? 'border-white/5' : 'border-slate-100'
+              isDark ? 'border-zinc-800' : 'border-slate-100'
             }`}>
               <span className={`text-[11px] font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>
                 Dispositivos Registrados
@@ -188,9 +186,9 @@ export const Header: React.FC<HeaderProps> = ({
                   const isOnline = devices.some(d => d.serial === dev.serial && d.state === 'device');
                   return (
                     <div key={dev.serial} className={`flex items-center gap-2 px-3 py-2 border-b ${
-                      isDark ? 'border-white/5' : 'border-slate-50'
+                      isDark ? 'border-zinc-800/60' : 'border-slate-50'
                     }`}>
-                      <div className={`w-2 h-2 rounded-full ${isOnline ? 'bg-[#22c97d]' : 'bg-white/20'}`} />
+                      <div className={`w-2 h-2 rounded-full ${isOnline ? 'bg-emerald-500' : 'bg-zinc-600'}`} />
                       <div className="flex-1 min-w-0">
                         <div className={`text-[10px] font-semibold truncate ${isDark ? 'text-white' : 'text-slate-800'}`}>
                           {dev.model}
@@ -204,7 +202,7 @@ export const Header: React.FC<HeaderProps> = ({
                         title={dev.autoConnect ? 'Desactivar auto-conexión' : 'Activar auto-conexión'}
                         className={`p-1 rounded-lg ${
                           dev.autoConnect
-                            ? 'text-[#22c97d] bg-[#22c97d]/10'
+                            ? 'text-zinc-100 bg-zinc-800'
                             : isDark ? 'text-white/30 hover:text-white/60' : 'text-slate-300 hover:text-slate-500'
                         }`}
                       >
@@ -224,7 +222,7 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
             {/* Add current device button */}
             {currentDevice && currentDevice.state === 'device' && !registeredDevices.some(d => d.serial === currentDevice.serial) && (
-              <div className={`px-3 py-2 border-t ${isDark ? 'border-white/5' : 'border-slate-100'}`}>
+              <div className={`px-3 py-2 border-t ${isDark ? 'border-zinc-800' : 'border-slate-100'}`}>
                 <button
                   onClick={() => {
                     const connType = currentDevice.connectionType === 'Wi-Fi' ? 'Wi-Fi' : 'USB';
@@ -234,8 +232,8 @@ export const Header: React.FC<HeaderProps> = ({
                   }}
                   className={`w-full flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-semibold ${
                     isDark
-                      ? 'bg-[#22c97d]/10 text-[#22c97d] hover:bg-[#22c97d]/20 border border-[#22c97d]/20'
-                      : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100 border border-emerald-200'
+                      ? 'bg-zinc-800 text-zinc-100 hover:bg-zinc-700 border border-zinc-700'
+                      : 'bg-zinc-100 text-zinc-800 hover:bg-zinc-200 border border-zinc-300'
                   }`}
                 >
                   <Plus size={12} />
@@ -254,7 +252,7 @@ export const Header: React.FC<HeaderProps> = ({
             onClick={onToggleRescue}
             title={
               rescueConfig.enabled
-                ? `⚡ Modo Rescate (${rescueConfig.targetModel}) ACTIVO · ${rescueMsg || 'Sincronización permanente Wi-Fi / USB'}`
+                ? `Modo Rescate (${rescueConfig.targetModel}) ACTIVO · ${rescueMsg || 'Sincronización permanente Wi-Fi / USB'}`
                 : `Activar sincronización automática permanente para dispositivo secundario (Galaxy A30)`
             }
             className={`${btnBase} px-2.5 py-1.5 border transition-all ${
@@ -272,15 +270,15 @@ export const Header: React.FC<HeaderProps> = ({
         )}
 
         {/* Radar */}
-        <button onClick={onScanRadar} disabled={isScanning} title="Escanear red en busca de celulares Android"
-          className={`${btnBase} px-2.5 py-1.5 bg-[#1bae6e]/10 hover:bg-[#1bae6e]/18 text-[#22c97d] border border-[#1bae6e]/25`}>
+        <button onClick={onScanRadar} disabled={isScanning} title="Escanear red en busca de dispositivos"
+          className={`${btnBase} px-2.5 py-1.5 ${isDark ? 'bg-zinc-900/60 hover:bg-zinc-800 text-zinc-300 border-zinc-800' : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200'} border`}>
           <Radio size={13} className={isScanning ? 'animate-spin' : ''} />
           <span className="hidden sm:inline">{isScanning ? 'Escanear' : 'Radar'}</span>
         </button>
 
       {/* Refresh */}
-      <button onClick={onRefresh} title="Actualizar estado de dispositivos"
-        className={`p-1.5 rounded-lg transition-colors ${isDark ? 'text-white/35 hover:text-white hover:bg-white/[0.06]' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-100'}`}>
+      <button onClick={onRefresh} title="Actualizar dispositivos"
+        className={`p-1.5 rounded-lg transition-colors ${isDark ? 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-100'}`}>
         <RefreshCw size={14} />
       </button>
 

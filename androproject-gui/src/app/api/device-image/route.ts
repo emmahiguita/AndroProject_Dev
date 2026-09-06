@@ -16,9 +16,23 @@ const lastGoodFrame = new Map<string, Uint8Array>();
 const lastGoodFrameId = new Map<string, number>();
 const lastGoodTs = new Map<string, number>();
 
-// ── In-flight capture worker tracker ─────────────────────────
+// ── In-flight capture worker tracker & TTL Pruning ───────────
 const inFlightWorkers = new Map<string, Promise<Uint8Array | null>>();
 let frameSequence = 1;
+const MAX_CACHED_DEVICES = 8;
+const CACHE_TTL_MS = 45000; // 45 seconds TTL for inactive devices
+
+function pruneStaleCache() {
+  const now = Date.now();
+  for (const [s, ts] of lastGoodTs.entries()) {
+    if (now - ts > CACHE_TTL_MS || lastGoodFrame.size > MAX_CACHED_DEVICES) {
+      lastGoodFrame.delete(s);
+      lastGoodFrameId.delete(s);
+      lastGoodTs.delete(s);
+      inFlightWorkers.delete(s);
+    }
+  }
+}
 
 // ── Placeholder: 1x1 transparent PNG ────────────────────────
 function placeholderFrame(): Uint8Array {
@@ -37,12 +51,13 @@ function placeholderFrame(): Uint8Array {
 
 /** Trigger background capture */
 function triggerCapture(serial: string): Promise<Uint8Array | null> {
+  pruneStaleCache();
   const existing = inFlightWorkers.get(serial);
   if (existing) return existing;
 
   const worker = (async () => {
     try {
-      const res = await adb.execOut(serial, 'exec-out screencap -p', 2000);
+      const res = await adb.execOut(serial, 'exec-out screencap -p', 5000);
       if (res.ok && res.stdout.length > 1000 && res.stdout[0] === 0x89 && res.stdout[1] === 0x50) {
         const frame = new Uint8Array(res.stdout.buffer, res.stdout.byteOffset, res.stdout.byteLength);
         lastGoodFrame.set(serial, frame);
@@ -109,7 +124,7 @@ export async function GET(req: NextRequest) {
   const lastTs = lastGoodTs.get(serial) || 0;
 
   // Trigger non-blocking capture if idle
-  if (!inFlightWorkers.has(serial) && (now - lastTs > 50)) {
+  if (!inFlightWorkers.has(serial) && (now - lastTs > 250)) {
     triggerCapture(serial);
   }
 

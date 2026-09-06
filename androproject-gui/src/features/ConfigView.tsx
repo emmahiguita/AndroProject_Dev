@@ -30,9 +30,9 @@ export function ConfigView({ addLog }: ConfigViewProps = {}) {
       });
       const data = await res.json();
       if (data.message) useAppStore.setState({ configData: data.message });
-      addLog?.('✓ Configuración recargada.');
+      addLog?.('Configuración recargada.');
     } catch {
-      addLog?.('✗ Error al recargar configuración.');
+      addLog?.('Error al recargar configuración.');
     }
   };
 
@@ -42,7 +42,7 @@ export function ConfigView({ addLog }: ConfigViewProps = {}) {
         {/* Header */}
         <div className={`${dark ? 'settings-panel' : `${t.panel} border ${t.border} shadow-sm`} rounded-xl px-4 py-3`}>
           <div className="flex items-center gap-2">
-            <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${dark ? 'bg-[#1bae6e]/15 text-[#22c97d]' : 'bg-emerald-100 text-emerald-600'}`}>
+            <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${dark ? 'bg-zinc-800 text-zinc-200' : 'bg-zinc-100 text-zinc-700'}`}>
               <Settings size={14} />
             </div>
             <div>
@@ -147,7 +147,7 @@ function ConfigRow({ icon, label, value, dark }: {
       </div>
       <button
         onClick={handleCopy}
-        className={`shrink-0 p-1 rounded transition-all duration-200 ${dark ? 'hover:bg-white/[0.08] text-white/20 hover:text-[#22c97d]' : 'hover:bg-slate-200 text-slate-400 hover:text-emerald-600'} ${copied ? (dark ? 'text-[#22c97d]' : 'text-emerald-600') : ''}`}
+        className={`shrink-0 p-1 rounded transition-all duration-200 ${dark ? 'hover:bg-zinc-800 text-zinc-500 hover:text-zinc-200' : 'hover:bg-slate-200 text-slate-400 hover:text-emerald-600'} ${copied ? (dark ? 'text-emerald-400' : 'text-emerald-600') : ''}`}
         title="Copiar"
       >
         {copied ? <Check size={10} /> : <Copy size={10} />}
@@ -162,7 +162,7 @@ function NavRow({ dark, icon, label, onClick }: { dark: boolean; icon: ReactNode
   return (
     <button onClick={onClick} className={`w-full flex items-center justify-between gap-3 rounded-lg p-2.5 text-left transition-colors ${dark ? 'hover:bg-white/[0.04]' : 'hover:bg-slate-100'}`}>
       <span className="flex items-center gap-2.5">
-        <span className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${dark ? 'bg-white/[0.04] text-[#22c97d]' : 'bg-slate-100 text-emerald-600'}`}>{icon}</span>
+        <span className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${dark ? 'bg-zinc-800 text-zinc-200' : 'bg-slate-100 text-emerald-600'}`}>{icon}</span>
         <span className={`text-[10px] font-bold ${dark ? 'text-white/60' : 'text-slate-700'}`}>{label}</span>
       </span>
       <ChevronRight size={14} className={`${dark ? 'text-white/30' : 'text-slate-300'}`} />

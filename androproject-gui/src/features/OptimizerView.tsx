@@ -41,7 +41,7 @@ export const OptimizerView: React.FC<OptimizerViewProps> = ({ device, addLog }) 
       if (!res.ok || !data.success) {
         // No fabricar éxito cuando el backend falla
         setOptimizationComplete(false);
-        addLog(`✗ Error al optimizar: ${data.error || 'HTTP ' + res.status}`, 'error');
+        addLog(`Error al optimizar: ${data.error || 'HTTP ' + res.status}`, 'error');
         return;
       }
 
@@ -58,7 +58,7 @@ export const OptimizerView: React.FC<OptimizerViewProps> = ({ device, addLog }) 
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
       setOptimizationComplete(false);
-      addLog(`✗ Error de red al optimizar: ${msg}`, 'error');
+      addLog(`Error de red al optimizar: ${msg}`, 'error');
     } finally {
       setIsOptimizing(false);
     }
@@ -136,7 +136,7 @@ export const OptimizerView: React.FC<OptimizerViewProps> = ({ device, addLog }) 
           <Card padding="sm">
             <div className="flex items-center justify-between text-text-secondary">
               <span className="text-[9px] font-semibold uppercase tracking-wider">Almacenamiento</span>
-              <HardDrive size={14} className="text-sky-400" />
+              <HardDrive size={14} className="text-brand-light" />
             </div>
             <p className="text-base font-bold font-mono text-text-primary mt-1">
               {device?.storage || '--'}
@@ -152,7 +152,7 @@ export const OptimizerView: React.FC<OptimizerViewProps> = ({ device, addLog }) 
           <Card padding="sm">
             <div className="flex items-center justify-between text-text-secondary">
               <span className="text-[9px] font-semibold uppercase tracking-wider">CPU</span>
-              <RefreshCw size={14} className="text-amber-400" />
+              <RefreshCw size={14} className="text-brand-light" />
             </div>
             <p className="text-base font-bold font-mono text-text-primary mt-1">
               {device?.cpuUsagePercent != null ? `${device.cpuUsagePercent}%` : '--'}

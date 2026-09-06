@@ -10,7 +10,9 @@ import {
   Sliders, Bell, Zap, EyeOff,
   Sun, Maximize2, Sparkles, Circle, LayoutGrid,
   CheckCircle2, Settings, VolumeX, PlayCircle, ChevronUp, Layers,
+  ClipboardPaste, Airplay,
 } from 'lucide-react';
+import { useActions } from '@/hooks/useActions';
 import type { DeviceInfo } from '@/features/types';
 import type { ScrcpyOptions } from '@/hooks/useProjection';
 
@@ -71,6 +73,7 @@ export const DeviceInfoPanel: React.FC<DeviceInfoPanelProps> = ({
   autoProject = false,
   onToggleAutoProject,
 }) => {
+  const { run } = useActions();
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const showToast = (msg: string) => {
@@ -86,8 +89,26 @@ export const DeviceInfoPanel: React.FC<DeviceInfoPanelProps> = ({
     }
   };
 
-  const cardBg = dark ? 'bg-white/[0.025]' : 'bg-white';
-  const cardBorder = dark ? 'border-white/[0.07]' : 'border-slate-200';
+  const handlePasteClipboard = async () => {
+    try {
+      const text = await navigator.clipboard.readText();
+      if (!text) {
+        showToast('Portapapeles de la PC vacío');
+        return;
+      }
+      const res = await run('paste_clipboard', 'Pegar del PC', { text, serial: device.serial }, false);
+      if (res?.success) {
+        showToast('Texto pegado en el dispositivo');
+      } else {
+        showToast('Error al pegar en dispositivo');
+      }
+    } catch {
+      showToast('Permiso de portapapeles denegado');
+    }
+  };
+
+  const cardBg = dark ? 'bg-zinc-900/40' : 'bg-white';
+  const cardBorder = dark ? 'border-zinc-800/70' : 'border-slate-200';
   const cardShadow = dark ? '' : 'shadow-sm';
 
   const formatTime = (secs: number) => {
@@ -103,8 +124,8 @@ export const DeviceInfoPanel: React.FC<DeviceInfoPanelProps> = ({
       {/* Toast notification overlay */}
       {toastMessage && (
         <div className="sticky top-2 z-30 flex items-center justify-center animate-in fade-in slide-in-from-top-1 duration-150">
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-black/90 border border-emerald-500/40 text-emerald-300 text-xs font-semibold shadow-xl">
-            <CheckCircle2 size={13} />
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-900/95 border border-zinc-700 text-zinc-200 text-xs font-medium shadow-xl backdrop-blur-md">
+            <CheckCircle2 size={13} className="text-emerald-400" />
             <span>{toastMessage}</span>
           </div>
         </div>
@@ -115,35 +136,33 @@ export const DeviceInfoPanel: React.FC<DeviceInfoPanelProps> = ({
         <div className={`rounded-xl border p-3.5 ${cardBg} ${cardBorder} ${cardShadow} space-y-3`}>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <span className="text-base">🍏</span>
+              <div className="w-6 h-6 rounded-md bg-zinc-800 flex items-center justify-center text-zinc-200">
+                <Airplay size={14} />
+              </div>
               <div>
-                <h3 className={`text-xs font-bold ${dark ? 'text-white' : 'text-slate-900'}`}>
+                <h3 className={`text-xs font-semibold ${dark ? 'text-zinc-100' : 'text-slate-900'}`}>
                   Receptor Apple AirPlay 2
                 </h3>
-                <p className="text-[10px] text-white/50">Screen Mirroring H.264 + Audio Sincronizado</p>
+                <p className="text-[10px] text-zinc-400">Screen Mirroring H.264 + Audio AAC</p>
               </div>
             </div>
-            <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#00e5ff]/10 border border-[#00e5ff]/30 text-[9px] font-bold text-[#00e5ff] shrink-0">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#00e5ff] animate-pulse" /> AIRPLAY 60 FPS
+            <span className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-zinc-800 border border-zinc-700 text-[10px] font-medium text-zinc-300">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> 60 FPS
             </span>
           </div>
 
-          <div className="p-2.5 rounded-xl bg-white/[0.02] border border-white/5 space-y-2">
+          <div className="p-2.5 rounded-lg bg-zinc-950/60 border border-zinc-800/80 space-y-2">
             <div className="flex items-center justify-between text-[11px]">
-              <span className="text-white/60 font-medium">Nombre en Red (Bonjour):</span>
-              <span className="font-bold text-white font-mono">AndroProject [PC]</span>
+              <span className="text-zinc-400 font-normal">Nombre en Red:</span>
+              <span className="font-medium text-zinc-200 font-mono">AndroProject [PC]</span>
             </div>
             <div className="flex items-center justify-between text-[11px]">
-              <span className="text-white/60 font-medium">Resolución de Flujo:</span>
-              <span className="font-bold text-white font-mono">{device.resolution || '1179 × 2556'}</span>
+              <span className="text-zinc-400 font-normal">Resolución:</span>
+              <span className="font-medium text-zinc-200 font-mono">{device.resolution || '1179 × 2556'}</span>
             </div>
             <div className="flex items-center justify-between text-[11px]">
-              <span className="text-white/60 font-medium">Velocidad de Cuadros:</span>
-              <span className="font-bold text-emerald-400 font-mono">60 FPS (GPU Direct3D)</span>
-            </div>
-            <div className="flex items-center justify-between text-[11px]">
-              <span className="text-white/60 font-medium">Audio AirPlay:</span>
-              <span className="font-bold text-emerald-400">Activado (AAC-ELD)</span>
+              <span className="text-zinc-400 font-normal">Velocidad de Cuadros:</span>
+              <span className="font-medium text-zinc-200 font-mono">60 FPS (Direct3D11)</span>
             </div>
           </div>
 
@@ -163,7 +182,7 @@ export const DeviceInfoPanel: React.FC<DeviceInfoPanelProps> = ({
                   showToast('Error al abrir ventana');
                 }
               }}
-              className="flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-xl text-xs font-bold transition-all shadow-md bg-gradient-to-r from-[#00b4d8] to-[#0077b6] hover:from-[#0096c7] hover:to-[#023e8a] text-white active:scale-[0.98] cursor-pointer"
+              className="flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-lg text-xs font-medium transition-colors bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 cursor-pointer"
             >
               <Maximize2 size={13} />
               <span>Ventana Libre</span>
@@ -172,40 +191,28 @@ export const DeviceInfoPanel: React.FC<DeviceInfoPanelProps> = ({
             <button
               type="button"
               onClick={() => {
-                showToast('Control de ratón activado. Usa el cursor sobre la pantalla.');
+                showToast('Control de ratón activado');
               }}
-              className="flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-xl text-xs font-bold transition-all shadow-md bg-white/10 hover:bg-white/15 text-white border border-white/10 active:scale-[0.98] cursor-pointer"
+              className="flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-lg text-xs font-medium transition-colors bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 cursor-pointer"
             >
-              <Sparkles size={13} className="text-emerald-400" />
+              <Sparkles size={13} className="text-zinc-400" />
               <span>Control Ratón</span>
             </button>
-          </div>
-
-          <div className="p-3 rounded-xl bg-emerald-500/5 border border-emerald-500/20 text-[11px] text-white/90 space-y-2">
-            <div className="font-bold text-emerald-400 flex items-center gap-1.5">
-              <span>🖱️ Manejo con Cursor y Ratón desde el PC:</span>
-            </div>
-            <p className="text-[10px] text-white/70 leading-relaxed">
-              Puedes hacer <strong>click</strong>, <strong>arrastrar</strong> o usar la <strong>rueda del ratón</strong> sobre el marco del iPhone. Para ver el cursor circular nativo en tu iPhone:
-            </p>
-            <div className="p-2 rounded-lg bg-black/40 border border-white/5 text-[10px] font-mono text-emerald-300">
-              Ajustes &gt; Accesibilidad &gt; Tocar &gt; AssistiveTouch &gt; ACTIVAR
-            </div>
           </div>
         </div>
       ) : (
         /* ═══ MODO ANDROID VISIONNANO 60 FPS ENGINE ═══ */
-        <div className={`rounded-xl border p-3 ${cardBg} ${cardBorder} ${cardShadow} space-y-3`}>
+        <div className={`rounded-xl border p-3.5 ${cardBg} ${cardBorder} ${cardShadow} space-y-3`}>
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-1.5">
-              <Sparkles size={14} className="text-[#22c97d]" />
-              <h3 className={`text-xs font-bold ${dark ? 'text-white' : 'text-slate-900'}`}>
-                VisionNano Engine (Direct3D11 60 FPS)
+            <div className="flex items-center gap-2">
+              <Sparkles size={14} className="text-zinc-400" />
+              <h3 className={`text-xs font-semibold ${dark ? 'text-zinc-100' : 'text-slate-900'}`}>
+                VisionNano Studio (Direct3D11 60 FPS)
               </h3>
             </div>
             {scrcpyActive && (
-              <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[9px] font-bold text-emerald-400 shrink-0">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> VISIONNANO ACTIVO
+              <span className="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-zinc-800 border border-zinc-700 text-[10px] font-medium text-emerald-400 shrink-0">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Activo
               </span>
             )}
           </div>
@@ -215,20 +222,20 @@ export const DeviceInfoPanel: React.FC<DeviceInfoPanelProps> = ({
             type="button"
             onClick={() => onToggleScrcpy()}
             disabled={isBusy}
-            className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-bold transition-all shadow-md ${
+            className={`w-full flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-semibold transition-colors shadow-sm cursor-pointer ${
               scrcpyActive
-                ? 'bg-red-500/15 text-red-400 hover:bg-red-500/25 border border-red-500/30'
-                : 'bg-[#1bae6e] hover:bg-[#22c97d] text-white shadow-[#1bae6e]/20 active:scale-[0.98]'
+                ? 'bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700'
+                : 'bg-zinc-100 hover:bg-white text-zinc-950 font-semibold'
             }`}
           >
-            {scrcpyActive ? <Square size={13} fill="currentColor" /> : <Play size={13} fill="currentColor" />}
-            <span>{scrcpyActive ? 'Detener VisionNano 60 FPS' : 'Lanzar VisionNano 60 FPS (Direct3D11)'}</span>
+            {scrcpyActive ? <Square size={12} fill="currentColor" /> : <Play size={12} fill="currentColor" />}
+            <span>{scrcpyActive ? 'Detener VisionNano' : 'Lanzar VisionNano 60 FPS'}</span>
           </button>
 
         {/* Streaming Controls Configuration */}
         <div className="grid grid-cols-3 gap-2 pt-1">
           <div>
-            <label className={`text-[10px] block font-semibold mb-1 ${dark ? 'text-white/50' : 'text-slate-500'}`}>
+            <label className={`text-[10px] block font-medium mb-1 ${dark ? 'text-zinc-400' : 'text-slate-500'}`}>
               Resolución
             </label>
             <select
@@ -236,18 +243,17 @@ export const DeviceInfoPanel: React.FC<DeviceInfoPanelProps> = ({
               onChange={(e) => setScrcpyOptions((o) => ({ ...o, maxSize: e.target.value }))}
               disabled={scrcpyActive}
               className={`w-full py-1 px-1.5 rounded-lg text-[10px] font-medium border ${
-                dark ? 'bg-white/[0.04] border-white/10 text-white' : 'bg-slate-50 border-slate-200 text-slate-800'
+                dark ? 'bg-zinc-900/80 border-zinc-800 text-zinc-200' : 'bg-slate-50 border-slate-200 text-slate-800'
               }`}
             >
-              <option value="1920">FHD (1080p)</option>
-              <option value="1280">HD (720p)</option>
-              <option value="800">SD (480p)</option>
-              <option value="0">Nativo Max</option>
+              <option value="1080">1080p FHD</option>
+              <option value="720">720p HD</option>
+              <option value="480">480p</option>
             </select>
           </div>
 
           <div>
-            <label className={`text-[10px] block font-semibold mb-1 ${dark ? 'text-white/50' : 'text-slate-500'}`}>
+            <label className={`text-[10px] block font-medium mb-1 ${dark ? 'text-zinc-400' : 'text-slate-500'}`}>
               Tasa FPS
             </label>
             <select
@@ -255,7 +261,7 @@ export const DeviceInfoPanel: React.FC<DeviceInfoPanelProps> = ({
               onChange={(e) => setScrcpyOptions((o) => ({ ...o, maxFps: e.target.value }))}
               disabled={scrcpyActive}
               className={`w-full py-1 px-1.5 rounded-lg text-[10px] font-medium border ${
-                dark ? 'bg-white/[0.04] border-white/10 text-white' : 'bg-slate-50 border-slate-200 text-slate-800'
+                dark ? 'bg-zinc-900/80 border-zinc-800 text-zinc-200' : 'bg-slate-50 border-slate-200 text-slate-800'
               }`}
             >
               <option value="60">60 FPS</option>
@@ -265,7 +271,7 @@ export const DeviceInfoPanel: React.FC<DeviceInfoPanelProps> = ({
           </div>
 
           <div>
-            <label className={`text-[10px] block font-semibold mb-1 ${dark ? 'text-white/50' : 'text-slate-500'}`}>
+            <label className={`text-[10px] block font-medium mb-1 ${dark ? 'text-zinc-400' : 'text-slate-500'}`}>
               Bitrate
             </label>
             <select
@@ -273,7 +279,7 @@ export const DeviceInfoPanel: React.FC<DeviceInfoPanelProps> = ({
               onChange={(e) => setScrcpyOptions((o) => ({ ...o, bitRate: e.target.value }))}
               disabled={scrcpyActive}
               className={`w-full py-1 px-1.5 rounded-lg text-[10px] font-medium border ${
-                dark ? 'bg-white/[0.04] border-white/10 text-white' : 'bg-slate-50 border-slate-200 text-slate-800'
+                dark ? 'bg-zinc-900/80 border-zinc-800 text-zinc-200' : 'bg-slate-50 border-slate-200 text-slate-800'
               }`}
             >
               <option value="16M">16 Mbps</option>
@@ -288,43 +294,43 @@ export const DeviceInfoPanel: React.FC<DeviceInfoPanelProps> = ({
         <div className="space-y-1.5 pt-1">
           <ToggleRow
             dark={dark}
-            icon={<EyeOff size={11} className="text-amber-400" />}
+            icon={<EyeOff size={12} className="text-zinc-400" />}
             label="Apagar pantalla física al proyectar"
-            description="Ahorra batería y evita sobrecalentamiento"
+            description="Ahorra batería y temperatura"
             checked={scrcpyOptions.turnScreenOff}
             onChange={(checked) => setScrcpyOptions((o) => ({ ...o, turnScreenOff: checked }))}
             disabled={scrcpyActive}
           />
           <ToggleRow
             dark={dark}
-            icon={<Sun size={11} className="text-yellow-400" />}
+            icon={<Sun size={12} className="text-zinc-400" />}
             label="Mantener pantalla activa"
-            description="Evita que el dispositivo entre en suspensión"
+            description="Evita que el teléfono entre en suspensión"
             checked={scrcpyOptions.stayAwake}
             onChange={(checked) => setScrcpyOptions((o) => ({ ...o, stayAwake: checked }))}
             disabled={scrcpyActive}
           />
           <ToggleRow
             dark={dark}
-            icon={<Maximize2 size={11} className="text-sky-400" />}
+            icon={<Maximize2 size={12} className="text-zinc-400" />}
             label="Ventana siempre al frente"
-            description="Mantiene la ventana de scrcpy fija encima"
+            description="Fija la ventana encima de otras aplicaciones"
             checked={scrcpyOptions.alwaysOnTop}
             onChange={(checked) => setScrcpyOptions((o) => ({ ...o, alwaysOnTop: checked }))}
             disabled={scrcpyActive}
           />
           <ToggleRow
             dark={dark}
-            icon={<Layers size={11} className="text-[#00e5ff]" />}
-            label="Ventana Cibernética Sin Bordes (Borderless)"
-            description="Elimina la barra clásica de Windows para proyección pura edge-to-edge"
+            icon={<Layers size={12} className="text-zinc-400" />}
+            label="Ventana sin bordes"
+            description="Elimina la barra de título para proyección edge-to-edge"
             checked={scrcpyOptions.borderless}
             onChange={(checked) => setScrcpyOptions((o) => ({ ...o, borderless: checked }))}
             disabled={scrcpyActive}
           />
           <ToggleRow
             dark={dark}
-            icon={<Camera size={11} className="text-emerald-400" />}
+            icon={<Camera size={12} className="text-zinc-400" />}
             label="Transmitir Cámara Trasera"
             description="Usa el sensor de cámara en lugar de la pantalla"
             checked={scrcpyOptions.videoSource === 'camera'}
@@ -334,8 +340,8 @@ export const DeviceInfoPanel: React.FC<DeviceInfoPanelProps> = ({
           {onToggleAutoProject && (
             <ToggleRow
               dark={dark}
-              icon={<Zap size={11} className="text-[#22c97d]" />}
-              label="Auto-proyectar al detectar dispositivo"
+              icon={<Zap size={12} className="text-zinc-400" />}
+              label="Auto-proyectar al conectar"
               description="Inicia la ventana nativa scrcpy automáticamente"
               checked={autoProject}
               onChange={onToggleAutoProject}
@@ -346,16 +352,16 @@ export const DeviceInfoPanel: React.FC<DeviceInfoPanelProps> = ({
       )}
 
       {/* ═══ Grabador de Pantalla HD en Segundo Plano ═══ */}
-      <div className={`rounded-xl border p-3 ${cardBg} ${cardBorder} ${cardShadow} space-y-2`}>
+      <div className={`rounded-xl border p-3.5 ${cardBg} ${cardBorder} ${cardShadow} space-y-2`}>
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-1.5">
-            <Video size={14} className={isRecording ? 'text-red-400 animate-pulse' : 'text-purple-400'} />
-            <h3 className={`text-xs font-bold ${dark ? 'text-white' : 'text-slate-900'}`}>
+          <div className="flex items-center gap-2">
+            <Video size={14} className={isRecording ? 'text-rose-400 animate-pulse' : 'text-zinc-400'} />
+            <h3 className={`text-xs font-semibold ${dark ? 'text-zinc-100' : 'text-slate-900'}`}>
               Grabador de Pantalla MP4
             </h3>
           </div>
           {isRecording && (
-            <span className="font-mono text-[10px] text-red-400 font-bold px-2 py-0.5 rounded-full bg-red-500/10 border border-red-500/20">
+            <span className="font-mono text-[10px] text-rose-400 font-medium px-2 py-0.5 rounded-md bg-rose-500/10 border border-rose-500/20">
               REC {formatTime(recordingSeconds)}
             </span>
           )}
@@ -365,54 +371,52 @@ export const DeviceInfoPanel: React.FC<DeviceInfoPanelProps> = ({
           type="button"
           onClick={onToggleRecord}
           disabled={isBusy}
-          className={`w-full flex items-center justify-center gap-2 py-2 rounded-xl text-xs font-bold transition-all ${
+          className={`w-full flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
             isRecording
-              ? 'bg-red-500 hover:bg-red-600 text-white shadow-lg shadow-red-500/25'
-              : dark
-                ? 'bg-purple-500/15 text-purple-300 hover:bg-purple-500/25 border border-purple-500/30'
-                : 'bg-purple-50 text-purple-700 hover:bg-purple-100 border border-purple-200'
+              ? 'bg-rose-500/15 border border-rose-500/30 text-rose-300 hover:bg-rose-500/25'
+              : 'bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700'
           }`}
         >
           {isRecording ? <Square size={12} fill="currentColor" /> : <Circle size={12} fill="currentColor" />}
-          <span>{isRecording ? 'Detener y Guardar Grabación' : 'Iniciar Grabación HD (H.265)'}</span>
+          <span>{isRecording ? 'Detener Grabación' : 'Iniciar Grabación (MP4)'}</span>
         </button>
       </div>
 
       {/* ═══ Herramientas de Control & Sistema ═══ */}
-      <div className={`rounded-xl border p-3 ${cardBg} ${cardBorder} ${cardShadow} space-y-2.5`}>
-        <h3 className={`text-[10px] font-bold uppercase tracking-wider ${dark ? 'text-white/40' : 'text-slate-400'}`}>
+      <div className={`rounded-xl border p-3.5 ${cardBg} ${cardBorder} ${cardShadow} space-y-2.5`}>
+        <h3 className={`text-[10px] font-semibold uppercase tracking-wider ${dark ? 'text-zinc-400' : 'text-slate-500'}`}>
           Herramientas y Sistema
         </h3>
 
         {/* Orientation Selector */}
         <div>
-          <span className={`text-[10px] block font-semibold mb-1 ${dark ? 'text-white/50' : 'text-slate-500'}`}>
+          <span className={`text-[10px] block font-medium mb-1.5 ${dark ? 'text-zinc-400' : 'text-slate-500'}`}>
             Orientación de Pantalla
           </span>
-          <div className="grid grid-cols-3 gap-1">
+          <div className="grid grid-cols-3 gap-1.5">
             <button
               type="button"
               onClick={() => { onSetOrientation('auto'); showToast('Orientación: Automática'); }}
-              className={`py-1.5 rounded-lg text-[10px] font-semibold border transition-all text-center ${
-                dark ? 'bg-white/[0.03] border-white/5 text-white/70 hover:bg-white/[0.08]' : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
+              className={`py-1.5 rounded-lg text-[10px] font-medium border transition-colors text-center cursor-pointer ${
+                dark ? 'bg-zinc-900/60 border-zinc-800 text-zinc-300 hover:bg-zinc-800 hover:text-zinc-100' : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
               }`}
             >
               Auto
             </button>
             <button
               type="button"
-              onClick={() => { onSetOrientation('portrait'); showToast('Orientación: Vertical fija'); }}
-              className={`py-1.5 rounded-lg text-[10px] font-semibold border transition-all text-center ${
-                dark ? 'bg-white/[0.03] border-white/5 text-white/70 hover:bg-white/[0.08]' : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
+              onClick={() => { onSetOrientation('portrait'); showToast('Orientación: Vertical'); }}
+              className={`py-1.5 rounded-lg text-[10px] font-medium border transition-colors text-center cursor-pointer ${
+                dark ? 'bg-zinc-900/60 border-zinc-800 text-zinc-300 hover:bg-zinc-800 hover:text-zinc-100' : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
               }`}
             >
               Vertical
             </button>
             <button
               type="button"
-              onClick={() => { onSetOrientation('landscape'); showToast('Orientación: Horizontal fija'); }}
-              className={`py-1.5 rounded-lg text-[10px] font-semibold border transition-all text-center ${
-                dark ? 'bg-white/[0.03] border-white/5 text-white/70 hover:bg-white/[0.08]' : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
+              onClick={() => { onSetOrientation('landscape'); showToast('Orientación: Horizontal'); }}
+              className={`py-1.5 rounded-lg text-[10px] font-medium border transition-colors text-center cursor-pointer ${
+                dark ? 'bg-zinc-900/60 border-zinc-800 text-zinc-300 hover:bg-zinc-800 hover:text-zinc-100' : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
               }`}
             >
               Horizontal
@@ -424,40 +428,46 @@ export const DeviceInfoPanel: React.FC<DeviceInfoPanelProps> = ({
         <div className="grid grid-cols-2 gap-1.5 pt-1">
           <ToolButton
             dark={dark}
-            icon={<Camera size={12} className="text-emerald-400" />}
+            icon={<ClipboardPaste size={13} className="text-zinc-400" />}
+            label="Pegar del PC"
+            onClick={handlePasteClipboard}
+          />
+          <ToolButton
+            dark={dark}
+            icon={<Camera size={13} className="text-zinc-400" />}
             label="Captura HD"
             onClick={handleScreenshotClick}
           />
           {onOpenAllApps && (
             <ToolButton
               dark={dark}
-              icon={<LayoutGrid size={12} className="text-emerald-400" />}
+              icon={<LayoutGrid size={13} className="text-zinc-400" />}
               label="Todas las Apps"
-              onClick={() => { onOpenAllApps(); showToast('Abriendo menú de aplicaciones'); }}
+              onClick={() => { onOpenAllApps(); showToast('Abriendo aplicaciones'); }}
             />
           )}
           <ToolButton
             dark={dark}
-            icon={<Bell size={12} className="text-sky-400" />}
+            icon={<Bell size={13} className="text-zinc-400" />}
             label="Notificaciones"
             onClick={() => { onExpandNotifications(); showToast('Desplegando notificaciones'); }}
           />
           <ToolButton
             dark={dark}
-            icon={<Sliders size={12} className="text-violet-400" />}
+            icon={<Sliders size={13} className="text-zinc-400" />}
             label="Ajustes Rápidos"
-            onClick={() => { onExpandQuickSettings(); showToast('Desplegando ajustes rápidos'); }}
+            onClick={() => { onExpandQuickSettings(); showToast('Ajustes rápidos'); }}
           />
           <ToolButton
             dark={dark}
-            icon={<Power size={12} className="text-amber-400" />}
+            icon={<Power size={13} className="text-zinc-400" />}
             label="Bloquear Pantalla"
             onClick={() => { onTogglePowerScreen(); showToast('Bloqueando pantalla'); }}
           />
           {onWakeScreen && (
             <ToolButton
               dark={dark}
-              icon={<Sun size={12} className="text-yellow-400" />}
+              icon={<Sun size={13} className="text-zinc-400" />}
               label="Despertar Pantalla"
               onClick={() => { onWakeScreen(); showToast('Despertando pantalla'); }}
             />
@@ -465,23 +475,23 @@ export const DeviceInfoPanel: React.FC<DeviceInfoPanelProps> = ({
           {onOpenSettings && (
             <ToolButton
               dark={dark}
-              icon={<Settings size={12} className="text-slate-300" />}
+              icon={<Settings size={13} className="text-zinc-400" />}
               label="Ajustes Sistema"
-              onClick={() => { onOpenSettings(); showToast('Abriendo Ajustes de Android'); }}
+              onClick={() => { onOpenSettings(); showToast('Abriendo Ajustes'); }}
             />
           )}
           {onToggleMute && (
             <ToolButton
               dark={dark}
-              icon={<VolumeX size={12} className="text-amber-400" />}
+              icon={<VolumeX size={13} className="text-zinc-400" />}
               label="Silenciar"
-              onClick={() => { onToggleMute(); showToast('Alternando Silencio'); }}
+              onClick={() => { onToggleMute(); showToast('Alternando silencio'); }}
             />
           )}
           {onMediaPlayPause && (
             <ToolButton
               dark={dark}
-              icon={<PlayCircle size={12} className="text-[#22c97d]" />}
+              icon={<PlayCircle size={13} className="text-zinc-400" />}
               label="Play / Pausa"
               onClick={() => { onMediaPlayPause(); showToast('Play / Pausa multimedia'); }}
             />
@@ -489,22 +499,22 @@ export const DeviceInfoPanel: React.FC<DeviceInfoPanelProps> = ({
           {onCollapsePanels && (
             <ToolButton
               dark={dark}
-              icon={<ChevronUp size={12} className="text-sky-300" />}
+              icon={<ChevronUp size={13} className="text-zinc-400" />}
               label="Cerrar Paneles"
-              onClick={() => { onCollapsePanels(); showToast('Cerrando paneles desplegados'); }}
+              onClick={() => { onCollapsePanels(); showToast('Cerrando paneles'); }}
             />
           )}
           <ToolButton
             dark={dark}
-            icon={<RotateCcw size={12} className="text-blue-400" />}
+            icon={<RotateCcw size={13} className="text-zinc-400" />}
             label="Reiniciar"
-            onClick={() => { onReboot(); showToast('Enviando orden de reinicio...'); }}
+            onClick={() => { onReboot(); showToast('Reiniciando...'); }}
           />
           <ToolButton
             dark={dark}
-            icon={<Power size={12} className="text-red-400" />}
+            icon={<Power size={13} className="text-rose-400" />}
             label="Apagar"
-            onClick={() => { onPowerOff(); showToast('Enviando orden de apagado...'); }}
+            onClick={() => { onPowerOff(); showToast('Apagando...'); }}
             danger
           />
         </div>
@@ -534,17 +544,17 @@ function ToggleRow({
   return (
     <label
       className={`flex items-center justify-between p-1.5 rounded-lg cursor-pointer select-none transition-colors ${
-        disabled ? 'opacity-50 cursor-not-allowed' : dark ? 'hover:bg-white/[0.03]' : 'hover:bg-slate-50'
+        disabled ? 'opacity-50 cursor-not-allowed' : dark ? 'hover:bg-zinc-900/60' : 'hover:bg-slate-50'
       }`}
     >
       <div className="flex items-center gap-2 min-w-0 pr-2">
         <span className="shrink-0">{icon}</span>
         <div className="min-w-0">
-          <span className={`text-[10px] font-semibold block leading-tight ${dark ? 'text-white/80' : 'text-slate-800'}`}>
+          <span className={`text-[11px] font-medium block leading-tight ${dark ? 'text-zinc-200' : 'text-slate-800'}`}>
             {label}
           </span>
           {description && (
-            <span className={`text-[9px] block leading-tight ${dark ? 'text-white/40' : 'text-slate-400'}`}>
+            <span className={`text-[10px] block leading-tight ${dark ? 'text-zinc-500' : 'text-slate-400'}`}>
               {description}
             </span>
           )}
@@ -555,7 +565,7 @@ function ToggleRow({
         checked={checked}
         disabled={disabled}
         onChange={(e) => onChange(e.target.checked)}
-        className="w-3.5 h-3.5 rounded accent-[#22c97d] cursor-pointer"
+        className="w-3.5 h-3.5 rounded accent-zinc-200 cursor-pointer"
       />
     </label>
   );
@@ -579,13 +589,13 @@ function ToolButton({
     <button
       type="button"
       onClick={onClick}
-      className={`flex items-center gap-2 px-2.5 py-2 rounded-xl text-left transition-all text-[10px] font-semibold border ${
+      className={`flex items-center gap-2 px-2.5 py-2 rounded-lg text-left transition-colors text-xs font-medium border cursor-pointer ${
         danger
           ? dark
-            ? 'text-red-400 bg-red-500/5 hover:bg-red-500/15 border-red-500/20'
+            ? 'text-rose-400 bg-rose-500/5 hover:bg-rose-500/10 border-rose-500/20'
             : 'text-red-600 bg-red-50 hover:bg-red-100 border-red-200'
           : dark
-            ? 'text-white/70 bg-white/[0.02] hover:bg-white/[0.06] border-white/5 hover:text-white'
+            ? 'text-zinc-300 bg-zinc-900/50 hover:bg-zinc-800/80 border-zinc-800/80 hover:text-zinc-100'
             : 'text-slate-700 bg-slate-50 hover:bg-slate-100 border-slate-200'
       }`}
     >

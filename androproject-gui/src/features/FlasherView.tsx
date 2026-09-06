@@ -24,10 +24,10 @@ const PARTITIONS = [
   { id: 'recovery_a',  label: 'Recuperación A',  desc: 'Slot A - Recuperación', critical: false },
   { id: 'recovery_b',  label: 'Recuperación B',  desc: 'Slot B - Recuperación', critical: false },
   { id: 'bootloader',  label: 'Gestor Arranque',  desc: 'CRÍTICO: gestor de arranque — brick si falla', critical: true },
-  { id: 'radio',       label: '⚠ Radio/Modem', desc: 'CRÍTICO: firmware de radio/baseband', critical: true },
-  { id: 'modem',       label: '⚠ Módem',     desc: 'CRÍTICO: partición del módem', critical: true },
-  { id: 'persist',     label: '⚠ Persistencia',   desc: 'CRÍTICO: calibración de sensores (IMEI, MAC)', critical: true },
-  { id: 'misc',        label: '⚠ Miscelánea',      desc: 'CRÍTICO: configuración de arranque', critical: true },
+  { id: 'radio',       label: 'Radio / Módem', desc: 'CRÍTICO: firmware de radio/baseband', critical: true },
+  { id: 'modem',       label: 'Módem',     desc: 'CRÍTICO: partición del módem', critical: true },
+  { id: 'persist',     label: 'Persistencia',   desc: 'CRÍTICO: calibración de sensores (IMEI, MAC)', critical: true },
+  { id: 'misc',        label: 'Miscelánea',      desc: 'CRÍTICO: configuración de arranque', critical: true },
   { id: 'logo',        label: 'Logo',        desc: 'Logo de arranque (splash)', critical: false },
 ];
 
@@ -89,7 +89,7 @@ export function FlasherView({ addLog: propAddLog }: FlasherViewProps = {}) {
                     setFlashState(d.state);
                     setFlashInfo(d.deviceInfo || {});
                     addLog(`Estado Flash: ${d.state}`);
-                  } catch { addLog('✗ Error al verificar estado'); }
+                  } catch { addLog('Error al verificar estado'); }
                 }}
               >
                 Detectar
@@ -107,7 +107,7 @@ export function FlasherView({ addLog: propAddLog }: FlasherViewProps = {}) {
                 <p className="text-sm font-bold">
                   {flashState === 'fastboot' ? 'Modo Fastboot — listo para flashear' :
                    flashState === 'adb' ? 'Android activo — reinicia en bootloader para flashear' :
-                   flashState === 'recovery' ? '🔧 Modo recovery — Sideload disponible' :
+                   flashState === 'recovery' ? 'Modo recovery — Sideload disponible' :
                    flashState === 'sideload' ? 'Modo sideload — listo para recibir el archivo ZIP' :
                    flashState === 'hardware_only' ? 'Hardware detectado — modo de bajo nivel' :
                    'Sin dispositivo detectado'}
@@ -162,10 +162,10 @@ export function FlasherView({ addLog: propAddLog }: FlasherViewProps = {}) {
                       if (d.success) {
                         addLog(`OEM Unlock: ${d.unlocked ? 'Permitido' : 'Bloqueado'}`);
                         alert(`Desbloqueo OEM en Ajustes está: ${d.unlocked ? 'PERMITIDO / HABILITADO' : 'BLOQUEADO / DESHABILITADO'}`);
-                      } else { addLog(`✗ Error al verificar OEM: ${d.error}`); }
-                    } catch { addLog('✗ Error de conexión'); }
+                      } else { addLog(`Error al verificar OEM: ${d.error}`); }
+                    } catch { addLog('Error de conexión'); }
                   }}
-                  className={`px-3 py-1.5 rounded-lg ${dark ? 'bg-[#1bae6e]/10 text-[#22c97d] border border-[#1bae6e]/20' : 'bg-blue-100 text-blue-600'} hover:opacity-80 transition-all font-semibold`}
+                  className={`px-3 py-1.5 rounded-lg ${dark ? 'bg-zinc-800 text-zinc-100 hover:bg-zinc-700 border border-zinc-700' : 'bg-zinc-100 text-zinc-800 hover:bg-zinc-200 border border-zinc-200'} transition-all font-semibold`}
                 >
                   Verificar Estado OEM
                 </button>
@@ -180,11 +180,11 @@ export function FlasherView({ addLog: propAddLog }: FlasherViewProps = {}) {
                       if (activeSerial) fd.append('serial', activeSerial);
                       const r = await fetch('/api/flash', { method: 'POST', body: fd });
                       const d = await r.json();
-                      addLog(d.success ? `✓ ${d.message}` : `✗ ${d.error}`);
+                      addLog(d.success ? `OEM: ${d.message}` : `Error: ${d.error}`);
                       alert(d.success ? d.message : d.error);
-                    } catch { addLog('✗ Error de conexión'); }
+                    } catch { addLog('Error de conexión'); }
                   }}
-                  className="flex-1 py-3 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-400 border border-emerald-500/20 text-xs font-bold transition-all shadow-sm"
+                  className="flex-1 py-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-100 border border-zinc-700 text-xs font-semibold transition-all shadow-sm"
                 >
                   Habilitar Desbloqueo OEM
                 </button>
@@ -196,10 +196,10 @@ export function FlasherView({ addLog: propAddLog }: FlasherViewProps = {}) {
                       if (activeSerial) fd.append('serial', activeSerial);
                       const r = await fetch('/api/flash', { method: 'POST', body: fd });
                       const d = await r.json();
-                      addLog(d.success ? `✓ ${d.message}` : `✗ ${d.error}`);
-                    } catch { addLog('✗ Error de conexión'); }
+                      addLog(d.success ? `Reinicio: ${d.message}` : `Error: ${d.error}`);
+                    } catch { addLog('Error de conexión'); }
                   }}
-                  className="flex-1 py-3 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-400 border border-amber-500/20 text-xs font-bold transition-all shadow-sm"
+                  className="flex-1 py-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-100 border border-zinc-700 text-xs font-semibold transition-all shadow-sm"
                 >
                   Reiniciar a Bootloader (Fastboot)
                 </button>
@@ -212,18 +212,18 @@ export function FlasherView({ addLog: propAddLog }: FlasherViewProps = {}) {
               <div className="flex gap-3">
                 <button
                   onClick={async () => {
-                    if (!confirm('⚠️ ADVERTENCIA: Intentar desbloquear el bootloader formateará tu celular de fábrica por seguridad. ¿Deseas ejecutar "fastboot flashing unlock"?')) return;
+                    if (!confirm('ADVERTENCIA: Intentar desbloquear el bootloader formateará tu celular de fábrica por seguridad. ¿Deseas ejecutar "fastboot flashing unlock"?')) return;
                     try {
                       const fd = new FormData();
                       fd.append('action', 'fastboot_unlock');
                       if (activeSerial) fd.append('serial', activeSerial);
                       const r = await fetch('/api/flash', { method: 'POST', body: fd });
                       const d = await r.json();
-                      addLog(d.success ? `✓ Desbloqueo: ${d.message}` : `✗ Error: ${d.error}`);
+                      addLog(d.success ? `Desbloqueo: ${d.message}` : `Error: ${d.error}`);
                       alert(d.success ? `Respuesta: ${d.message}` : `Error: ${d.error}`);
-                    } catch { addLog('✗ Error de conexión'); }
+                    } catch { addLog('Error de conexión'); }
                   }}
-                  className="flex-1 py-3 rounded-xl bg-red-500/15 hover:bg-red-500/25 text-red-400 border border-red-500/20 text-xs font-bold transition-all shadow-sm"
+                  className="flex-1 py-3 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-400 border border-rose-500/20 text-xs font-semibold transition-all shadow-sm"
                 >
                   Desbloquear bootloader
                 </button>
@@ -236,11 +236,11 @@ export function FlasherView({ addLog: propAddLog }: FlasherViewProps = {}) {
                       if (activeSerial) fd.append('serial', activeSerial);
                       const r = await fetch('/api/flash', { method: 'POST', body: fd });
                       const d = await r.json();
-                      addLog(d.success ? `✓ Bloqueo: ${d.message}` : `✗ Error: ${d.error}`);
+                      addLog(d.success ? `Bloqueo: ${d.message}` : `Error: ${d.error}`);
                       alert(d.success ? `Respuesta: ${d.message}` : `Error: ${d.error}`);
-                    } catch { addLog('✗ Error de conexión'); }
+                    } catch { addLog('Error de conexión'); }
                   }}
-                  className="flex-1 py-3 rounded-xl bg-blue-500/15 hover:bg-blue-500/25 text-blue-400 border border-blue-500/20 text-xs font-bold transition-all shadow-sm"
+                  className="flex-1 py-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 text-xs font-semibold transition-all shadow-sm"
                 >
                   Bloquear bootloader
                 </button>
@@ -253,11 +253,11 @@ export function FlasherView({ addLog: propAddLog }: FlasherViewProps = {}) {
                     if (activeSerial) fd.append('serial', activeSerial);
                     const r = await fetch('/api/flash', { method: 'POST', body: fd });
                     const d = await r.json();
-                    if (d.success) { addLog('✓ Info de dispositivo obtenida con éxito'); alert(d.info); }
-                    else { addLog(`✗ Error: ${d.error}`); alert(`Error: ${d.error}`); }
-                  } catch { addLog('✗ Error de conexión'); }
+                    if (d.success) { addLog('Info de dispositivo obtenida con éxito'); alert(d.info); }
+                    else { addLog(`Error: ${d.error}`); alert(`Error: ${d.error}`); }
+                  } catch { addLog('Error de conexión'); }
                 }}
-                className="w-full py-3 rounded-xl bg-[#1bae6e]/10 hover:bg-[#1bae6e]/20 text-[#22c97d] border border-[#1bae6e]/20 text-xs font-bold transition-all shadow-sm"
+                className="w-full py-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 text-xs font-semibold transition-all shadow-sm"
               >
                 Consultar información de seguridad OEM
               </button>
@@ -348,8 +348,8 @@ export function FlasherView({ addLog: propAddLog }: FlasherViewProps = {}) {
               const isCritical = selectedPartObj?.critical === true;
               if (!confirm(`¿Estás SEGURO de flashear "${flashFile.name}" en la partición "${selectedPartition}"? Esto podría dañar el dispositivo.`)) return;
               if (isCritical) {
-                if (!confirm(`⚠ ADVERTENCIA CRÍTICA ⚠\n\n"${selectedPartition}" es una partición de bajo nivel.\n\nFlashearla incorrectamente puede:\n• Dejar el dispositivo inservible (brick)\n• Borrar el IMEI permanentemente\n• Dañar la calibración de sensores\n\n¿Confirmas que sabes lo que haces?`)) return;
-                addLog(`⚠ Flasheando partición CRÍTICA: ${selectedPartition}`);
+                if (!confirm(`ADVERTENCIA CRÍTICA\n\n"${selectedPartition}" es una partición de bajo nivel.\n\nFlashearla incorrectamente puede:\n• Dejar el dispositivo inservible (brick)\n• Borrar el IMEI permanentemente\n• Dañar la calibración de sensores\n\n¿Confirmas que sabes lo que haces?`)) return;
+                addLog(`Partición crítica: ${selectedPartition}`);
               }
               setFlashing(true);
               setFlashProgress('Enviando imagen al dispositivo...');
@@ -363,16 +363,16 @@ export function FlasherView({ addLog: propAddLog }: FlasherViewProps = {}) {
                 if (activeSerial) fd.append('serial', activeSerial);
                 const r = await fetch('/api/flash', { method: 'POST', body: fd });
                 const d = await r.json();
-                addLog(d.success ? `✓ ${d.message}` : `✗ ${d.error}`);
-                setFlashProgress(d.success ? '✓ Flash completado' : `✗ ${d.error}`);
-              } catch { addLog('✗ Error de conexión'); setFlashProgress('✗ Error'); }
+                addLog(d.success ? `Flash: ${d.message}` : `Error: ${d.error}`);
+                setFlashProgress(d.success ? 'Flash completado con éxito' : `Error: ${d.error}`);
+              } catch { addLog('Error de conexión'); setFlashProgress('Error de conexión'); }
               finally { setFlashing(false); }
             }}
           >
             {flashing ? flashProgress : 'FLASHEAR PARTICIÓN'}
           </Button>
           {flashState !== 'fastboot' && flashFile && (
-            <p className={`text-xs text-center ${t.textMuted} mt-2`}>⚠️ Requiere que el dispositivo esté en modo Fastboot. Usa el botón &quot;Detectar&quot; de la parte superior.</p>
+            <p className={`text-xs text-center ${t.textMuted} mt-2`}>Requiere que el dispositivo esté en modo Fastboot. Usa el botón &quot;Detectar&quot; de la parte superior.</p>
           )}
         </div>
 
@@ -394,8 +394,8 @@ export function FlasherView({ addLog: propAddLog }: FlasherViewProps = {}) {
                 if (!f) return;
                 if (!confirm(`¿Enviar "${f.name}" vía ADB Sideload?`)) return;
                 if (flashState !== 'sideload' && flashState !== 'recovery') {
-                  addLog(`✗ El dispositivo debe estar en modo Recovery/Sideload. Actual: ${flashState}`);
-                  setFlashProgress('✗ Requiere modo Recovery con ADB Sideload activado');
+                  addLog(`El dispositivo debe estar en modo Recovery/Sideload. Actual: ${flashState}`);
+                  setFlashProgress('Requiere modo Recovery con ADB Sideload activado');
                   try {
                     const fd2 = new FormData();
                     fd2.append('action', 'check_state');
@@ -417,16 +417,16 @@ export function FlasherView({ addLog: propAddLog }: FlasherViewProps = {}) {
                   if (activeSerial) fd.append('serial', activeSerial);
                   const r = await fetch('/api/flash', { method: 'POST', body: fd });
                   const d = await r.json();
-                  addLog(d.success ? `✓ ${d.message}` : `✗ ${d.error}`);
-                  setFlashProgress(d.success ? '✓ Sideload completo' : `✗ ${d.error}`);
-                } catch { addLog('✗ Error de conexión'); }
+                  addLog(d.success ? `Sideload: ${d.message}` : `Error: ${d.error}`);
+                  setFlashProgress(d.success ? 'Sideload completado' : `Error: ${d.error}`);
+                } catch { addLog('Error de conexión'); }
                 finally { setFlashing(false); e.target.value = ''; }
               }}
             />
             <div className={`w-12 h-12 rounded-full ${dark ? 'bg-blue-500/10' : 'bg-blue-100'} flex items-center justify-center text-blue-500 mb-3 transition-transform`}>
               <Download size={22} />
             </div>
-            <p className="text-sm font-semibold group-hover:text-emerald-500 transition-colors">Suelta un archivo ZIP de ROM</p>
+            <p className="text-sm font-semibold group-hover:text-zinc-100 transition-colors">Suelta un archivo ZIP de ROM</p>
             <p className={`text-xs ${t.textMuted} mt-1`}>lineage-20.0-xxx.zip, twrp-installer.zip, etc.</p>
           </div>
         </div>

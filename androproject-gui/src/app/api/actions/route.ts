@@ -34,6 +34,8 @@ const registry: Record<string, ActionHandler> = {
   keyevent:             (ctx, body) => device.keyevent(ctx, body as { keycode: string }),
   adb_shell:            (ctx, body) => device.adbShell(ctx, body as { cmd: string }),
   input_text:           (ctx, body) => device.inputText(ctx, body as { text: string }),
+  set_clipboard:        (ctx, body) => device.setClipboard(ctx, body as { text: string }),
+  paste_clipboard:      (ctx, body) => device.pasteClipboard(ctx, body as { text?: string }),
   input_tap:            (ctx, body) => device.inputTap(ctx, body as { x: number; y: number }),
   input_swipe:          (ctx, body) => device.inputSwipe(ctx, body as { x1: number; y1: number; x2: number; y2: number; duration?: number }),
 
