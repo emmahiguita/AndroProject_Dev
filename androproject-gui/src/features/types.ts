@@ -1,3 +1,11 @@
+// ============================================================================
+// ARCHIVO: types.ts
+// QUÉ HACE: Contratos e interfaces TypeScript compartidos entre vistas, stores
+//           y endpoints de telemetría Android / iOS.
+// CÓMO FUNCIONA: Define la estructura exacta de DeviceInfo, AppInfo y logs.
+// POR QUÉ: Garantizar tipado estricto de extremo a extremo sin `any` (< 200L).
+// ============================================================================
+
 export type DeviceData = {
   connected: boolean;
   platform?: 'android' | 'ios';
@@ -11,15 +19,21 @@ export type DeviceData = {
   resolution?: string;
   ram?: string;
   ramUsed?: string;
+  ramFreeMB?: number;
   ramUsagePercent?: number;
   storage?: string;
   storageUsedGB?: number;
   storageFreeGB?: number;
   storageUsagePercent?: number;
   cpuUsagePercent?: number;
+  cpuLoadAvg?: string;
+  activeThreads?: string;
+  uptimeHours?: string;
   battery?: number;
   isCharging?: boolean;
   temperature?: string;
+  batteryVoltageMv?: number;
+  batteryTech?: string;
   state?: string;
   oemUnlockAllowed?: boolean;
   bootloaderLocked?: boolean;

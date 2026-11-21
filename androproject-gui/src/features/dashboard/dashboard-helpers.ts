@@ -1,12 +1,13 @@
 // ============================================================================
 // ARCHIVO: dashboard-helpers.ts
-// QUÉ HACE: Funciones puras de cálculo de telemetría (CPU, RAM, Temperatura,
-//           Almacenamiento) y asignación determinista de color por paquete APK.
-// CÓMO FUNCIONA: Normaliza lecturas crudas de sensores Android (ej. décimas de
-//           grado "350" -> 35°C) y clasifica umbrales operativos sin efectos
-//           secundarios ni dependencia del estado de React.
-// POR QUÉ: Cumplir Single Responsibility Principle (SOLID), facilitar el
-//           mantenimiento y evitar recalcular lógica dispersa en la vista (< 200L).
+// QUÉ HACE: Funciones puras de cálculo de telemetría real (CPU delta, RAM en
+//           GB/MB, Temperatura con décimas, Almacenamiento real y carga de
+//           hilos) y asignación determinista de color por paquete APK.
+// CÓMO FUNCIONA: Toma los datos reales leídos de `/proc/stat`, `/proc/meminfo`,
+//           `df -k /data` y `dumpsys battery` y construye etiquetas técnicas
+//           exactas sin valores simulados.
+// POR QUÉ: Cumplir Single Responsibility Principle (SOLID) y separar la lógica
+//           de formato técnico de los componentes visuales (< 200 líneas).
 // ============================================================================
 
 import type { DeviceInfo } from '../types';
@@ -17,21 +18,25 @@ export type AppsFilterDash = 'all' | 'user' | 'system' | 'safe' | 'bloatware';
 /** Nivel semántico sobrio para indicadores de estado técnico. */
 export type TelemetryLevel = 'ok' | 'warn' | 'crit' | 'neutral';
 
-/** Estructura normalizada de telemetría lista para renderizar en UI. */
+/** Estructura normalizada de telemetría real lista para renderizar en UI. */
 export interface DeviceTelemetrySummary {
   cpuPercent: number;
   cpuStatus: string;
+  cpuSubDetail: string;
   cpuLevel: TelemetryLevel;
   ramPercent: number;
   ramStatus: string;
+  ramSubDetail: string;
   ramLevel: TelemetryLevel;
   tempNum: number;
   tempCelsius: string;
   tempStatus: string;
+  tempSubDetail: string;
   tempLevel: TelemetryLevel;
   storagePercent: number;
   storageFreeGB: number;
   storStatus: string;
+  storSubDetail: string;
   storLevel: TelemetryLevel;
 }
 
@@ -51,10 +56,7 @@ const APP_COLORS: Record<string, string> = {
   'com.coloros': '#1BAE6E',
 };
 
-/**
- * Genera un color consistente para un nombre de paquete cuando aún no hay icono PNG.
- * Usa prefijos conocidos o un hash DJB2 sobre el string del packageName.
- */
+/** Genera un color consistente para un paquete cuando aún no hay icono PNG. */
 export function getAppColor(pkg: string): string {
   for (const [prefix, color] of Object.entries(APP_COLORS)) {
     if (pkg.startsWith(prefix)) return color;
@@ -63,14 +65,10 @@ export function getAppColor(pkg: string): string {
   for (let i = 0; i < pkg.length; i++) {
     hash = pkg.charCodeAt(i) + ((hash << 5) - hash);
   }
-  const hue = Math.abs(hash) % 360;
-  return `hsl(${hue}, 55%, 45%)`;
+  return `hsl(${Math.abs(hash) % 360}, 55%, 45%)`;
 }
 
-/**
- * Convierte la lectura térmica de Android (que puede venir en décimas como "350"
- * o en grados como "35.2") a un número flotante en grados Celsius.
- */
+/** Normaliza lectura térmica de Android ("353" -> 35.3°C o "35.3" -> 35.3°C). */
 export function parseTempNum(rawTemp?: string): number | null {
   if (!rawTemp || rawTemp === '--') return null;
   let v = parseFloat(rawTemp);
@@ -80,8 +78,8 @@ export function parseTempNum(rawTemp?: string): number | null {
 }
 
 /**
- * Calcula todos los indicadores y estados de telemetría del dispositivo conectado.
- * Función pura O(1) sin mutaciones.
+ * Construye el resumen completo de telemetría real a partir del objeto `DeviceInfo`
+ * entregado por `/api/device` (lectura directa del kernel Android).
  */
 export function computeDeviceTelemetry(device?: DeviceInfo | null): DeviceTelemetrySummary {
   const cpuPercent = Math.min(100, Math.max(0, device?.cpuUsagePercent ?? 0));
@@ -91,42 +89,60 @@ export function computeDeviceTelemetry(device?: DeviceInfo | null): DeviceTeleme
 
   const tempParsed = parseTempNum(device?.temperature ?? '--');
   const tempNum = tempParsed !== null ? Math.round(tempParsed) : 0;
-  const tempCelsius = tempParsed !== null ? tempParsed.toFixed(0) : '--';
+  const tempCelsius = tempParsed !== null ? tempParsed.toFixed(1) : '--';
 
-  const cpuStatus = cpuPercent < 50 ? 'Normal' : cpuPercent < 80 ? 'Uso alto' : 'Crítico';
+  const cpuStatus = cpuPercent < 50 ? 'Normal' : cpuPercent < 80 ? 'Carga media' : 'Crítico';
   const cpuLevel: TelemetryLevel = cpuPercent < 50 ? 'ok' : cpuPercent < 80 ? 'warn' : 'crit';
+  const cpuSubDetail = device?.activeThreads
+    ? `Load ${device.cpuLoadAvg || '--'} · Hilos ${device.activeThreads}`
+    : 'Delta /proc/stat en vivo';
 
-  const ramStatus = ramPercent < 60 ? 'Uso normal' : ramPercent < 85 ? 'Uso alto' : 'Crítico';
-  const ramLevel: TelemetryLevel = ramPercent < 60 ? 'ok' : ramPercent < 85 ? 'warn' : 'crit';
+  const ramStatus = ramPercent < 65 ? 'Normal' : ramPercent < 85 ? 'Uso alto' : 'Crítico';
+  const ramLevel: TelemetryLevel = ramPercent < 65 ? 'ok' : ramPercent < 85 ? 'warn' : 'crit';
+  const ramSubDetail =
+    device?.ramUsed && device?.ram
+      ? `${device.ramUsed} / ${device.ram} (${device.ramFreeMB ?? '--'} MB libres)`
+      : 'Lectura /proc/meminfo';
 
   const tempStatus =
     tempParsed === null
-      ? 'Sin lectura'
-      : tempNum < 42
+      ? 'Sin sensor'
+      : tempNum < 41
       ? 'Normal'
-      : tempNum < 48
-      ? 'Temperatura alta'
-      : 'Sobrecalentamiento';
+      : tempNum < 46
+      ? 'Templado'
+      : 'Caliente';
   const tempLevel: TelemetryLevel =
-    tempParsed === null ? 'neutral' : tempNum < 42 ? 'ok' : tempNum < 48 ? 'warn' : 'crit';
+    tempParsed === null ? 'neutral' : tempNum < 41 ? 'ok' : tempNum < 46 ? 'warn' : 'crit';
+  const tempSubDetail = device?.batteryVoltageMv
+    ? `${device.batteryVoltageMv} mV · ${device.batteryTech || 'Li-ion'}`
+    : `Batería ${device?.battery ?? '--'}%`;
 
   const storStatus = storageFreeGB > 0 ? `${storageFreeGB} GB libres` : `${100 - storagePercent}% libre`;
   const storLevel: TelemetryLevel = storagePercent < 85 ? 'neutral' : 'warn';
+  const storSubDetail =
+    device?.storageUsedGB !== undefined && device?.storage
+      ? `${device.storageUsedGB} GB usados de ${device.storage}`
+      : 'Partición /data';
 
   return {
     cpuPercent,
     cpuStatus,
+    cpuSubDetail,
     cpuLevel,
     ramPercent,
     ramStatus,
+    ramSubDetail,
     ramLevel,
     tempNum,
     tempCelsius,
     tempStatus,
+    tempSubDetail,
     tempLevel,
     storagePercent,
     storageFreeGB,
     storStatus,
+    storSubDetail,
     storLevel,
   };
 }

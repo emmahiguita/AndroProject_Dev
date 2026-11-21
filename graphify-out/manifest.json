@@ -105,8 +105,8 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/app/api/config/route.ts": {
-    "mtime": 1795287045.004055,
-    "ast_hash": "4485d8fef3a462c879c3d28548fd7a1b",
+    "mtime": 1795302000.8586364,
+    "ast_hash": "41d20532848a2222c4650ab9aa9a311a",
     "semantic_hash": ""
   },
   "androproject-gui/src/app/api/device/route.ts": {
@@ -115,8 +115,8 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/app/api/flash/route.ts": {
-    "mtime": 1795116798.6385093,
-    "ast_hash": "8d3ba312301cdbc2db78a37407e18bf6",
+    "mtime": 1795301733.6825547,
+    "ast_hash": "336bc21f66a71a48790b69b70dd353a4",
     "semantic_hash": ""
   },
   "androproject-gui/src/app/api/install-apk/route.ts": {
@@ -190,8 +190,8 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/features/ConfigView.tsx": {
-    "mtime": 1788497668.2746267,
-    "ast_hash": "cc68076b7ab5d42121a6438e60ba046c",
+    "mtime": 1795302203.8993511,
+    "ast_hash": "14e2162f5a5638d25739c30854d78dc0",
     "semantic_hash": ""
   },
   "androproject-gui/src/features/CurarView.tsx": {
@@ -200,13 +200,13 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/features/DashboardView.tsx": {
-    "mtime": 1795300751.977596,
-    "ast_hash": "e8e17df8a42c82b7e8a8b024c08d972f",
+    "mtime": 1795301532.3095424,
+    "ast_hash": "3036b7e06f638d101f20357545ead405",
     "semantic_hash": ""
   },
   "androproject-gui/src/features/FlasherView.tsx": {
-    "mtime": 1795295853.2119813,
-    "ast_hash": "401905be0b7ea01c1073fc5c4403648c",
+    "mtime": 1795301900.2440155,
+    "ast_hash": "5215922c9f2810eb36b695e960c67d9a",
     "semantic_hash": ""
   },
   "androproject-gui/src/features/OptimizerView.tsx": {
@@ -220,8 +220,8 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/features/types.ts": {
-    "mtime": 1795296039.1085637,
-    "ast_hash": "8a565aef7bc616e64adb2b5af2f1483d",
+    "mtime": 1795301200.2821858,
+    "ast_hash": "08c26164a1499aa3b3f8acf217d4cb97",
     "semantic_hash": ""
   },
   "androproject-gui/src/hooks/useActions.ts": {
@@ -715,8 +715,8 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/lib/services/device-info-fetcher.ts": {
-    "mtime": 1788711594.7684288,
-    "ast_hash": "1eaeacea0465d53eb59a70f459f807df",
+    "mtime": 1795301282.3079903,
+    "ast_hash": "23ec29df7c657e7defc721ee87cb3588",
     "semantic_hash": ""
   },
   "androproject-gui/src/lib/services/index.ts": {
@@ -1400,13 +1400,43 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/features/dashboard/TelemetryModal.tsx": {
-    "mtime": 1795300645.534875,
-    "ast_hash": "3036ad862f693b5fc47e6f7a2e22a796",
+    "mtime": 1795301403.904915,
+    "ast_hash": "9f264a032f6220210de81fb8346fd7b2",
     "semantic_hash": ""
   },
   "androproject-gui/src/features/dashboard/dashboard-helpers.ts": {
-    "mtime": 1795300541.5903227,
-    "ast_hash": "e6305334fc036b7064d2fcabaf1df34b",
+    "mtime": 1795301358.2402403,
+    "ast_hash": "b06952386ee8afdc1f15b053d1873d22",
+    "semantic_hash": ""
+  },
+  "androproject-gui/src/features/config/DeviceSettingsPanel.tsx": {
+    "mtime": 1795302079.5370371,
+    "ast_hash": "db9923f00341917d4481e51c8e7fbb2d",
+    "semantic_hash": ""
+  },
+  "androproject-gui/src/features/flasher/FlasherBootloaderPanel.tsx": {
+    "mtime": 1795301815.0605502,
+    "ast_hash": "269cfc2dcd1d88710c35c186ffbfe3f9",
+    "semantic_hash": ""
+  },
+  "androproject-gui/src/features/flasher/FlasherImagePanel.tsx": {
+    "mtime": 1795301869.680429,
+    "ast_hash": "592c5841abde363893b39a1a81b451c6",
+    "semantic_hash": ""
+  },
+  "androproject-gui/src/features/flasher/flasher-partitions.ts": {
+    "mtime": 1795301771.3584292,
+    "ast_hash": "51326d1b5f942090376ecf6d4d537dd0",
+    "semantic_hash": ""
+  },
+  "androproject-gui/src/lib/services/device-telemetry-parsers.ts": {
+    "mtime": 1795301237.979792,
+    "ast_hash": "86ca128b8de53c3ddf3ad40632cb833c",
+    "semantic_hash": ""
+  },
+  "androproject-gui/src/lib/services/flash-device-inspector.ts": {
+    "mtime": 1795301696.9127998,
+    "ast_hash": "3a45a16c71fa4dbd7ee3d7887bf71711",
     "semantic_hash": ""
   }
 }

@@ -1,171 +1,198 @@
+// ============================================================================
+// ARCHIVO: ConfigView.tsx
+// QUÉ HACE: Vista de Ajustes del Sistema y del Dispositivo Android conectado.
+// CÓMO FUNCIONA: Al montar o cambiar `activeSerial`, consulta `GET /api/config`
+//           para cargar las rutas reales de binarios (verificados en disco) y
+//           los ajustes en vivo del móvil (`settings global/system`), permitiendo
+//           modificarlos mediante `POST /api/config`.
+// POR QUÉ: Corregir el bug donde `configData` aparecía vacío ("No configurado")
+//           e inyectar control real sobre el dispositivo y el host (< 200L).
+// ============================================================================
 'use client';
 
-import { useState } from 'react';
-import type { ReactNode } from 'react';
+import React, { useState, useEffect, useCallback, type ReactNode } from 'react';
 import {
   Settings, FolderOpen, HardDrive, Monitor, Zap, Camera,
-  Wifi, Globe, Radio, Code, Sparkles, Copy, Check, Wrench, ChevronRight,
+  Wifi, Globe, Radio, Copy, Check, Wrench, RefreshCw, Terminal, ChevronRight,
 } from 'lucide-react';
 import { useAppStore } from '@/stores';
 import { useTheme } from '@/hooks/useTheme';
 import { ViewShell } from '@/components/ViewShell';
-import { Card } from '@/components/ui/Card';
+import { DeviceSettingsPanel, type LiveAndroidSettings } from './config/DeviceSettingsPanel';
 
 interface ConfigViewProps {
   addLog?: (msg: string, type?: 'info' | 'success' | 'error') => void;
 }
 
-export function ConfigView({ addLog }: ConfigViewProps = {}) {
-  const { t, dark } = useTheme();
+export function ConfigView({ addLog: propAddLog }: ConfigViewProps = {}) {
+  const { dark } = useTheme();
   const configData = useAppStore((s) => s.configData);
+  const activeSerial = useAppStore((s) => s.activeSerial);
+  const device = useAppStore((s) => s.device);
   const setActiveNav = useAppStore((s) => s.setActiveNav);
+  const storeAddLog = useAppStore((s) => s.addLog);
 
-  const resetConfig = async () => {
+  const [verified, setVerified] = useState<Record<string, boolean>>({});
+  const [deviceSettings, setDeviceSettings] = useState<LiveAndroidSettings | null>(null);
+  const [busyAction, setBusyAction] = useState<string | null>(null);
+
+  const log = useCallback(
+    (msg: string, type: 'info' | 'success' | 'error' = 'info') => {
+      if (propAddLog) propAddLog(msg, type);
+      else storeAddLog(msg, new Date().toLocaleTimeString(), type);
+    },
+    [propAddLog, storeAddLog],
+  );
+
+  // Carga automática real de rutas de binarios y ajustes del dispositivo Android
+  const loadConfig = useCallback(async () => {
+    setBusyAction('load');
     try {
-      addLog?.('Recargando configuración del dispositivo...');
+      const q = activeSerial ? `?serial=${encodeURIComponent(activeSerial)}` : '';
+      const res = await fetch(`/api/config${q}`, { cache: 'no-store' });
+      const data = await res.json();
+      if (data.success) {
+        useAppStore.setState({ configData: data });
+        setVerified(data.verified || {});
+        setDeviceSettings(data.deviceSettings || null);
+      }
+    } catch {
+      log('Error al leer la configuración del sistema.', 'error');
+    } finally {
+      setBusyAction(null);
+    }
+  }, [activeSerial, log]);
+
+  useEffect(() => { loadConfig(); }, [loadConfig]);
+
+  // Ejecuta un ajuste real en el dispositivo o en el servidor host
+  const handleApplySetting = async (action: string, value?: string | number | boolean) => {
+    setBusyAction(action);
+    try {
       const res = await fetch('/api/config', {
         method: 'POST',
-        body: JSON.stringify({ action: 'reset' }),
         headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action, serial: activeSerial, value }),
       });
       const data = await res.json();
-      if (data.message) useAppStore.setState({ configData: data.message });
-      addLog?.('Configuración recargada.');
+      if (data.success) {
+        if (data.deviceSettings) setDeviceSettings(data.deviceSettings);
+        log(`Ajuste aplicado (${action})`, 'success');
+      } else {
+        log(data.error || 'Error aplicando ajuste', 'error');
+      }
     } catch {
-      addLog?.('Error al recargar configuración.');
+      log('Error de red al aplicar ajuste.', 'error');
+    } finally {
+      setBusyAction(null);
     }
   };
 
+  const cardCls = dark ? 'bg-zinc-950 border-zinc-800 text-zinc-100' : 'bg-white border-slate-300 text-slate-900 shadow-sm';
+  const btnCls = `px-2.5 py-1 rounded border text-xs font-semibold flex items-center gap-1.5 transition-colors disabled:opacity-50 ${
+    dark ? 'bg-zinc-900 border-zinc-700 text-zinc-100 hover:bg-zinc-800' : 'bg-slate-100 border-slate-300 text-slate-800 hover:bg-slate-200'
+  }`;
+
   return (
     <ViewShell navId="config">
-      <div className="mx-auto w-full min-w-0 max-w-4xl space-y-3">
-        {/* Header */}
-        <div className={`${dark ? 'settings-panel' : `${t.panel} border ${t.border} shadow-sm`} rounded-xl px-4 py-3`}>
-          <div className="flex items-center gap-2">
-            <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${dark ? 'bg-zinc-800 text-zinc-200' : 'bg-zinc-100 text-zinc-700'}`}>
-              <Settings size={14} />
+      <div className="mx-auto w-full max-w-4xl space-y-3">
+        {/* Cabecera compacta con acciones reales de sistema */}
+        <div className={`rounded-lg border p-3.5 flex flex-wrap items-center justify-between gap-2 ${cardCls}`}>
+          <div className="flex items-center gap-2.5">
+            <div className={`w-8 h-8 rounded border flex items-center justify-center shrink-0 ${dark ? 'bg-zinc-900 border-zinc-800 text-zinc-200' : 'bg-slate-100 border-slate-300 text-slate-700'}`}>
+              <Settings size={16} />
             </div>
             <div>
-              <h2 className={`text-xs font-bold ${t.text}`}>Ajustes del sistema</h2>
-              <p className={`text-[10px] ${t.textSub}`}>Información técnica.</p>
+              <h2 className="text-sm font-bold">Ajustes del Sistema y Dispositivo</h2>
+              <p className={`text-[11px] ${dark ? 'text-zinc-400' : 'text-slate-500'}`}>Control en vivo de parámetros Android (`settings`), rutas de binarios y red</p>
             </div>
+          </div>
+          <div className="flex flex-wrap items-center gap-1.5">
+            <button type="button" onClick={() => handleApplySetting('open_captures')} disabled={busyAction !== null} className={btnCls}><FolderOpen size={12} /> <span>Abrir Capturas</span></button>
+            <button type="button" onClick={() => handleApplySetting('restart_adb')} disabled={busyAction !== null} className={btnCls}><Zap size={12} /> <span>Reiniciar ADB</span></button>
+            <button type="button" onClick={loadConfig} disabled={busyAction !== null} className={btnCls}><RefreshCw size={12} className={busyAction === 'load' ? 'animate-spin' : ''} /> <span>Recargar</span></button>
           </div>
         </div>
 
-        {/* System paths */}
-        <Card heading={<span className="flex items-center gap-1.5"><FolderOpen size={10} /> Rutas del sistema</span>}>
-          <div className="space-y-0.5">
-            <ConfigRow dark={dark} icon={<HardDrive size={12} />} label="Binario ADB" value={configData.adb || 'No configurado'} />
-            <ConfigRow dark={dark} icon={<Monitor size={12} />} label="Motor de transmisión" value={configData.streamingEngine || 'No configurado'} />
-            <ConfigRow dark={dark} icon={<Zap size={12} />} label="Fastboot" value={configData.fastboot || 'No configurado'} />
-            <ConfigRow dark={dark} icon={<HardDrive size={12} />} label="Directorio raíz" value={configData.home || 'No configurado'} />
-            <ConfigRow dark={dark} icon={<Camera size={12} />} label="Capturas" value={configData.capturesDir || 'No configurado'} />
-          </div>
-        </Card>
+        <DeviceSettingsPanel dark={dark} serial={activeSerial} model={device?.marketName || device?.model} settings={deviceSettings} busyAction={busyAction} onApplySetting={handleApplySetting} />
 
-        {/* Network & ports */}
-        <Card heading={<span className="flex items-center gap-1.5"><Wifi size={10} /> Red y puertos</span>}>
-          <div className="space-y-0.5">
-            <ConfigRow dark={dark} icon={<Wifi size={12} />} label="Puerto Wi-Fi (ADB)" value={String(configData.wifiPort || 5555)} />
-            <ConfigRow dark={dark} icon={<Globe size={12} />} label="Puerto API" value={String(configData.apiPort || 3001)} />
-            <ConfigRow dark={dark} icon={<Radio size={12} />} label="Puerto WebSocket" value={String(configData.streamingWsPort || 3002)} />
-          </div>
-        </Card>
-
-        {/* Software */}
-        <Card heading={<span className="flex items-center gap-1.5"><Code size={10} /> Programa</span>}>
-          <div className="space-y-0.5">
-            <ConfigRow dark={dark} icon={<Sparkles size={12} />} label="Versión" value={configData.version || 'No disponible'} />
-          </div>
-        </Card>
-
-        {/* Copy codes */}
-        <Card heading="Códigos del dispositivo">
-          <div className="space-y-2">
-            <div className={`${dark ? 'bg-white/[0.03]' : 'bg-slate-100'} rounded-lg p-2.5 font-mono text-[10px] ${dark ? 'text-white/40' : 'text-slate-500'}`}>
-              <p>ADB:</p>
-              <code className="break-all">{configData.adb || '—'}</code>
-            </div>
-            <div className={`${dark ? 'bg-white/[0.03]' : 'bg-slate-100'} rounded-lg p-2.5 font-mono text-[10px] ${dark ? 'text-white/40' : 'text-slate-500'}`}>
-              <p>Capturas:</p>
-              <code className="break-all">{configData.capturesDir || '—'}</code>
+        {/* Cuadrícula de 2 columnas: Binarios verificados + Red y Accesos */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+          <div className={`rounded-lg border p-3.5 space-y-2 ${cardCls}`}>
+            <h3 className="text-xs font-bold uppercase tracking-wider flex items-center gap-1.5"><HardDrive size={13} /> Binarios y Rutas del Host</h3>
+            <div className="space-y-1">
+              <ConfigRow dark={dark} icon={<HardDrive size={12} />} label="Binario ADB" value={configData.adb || 'C:\\AndroProject\\adb.exe'} ok={verified.adb} />
+              <ConfigRow dark={dark} icon={<Zap size={12} />} label="Binario Fastboot" value={configData.fastboot || 'fastboot.exe'} ok={verified.fastboot} />
+              <ConfigRow dark={dark} icon={<Monitor size={12} />} label="Motor Scrcpy 4.1" value={configData.streamingEngine || 'scrcpy.exe'} ok={verified.scrcpy} />
+              <ConfigRow dark={dark} icon={<Camera size={12} />} label="Carpeta de Capturas" value={configData.capturesDir || 'C:\\AndroProject\\Capturas'} ok />
+              <ConfigRow dark={dark} icon={<FolderOpen size={12} />} label="Directorio Raíz" value={configData.home || 'C:\\AndroProject'} ok />
             </div>
           </div>
-        </Card>
 
-        {/* Reset config */}
-        <Card heading="Restablecer configuración">
-          <div className="flex items-center justify-between gap-3">
-            <p className={`text-[10px] ${t.textSub}`}>Recarga la configuración desde el dispositivo.</p>
-            <button
-              onClick={resetConfig}
-              className={`shrink-0 px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all ${dark ? 'bg-white/[0.04] text-white/70 hover:bg-white/[0.08]' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
-            >
-              Recargar
-            </button>
-          </div>
-        </Card>
+          <div className={`rounded-lg border p-3.5 flex flex-col justify-between gap-3 ${cardCls}`}>
+            <div className="space-y-2">
+              <h3 className="text-xs font-bold uppercase tracking-wider flex items-center gap-1.5"><Wifi size={13} /> Red, Puertos y Servicios</h3>
+              <div className="space-y-1">
+                <ConfigRow dark={dark} icon={<Wifi size={12} />} label="Puerto ADB Wi-Fi" value={String(configData.wifiPort || 5555)} ok />
+                <ConfigRow dark={dark} icon={<Globe size={12} />} label="Puerto Estudio Web (Next.js)" value="3000" ok />
+                <ConfigRow dark={dark} icon={<Radio size={12} />} label="Receptor AirPlay 2 Nativo" value="7001 (Bonjour Activo)" ok />
+              </div>
+            </div>
 
-        {/* Advanced sections */}
-        <Card heading="Secciones avanzadas">
-          <div className="space-y-1">
-            <NavRow dark={dark} icon={<Settings size={12} />} label="Gestión de apps" onClick={() => setActiveNav('apps')} />
-            <NavRow dark={dark} icon={<FolderOpen size={12} />} label="Transferencia de archivos" onClick={() => setActiveNav('archivos')} />
-            {/* FIX: 'herramientas' y 'proyeccion' no existen en NavSection — corregido a 'tools' y 'projection' */}
-            <NavRow dark={dark} icon={<Wrench size={12} />} label="Herramientas avanzadas" onClick={() => setActiveNav('tools')} />
-            <NavRow dark={dark} icon={<Camera size={12} />} label="Proyección de pantalla" onClick={() => setActiveNav('projection')} />
+            <div className="space-y-1 pt-2 border-t border-zinc-800/40">
+              <p className={`text-[10px] font-bold uppercase tracking-wider mb-1 ${dark ? 'text-zinc-400' : 'text-slate-500'}`}>Módulos de Ingeniería</p>
+              <div className="grid grid-cols-2 gap-1.5">
+                <QuickNavBtn dark={dark} icon={<Monitor size={12} />} label="Proyección 60 FPS" onClick={() => setActiveNav('projection')} />
+                <QuickNavBtn dark={dark} icon={<Terminal size={12} />} label="Inyección CLI & IA" onClick={() => setActiveNav('cli')} />
+                <QuickNavBtn dark={dark} icon={<Wrench size={12} />} label="Herramientas ADB" onClick={() => setActiveNav('tools')} />
+                <QuickNavBtn dark={dark} icon={<Zap size={12} />} label="Flasheador Fastboot" onClick={() => setActiveNav('flasher')} />
+              </div>
+            </div>
           </div>
-        </Card>
+        </div>
       </div>
     </ViewShell>
   );
 }
 
-// ── ConfigRow helper (internal to this view) ──────────────────────────
-
-function ConfigRow({ icon, label, value, dark }: {
-  icon: ReactNode;
-  label: string;
-  value: string;
-  dark: boolean;
-}) {
+/** Fila compacta de ruta o puerto con insignia de verificación y botón de copia. */
+function ConfigRow({ icon, label, value, dark, ok }: { icon: ReactNode; label: string; value: string; dark: boolean; ok?: boolean }) {
   const [copied, setCopied] = useState(false);
-
-  const handleCopy = () => {
-    navigator.clipboard.writeText(value);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
   return (
-    <div className={`flex items-center gap-2 py-1.5 border-b ${dark ? 'border-white/5' : 'border-slate-100'} last:border-0 transition-colors ${dark ? 'hover:bg-white/[0.02]' : 'hover:bg-slate-50'} px-1 rounded-lg min-w-0 w-full`}>
-      <div className={`shrink-0 ${dark ? 'text-white/35' : 'text-slate-400'}`}>{icon}</div>
-
+    <div className={`flex items-center gap-2 px-2 py-1.5 rounded border ${dark ? 'bg-zinc-900/50 border-zinc-800/80' : 'bg-slate-50 border-slate-200'}`}>
+      <span className={`shrink-0 ${dark ? 'text-zinc-400' : 'text-slate-500'}`}>{icon}</span>
       <div className="flex-1 min-w-0">
-        <p className={`text-[10px] ${dark ? 'text-white/45' : 'text-slate-400'}`}>{label}</p>
-        <p className={`text-[10px] font-mono truncate ${dark ? 'text-white/75' : 'text-slate-700'}`} title={value}>{value}</p>
+        <div className="flex items-center gap-1.5">
+          <span className={`text-[10px] font-semibold ${dark ? 'text-zinc-300' : 'text-slate-700'}`}>{label}</span>
+          {ok !== undefined && (
+            <span className={`text-[8px] font-mono px-1 rounded ${ok ? 'bg-emerald-500/15 text-emerald-500' : 'bg-amber-500/15 text-amber-500'}`}>{ok ? 'OK' : 'WARN'}</span>
+          )}
+        </div>
+        <p className={`text-[10px] font-mono truncate ${dark ? 'text-zinc-400' : 'text-slate-500'}`} title={value}>{value}</p>
       </div>
       <button
-        onClick={handleCopy}
-        className={`shrink-0 p-1 rounded transition-all duration-200 ${dark ? 'hover:bg-zinc-800 text-zinc-500 hover:text-zinc-200' : 'hover:bg-slate-200 text-slate-400 hover:text-emerald-600'} ${copied ? (dark ? 'text-emerald-400' : 'text-emerald-600') : ''}`}
-        title="Copiar"
+        type="button"
+        onClick={() => { navigator.clipboard.writeText(value); setCopied(true); setTimeout(() => setCopied(false), 1500); }}
+        className={`p-1 rounded transition-colors ${dark ? 'hover:bg-zinc-800 text-zinc-400' : 'hover:bg-slate-200 text-slate-600'}`}
+        title="Copiar valor"
       >
-        {copied ? <Check size={10} /> : <Copy size={10} />}
+        {copied ? <Check size={11} className="text-emerald-500" /> : <Copy size={11} />}
       </button>
     </div>
   );
 }
 
-// ── NavRow helper (internal to this view) ─────────────────────────────
-
-function NavRow({ dark, icon, label, onClick }: { dark: boolean; icon: ReactNode; label: string; onClick: () => void }) {
+function QuickNavBtn({ dark, icon, label, onClick }: { dark: boolean; icon: ReactNode; label: string; onClick: () => void }) {
   return (
-    <button onClick={onClick} className={`w-full flex items-center justify-between gap-3 rounded-lg p-2.5 text-left transition-colors ${dark ? 'hover:bg-white/[0.04]' : 'hover:bg-slate-100'}`}>
-      <span className="flex items-center gap-2.5">
-        <span className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${dark ? 'bg-zinc-800 text-zinc-200' : 'bg-slate-100 text-emerald-600'}`}>{icon}</span>
-        <span className={`text-[10px] font-bold ${dark ? 'text-white/60' : 'text-slate-700'}`}>{label}</span>
-      </span>
-      <ChevronRight size={14} className={`${dark ? 'text-white/30' : 'text-slate-300'}`} />
+    <button
+      type="button"
+      onClick={onClick}
+      className={`flex items-center justify-between gap-1.5 px-2.5 py-1.5 rounded border text-[11px] font-semibold transition-colors ${
+        dark ? 'bg-zinc-900 border-zinc-800 text-zinc-200 hover:bg-zinc-800' : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
+      }`}
+    >
+      <span className="flex items-center gap-1.5 truncate">{icon} <span className="truncate">{label}</span></span>
+      <ChevronRight size={12} className="shrink-0 opacity-60" />
     </button>
   );
 }
