@@ -13,10 +13,10 @@ interface UseDeviceStreamResult {
   refreshNow: () => void;
 }
 
-/** How often to poll (ms). Optimized to 300ms for better responsiveness */
-const POLL_INTERVAL_MS = 300;
-/** On error, back off to 500 ms before retrying */
-const ERROR_RETRY_MS = 500;
+/** How often to poll (ms). Optimized to 120ms for fluid responsiveness in fallback/iOS mode */
+const POLL_INTERVAL_MS = 120;
+/** On error, back off to 400 ms before retrying */
+const ERROR_RETRY_MS = 400;
 
 /**
  * useDeviceStream — Zero-Lag ETag Polling Stream.
@@ -111,7 +111,7 @@ export function useDeviceStream(
         if (res.status === 304) {
           setConnected(true);
           isPolling = false;
-          const interval = 500; // Balanced interval when screen is static
+          const interval = 200; // Snappy interval when screen is static
           timeoutId = setTimeout(poll, interval);
           return;
         }
@@ -148,8 +148,7 @@ export function useDeviceStream(
           }
 
           isPolling = false;
-          const interval = 300; // Optimal latency without saturating ADB bus
-          timeoutId = setTimeout(poll, interval);
+          timeoutId = setTimeout(poll, POLL_INTERVAL_MS);
         } else {
           isPolling = false;
           setError(true);

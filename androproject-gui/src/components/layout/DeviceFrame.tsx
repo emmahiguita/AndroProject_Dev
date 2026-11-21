@@ -36,7 +36,7 @@ export const DeviceFrame: React.FC<DeviceFrameProps> = ({
 }) => {
   const { run } = useActions();
   const isIos = device.platform === 'ios' || device.serial?.startsWith('airplay-');
-  const [useMjpegStream, setUseMjpegStream] = useState(false);
+  const [useMjpegStream, setUseMjpegStream] = useState(!isIos);
   const [currentFps, setCurrentFps] = useState(0);
 
   // Zoom state passed down to ProjectionCanvas

@@ -31,14 +31,13 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  // Sync to DOM attribute for CSS tokens
+  // Sync to DOM attribute and Tailwind class for CSS tokens & dark: utilities
   useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
-    if (theme === 'light') {
-      document.documentElement.classList.add('light');
-    } else {
-      document.documentElement.classList.remove('light');
-    }
+    const root = document.documentElement;
+    root.setAttribute('data-theme', theme);
+    root.classList.toggle('light', theme === 'light');
+    root.classList.toggle('dark', theme === 'dark');
+    root.style.colorScheme = theme;
     localStorage.setItem('androproject-theme', theme);
   }, [theme]);
 

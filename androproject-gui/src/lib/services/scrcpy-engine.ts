@@ -52,7 +52,7 @@ export interface IVisionNanoEngine {
   checkAlive(serial: string): Promise<boolean>;
 }
 
-export interface IScrcpyEngine extends IVisionNanoEngine {}
+export type IScrcpyEngine = IVisionNanoEngine;
 
 export class VisionNanoEngine implements IVisionNanoEngine {
   /**
@@ -62,11 +62,12 @@ export class VisionNanoEngine implements IVisionNanoEngine {
     const { serial } = options;
     const isWifi = /^\d{1,3}(\.\d{1,3}){3}(:\d+)?$/.test(serial);
 
-    const bitRate = options.bitRate ? String(options.bitRate) : (isWifi ? '8M' : '16M');
+    const bitRate = options.bitRate ? String(options.bitRate) : (isWifi ? '4M' : '16M');
     const maxSize = options.maxSize && options.maxSize !== '0' ? String(options.maxSize) : '960';
-    const maxFps = options.maxFps ? String(options.maxFps) : '60';
+    const maxFps = options.maxFps ? String(options.maxFps) : (isWifi ? '30' : '60');
     const displayId = options.displayId !== undefined ? String(options.displayId) : '0';
-    const videoBuffer = options.videoBuffer !== undefined ? String(options.videoBuffer) : '0';
+    // Para Wi-Fi es necesario algo de buffer para evitar que el cliente de scrcpy crashee por falta de frames
+    const videoBuffer = options.videoBuffer !== undefined ? String(options.videoBuffer) : (isWifi ? '50' : '0');
 
     const args: string[] = ['-s', String(serial)];
 

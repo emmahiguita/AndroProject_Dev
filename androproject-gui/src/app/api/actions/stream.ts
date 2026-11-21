@@ -9,10 +9,12 @@ import {
   getRecordLockFile,
   writeLock, readLock, deleteLock, isLockAlive, killLockedProcess,
 } from '@/lib/config';
-import { scrcpyEngine } from '@/lib/services/scrcpy-engine';
+import { projectionCoordinator } from '@/lib/services/projection-coordinator';
+import type { DeviceInfo } from '@/features/types';
 import { adb } from '@/lib/services/adb-executor';
+import { airPlayReceiverEngine } from '@/lib/services/airplay-engine';
 
-// ── Screen Streaming (scrcpy) ──────────────────────────────────────
+// ── Screen Streaming (Unified via ProjectionCoordinator - SOLID) ──────────
 
 export async function openScreen(ctx: ActionContext, body: {
   videoSource?: string;
@@ -27,28 +29,20 @@ export async function openScreen(ctx: ActionContext, body: {
   videoBuffer?: number | string;
   platform?: 'android' | 'ios';
 }) {
-  const targetSerial = ctx.targetSerial;
-  const isIos = (targetSerial && targetSerial.startsWith('airplay-')) || body.platform === 'ios';
-
-  if (isIos) {
-    const { airPlayReceiverEngine } = await import('@/lib/services/airplay-engine');
-    const result = await airPlayReceiverEngine.start({
-      serverName: 'AndroProject [PC]',
-      port: 7000,
-      pinRequired: false,
-    });
-    return NextResponse.json({
-      success: true,
-      alive: result.running,
-      message: 'Proyector AirPlay 2 iniciado. Conecte su iPhone desde Duplicar Pantalla -> AndroProject [PC].',
-    });
-  }
-
+  const targetSerial = ctx.targetSerial || (body.platform === 'ios' ? 'airplay-ios' : '');
   if (!targetSerial) {
     return NextResponse.json({ success: false, error: 'No hay un dispositivo conectado' }, { status: 400 });
   }
 
-  const result = await scrcpyEngine.start({
+  const isIos = (targetSerial && targetSerial.startsWith('airplay-')) || body.platform === 'ios';
+  const device: DeviceInfo = {
+    serial: targetSerial,
+    model: isIos ? 'Apple iPhone' : 'Android Device',
+    platform: isIos ? 'ios' : 'android',
+    connected: true,
+  };
+
+  const result = await projectionCoordinator.start(device, {
     serial: targetSerial,
     displayId: body.displayId,
     maxSize: body.maxSize,
@@ -60,10 +54,13 @@ export async function openScreen(ctx: ActionContext, body: {
     borderless: body.borderless,
     videoBuffer: body.videoBuffer,
     videoSource: body.videoSource as 'display' | 'camera',
+    platform: device.platform,
   });
 
-  if (!result.success) {
-    return NextResponse.json({ success: false, error: result.error || 'Error al iniciar transmisión' }, { status: 500 });
+  const isSuccess = 'success' in result ? result.success : ('running' in result ? result.running : true);
+  if (!isSuccess) {
+    const errorMsg = ('error' in result && result.error) || 'Error al iniciar transmisión';
+    return NextResponse.json({ success: false, error: errorMsg }, { status: 500 });
   }
 
   return NextResponse.json(result);
@@ -71,26 +68,21 @@ export async function openScreen(ctx: ActionContext, body: {
 
 export async function checkOrStopScreen(ctx: ActionContext, action: 'check_screen' | 'stop_screen') {
   const serial = ctx.targetSerial || 'default';
-
-  if (serial.startsWith('airplay-')) {
-    const { airPlayReceiverEngine } = await import('@/lib/services/airplay-engine');
-    if (action === 'check_screen') {
-      const status = await airPlayReceiverEngine.getStatus();
-      return NextResponse.json({ success: true, alive: status.running });
-    }
-    if (action === 'stop_screen') {
-      const stopped = await airPlayReceiverEngine.stop();
-      return NextResponse.json({ success: true, alive: false, message: 'Transmisión AirPlay detenida' });
-    }
-  }
+  const isIos = serial.startsWith('airplay-');
+  const device: DeviceInfo = {
+    serial,
+    model: isIos ? 'Apple iPhone' : 'Android Device',
+    platform: isIos ? 'ios' : 'android',
+    connected: true,
+  };
 
   if (action === 'check_screen') {
-    const alive = await scrcpyEngine.checkAlive(serial);
+    const alive = await projectionCoordinator.isAlive(device);
     return NextResponse.json({ success: true, alive });
   }
 
   if (action === 'stop_screen') {
-    const stopped = await scrcpyEngine.stop(serial);
+    const stopped = await projectionCoordinator.stop(device);
     return NextResponse.json({
       success: true,
       alive: false,
@@ -112,7 +104,25 @@ export async function screenshot(ctx: ActionContext) {
   const localPath = path.join(SCREENSHOTS_DIR, `screenshot_${timestamp}.png`);
   const serial = ctx.targetSerial || '';
 
-  // Primary method: raw binary screencap via exec-out
+  // iOS AirPlay / Apple Device screenshot capture
+  if (serial.startsWith('airplay-') || serial.startsWith('apple-')) {
+    const frame = airPlayReceiverEngine.getLatestFrame(serial);
+    if (frame && frame.length > MIN_SCREENSHOT_SIZE && frame[0] === 0x89 && frame[1] === 0x50) {
+      fs.writeFileSync(localPath, frame);
+      return NextResponse.json({
+        success: true,
+        message: `Captura iOS guardada en Capturas\\screenshot_${timestamp}.png`,
+        path: localPath,
+        size: frame.length,
+      });
+    }
+    return NextResponse.json({
+      success: false,
+      error: 'No se pudo capturar la pantalla iOS. Verifica que la duplicación AirPlay esté activa en tu iPhone.',
+    }, { status: 422 });
+  }
+
+  // Primary method: raw binary screencap via exec-out (Android)
   const res = await adb.execOut(serial, 'exec-out screencap -p');
   if (res.ok && res.stdout.length > MIN_SCREENSHOT_SIZE && res.stdout[0] === 0x89 && res.stdout[1] === 0x50) {
     fs.writeFileSync(localPath, res.stdout);

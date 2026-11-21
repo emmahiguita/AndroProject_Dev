@@ -60,9 +60,9 @@ export function FlasherView({ addLog: propAddLog }: FlasherViewProps = {}) {
       <div className="mx-auto w-full min-w-0 max-w-4xl space-y-5">
 
         {/* Header */}
-        <div className={`${dark ? 'glow-card' : `${t.panel} border ${t.border} shadow-sm`} rounded-xl p-6`}>
+        <div className={`${dark ? 'bg-zinc-950 border border-zinc-800' : `${t.panel} border ${t.border}`} rounded-xl p-6`}>
           <div className="flex items-center gap-3 mb-5">
-            <div className={`w-12 h-12 rounded-xl ${dark ? 'bg-orange-500/10 border border-orange-500/20' : 'bg-orange-100'} flex items-center justify-center text-orange-500 shadow-inner`}>
+            <div className={`w-12 h-12 rounded-xl border ${dark ? 'bg-zinc-900 border-zinc-800 text-zinc-200' : 'bg-slate-100 border-slate-200 text-slate-700'} flex items-center justify-center`}>
               <Zap size={24} />
             </div>
             <div>
@@ -72,7 +72,7 @@ export function FlasherView({ addLog: propAddLog }: FlasherViewProps = {}) {
           </div>
 
           {/* Device State Detector */}
-          <div className={`${dark ? 'bg-black/30 border border-white/5' : 'bg-slate-50 border border-slate-200'} rounded-xl p-4 mb-5`}>
+          <div className={`${dark ? 'bg-zinc-900/60 border border-zinc-800' : 'bg-slate-50 border border-slate-200'} rounded-xl p-4 mb-5`}>
             <div className="flex items-center justify-between mb-3">
               <p className={`text-[10px] ${t.textSub} uppercase tracking-widest font-bold`}>Estado del dispositivo</p>
               <Button
@@ -96,12 +96,11 @@ export function FlasherView({ addLog: propAddLog }: FlasherViewProps = {}) {
               </Button>
             </div>
             <div className="flex items-center gap-4">
-              <div className={`w-3 h-3 rounded-full ${
-                flashState === 'fastboot' ? 'bg-orange-500 shadow-[0_0_8px_rgba(249,115,22,0.6)]' :
-                flashState === 'adb' ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]' :
-                flashState === 'recovery' || flashState === 'sideload' ? 'bg-blue-500 shadow-[0_0_8px_rgba(168,85,247,0.6)]' :
-                flashState === 'hardware_only' ? 'bg-yellow-500 shadow-[0_0_8px_rgba(234,179,8,0.6)]' :
-                'bg-gray-500'
+              <div className={`w-2.5 h-2.5 rounded-full ${
+                flashState === 'adb' ? 'bg-emerald-500' :
+                flashState === 'fastboot' || flashState === 'recovery' || flashState === 'sideload' ? (dark ? 'bg-zinc-200' : 'bg-slate-800') :
+                flashState === 'hardware_only' ? 'bg-zinc-400' :
+                'bg-zinc-600'
               }`} />
               <div>
                 <p className="text-sm font-bold">
@@ -118,10 +117,10 @@ export function FlasherView({ addLog: propAddLog }: FlasherViewProps = {}) {
           </div>
 
           {flashState === 'hardware_only' && (
-            <div className={`flex items-start gap-3 ${dark ? 'bg-amber-500/10 border border-amber-500/20' : 'bg-amber-50 border border-amber-200'} rounded-xl p-3.5 mb-5`}>
-              <AlertTriangle size={20} className="text-amber-500 shrink-0 mt-0.5" />
+            <div className={`flex items-start gap-3 ${dark ? 'bg-zinc-900 border border-zinc-700' : 'bg-slate-100 border border-slate-300'} rounded-xl p-3.5 mb-5`}>
+              <AlertTriangle size={20} className={dark ? 'text-zinc-300 shrink-0 mt-0.5' : 'text-slate-700 shrink-0 mt-0.5'} />
               <div>
-                <p className="text-sm font-bold text-amber-500">Aviso: Posible falta de Drivers Fastboot</p>
+                <p className={`text-sm font-bold ${dark ? 'text-zinc-100' : 'text-slate-900'}`}>Aviso: Posible falta de Drivers Fastboot</p>
                 <p className={`text-xs ${t.textMuted} mt-1`}>
                   Windows detectó la conexión física del dispositivo, pero no puede comunicarse mediante comandos Fastboot.
                   Si tu celular se reinicia solo a los pocos segundos de entrar en la pantalla de Fastboot, se debe a la falta del driver <strong>Android Bootloader Interface</strong> en tu PC. Instálalo desde el Administrador de Dispositivos para poder flashear.
@@ -285,9 +284,9 @@ export function FlasherView({ addLog: propAddLog }: FlasherViewProps = {}) {
                 onClick={() => setSelectedPartition(p.id)}
                 className={`py-2 px-1 rounded-xl text-center transition-all duration-200 border text-[11px] font-bold ${
                   selectedPartition === p.id
-                    ? dark ? 'bg-orange-500/15 border-orange-500/40 text-orange-400 shadow-[0_0_10px_rgba(249,115,22,0.15)]' : 'bg-orange-100 border-orange-300 text-orange-700'
-                    : dark ? `bg-white/[0.03] border-white/5 ${t.textMuted} hover:bg-white/10` : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
-                } ${p.id === 'userdata' ? 'ring-1 ring-red-500/30' : ''}`}
+                    ? dark ? 'bg-zinc-100 border-zinc-100 text-zinc-950' : 'bg-slate-900 border-slate-900 text-white'
+                    : dark ? `bg-zinc-900 border-zinc-800 ${t.textMuted} hover:bg-zinc-800` : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
+                }`}
               >
                 {p.label}
               </button>
@@ -297,8 +296,8 @@ export function FlasherView({ addLog: propAddLog }: FlasherViewProps = {}) {
           {(() => {
             const selectedPartObj = PARTITIONS.find(p => p.id === selectedPartition);
             return selectedPartObj ? (
-              <div className={`mb-4 p-3 rounded-xl flex items-start gap-2.5 text-xs ${dark ? 'bg-orange-500/5 border border-orange-500/10 text-orange-300/80' : 'bg-orange-50 border border-orange-200 text-orange-800'}`}>
-                <AlertTriangle size={14} className="shrink-0 mt-0.5 text-orange-500" />
+              <div className={`mb-4 p-3 rounded-xl flex items-start gap-2.5 text-xs ${dark ? 'bg-zinc-900 border border-zinc-800 text-zinc-300' : 'bg-slate-50 border border-slate-200 text-slate-700'}`}>
+                <AlertTriangle size={14} className="shrink-0 mt-0.5" />
                 <div>
                   <span className="font-bold uppercase tracking-wider text-[10px] block mb-0.5">Destino: {selectedPartObj.label}</span>
                   <p className="opacity-90">{selectedPartObj.desc}</p>
@@ -308,7 +307,7 @@ export function FlasherView({ addLog: propAddLog }: FlasherViewProps = {}) {
           })()}
 
           {/* File Drop */}
-          <div className={`border-2 border-dashed ${dark ? 'border-orange-500/20 hover:border-orange-500/50' : 'border-orange-300 hover:border-orange-500'} transition-all duration-200 rounded-xl p-6 flex flex-col items-center justify-center ${t.bg} relative group hover:bg-orange-500/5`}>
+          <div className={`border-2 border-dashed ${dark ? 'border-zinc-700 hover:border-zinc-500 hover:bg-zinc-900/50' : 'border-slate-300 hover:border-slate-500 hover:bg-slate-50'} transition-all duration-200 rounded-xl p-6 flex flex-col items-center justify-center ${t.bg} relative group`}>
             <input
               type="file"
               accept=".img,.bin,.mbn"
@@ -318,17 +317,17 @@ export function FlasherView({ addLog: propAddLog }: FlasherViewProps = {}) {
                 if (f) { setFlashFile(f); addLog(`Archivo seleccionado: ${f.name} (${(f.size / 1024 / 1024).toFixed(1)} MB)`); }
               }}
             />
-            <div className={`w-12 h-12 rounded-full ${dark ? 'bg-orange-500/10' : 'bg-orange-100'} flex items-center justify-center text-orange-500 mb-3 transition-transform`}>
+            <div className={`w-12 h-12 rounded-full ${dark ? 'bg-zinc-900 text-zinc-300' : 'bg-slate-100 text-slate-700'} flex items-center justify-center mb-3 transition-transform`}>
               <Download size={22} />
             </div>
             {flashFile ? (
               <>
-                <p className="text-sm font-bold text-orange-500">{flashFile.name}</p>
-                <p className={`text-xs ${t.textMuted} mt-1`}>{(flashFile.size / 1024 / 1024).toFixed(1)} MB — Partición destino: <span className="font-bold text-orange-400">{selectedPartition}</span></p>
+                <p className={`text-sm font-bold ${dark ? 'text-zinc-100' : 'text-slate-900'}`}>{flashFile.name}</p>
+                <p className={`text-xs ${t.textMuted} mt-1`}>{(flashFile.size / 1024 / 1024).toFixed(1)} MB — Partición destino: <span className="font-bold">{selectedPartition}</span></p>
               </>
             ) : (
               <>
-                <p className="text-sm font-bold group-hover:text-orange-500 transition-colors">Arrastre el archivo .img aquí</p>
+                <p className="text-sm font-bold transition-colors">Arrastre el archivo .img aquí</p>
                 <p className={`text-xs ${t.textMuted} mt-1`}>boot.img, recovery.img, system.img, etc.</p>
               </>
             )}
@@ -379,12 +378,12 @@ export function FlasherView({ addLog: propAddLog }: FlasherViewProps = {}) {
         {/* Sideload Panel */}
         <div className={`${dark ? 'bg-white/[0.025] border border-white/[0.07]' : `${t.panel} border ${t.border} shadow-sm`} rounded-xl p-6`}>
           <div className="flex items-center gap-3 mb-4">
-            <Download size={20} className="text-blue-500" />
+            <Download size={20} className={dark ? 'text-zinc-300' : 'text-slate-700'} />
             <p className="text-sm font-bold">ADB Sideload (.zip)</p>
-            <span className={`text-[10px] px-2 py-0.5 rounded-full ${dark ? 'bg-blue-500/15 text-blue-400 border border-blue-500/30' : 'bg-blue-100 text-blue-600'} font-medium`}>Recovery</span>
+            <span className={`text-[10px] px-2 py-0.5 rounded-full border ${dark ? 'bg-zinc-900 text-zinc-300 border-zinc-700' : 'bg-slate-100 text-slate-700 border-slate-200'} font-medium`}>Recovery</span>
           </div>
           <p className={`text-xs ${t.textMuted} mb-4`}>Envía un archivo ZIP de Custom ROM o actualización al modo Recovery (TWRP/LineageOS Recovery). El dispositivo debe estar en modo ADB Sideload.</p>
-          <div className={`border-2 border-dashed ${dark ? 'border-blue-500/20 hover:border-blue-500/50' : 'border-blue-300 hover:border-blue-500'} transition-all duration-200 rounded-xl p-6 flex flex-col items-center justify-center ${t.bg} relative group hover:bg-blue-500/5`}>
+          <div className={`border-2 border-dashed ${dark ? 'border-zinc-700 hover:border-zinc-500 hover:bg-zinc-900/50' : 'border-slate-300 hover:border-slate-500 hover:bg-slate-50'} transition-all duration-200 rounded-xl p-6 flex flex-col items-center justify-center ${t.bg} relative group`}>
             <input
               type="file"
               accept=".zip"

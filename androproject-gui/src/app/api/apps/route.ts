@@ -2,8 +2,16 @@ import { NextResponse } from 'next/server';
 import { exec } from 'child_process';
 import { promisify } from 'util';
 import { ADB } from '@/lib/config';
+import { assertValidPackageName, isValidDeviceSerial } from '@/lib/security/input-sanitizer';
 
-const execAsync = promisify(exec);
+const execAsyncOrig = promisify(exec);
+const execAsync = async (command: string, options: { timeout?: number; encoding?: BufferEncoding; maxBuffer?: number } = {}) => {
+  const res = await execAsyncOrig(command, { encoding: 'utf8', ...options, windowsHide: true });
+  return {
+    stdout: typeof res.stdout === 'string' ? res.stdout : (res.stdout ? String(res.stdout) : ''),
+    stderr: typeof res.stderr === 'string' ? res.stderr : (res.stderr ? String(res.stderr) : ''),
+  };
+};
 
 const getErrorMessage = (error: unknown) =>
   error instanceof Error ? error.message : String(error);
@@ -316,11 +324,15 @@ export async function POST(req: Request) {
     
     // Resolve ADB command target
     const { stdout: devicesOut } = await execAsync(`"${ADB}" devices`);
-    const id = devicesOut.split('\n').slice(1).find(l => l.includes('\tdevice'))?.split(/\s+/)[0];
+    const id = devicesOut.split('\n').slice(1).find((l: string) => l.includes('\tdevice'))?.split(/\s+/)[0];
     const targetSerial = serial || id;
     
     if (!targetSerial) {
       return NextResponse.json({ success: false, error: 'Dispositivo no detectado' }, { status: 400 });
+    }
+
+    if (targetSerial !== 'Hardware Level' && !isValidDeviceSerial(targetSerial)) {
+      return NextResponse.json({ success: false, error: 'Serial de dispositivo inválido' }, { status: 400 });
     }
     
     const adbTarget = (targetSerial && targetSerial !== 'Hardware Level')
@@ -349,15 +361,15 @@ export async function POST(req: Request) {
       const statsOut = statsRes.stdout;
 
       const systemSet = new Set(
-        systemPkgsOut.trim().split('\n').map(l => l.replace('package:', '').trim()).filter(Boolean)
+        systemPkgsOut.trim().split('\n').map((l: string) => l.replace('package:', '').trim()).filter(Boolean)
       );
 
       const disabledSet = new Set(
-        disabledPkgsOut.trim().split('\n').map(l => l.replace('package:', '').trim()).filter(Boolean)
+        disabledPkgsOut.trim().split('\n').map((l: string) => l.replace('package:', '').trim()).filter(Boolean)
       );
 
       const launcherSet = new Set(
-        launcherPkgsOut.trim().split('\n').map(l => l.trim()).filter(Boolean)
+        launcherPkgsOut.trim().split('\n').map((l: string) => l.trim()).filter(Boolean)
       );
 
       const overlaySet = new Set<string>();
@@ -458,10 +470,10 @@ export async function POST(req: Request) {
 
     // Action 2: Uninstall (Debloat if system app)
     if (action === 'uninstall') {
-      if (!packageName) throw new Error('Nombre de paquete requerido');
+      const safePkg = assertValidPackageName(packageName);
       
       // Check if it is a system app
-      const { stdout: pathCheck } = await execAsync(`${adbTarget} shell pm path ${packageName}`).catch(() => ({ stdout: '' }));
+      const { stdout: pathCheck } = await execAsync(`${adbTarget} shell pm path ${safePkg}`).catch(() => ({ stdout: '' }));
       const isSystem = pathCheck.includes('/system/') || 
                        pathCheck.includes('/system_ext/') || 
                        pathCheck.includes('/product/') || 
@@ -470,41 +482,41 @@ export async function POST(req: Request) {
                        
       if (isSystem) {
         // Debloat system app for user 0 without requiring root
-        await execAsync(`${adbTarget} shell pm uninstall -k --user 0 ${packageName}`);
-        return NextResponse.json({ success: true, message: `Aplicación de fábrica ${packageName} desinstalada de forma segura.` });
+        await execAsync(`${adbTarget} shell pm uninstall -k --user 0 ${safePkg}`);
+        return NextResponse.json({ success: true, message: `Aplicación de fábrica ${safePkg} desinstalada de forma segura.` });
       } else {
         // Normal uninstall
-        await execAsync(`${adbTarget} shell pm uninstall ${packageName}`);
-        return NextResponse.json({ success: true, message: `Aplicación ${packageName} desinstalada correctamente.` });
+        await execAsync(`${adbTarget} shell pm uninstall ${safePkg}`);
+        return NextResponse.json({ success: true, message: `Aplicación ${safePkg} desinstalada correctamente.` });
       }
     }
 
     // Action 3: Disable app
     if (action === 'disable') {
-      if (!packageName) throw new Error('Nombre de paquete requerido');
-      await execAsync(`${adbTarget} shell pm disable-user --user 0 ${packageName}`);
-      return NextResponse.json({ success: true, message: `Aplicación ${packageName} deshabilitada correctamente.` });
+      const safePkg = assertValidPackageName(packageName);
+      await execAsync(`${adbTarget} shell pm disable-user --user 0 ${safePkg}`);
+      return NextResponse.json({ success: true, message: `Aplicación ${safePkg} deshabilitada correctamente.` });
     }
 
     // Action 4: Enable app
     if (action === 'enable') {
-      if (!packageName) throw new Error('Nombre de paquete requerido');
-      await execAsync(`${adbTarget} shell pm enable ${packageName}`);
-      return NextResponse.json({ success: true, message: `Aplicación ${packageName} habilitada y lista para usar.` });
+      const safePkg = assertValidPackageName(packageName);
+      await execAsync(`${adbTarget} shell pm enable ${safePkg}`);
+      return NextResponse.json({ success: true, message: `Aplicación ${safePkg} habilitada y lista para usar.` });
     }
 
     // Action 5: Force stop app
     if (action === 'force_stop') {
-      if (!packageName) throw new Error('Nombre de paquete requerido');
-      await execAsync(`${adbTarget} shell am force-stop ${packageName}`);
-      return NextResponse.json({ success: true, message: `Proceso de ${packageName} detenido inmediatamente.` });
+      const safePkg = assertValidPackageName(packageName);
+      await execAsync(`${adbTarget} shell am force-stop ${safePkg}`);
+      return NextResponse.json({ success: true, message: `Proceso de ${safePkg} detenido inmediatamente.` });
     }
 
     // Action 6: Clear app data
     if (action === 'clear_data') {
-      if (!packageName) throw new Error('Nombre de paquete requerido');
-      await execAsync(`${adbTarget} shell pm clear ${packageName}`);
-      return NextResponse.json({ success: true, message: `Datos y caché de ${packageName} purgados.` });
+      const safePkg = assertValidPackageName(packageName);
+      await execAsync(`${adbTarget} shell pm clear ${safePkg}`);
+      return NextResponse.json({ success: true, message: `Datos y caché de ${safePkg} purgados.` });
     }
 
     return NextResponse.json({ success: false, error: 'Acción no reconocida' }, { status: 400 });

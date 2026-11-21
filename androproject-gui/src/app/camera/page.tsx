@@ -591,9 +591,9 @@ export default function CameraTransmitter() {
 
         {/* Reconexión indicator */}
         {reconnecting && (
-          <div className="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-3 flex items-center gap-3">
-            <RefreshCw size={16} className="text-amber-400 animate-spin" />
-            <span className="text-xs text-amber-400 font-bold">Reconectando automáticamente...</span>
+          <div className="bg-zinc-900 border border-zinc-700 rounded-xl p-3 flex items-center gap-3">
+            <RefreshCw size={16} className="text-zinc-300 animate-spin" />
+            <span className="text-xs text-zinc-200 font-semibold">Reconectando automáticamente...</span>
           </div>
         )}
 

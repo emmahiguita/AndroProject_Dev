@@ -96,6 +96,8 @@ export async function radar() {
     const rScan = await safeExec(`powershell -ExecutionPolicy Bypass -NoProfile -EncodedCommand ${encoded}`, 10000);
     const ips = rScan.ok ? rScan.out.trim().split(/\r?\n/).map(s => s.trim()).filter(Boolean) : [];
     if (ips.length > 0) {
+      // Limpiar conexiones stale antes de reconectar para no acumular "offline"
+      await safeExec(`"${ADB}" disconnect`);
       await Promise.all(ips.map(ip => safeExec(`"${ADB}" connect ${ip}:5555`)));
       return NextResponse.json({ success: true, message: `Radar exitoso. Conectado a: ${ips.join(', ')}`, ips });
     }

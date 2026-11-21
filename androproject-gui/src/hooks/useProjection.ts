@@ -18,6 +18,7 @@ export interface ScrcpyOptions {
   alwaysOnTop: boolean;
   borderless: boolean;
   videoSource: 'display' | 'camera';
+  enableAudio?: boolean;
 }
 
 export interface UseProjectionReturn {
@@ -69,8 +70,8 @@ const DEFAULT_OPTIONS: ScrcpyOptions = {
   videoSource: 'display',
 };
 
-/** Polling interval for scrcpy status check (ms) — 2500ms for zero network lag */
-const STATUS_POLL_MS = 2500;
+/** Polling interval for scrcpy status check (ms) — 5s to minimise idle network traffic */
+const STATUS_POLL_MS = 5000;
 
 export function useProjection(device: DeviceInfo | null | undefined): UseProjectionReturn {
   const { run } = useActions();
@@ -92,22 +93,45 @@ export function useProjection(device: DeviceInfo | null | undefined): UseProject
 
   const serial = device?.serial ?? undefined;
 
-  // ── Scrcpy status polling (8s interval) ──
+  // ── Scrcpy status polling with Page Visibility API guard ──
   useEffect(() => {
     if (!serial) return;
     let isMounted = true;
+    let intervalId: ReturnType<typeof setInterval> | null = null;
 
     const checkAlive = () => {
+      // Skip poll if the page is hidden — save CPU and network when user switches tabs
+      if (document.visibilityState === 'hidden') return;
       run('check_screen', '', { serial }, false).then((res: any) => {
         if (isMounted) setScrcpyActive(res?.alive || false);
       }).catch(() => {});
     };
 
-    checkAlive();
-    const interval = setInterval(checkAlive, STATUS_POLL_MS);
+    const startInterval = () => {
+      if (intervalId) return;
+      checkAlive();
+      intervalId = setInterval(checkAlive, STATUS_POLL_MS);
+    };
+
+    const stopInterval = () => {
+      if (intervalId) { clearInterval(intervalId); intervalId = null; }
+    };
+
+    const onVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        startInterval();
+      } else {
+        stopInterval();
+      }
+    };
+
+    startInterval();
+    document.addEventListener('visibilitychange', onVisibilityChange);
+
     return () => {
       isMounted = false;
-      clearInterval(interval);
+      stopInterval();
+      document.removeEventListener('visibilitychange', onVisibilityChange);
     };
   }, [serial, run]);
 
@@ -152,19 +176,14 @@ export function useProjection(device: DeviceInfo | null | undefined): UseProject
     const target = `${ip.trim()}:${(port || '5555').trim()}`;
     setIsConnecting(true);
     try {
-      const res = await fetch('/api/actions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'connect_adb', target }),
-      });
-      const data = await res.json();
-      return { success: Boolean(data.success), message: data.message || data.error };
+      const data = await run('connect_adb', `Conectando a ${target}`, { target }, false);
+      return { success: Boolean(data?.success), message: data?.message || data?.error };
     } catch {
       return { success: false, message: 'Error de conexión de red' };
     } finally {
       setIsConnecting(false);
     }
-  }, []);
+  }, [run]);
 
   // ── Scrcpy lifecycle ──
   const toggleScrcpy = useCallback(async (customOpts?: Partial<ScrcpyOptions>) => {

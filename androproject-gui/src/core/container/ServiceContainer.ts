@@ -16,6 +16,7 @@ export class ServiceContainer {
   public static getInstance(): ServiceContainer {
     if (!ServiceContainer.instance) {
       ServiceContainer.instance = new ServiceContainer();
+      initializeDefaultBindings(ServiceContainer.instance);
     }
     return ServiceContainer.instance;
   }
@@ -79,8 +80,61 @@ export const TOKENS = {
   AdbExecutor: 'IAdbExecutor',
   ScrcpyTransport: 'IScrcpyTransport',
   AirPlayEngine: 'IAirPlayEngine',
+  AirPlayTransport: 'IAirPlayTransport',
+  IosBridge: 'IIosBridge',
+  ProjectionCoordinator: 'IProjectionCoordinator',
   StreamManager: 'IStreamManager',
   SessionManager: 'ISessionManager',
 } as const;
+
+export type ServiceToken = typeof TOKENS[keyof typeof TOKENS];
+
+/**
+ * Initializes default bindings into the container.
+ * Uses lazy imports / factories so circular dependencies and heavy imports are avoided.
+ */
+function initializeDefaultBindings(c: ServiceContainer): void {
+  // ADB Executor
+  c.registerSingleton(TOKENS.AdbExecutor, () => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { adb } = require('@/lib/services/adb-executor');
+    return adb;
+  });
+
+  // Scrcpy Transport
+  c.registerSingleton(TOKENS.ScrcpyTransport, () => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { scrcpyTransport } = require('@/core/transports/ScrcpyStreamTransport');
+    return scrcpyTransport;
+  });
+
+  // AirPlay Engine
+  c.registerSingleton(TOKENS.AirPlayEngine, () => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { airPlayReceiverEngine } = require('@/lib/services/airplay-engine');
+    return airPlayReceiverEngine;
+  });
+
+  // AirPlay Transport
+  c.registerSingleton(TOKENS.AirPlayTransport, () => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { airPlayTransport } = require('@/core/transports/AirPlayStreamTransport');
+    return airPlayTransport;
+  });
+
+  // iOS Automation & WDA Bridge
+  c.registerSingleton(TOKENS.IosBridge, () => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { iosBridge } = require('@/lib/services/ios-bridge');
+    return iosBridge;
+  });
+
+  // Projection Coordinator
+  c.registerSingleton(TOKENS.ProjectionCoordinator, () => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { projectionCoordinator } = require('@/lib/services/projection-coordinator');
+    return projectionCoordinator;
+  });
+}
 
 export const container = ServiceContainer.getInstance();

@@ -1,63 +1,95 @@
-import { NextResponse } from 'next/server';
+// ============================================================================
+// ARCHIVO: icon/route.ts
+// QUÉ HACE: Sirve iconos reales de aplicaciones Android vía GET /api/apps/icon.
+// CÓMO FUNCIONA: 1) Lee caché de disco (<2ms), 2) Extrae el icono real desde
+//           el APK del dispositivo vía ADB, 3) Fallback a Play Store si el
+//           dispositivo no está conectado o el APK solo trae XML vectorial.
+// POR QUÉ: Garantizar iconos reales rápidos, seguros y sin fuga de temporales.
+// ============================================================================
 
-// In-memory cache to store Google Play Store icon URLs per package name
-const iconCache: Record<string, string> = {
-  'com.android.chrome': 'https://play-lh.googleusercontent.com/KwUq3n78OCee9jiC6aWP3QZa5A1j5KWls7Cg08HBPHVC1qFQA6GPB52WGLYuxHTg2co=w240-h240-rw',
-  'com.google.android.youtube': 'https://play-lh.googleusercontent.com/lMo3ZORbbUBnrmziB3QCJj3nhuKjMTZUb3sRfrha1sgf77UdxgS4CONa3UDj9wJZkoA=w240-h240-rw',
-  'com.whatsapp': 'https://play-lh.googleusercontent.com/bYtqbOcTYOlgc6gqZ2rwb8ZAH43w6H25wJuIMQH9_1qy2W4WCVSatGd2QBiAKmA3yQ=w240-h240-rw',
-  'com.instagram.android': 'https://play-lh.googleusercontent.com/c2sPnja-w3sFcxtcnwd1GWyIEgQFBmCXAft3mTK8s5jz4Oi5XY55ElW7RqaN5Pf4sA=w240-h240-rw',
-  'com.facebook.katana': 'https://play-lh.googleusercontent.com/ccWneaYgnqyZ3hCwPM4Tb5205Qx9EDnzxDOd18u13e2hWSy1w5WRqHs4hoj6sAHZnsA=w240-h240-rw',
-  'com.netflix.mediaclient': 'https://play-lh.googleusercontent.com/TBRvdWyofoJGDClc8Ygxh4SPgZAo_wzCcgcxrk5bh4J5W8Ih38qUyC-Fyxg15_25mg=w240-h240-rw',
-  'com.spotify.music': 'https://play-lh.googleusercontent.com/P2Vxa2GLvj23GI4vUBHNeeJUUk4aEPyPgEJC5f6430ZscIGjI54eCO9WX70V1n64ODg=w240-h240-rw',
-  'com.microsoft.copilot': 'https://play-lh.googleusercontent.com/y4E-cR_2F_1tq-B401yB6W-n5QZ0_rR5kZ0134Q5kY01yA=w240-h240-rw'
-};
+import { NextResponse } from 'next/server';
+import { assertValidPackageName, isValidDeviceSerial } from '@/lib/security/input-sanitizer';
+import {
+  extractDeviceApkIcon,
+  readCachedIcon,
+  saveCachedIcon,
+} from '@/lib/services/apk-icon-extractor';
+
+const playUrlCache = new Map<string, string>();
+
+/** Descarga imagen og:image desde Play Store como último fallback y la cachea. */
+async function fetchPlayStoreFallback(pkg: string): Promise<Response | null> {
+  const cachedUrl = playUrlCache.get(pkg);
+  if (cachedUrl) return NextResponse.redirect(cachedUrl);
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 3000);
+  try {
+    const res = await fetch(`https://play.google.com/store/apps/details?id=${encodeURIComponent(pkg)}`, {
+      signal: controller.signal,
+      headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' },
+    });
+    if (!res.ok) return null;
+    const html = await res.text();
+    const match =
+      html.match(/<meta\s+property="og:image"\s+content="([^"]+)"/i) ||
+      html.match(/<meta\s+content="([^"]+)"\s+property="og:image"/i);
+    if (!match?.[1]) return null;
+
+    const imgRes = await fetch(match[1], { signal: controller.signal });
+    if (imgRes.ok) {
+      const buf = Buffer.from(await imgRes.arrayBuffer());
+      const isWebp = imgRes.headers.get('content-type')?.includes('webp');
+      const ext = isWebp ? 'webp' : 'png';
+      await saveCachedIcon(pkg, buf, ext).catch(() => {});
+      return new Response(new Uint8Array(buf), {
+        headers: {
+          'Content-Type': isWebp ? 'image/webp' : 'image/png',
+          'Cache-Control': 'public, max-age=86400',
+        },
+      });
+    }
+    playUrlCache.set(pkg, match[1]);
+    return NextResponse.redirect(match[1]);
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
 
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const packageName = searchParams.get('package');
+    const rawPkg = searchParams.get('package');
+    const rawSerial = searchParams.get('serial');
+    if (!rawPkg) return new Response('Missing package parameter', { status: 400 });
 
-    if (!packageName) {
-      return new Response('Missing package parameter', { status: 400 });
+    const pkg = assertValidPackageName(rawPkg);
+    const serial = rawSerial && isValidDeviceSerial(rawSerial) ? rawSerial : null;
+
+    // 1. Caché local en disco (instantáneo)
+    const cached = await readCachedIcon(pkg);
+    if (cached) {
+      return new Response(new Uint8Array(cached.buffer), {
+        headers: { 'Content-Type': cached.contentType, 'Cache-Control': 'public, max-age=86400' },
+      });
     }
 
-    // 1. Check in-memory cache
-    if (iconCache[packageName]) {
-      return NextResponse.redirect(iconCache[packageName]);
+    // 2. Extracción real desde el APK instalado en el dispositivo ADB
+    const fromApk = await extractDeviceApkIcon(pkg, serial).catch(() => null);
+    if (fromApk) {
+      return new Response(new Uint8Array(fromApk.buffer), {
+        headers: { 'Content-Type': fromApk.contentType, 'Cache-Control': 'public, max-age=86400' },
+      });
     }
 
-    // 2. Attempt to scrape Google Play Store for the app icon using og:image meta tag
-    const playStoreUrl = `https://play.google.com/store/apps/details?id=${packageName}`;
-    const controller = new AbortController();
-    const id = setTimeout(() => controller.abort(), 3500); // 3.5 seconds timeout
+    // 3. Fallback a Google Play Store (para iconos adaptativos XML o sin USB)
+    const fallback = await fetchPlayStoreFallback(pkg);
+    if (fallback) return fallback;
 
-    const res = await fetch(playStoreUrl, {
-      signal: controller.signal,
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-      },
-      next: { revalidate: 86400 } // Cache results for 1 day
-    });
-    
-    clearTimeout(id);
-
-    if (res.ok) {
-      const html = await res.text();
-      // Look for the standard Open Graph social image tag
-      const ogImageMatch = html.match(/<meta\s+property="og:image"\s+content="([^"]+)"/i) || 
-                           html.match(/<meta\s+content="([^"]+)"\s+property="og:image"/i);
-      
-      if (ogImageMatch && ogImageMatch[1]) {
-        const imageUrl = ogImageMatch[1];
-        iconCache[packageName] = imageUrl;
-        return NextResponse.redirect(imageUrl);
-      }
-    }
+    return new Response('Icon not found', { status: 404 });
   } catch {
-    // Silent fail to return fallback
+    return new Response('Invalid package', { status: 400 });
   }
-
-  // 3. If the app is not in Play Store or request failed, return 404
-  // The frontend will catch the error and render a beautiful fallback icon
-  return new Response('Icon not found', { status: 404 });
 }

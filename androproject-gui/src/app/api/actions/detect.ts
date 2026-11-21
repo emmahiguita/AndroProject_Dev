@@ -1,9 +1,6 @@
 import { NextResponse } from 'next/server';
-import { exec } from 'child_process';
-import { promisify } from 'util';
 import { ADB } from '@/lib/config';
-
-const execAsync = promisify(exec);
+import { execAsync } from './_lib/helpers';
 
 interface DeviceInfo {
   serial: string; model: string; connectionType: string; state: string;

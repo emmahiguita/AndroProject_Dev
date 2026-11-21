@@ -7,7 +7,14 @@ import { exec } from 'child_process';
 import { promisify } from 'util';
 import { ADB } from '@/lib/config';
 
-const execAsync = promisify(exec);
+const execAsyncOrig = promisify(exec);
+const execAsync = async (command: string, options: { timeout?: number; encoding?: BufferEncoding; maxBuffer?: number } = {}) => {
+  const result = await execAsyncOrig(command, { encoding: 'utf8', ...options, windowsHide: true });
+  return {
+    stdout: typeof result.stdout === 'string' ? result.stdout : (result.stdout ? String(result.stdout) : ''),
+    stderr: typeof result.stderr === 'string' ? result.stderr : (result.stderr ? String(result.stderr) : ''),
+  };
+};
 
 export interface AdbExecResult {
   readonly ok: boolean;
@@ -57,12 +64,13 @@ export class AdbExecutor implements IAdbExecutor {
   async execOut(serial?: string, args: string = '', timeoutMs: number = 20000): Promise<{ ok: boolean; stdout: Buffer; err: string }> {
     const prefix = (serial && serial !== 'undefined' && serial !== 'default') ? `-s ${serial} ` : '';
     try {
-      const { stdout } = await execAsync(`"${this.adbPath}" ${prefix}${args}`, {
+      const result = await execAsyncOrig(`"${this.adbPath}" ${prefix}${args}`, {
         timeout: timeoutMs,
         encoding: 'buffer',
         maxBuffer: 20 * 1024 * 1024,
-      }) as { stdout: Buffer };
-      return { ok: true, stdout, err: '' };
+        windowsHide: true,
+      }) as unknown as { stdout: Buffer };
+      return { ok: true, stdout: Buffer.isBuffer(result.stdout) ? result.stdout : Buffer.from(result.stdout || ''), err: '' };
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : String(error);
       return { ok: false, stdout: Buffer.alloc(0), err: message };

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Maximize, Minimize, Sliders, Terminal, Bug, LayoutGrid, Smartphone } from 'lucide-react';
+import { Maximize, Minimize, Sliders, Terminal, LayoutGrid } from 'lucide-react';
 import { useTheme } from '@/hooks/useTheme';
 import { useSplitPanel } from '@/hooks/useSplitPanel';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
@@ -15,6 +15,7 @@ import { DeviceFrame } from '@/components/layout/DeviceFrame';
 import { DeviceInfoPanel } from '@/components/projection/DeviceInfoPanel';
 import { LogcatInspectorPanel } from '@/components/projection/LogcatInspectorPanel';
 import { MultiScreenGrid } from '@/components/projection/MultiScreenGrid';
+import { MobileProjection } from '@/components/projection/MobileProjection';
 import type { DeviceInfo } from './types';
 
 interface ProjectionViewProps {
@@ -32,10 +33,10 @@ interface ProjectionViewProps {
  */
 export function ProjectionView({ device }: ProjectionViewProps) {
   const { dark } = useTheme();
-  const { run } = useActions();
   const isMobile = useMediaQuery('(max-width: 768px)');
   const { ratio, isDragging, containerRef, onPointerDown, onPointerMove, onPointerUp, onKeyDown } = useSplitPanel({ defaultRatio: 0.58 });
   const projection = useProjection(device);
+  const { run } = useActions();
   const [activeTab, setActiveTab] = useState<'studio' | 'logcat'>('studio');
 
   const multiScreenEnabled = useAppStore((state) => state.multiScreenEnabled);
@@ -66,8 +67,10 @@ export function ProjectionView({ device }: ProjectionViewProps) {
         {/* Slim action bar — no redundant title, DeviceFrame already has its own header */}
         <div className="flex items-center justify-end shrink-0 pb-1 gap-2">
           {projection.scrcpyActive && (
-            <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[9px] font-bold text-emerald-400">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> VisionNano 60 FPS Activo
+            <span className={`flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg border text-[10px] font-medium ${
+              dark ? 'bg-zinc-900 border-zinc-800 text-zinc-200' : 'bg-white border-slate-200 text-slate-700'
+            }`}>
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> VisionNano 60 FPS Activo
             </span>
           )}
           {projection.isRecording && (
@@ -76,27 +79,54 @@ export function ProjectionView({ device }: ProjectionViewProps) {
             </span>
           )}
 
+          {multiScreenEnabled && devicesList.length > 0 && (
+            <button
+              type="button"
+              onClick={() => {
+                devicesList.forEach((d) => {
+                  const isIos = d.serial.startsWith('airplay-') || d.serial.startsWith('apple-');
+                  run('open_screen', `Proyectando ${d.model || d.serial}...`, {
+                    serial: d.serial,
+                    platform: isIos ? 'ios' : 'android',
+                  }, false);
+                });
+              }}
+              title="Lanzar proyección nativa 60 FPS para todos los dispositivos conectados"
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-semibold transition-colors cursor-pointer ${
+                dark
+                  ? 'bg-zinc-900 border-zinc-700 text-zinc-200 hover:bg-zinc-800'
+                  : 'bg-white border-slate-300 text-slate-800 hover:bg-slate-50'
+              }`}
+            >
+              <span>Proyectar Todas ({devicesList.length})</span>
+            </button>
+          )}
+
           <button
             type="button"
             onClick={toggleMultiScreen}
             title={multiScreenEnabled ? 'Volver a vista focal' : 'Activar cuadrícula multi-pantalla'}
-            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-xl border text-xs font-semibold transition-all cursor-pointer ${
+            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-semibold transition-colors cursor-pointer ${
               multiScreenEnabled
-                ? 'bg-cyan-500/20 border-cyan-500/50 text-cyan-300 shadow-sm shadow-cyan-500/20'
-                : 'bg-white/5 border-white/10 text-white/70 hover:text-white hover:bg-white/10'
+                ? (dark
+                    ? 'bg-zinc-100 border-zinc-100 text-zinc-950'
+                    : 'bg-zinc-900 border-zinc-900 text-white')
+                : (dark
+                    ? 'bg-zinc-900 border-zinc-800 text-zinc-300 hover:text-zinc-100 hover:bg-zinc-800'
+                    : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50')
             }`}
           >
             <LayoutGrid size={12} />
-            <span>{multiScreenEnabled ? 'Multi-Pantalla ON' : 'Multi-Pantalla'}</span>
+            <span>{multiScreenEnabled ? 'Multi-Pantalla ON' : `Multi-Pantalla${devicesList.length > 1 ? ` (${devicesList.length})` : ''}`}</span>
           </button>
 
           <button
             type="button"
             onClick={projection.toggleFullscreen}
             title={projection.fullscreen ? 'Salir de pantalla completa' : 'Pantalla completa'}
-            className={`p-1 rounded-xl border transition-all cursor-pointer ${
+            className={`p-1.5 rounded-lg border transition-colors cursor-pointer ${
               dark
-                ? 'bg-white/5 border-white/10 text-white/60 hover:text-white hover:bg-white/10'
+                ? 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800'
                 : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
             }`}
           >
@@ -106,18 +136,24 @@ export function ProjectionView({ device }: ProjectionViewProps) {
 
         {/* Multi-Screen Grid View or Single Split View */}
         {multiScreenEnabled ? (
-          <div className="flex-1 min-h-0 rounded-xl border border-white/10 bg-black/40 overflow-hidden">
+          <div className={`flex-1 min-h-0 rounded-xl border overflow-hidden ${
+            dark ? 'border-zinc-800 bg-zinc-950' : 'border-slate-200 bg-slate-50'
+          }`}>
             <MultiScreenGrid
-              devices={devicesList.map(d => ({
-                serial: d.serial,
-                model: d.model || d.serial,
-                platform: 'android',
-                connected: true,
-                connectionType: d.connectionType || 'USB',
-              }))}
+              devices={(devicesList.length > 0 ? devicesList : [device]).map((d) => {
+                const isIos = d.serial.startsWith('airplay-') || d.serial.startsWith('apple-');
+                return {
+                  serial: d.serial,
+                  model: d.model || d.serial,
+                  platform: isIos ? 'ios' : 'android',
+                  connected: true,
+                  connectionType: d.connectionType || (isIos ? 'Wi-Fi' : 'USB'),
+                };
+              })}
               onToggleScrcpy={(s) => {
                 if (s && s !== device?.serial) {
-                  run('open_screen', `Iniciando transmisión: ${s}...`, { serial: s });
+                  const isIos = s.startsWith('airplay-') || s.startsWith('apple-');
+                  run('open_screen', `Iniciando transmisión: ${s}...`, { serial: s, platform: isIos ? 'ios' : 'android' });
                 } else {
                   projection.toggleScrcpy();
                 }
@@ -235,41 +271,3 @@ export function ProjectionView({ device }: ProjectionViewProps) {
   );
 }
 
-/* ── MobileProjection — mobile-specific layout ─────────────── */
-function MobileProjection({
-  device, dark, projection,
-}: {
-  device: DeviceInfo;
-  dark: boolean;
-  projection: ReturnType<typeof useProjection>;
-}) {
-  return (
-    <div className="flex flex-col h-full min-h-0">
-      {/* Mobile header */}
-      <div className={`flex items-center justify-between shrink-0 px-3 py-2 border-b ${
-        dark ? 'border-zinc-800 bg-zinc-900/60' : 'border-slate-200 bg-slate-50'
-      }`}>
-        <div className="flex items-center gap-2">
-          <div className={`w-2 h-2 rounded-full ${projection.scrcpyActive ? 'bg-emerald-500 animate-pulse' : 'bg-emerald-500'}`} />
-          <span className={`text-[11px] font-bold ${dark ? 'text-white' : 'text-slate-900'}`}>{device.model}</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <button
-            type="button"
-            onClick={projection.toggleFullscreen}
-            className={`p-1.5 rounded-lg transition-all ${
-              dark ? 'bg-white/5 text-white/50 hover:bg-white/10' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
-            }`}
-          >
-            {projection.fullscreen ? <Minimize size={14} /> : <Maximize size={14} />}
-          </button>
-        </div>
-      </div>
-
-      {/* Device screen */}
-      <div className="flex-1 flex items-center justify-center bg-black min-h-0">
-        <DeviceFrame device={device} expanded={true} compact={true} onSendKey={projection.sendKey} />
-      </div>
-    </div>
-  );
-}

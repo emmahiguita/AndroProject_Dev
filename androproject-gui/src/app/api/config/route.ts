@@ -49,3 +49,23 @@ export async function GET() {
     tunnelURL: process.env.CF_TUNNEL_URL || null,
   });
 }
+
+export async function POST(request: Request) {
+  try {
+    const body = await request.json().catch(() => ({}));
+    const action = typeof body?.action === 'string' ? body.action : 'reload';
+    const currentRes = await GET();
+    const config = await currentRes.json();
+    return NextResponse.json({
+      success: true,
+      action,
+      message: action === 'reset'
+        ? 'Configuración recargada desde el entorno activo.'
+        : 'Configuración actualizada.',
+      config,
+    });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+    return NextResponse.json({ success: false, error: message }, { status: 500 });
+  }
+}

@@ -8,10 +8,14 @@
 export const dynamic = 'force-dynamic';
 
 import { NextResponse } from 'next/server';
+import { exec } from 'child_process';
+import { promisify } from 'util';
 import { adb } from '@/lib/services/adb-executor';
 import { DeviceDetector, DetectedDevice } from '@/lib/services/device-detector';
 import { DeviceInfoFetcher } from '@/lib/services/device-info-fetcher';
 import { airPlayReceiverEngine } from '@/lib/services/airplay-engine';
+
+const execAsync = promisify(exec);
 
 const detector = new DeviceDetector(adb);
 const fetcher = new DeviceInfoFetcher(adb);
@@ -21,28 +25,34 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const requestedSerial = searchParams.get('serial');
 
-    // 1. Discover connected Android devices + active iOS AirPlay clients
-    const androidDevices = await detector.detect();
+    // 1. Discover connected Android devices + active iOS AirPlay clients (refresh live sockets first)
+    const [androidDevices] = await Promise.all([
+      detector.detect(),
+      airPlayReceiverEngine.getStatus().catch(() => null),
+    ]);
     let iosDevices = airPlayReceiverEngine.getConnectedDevices();
 
-    // If iPhone is physically connected via USB (VID 05AC), ensure it is selectable
-    if (iosDevices.length === 0) {
-      iosDevices = [
-        {
-          connected: true,
-          platform: 'ios',
-          connectionType: 'USB / Wi-Fi',
-          model: 'iPhone (Apple Inc.)',
-          serial: 'airplay-00008120001004D60160201E',
-          iosVersion: 'iOS 18.2',
-          resolution: '1179 × 2556',
-          state: 'device',
-          airplayClientName: 'iPhone',
-          airplayResolution: '1179 × 2556',
-          airplayFps: 60,
-          airplayAudioEnabled: true,
-        },
-      ];
+    // Check hardware USB if no AirPlay sessions or no Android devices detected
+    if (iosDevices.length === 0 || androidDevices.length === 0) {
+      const hw = await scanHardwareUsb();
+      if (iosDevices.length === 0 && hw.hasAppleUsb) {
+        iosDevices = [
+          {
+            connected: true,
+            platform: 'ios',
+            connectionType: 'USB',
+            model: 'Apple iPhone (USB Conectado)',
+            serial: 'apple-usb-device',
+            iosVersion: 'iOS',
+            resolution: '1179 × 2556',
+            state: 'device',
+            airplayClientName: 'iPhone',
+            airplayResolution: '1179 × 2556',
+            airplayFps: 60,
+            airplayAudioEnabled: false,
+          },
+        ];
+      }
     }
 
     const allDetectedDeviceSummaries = [
@@ -169,19 +179,53 @@ function buildOfflineDevice(target: { serial: string; model: string; state: stri
   };
 }
 
+interface HardwareUsbScan {
+  hasAppleUsb: boolean;
+  androidHardwareName: string | null;
+}
+
+let lastUsbScanTime = 0;
+let cachedUsbScan: HardwareUsbScan = { hasAppleUsb: false, androidHardwareName: null };
+
+async function scanHardwareUsb(): Promise<HardwareUsbScan> {
+  const now = Date.now();
+  if (now - lastUsbScanTime < 6000) {
+    return cachedUsbScan;
+  }
+  lastUsbScanTime = now;
+
+  try {
+    const { stdout } = await execAsync('pnputil /enum-devices /connected /class USB', {
+      windowsHide: true,
+      timeout: 2000,
+    });
+
+    const text = String(stdout || '');
+    const hasAppleUsb = /VID_05AC/i.test(text);
+
+    let androidHardwareName: string | null = null;
+    if (/VID_22D9|VID_04E8|VID_18D1|VID_2717|VID_12D1|VID_0BB4|VID_2A70|Android|Fastboot|SAMSUNG Mobile|ADB/i.test(text)) {
+      const match = text.match(/Descripci[óo]n del dispositivo:\s*(.+)/i);
+      if (match && match[1]) {
+        androidHardwareName = match[1].replace(/Mobile|USB|CDC|Composite|Device|Modem|#\d+/ig, '').trim() || 'Dispositivo Hardware';
+      } else {
+        androidHardwareName = 'Dispositivo Android (USB)';
+      }
+    }
+
+    cachedUsbScan = { hasAppleUsb, androidHardwareName };
+    return cachedUsbScan;
+  } catch {
+    return cachedUsbScan;
+  }
+}
+
 async function detectHardwareFallback() {
   try {
-    const { exec } = require('child_process');
-    const { promisify } = require('util');
-    const execAsync = promisify(exec);
+    const hw = await scanHardwareUsb();
+    if (!hw.androidHardwareName) return null;
 
-    const psScript = `Get-PnpDevice -PresentOnly | Where-Object FriendlyName -match 'Android|Fastboot|SAMSUNG Mobile|ADB' | Where-Object Class -match 'USB|Modem|AndroidUsbDeviceClass' | Select-Object -ExpandProperty FriendlyName -First 1`;
-    const { stdout } = await execAsync(`powershell -NoProfile -Command "${psScript}"`, { timeout: 4000 });
-    const hwName = stdout.trim();
-
-    if (!hwName) return null;
-
-    const cleanName = hwName.replace(/Mobile|USB|CDC|Composite|Device|Modem|#\\d+/ig, '').trim() || 'Dispositivo Hardware';
+    const cleanName = hw.androidHardwareName;
     return {
       connected: true,
       devices: [{ serial: 'Hardware Level', model: cleanName, connectionType: 'USB', state: 'offline' }],

@@ -6,7 +6,6 @@ import { Header } from './Header';
 import { Sidebar } from './Sidebar';
 import { WirelessConnectModal } from './WirelessConnectModal';
 import { useAppTheme } from '../ThemeProvider';
-import { useMouseLight } from '../../hooks/useMouseLight';
 import { useRescueSync } from '../../hooks/useRescueSync';
 import type { DeviceInfo, SystemLogs, NavSection } from '@/features/types';
 import type { RegisteredDevice } from '../../hooks/useAdbConnection';
@@ -103,9 +102,6 @@ export const AppShell: React.FC<AppShellProps> = ({
     }
   };
 
-  // Cosmic 3D: dynamic lighting follows cursor
-  useMouseLight(sceneRef);
-
   // Per-device transmission status tracking
   const [activeStreams, setActiveStreams] = useState<Record<string, boolean>>({});
 
@@ -114,6 +110,7 @@ export const AppShell: React.FC<AppShellProps> = ({
     let mounted = true;
 
     const checkStream = async () => {
+      if (typeof document !== 'undefined' && document.visibilityState === 'hidden') return;
       try {
         const res = await fetch('/api/actions', {
           method: 'POST',
@@ -176,6 +173,14 @@ export const AppShell: React.FC<AppShellProps> = ({
     }
   };
 
+  const mainRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    if (mainRef.current) {
+      mainRef.current.scrollTop = 0;
+    }
+  }, [activeNav]);
+
   useEffect(() => {
     const check = () => setViewportMedium(window.innerWidth >= BP_MED);
     check();
@@ -188,16 +193,7 @@ export const AppShell: React.FC<AppShellProps> = ({
   }, [viewportMedium]);
 
   return (
-    <div ref={sceneRef} suppressHydrationWarning className={`relative flex h-screen w-screen overflow-hidden ${isDark ? 'bg-zinc-950 text-zinc-100' : 'bg-slate-50 text-slate-900'}`}>
-      {/* ═══ COSMIC 3D BACKGROUND ═══ */}
-      {isDark && (
-        <>
-          <div className="cosmic-starfield" />
-          <div className="cosmic-fog" />
-          <div className="cosmic-light" />
-        </>
-      )}
-
+    <div ref={sceneRef} suppressHydrationWarning className={`fixed inset-0 flex overflow-hidden ${isDark ? 'bg-zinc-950 text-zinc-100' : 'bg-slate-50 text-slate-900'}`}>
       {/* ═══ SIDEBAR / DRAWER ═══ */}
       {viewportMedium ? (
         <Sidebar
@@ -248,7 +244,7 @@ export const AppShell: React.FC<AppShellProps> = ({
 
         {/* ═══ AUTO-DETECTION CONFIRMATION TOAST BANNER ═══ */}
         {detectedToast && activeNav !== 'projection' && (
-          <div className="absolute top-14 right-4 z-40 flex items-center gap-3 px-3.5 py-2.5 rounded-xl bg-zinc-900/95 border border-zinc-700 text-white shadow-2xl backdrop-blur-md animate-in fade-in slide-in-from-top-2 duration-200">
+          <div className="fixed bottom-3 right-3 sm:absolute sm:top-14 sm:bottom-auto sm:right-4 z-40 flex items-center gap-3 px-3.5 py-2.5 rounded-xl bg-zinc-900/95 border border-zinc-700 text-white shadow-2xl backdrop-blur-md animate-in fade-in slide-in-from-top-2 duration-200 max-w-[calc(100vw-24px)]">
             <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
             <div className="text-xs">
               <p className="font-bold text-white">Dispositivo detectado</p>
@@ -271,14 +267,11 @@ export const AppShell: React.FC<AppShellProps> = ({
           </div>
         )}
 
-        <main className={`relative flex-1 min-h-0 min-w-0 ${
+        <main ref={mainRef} className={`relative flex-1 min-h-0 min-w-0 overflow-x-hidden ${
           activeNav === 'projection'
             ? 'overflow-hidden p-0 flex flex-col'
             : 'overflow-y-auto custom-scrollbar p-2 md:p-3'
         } ${isDark ? '' : 'bg-white'}`}>
-
-          {/* Cosmic ground glow at bottom of content */}
-          {isDark && <div className="cosmic-ground-glow" />}
           {children}
         </main>
       </div>

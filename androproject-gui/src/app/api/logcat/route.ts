@@ -14,8 +14,16 @@ import { NextRequest } from 'next/server';
 import { spawn, exec } from 'child_process';
 import { promisify } from 'util';
 import { ADB } from '@/lib/config';
+import { isValidDeviceSerial } from '@/lib/security/input-sanitizer';
 
-const execAsync = promisify(exec);
+const execAsyncOrig = promisify(exec);
+const execAsync = async (command: string, options: { timeout?: number; encoding?: BufferEncoding; maxBuffer?: number } = {}) => {
+  const res = await execAsyncOrig(command, { encoding: 'utf8', ...options, windowsHide: true });
+  return {
+    stdout: typeof res.stdout === 'string' ? res.stdout : (res.stdout ? String(res.stdout) : ''),
+    stderr: typeof res.stderr === 'string' ? res.stderr : (res.stderr ? String(res.stderr) : ''),
+  };
+};
 
 export interface LogcatEntry {
   id: string;
@@ -136,8 +144,8 @@ export async function GET(req: NextRequest) {
   const serial = searchParams.get('serial');
   const clearBuffer = searchParams.get('clear') === 'true';
 
-  if (!serial) {
-    return new Response(JSON.stringify({ error: 'Serial de dispositivo requerido' }), {
+  if (!serial || !isValidDeviceSerial(serial)) {
+    return new Response(JSON.stringify({ error: 'Serial de dispositivo inválido o requerido' }), {
       status: 400,
       headers: { 'Content-Type': 'application/json' },
     });

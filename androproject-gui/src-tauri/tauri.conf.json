@@ -5,7 +5,8 @@
   "identifier": "com.androproject.desktop",
   "build": {
     "frontendDist": "../out",
-    "devUrl": "http://127.0.0.1:3001"
+    "devUrl": "http://localhost:3000",
+    "beforeDevCommand": "npm run dev"
   },
   "app": {
     "withGlobalTauri": true,

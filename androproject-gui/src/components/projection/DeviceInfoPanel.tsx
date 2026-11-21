@@ -10,7 +10,7 @@ import {
   Sliders, Bell, Zap, EyeOff,
   Sun, Maximize2, Sparkles, Circle, LayoutGrid,
   CheckCircle2, Settings, VolumeX, PlayCircle, ChevronUp, Layers,
-  ClipboardPaste, Airplay,
+  ClipboardPaste, Airplay, Home, Lock, Volume2,
 } from 'lucide-react';
 import { useActions } from '@/hooks/useActions';
 import type { DeviceInfo } from '@/features/types';
@@ -44,6 +44,8 @@ interface DeviceInfoPanelProps {
   isConnecting?: boolean;
   autoProject?: boolean;
   onToggleAutoProject?: (v: boolean) => void;
+  /** AirPlay iOS: toggle mouse/pointer control overlay */
+  onMouseControl?: () => Promise<void> | void;
 }
 
 export const DeviceInfoPanel: React.FC<DeviceInfoPanelProps> = ({
@@ -72,9 +74,11 @@ export const DeviceInfoPanel: React.FC<DeviceInfoPanelProps> = ({
   isBusy,
   autoProject = false,
   onToggleAutoProject,
+  onMouseControl,
 }) => {
   const { run } = useActions();
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [mouseControlActive, setMouseControlActive] = useState(false);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -143,7 +147,7 @@ export const DeviceInfoPanel: React.FC<DeviceInfoPanelProps> = ({
                 <h3 className={`text-xs font-semibold ${dark ? 'text-zinc-100' : 'text-slate-900'}`}>
                   Receptor Apple AirPlay 2
                 </h3>
-                <p className="text-[10px] text-zinc-400">Screen Mirroring H.264 + Audio AAC</p>
+                <p className="text-[10px] text-emerald-400">Video H.264 60 FPS • Audio en Celular</p>
               </div>
             </div>
             <span className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-zinc-800 border border-zinc-700 text-[10px] font-medium text-zinc-300">
@@ -157,8 +161,8 @@ export const DeviceInfoPanel: React.FC<DeviceInfoPanelProps> = ({
               <span className="font-medium text-zinc-200 font-mono">AndroProject [PC]</span>
             </div>
             <div className="flex items-center justify-between text-[11px]">
-              <span className="text-zinc-400 font-normal">Resolución:</span>
-              <span className="font-medium text-zinc-200 font-mono">{device.resolution || '1179 × 2556'}</span>
+              <span className="text-zinc-400 font-normal">Salida de Audio:</span>
+              <span className="font-medium text-emerald-400 font-mono">Altavoz del Celular (--no-audio)</span>
             </div>
             <div className="flex items-center justify-between text-[11px]">
               <span className="text-zinc-400 font-normal">Velocidad de Cuadros:</span>
@@ -190,14 +194,159 @@ export const DeviceInfoPanel: React.FC<DeviceInfoPanelProps> = ({
 
             <button
               type="button"
-              onClick={() => {
-                showToast('Control de ratón activado');
+              onClick={async () => {
+                const nextState = !mouseControlActive;
+                setMouseControlActive(nextState);
+                if (onMouseControl) {
+                  showToast(nextState ? 'Control de ratón activado' : 'Control de ratón desactivado');
+                  await onMouseControl();
+                } else {
+                  // Fallback: llamada directa a la API AirPlay
+                  try {
+                    const res = await fetch('/api/airplay', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ action: 'toggle_mouse_control' }),
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                      showToast(nextState ? 'Control de ratón activado' : 'Control de ratón desactivado');
+                    } else {
+                      setMouseControlActive(!nextState); // revert
+                      showToast(data.error || 'Error activando control de ratón');
+                    }
+                  } catch {
+                    setMouseControlActive(!nextState); // revert on network error
+                    showToast('Error de conexión con AirPlay');
+                  }
+                }
               }}
-              className="flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-lg text-xs font-medium transition-colors bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 cursor-pointer"
+              className={`flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-lg text-xs font-medium transition-colors border cursor-pointer ${
+                mouseControlActive
+                  ? 'bg-zinc-100 border-zinc-100 text-zinc-950 hover:bg-white'
+                  : 'bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border-zinc-700'
+              }`}
             >
-              <Sparkles size={13} className="text-zinc-400" />
-              <span>Control Ratón</span>
+              <Sparkles size={13} className={mouseControlActive ? 'text-emerald-600' : 'text-zinc-400'} />
+              <span>{mouseControlActive ? 'Ratón Activo' : 'Control Ratón'}</span>
             </button>
+          </div>
+
+          <div className="pt-1 border-t border-zinc-800/60">
+            <ToggleRow
+              dark={dark}
+              icon={<VolumeX size={12} className="text-emerald-400" />}
+              label="Escuchar audio en el PC (Opcional)"
+              description="Desactivado por defecto: el sonido se escucha en el celular"
+              checked={Boolean(scrcpyOptions.enableAudio)}
+              onChange={async (checked) => {
+                setScrcpyOptions((o) => ({ ...o, enableAudio: checked }));
+                try {
+                  const res = await fetch('/api/airplay', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'set_audio', audioEnabled: checked }),
+                  });
+                  const data = await res.json();
+                  showToast(data.message || (checked ? 'Audio en PC activado' : 'Audio en Celular activado'));
+                } catch {
+                  showToast('Error cambiando salida de audio');
+                }
+              }}
+            />
+          </div>
+
+          <div className="pt-2 border-t border-zinc-800/60 space-y-1.5">
+            <span className={`text-[10px] block font-semibold uppercase tracking-wider ${dark ? 'text-zinc-400' : 'text-slate-500'}`}>
+              Automatización y Botones Físicos iOS
+            </span>
+            <div className="grid grid-cols-2 gap-1.5">
+              <ToolButton
+                dark={dark}
+                icon={<Home size={13} className="text-zinc-400" />}
+                label="Inicio (Home)"
+                onClick={async () => {
+                  showToast('Pulsando botón Inicio...');
+                  await run('keyevent', '', { keycode: 'KEYCODE_HOME', serial: device.serial }, false);
+                }}
+              />
+              <ToolButton
+                dark={dark}
+                icon={<Lock size={13} className="text-zinc-400" />}
+                label="Bloquear Pantalla"
+                onClick={async () => {
+                  showToast('Bloqueando iPhone...');
+                  await run('keyevent', '', { keycode: 'KEYCODE_POWER', serial: device.serial }, false);
+                }}
+              />
+              <ToolButton
+                dark={dark}
+                icon={<Volume2 size={13} className="text-zinc-400" />}
+                label="Subir Volumen"
+                onClick={async () => {
+                  showToast('Subiendo volumen');
+                  await run('keyevent', '', { keycode: 'KEYCODE_VOLUME_UP', serial: device.serial }, false);
+                }}
+              />
+              <ToolButton
+                dark={dark}
+                icon={<VolumeX size={13} className="text-zinc-400" />}
+                label="Bajar Volumen"
+                onClick={async () => {
+                  showToast('Bajando volumen');
+                  await run('keyevent', '', { keycode: 'KEYCODE_VOLUME_DOWN', serial: device.serial }, false);
+                }}
+              />
+              <ToolButton
+                dark={dark}
+                icon={<Camera size={13} className="text-zinc-400" />}
+                label="Captura HD"
+                onClick={handleScreenshotClick}
+              />
+              <ToolButton
+                dark={dark}
+                icon={<ClipboardPaste size={13} className="text-zinc-400" />}
+                label="Pegar del PC"
+                onClick={handlePasteClipboard}
+              />
+              <ToolButton
+                dark={dark}
+                icon={<Zap size={13} className="text-zinc-400" />}
+                label="Túnel USB WDA"
+                onClick={async () => {
+                  showToast('Activando túnel USB iOS (puerto 8100)...');
+                  try {
+                    const res = await fetch('/api/ios', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ action: 'start_tunnel', port: 8100 }),
+                    });
+                    const data = await res.json();
+                    showToast(data.message || 'Túnel USB WDA activo');
+                  } catch {
+                    showToast('Error iniciando túnel USB');
+                  }
+                }}
+              />
+              <ToolButton
+                dark={dark}
+                icon={<Sliders size={13} className="text-zinc-400" />}
+                label="Ratón Bluetooth"
+                onClick={async () => {
+                  try {
+                    const res = await fetch('/api/ios', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ action: 'open_bluetooth_settings' }),
+                    });
+                    const data = await res.json();
+                    showToast(data.message || 'Ajustes Bluetooth abiertos');
+                  } catch {
+                    showToast('Error abriendo Bluetooth');
+                  }
+                }}
+              />
+            </div>
           </div>
         </div>
       ) : (

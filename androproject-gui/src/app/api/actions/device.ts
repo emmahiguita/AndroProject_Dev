@@ -114,6 +114,16 @@ export async function powerOff(ctx: ActionContext) {
 // ── Foreground App / Input ─────────────────────────────────────────
 
 export async function getForegroundApp(ctx: ActionContext) {
+  const target = ctx.targetSerial || '';
+  if (target.startsWith('airplay-') || target.startsWith('apple-')) {
+    const { iosBridge } = await import('@/lib/services/ios-bridge');
+    const app = await iosBridge.getActiveApp();
+    if (app.success && app.bundleId) {
+      return NextResponse.json({ success: true, package: app.bundleId });
+    }
+    return NextResponse.json({ success: true, package: 'com.apple.springboard' });
+  }
+
   const [windowResult, activityResult] = await Promise.all([
     adb.execFor(ctx.targetSerial!, 'shell dumpsys window windows'),
     adb.execFor(ctx.targetSerial!, 'shell dumpsys activity activities'),
@@ -131,6 +141,34 @@ export async function getForegroundApp(ctx: ActionContext) {
 }
 
 export async function keyevent(ctx: ActionContext, body: { keycode: string }) {
+  const target = ctx.targetSerial || '';
+  if (target.startsWith('airplay-') || target.startsWith('apple-')) {
+    const { iosBridge } = await import('@/lib/services/ios-bridge');
+    const code = String(body.keycode || '').toUpperCase();
+    if (code.includes('HOME')) {
+      const res = await iosBridge.pressButton('home');
+      return NextResponse.json(res);
+    }
+    if (code.includes('POWER') || code.includes('LOCK')) {
+      const res = await iosBridge.pressButton('lock');
+      return NextResponse.json(res);
+    }
+    if (code.includes('VOLUME_UP')) {
+      const res = await iosBridge.pressButton('volumeUp');
+      return NextResponse.json(res);
+    }
+    if (code.includes('VOLUME_DOWN')) {
+      const res = await iosBridge.pressButton('volumeDown');
+      return NextResponse.json(res);
+    }
+    if (code.includes('BACK')) {
+      // iOS Back is left-edge swipe gesture
+      await iosBridge.swipe(10, 500, 250, 500, 150);
+      return NextResponse.json({ success: true, message: 'Gesto Atrás iOS ejecutado' });
+    }
+    return NextResponse.json({ success: true, message: `Tecla iOS simulada: ${body.keycode}` });
+  }
+
   await adb.shell(ctx.targetSerial!, `input keyevent ${body.keycode}`);
   return NextResponse.json({ success: true, message: `Tecla enviada: ${body.keycode}` });
 }

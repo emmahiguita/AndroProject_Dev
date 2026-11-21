@@ -8,7 +8,14 @@ import { pipeline } from 'stream/promises';
 import { Readable } from 'stream';
 import { ADB, FASTBOOT } from '@/lib/config';
 
-const execAsync = promisify(exec);
+const execAsyncOrig = promisify(exec);
+const execAsync = async (command: string, options: { timeout?: number; encoding?: BufferEncoding; maxBuffer?: number } = {}) => {
+  const res = await execAsyncOrig(command, { encoding: 'utf8', ...options, windowsHide: true });
+  return {
+    stdout: typeof res.stdout === 'string' ? res.stdout : (res.stdout ? String(res.stdout) : ''),
+    stderr: typeof res.stderr === 'string' ? res.stderr : (res.stderr ? String(res.stderr) : ''),
+  };
+};
 const FLASH_DIR = path.join(process.cwd(), 'temp', 'flash');
 
 const getErrorMessage = (error: unknown) =>
@@ -144,7 +151,7 @@ export async function POST(req: Request) {
       try {
         // CORREGIDO: advertir que requiere root en Android 10+
         const { stdout, stderr } = await execAsync(`${adbTarget} shell settings put global oem_unlock_allowed 1`, { timeout: 5000 });
-        const output = (stdout + stderr).toLowerCase();
+        const output = (String(stdout || '') + String(stderr || '')).toLowerCase();
         if (output.includes('permission denial') || output.includes('not allowed') || output.includes('operation not permitted')) {
           return NextResponse.json({
             success: false,
@@ -183,7 +190,7 @@ export async function POST(req: Request) {
         try {
           const { stdout, stderr } = await execAsync(`${fastbootTarget} ${cmd} ${sub}`, { timeout: 15000 });
           success = true;
-          message = stdout || stderr;
+          message = String(stdout || stderr || '');
           break;
         } catch (e: unknown) {
           lastError = getCommandOutput(e);

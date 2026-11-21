@@ -217,15 +217,17 @@ function tryScrcpyNamedPipePipeline(
     pipeServer = net.createServer((socket) => {
       pipeSocket = socket;
 
-      // Spawn FFmpeg to read raw MKV stream from named pipe socket and convert to MJPEG
+      // Spawn FFmpeg with zero-buffer / zero-probe low-latency MJPEG passthrough
       ffProc = spawn(ff, [
         '-f', 'matroska',
         '-fflags', 'nobuffer+discardcorrupt',
         '-flags', 'low_delay',
+        '-probesize', '32',
+        '-analyzeduration', '0',
         '-i', 'pipe:0',
         '-f', 'mjpeg',
-        '-q:v', '4',
-        '-r', String(targetFps),
+        '-q:v', '5',
+        '-fps_mode', 'passthrough',
         'pipe:1',
       ], { windowsHide: true, stdio: ['pipe', 'pipe', 'ignore'] });
 
@@ -248,13 +250,10 @@ function tryScrcpyNamedPipePipeline(
     pipeServer.listen(pipePath, () => {
       if (stopped) return;
 
-      // Spawn scrcpy recording to named pipe with hidden 1x1 window
+      // Spawn scrcpy recording directly to named pipe with --no-playback (zero SDL2 window overhead)
       scrcpyProc = spawn(scrcpy, [
         '-s', serial,
-        '--window-x=-8000', '--window-y=-8000',
-        '--window-width=1', '--window-height=1',
-        '--window-borderless',
-        '--window-title=_AndroPipe',
+        '--no-playback',
         '--no-audio',
         '--video-codec=h264',
         '--max-size=720',

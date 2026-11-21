@@ -1,46 +1,56 @@
-/* ═══════════════════════════════════════════════════════════════════
-   AndroProject — RicoUI Minimalist Design Tokens
-   Professional neutral palette inspired by design.ricoui.com / Linear
-   ═══════════════════════════════════════════════════════════════════ */
+/* ============================================================================
+   ARCHIVO: tokens.css
+   QUÉ HACE: Paleta oficial de tokens de color, superficies, bordes y contraste
+             WCAG AA/AAA para Modo Oscuro y Modo Claro de AndroProject Studio.
+   CÓMO FUNCIONA: Define variables CSS en `:root` (oscuro por defecto) y las
+             sobrescribe en `:root.light` / `[data-theme="light"]`.
+   POR QUÉ: Garantizar legibilidad impecable, jerarquía limpia y cero colores
+             neón o paneles oscuros filtrándose en modo claro.
+   ============================================================================ */
 
 :root {
-  /* ── Brand / Core Accent ── */
+  /* ── Brand / Primary Action (Dark Mode) ── */
   --brand:            #27272a;
   --brand-light:      #3f3f46;
   --brand-muted:      #18181b;
+  --btn-primary-bg:   #f4f4f5;
+  --btn-primary-text: #09090b;
+  --btn-primary-hov:  #ffffff;
 
-  /* ── Surfaces (Dark Mode Default) ── */
+  /* ── Surfaces (Dark Mode — Obsidian Neutral) ── */
   --surface-root:     #09090b;
-  --surface-base:     #121215;
-  --surface-raised:   #18181b;
-  --surface-overlay:  #27272a;
+  --surface-base:     #101013;
+  --surface-card:     #141418;
+  --surface-raised:   #18181d;
+  --surface-overlay:  #232329;
+  --surface-track:    rgba(255, 255, 255, 0.09);
 
-  /* ── Borders ── */
-  --border-subtle:    rgba(255, 255, 255, 0.05);
-  --border-default:   rgba(255, 255, 255, 0.08);
-  --border-strong:    rgba(255, 255, 255, 0.14);
-  --border-accent:    rgba(255, 255, 255, 0.22);
+  /* ── Borders (Dark Mode) ── */
+  --border-subtle:    rgba(255, 255, 255, 0.08);
+  --border-default:   rgba(255, 255, 255, 0.13);
+  --border-strong:    rgba(255, 255, 255, 0.22);
+  --border-accent:    rgba(255, 255, 255, 0.34);
 
-  /* ── Text ── */
-  --text-primary:     #fafafa;
-  --text-secondary:   #a1a1aa;
-  --text-tertiary:    #71717a;
-  --text-disabled:    #52525b;
-  --text-accent:      #f4f4f5;
+  /* ── Text (Dark Mode — WCAG AA/AAA) ── */
+  --text-primary:     #f4f4f5;
+  --text-secondary:   #b4b4bd;
+  --text-tertiary:    #8c8c97;
+  --text-disabled:    #5c5c66;
+  --text-accent:      #ffffff;
 
-  /* ── Semantic Statuses ── */
+  /* ── Semantic Statuses (Muted Studio Tones) ── */
   --success:          #10b981;
-  --warning:          #f59e0b;
-  --danger:           #f43f5e;
+  --warning:          #d97706;
+  --danger:           #ef4444;
   --info:             #3b82f6;
-  --violet:           #8b5cf6;
+  --violet:           #71717a;
 
   /* ── Subtle Elevation Shadows ── */
-  --shadow-xs:        0 1px 2px rgba(0, 0, 0, 0.4);
-  --shadow-sm:        0 2px 6px rgba(0, 0, 0, 0.35);
-  --shadow-md:        0 4px 12px rgba(0, 0, 0, 0.4);
-  --shadow-lg:        0 8px 24px rgba(0, 0, 0, 0.45);
-  --shadow-xl:        0 16px 36px rgba(0, 0, 0, 0.5);
+  --shadow-xs:        0 1px 2px rgba(0, 0, 0, 0.35);
+  --shadow-sm:        0 2px 6px rgba(0, 0, 0, 0.30);
+  --shadow-md:        0 4px 12px rgba(0, 0, 0, 0.35);
+  --shadow-lg:        0 8px 24px rgba(0, 0, 0, 0.40);
+  --shadow-xl:        0 16px 36px rgba(0, 0, 0, 0.45);
 
   --glow-brand-sm:    none;
   --glow-brand-md:    none;
@@ -106,33 +116,47 @@
   --z-tooltip:   600;
 }
 
-/* ── Light Theme: Soft, Non-straining Warm Zinc Palette ── */
+/* ── Light Theme: Crisp Studio Slate & Pure White Cards ── */
 :root.light,
 [data-theme="light"] {
-  --brand:            #f4f4f5;
-  --brand-light:      #e4e4e7;
-  --brand-muted:      #d4d4d8;
+  --brand:            #0f172a;
+  --brand-light:      #1e293b;
+  --brand-muted:      #e2e8f0;
+  --btn-primary-bg:   #0f172a;
+  --btn-primary-text: #ffffff;
+  --btn-primary-hov:  #1e293b;
 
-  /* Warm zinc surfaces (not burning pure white everywhere) */
-  --surface-root:     #f4f4f6;
-  --surface-base:     #ebecef;
+  /* Soft cool-gray canvas so elevated white cards stand out cleanly */
+  --surface-root:     #f1f5f9;
+  --surface-base:     #e8edf3;
+  --surface-card:     #ffffff;
   --surface-raised:   #ffffff;
-  --surface-overlay:  #e4e4e7;
+  --surface-overlay:  #e2e8f0;
+  --surface-track:    rgba(15, 23, 42, 0.09);
 
-  --border-subtle:    rgba(0, 0, 0, 0.05);
-  --border-default:   rgba(0, 0, 0, 0.09);
-  --border-strong:    rgba(0, 0, 0, 0.14);
-  --border-accent:    rgba(0, 0, 0, 0.24);
+  /* Crisp, visible slate borders */
+  --border-subtle:    rgba(15, 23, 42, 0.09);
+  --border-default:   rgba(15, 23, 42, 0.14);
+  --border-strong:    rgba(15, 23, 42, 0.22);
+  --border-accent:    rgba(15, 23, 42, 0.36);
 
-  --text-primary:     #18181b;
-  --text-secondary:   #52525b;
-  --text-tertiary:    #71717a;
-  --text-disabled:    #a1a1aa;
-  --text-accent:      #09090b;
+  /* High-contrast slate ink (WCAG AAA/AA) */
+  --text-primary:     #0f172a;
+  --text-secondary:   #334155;
+  --text-tertiary:    #475569;
+  --text-disabled:    #94a3b8;
+  --text-accent:      #020617;
 
-  --shadow-xs:        0 1px 2px rgba(0, 0, 0, 0.04);
-  --shadow-sm:        0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
-  --shadow-md:        0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.02);
-  --shadow-lg:        0 10px 15px -3px rgba(0, 0, 0, 0.06), 0 4px 6px -2px rgba(0, 0, 0, 0.02);
-  --shadow-xl:        0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
+  /* Deeper semantic colors for crisp legibility on light backgrounds */
+  --success:          #059669;
+  --warning:          #b45309;
+  --danger:           #dc2626;
+  --info:             #1d4ed8;
+  --violet:           #475569;
+
+  --shadow-xs:        0 1px 2px rgba(15, 23, 42, 0.05);
+  --shadow-sm:        0 1px 3px rgba(15, 23, 42, 0.07), 0 1px 2px rgba(15, 23, 42, 0.04);
+  --shadow-md:        0 4px 8px -1px rgba(15, 23, 42, 0.07), 0 2px 4px -1px rgba(15, 23, 42, 0.04);
+  --shadow-lg:        0 10px 18px -3px rgba(15, 23, 42, 0.08), 0 4px 6px -2px rgba(15, 23, 42, 0.04);
+  --shadow-xl:        0 20px 28px -5px rgba(15, 23, 42, 0.10), 0 10px 10px -5px rgba(15, 23, 42, 0.04);
 }

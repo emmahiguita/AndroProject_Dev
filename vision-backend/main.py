@@ -44,7 +44,8 @@ app = FastAPI(
 import os
 
 _CORS_ORIGINS = os.environ.get(
-    "FRONTEND_ORIGIN", "http://127.0.0.1:3001,http://localhost:3001"
+    "FRONTEND_ORIGIN",
+    "http://127.0.0.1:3000,http://localhost:3000,http://127.0.0.1:3001,http://localhost:3001",
 )
 _ALLOWED_ORIGINS = [o.strip() for o in _CORS_ORIGINS.split(",") if o.strip()]
 

@@ -91,10 +91,11 @@ export async function GET(req: NextRequest) {
   // Handle iOS AirPlay screen streaming
   if (serial.startsWith('airplay-')) {
     const frameBuffer = airPlayReceiverEngine.getLatestFrame(serial);
+    const contentType = airPlayReceiverEngine.getLatestFrameContentType();
     const uint8 = new Uint8Array(frameBuffer.buffer, frameBuffer.byteOffset, frameBuffer.byteLength);
     return new NextResponse(uint8 as unknown as BodyInit, {
       headers: {
-        'Content-Type': 'image/svg+xml',
+        'Content-Type': contentType,
         'Cache-Control': 'no-store',
         'ETag': String(Date.now()),
         'X-Connection': 'ok',

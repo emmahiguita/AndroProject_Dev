@@ -53,3 +53,8 @@ Thumbs.db
 *.mkv
 scratch/
 **/scratch/
+.cache/
+**/.cache/
+src-tauri/target/
+**/src-tauri/target/
+*.bak

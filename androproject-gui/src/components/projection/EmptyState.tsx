@@ -57,17 +57,13 @@ export const EmptyState: React.FC<EmptyStateProps> = ({ dark, onConnectAdb, isCo
 
   return (
     <div className="flex flex-col items-center justify-center h-full text-center gap-5 px-4 max-w-md mx-auto">
-      {/* Animated phone icon */}
-      <div className={`relative w-20 h-20 rounded-2xl flex items-center justify-center ${
+      {/* Clean phone icon */}
+      <div className={`relative w-16 h-16 rounded-2xl flex items-center justify-center border ${
         dark
-          ? 'bg-gradient-to-br from-white/[0.04] to-white/[0.01] border border-white/[0.06]'
-          : 'bg-gradient-to-br from-slate-50 to-slate-100 border border-slate-200 shadow-sm'
+          ? 'bg-zinc-900 border-zinc-800'
+          : 'bg-slate-100 border-slate-200'
       }`}>
-        <Smartphone size={32} className={dark ? 'text-white/20' : 'text-slate-300'} />
-        {/* Pulsing ring */}
-        <div className={`absolute inset-0 rounded-2xl border-2 ${
-          dark ? 'border-zinc-700' : 'border-zinc-300'
-        } animate-ping opacity-30`} />
+        <Smartphone size={28} className={dark ? 'text-zinc-400' : 'text-slate-600'} />
       </div>
 
       <div>

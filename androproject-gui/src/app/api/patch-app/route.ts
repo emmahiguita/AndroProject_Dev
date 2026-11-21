@@ -4,8 +4,16 @@ import { promisify } from 'util';
 import path from 'path';
 import fs from 'fs';
 import { ADB, ANDROPROJECT_HOME } from '@/lib/config';
+import { assertValidDeviceSerial } from '@/lib/security/input-sanitizer';
 
-const execAsync = promisify(exec);
+const execAsyncOrig = promisify(exec);
+const execAsync = async (command: string, options: { timeout?: number; encoding?: BufferEncoding; maxBuffer?: number } = {}) => {
+  const res = await execAsyncOrig(command, { encoding: 'utf8', ...options, windowsHide: true });
+  return {
+    stdout: typeof res.stdout === 'string' ? res.stdout : (res.stdout ? String(res.stdout) : ''),
+    stderr: typeof res.stderr === 'string' ? res.stderr : (res.stderr ? String(res.stderr) : ''),
+  };
+};
 
 const getErrorMessage = (error: unknown) =>
   error instanceof Error ? error.message : String(error);
@@ -85,7 +93,8 @@ export async function POST(request: Request) {
         throw new Error('Herramientas LSPatch no encontradas');
       }
 
-      const adbTarget = serial ? `"${ADB}" -s ${serial}` : `"${ADB}"`;
+      const safeSerial = serial ? assertValidDeviceSerial(serial) : '';
+      const adbTarget = safeSerial ? `"${ADB}" -s ${safeSerial}` : `"${ADB}"`;
       let apkPaths: string[] = [];
       let isSplit = false;
 
@@ -95,8 +104,8 @@ export async function POST(request: Request) {
         const { stdout: pathOut } = await execAsync(`${adbTarget} shell pm path ${packageName}`);
         if (pathOut && pathOut.includes('package:')) {
           apkPaths = pathOut.split('\n')
-            .filter(l => l.includes('package:'))
-            .map(l => l.replace('package:', '').trim());
+            .filter((l: string) => l.includes('package:'))
+            .map((l: string) => l.replace('package:', '').trim());
           isSplit = apkPaths.length > 1;
         }
       } catch (err: unknown) {
@@ -200,8 +209,8 @@ export async function POST(request: Request) {
         try {
           const { stdout: usersOut } = await execAsync(`${adbTarget} shell pm list users`);
           const userMatches = Array.from(usersOut.matchAll(/UserInfo\{(\d+):/g));
-          const secondary = userMatches.find(m => m[1] !== '0');
-          if (secondary) {
+          const secondary = userMatches.find((m) => m[1] !== '0');
+          if (secondary && secondary[1]) {
             targetUser = secondary[1];
             await appendLog(`Perfil aislado detectado: ID ${targetUser}`);
           } else {

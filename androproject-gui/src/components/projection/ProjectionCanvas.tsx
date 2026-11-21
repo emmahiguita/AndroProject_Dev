@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { useDeviceStream } from '@/hooks/useDeviceStream';
 import { useActions } from '@/hooks/useActions';
+import { WebCodecsCanvas } from './WebCodecsCanvas';
 import type { DeviceInfo } from '@/features/types';
 
 export interface ZoomState {
@@ -66,8 +67,8 @@ const MjpegStreamView: React.FC<MjpegStreamViewProps> = ({
   const retryCountRef = useRef(0);
   const retryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Build stream URL (key forces img remount on retry)
-  const streamUrl = `/api/device-stream?serial=${encodeURIComponent(serial)}&mode=mjpeg&maxSize=720&maxFps=30`;
+  // Build stream URL (key forces img remount on retry) — 60 FPS ultra-low-latency MJPEG
+  const streamUrl = `/api/device-stream?serial=${encodeURIComponent(serial)}&mode=mjpeg&maxSize=720&maxFps=60`;
 
   const handleLoad = () => {
     retryCountRef.current = 0; // success — reset retry counter
@@ -167,10 +168,14 @@ export const ProjectionCanvas: React.FC<ProjectionCanvasProps> = ({
 
   useEffect(() => {
     setImgError(false);
+  }, [frameUrl]);
+
+  useEffect(() => {
+    setImgError(false);
     setIsSyncing(false);
     setMjpegError(false);
     setMjpegLoaded(false);
-  }, [frameUrl, device?.serial]);
+  }, [device?.serial]);
 
   // Auto-retry MJPEG after 5s if it errored — handles cold-start compilation delays
   useEffect(() => {
@@ -179,32 +184,36 @@ export const ProjectionCanvas: React.FC<ProjectionCanvasProps> = ({
     return () => clearTimeout(t);
   }, [mjpegError, useMjpegStream]);
 
-  // ── Touch & gesture dispatchers ──
-  const tapDevice = useCallback(async (x: number, y: number) => {
-    if (!device?.serial || !Number.isFinite(x) || !Number.isFinite(y)) return;
-    setIsSyncing(true);
-    await run('input_tap', 'Tap', { x: Math.round(x), y: Math.round(y), serial: device.serial }, false);
-    if (!useMjpegStream || mjpegError) refreshNow();
-    setIsSyncing(false);
-  }, [run, device?.serial, refreshNow, useMjpegStream, mjpegError]);
+  // ── Zero-Lag Touch & Gesture Dispatchers (direct non-blocking fetch, no React re-render thrashing) ──
+  const postTouch = useCallback((payload: Record<string, unknown>) => {
+    fetch('/api/actions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+      keepalive: true,
+    })
+      .then(() => {
+        if (!useMjpegStream || mjpegError) refreshNow();
+      })
+      .catch(() => {});
+  }, [refreshNow, useMjpegStream, mjpegError]);
 
-  const longPressDevice = useCallback(async (x: number, y: number) => {
+  const tapDevice = useCallback((x: number, y: number) => {
     if (!device?.serial || !Number.isFinite(x) || !Number.isFinite(y)) return;
-    setIsSyncing(true);
-    await run('input_swipe', 'Long Press', { x1: Math.round(x), y1: Math.round(y), x2: Math.round(x), y2: Math.round(y), duration: 1000, serial: device.serial }, false);
-    if (!useMjpegStream || mjpegError) refreshNow();
-    setIsSyncing(false);
-  }, [run, device?.serial, refreshNow, useMjpegStream, mjpegError]);
+    postTouch({ action: 'input_tap', x: Math.round(x), y: Math.round(y), serial: device.serial });
+  }, [device?.serial, postTouch]);
 
-  const swipeDevice = useCallback(async (
-    x1: number, y1: number, x2: number, y2: number, duration = 120,
+  const longPressDevice = useCallback((x: number, y: number) => {
+    if (!device?.serial || !Number.isFinite(x) || !Number.isFinite(y)) return;
+    postTouch({ action: 'input_swipe', x1: Math.round(x), y1: Math.round(y), x2: Math.round(x), y2: Math.round(y), duration: 750, serial: device.serial });
+  }, [device?.serial, postTouch]);
+
+  const swipeDevice = useCallback((
+    x1: number, y1: number, x2: number, y2: number, duration = 110,
   ) => {
     if (!device?.serial || !Number.isFinite(x1) || !Number.isFinite(y1) || !Number.isFinite(x2) || !Number.isFinite(y2)) return;
-    setIsSyncing(true);
-    await run('input_swipe', 'Gesto', { x1: Math.round(x1), y1: Math.round(y1), x2: Math.round(x2), y2: Math.round(y2), duration, serial: device.serial }, false);
-    if (!useMjpegStream || mjpegError) refreshNow();
-    setIsSyncing(false);
-  }, [run, device?.serial, refreshNow, useMjpegStream, mjpegError]);
+    postTouch({ action: 'input_swipe', x1: Math.round(x1), y1: Math.round(y1), x2: Math.round(x2), y2: Math.round(y2), duration, serial: device.serial });
+  }, [device?.serial, postTouch]);
 
   const tapRef = useRef(tapDevice);
   const longPressRef = useRef(longPressDevice);
@@ -228,7 +237,7 @@ export const ProjectionCanvas: React.FC<ProjectionCanvasProps> = ({
 
   const wheelLockRef = useRef(0);
 
-  // ── Screen coordinate mapping ──
+  // ── Screen coordinate mapping (maps scaled 720p MJPEG stream to real physical device resolution) ──
   const toDevice = useCallback((cx: number, cy: number) => {
     const img = imgRef.current;
     const screen = screenRef.current;
@@ -236,6 +245,21 @@ export const ProjectionCanvas: React.FC<ProjectionCanvasProps> = ({
 
     const nw = img?.naturalWidth || 1080;
     const nh = img?.naturalHeight || 2400;
+
+    // Parse real physical resolution (e.g. "1080 × 2400") so 720p streams map 1:1 to physical touch coordinates
+    const resParts = (device?.resolution || '')
+      .split(/[×xX]/)
+      .map((s) => parseFloat(s.trim()))
+      .filter((n) => Number.isFinite(n) && n > 0);
+    let devW = resParts.length >= 2 ? resParts[0] : nw;
+    let devH = resParts.length >= 2 ? resParts[1] : nh;
+    // Match current video orientation (portrait vs landscape)
+    if ((nw > nh && devW < devH) || (nh > nw && devH < devW)) {
+      const tmp = devW;
+      devW = devH;
+      devH = tmp;
+    }
+
     const rect = img?.getBoundingClientRect() || screen.getBoundingClientRect();
     if (rect.width <= 0 || rect.height <= 0) return null;
 
@@ -271,11 +295,11 @@ export const ProjectionCanvas: React.FC<ProjectionCanvasProps> = ({
     }
 
     if (!Number.isFinite(nx) || !Number.isFinite(ny) || nx < -0.05 || ny < -0.05 || nx > 1.05 || ny > 1.05) return null;
-    const x = clamp(Math.round(clamp01(nx) * nw), 0, nw - 1);
-    const y = clamp(Math.round(clamp01(ny) * nh), 0, nh - 1);
+    const x = clamp(Math.round(clamp01(nx) * devW), 0, devW - 1);
+    const y = clamp(Math.round(clamp01(ny) * devH), 0, devH - 1);
     if (!Number.isFinite(x) || !Number.isFinite(y)) return null;
     return { x, y };
-  }, [zoom]);
+  }, [zoom, device?.resolution]);
 
   const toDeviceRef = useRef(toDevice);
   const frameUrlRef = useRef(frameUrl);
@@ -516,28 +540,17 @@ export const ProjectionCanvas: React.FC<ProjectionCanvasProps> = ({
           showLiveStream ? (zoomed ? 'cursor-grab active:cursor-grabbing' : 'cursor-crosshair') : 'cursor-default'
         }`}
       >
-        {/* ── Screen Projection: MJPEG mode ── */}
-        {useMjpegStream && device.serial && (
-          <MjpegStreamView
+        {/* ── Screen Projection: Hardware GPU WebCodecs H.264 60 FPS + 2ms Binary Control ── */}
+        {useMjpegStream && device.serial && !mjpegError && !device.serial.startsWith('airplay-') && (
+          <WebCodecsCanvas
             serial={device.serial}
-            imgRef={imgRef}
+            onFpsUpdate={onFpsUpdate}
+            onReady={() => {
+              setMjpegError(false);
+              setMjpegLoaded(true);
+            }}
             onError={() => {
               setMjpegError(true);
-            }}
-            onLoad={() => {
-              setMjpegError(false);
-            }}
-            style={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'fill',
-              pointerEvents: 'none',
-              imageRendering: 'auto',
-              willChange: 'transform',
-              transform: `scale(${zoom.scale})`,
-              transformOrigin: `${zoom.ox * 100}% ${zoom.oy * 100}%`,
-              display: mjpegError ? 'none' : undefined,
-              opacity: 1,
             }}
           />
         )}

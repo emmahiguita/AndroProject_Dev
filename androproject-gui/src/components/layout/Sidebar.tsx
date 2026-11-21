@@ -38,6 +38,7 @@ const groups: { label: string; items: NavItemDef[] }[] = [
   {
     label: 'HERRAMIENTAS',
     items: [
+      { id: 'cli',       label: 'CLI / IA', icon: <Terminal size={16} /> },
       { id: 'tools',     label: 'Herramientas', icon: <Wrench size={16} /> },
       { id: 'flasher',   label: 'Flasheador', icon: <Zap size={16} /> },
     ],
@@ -127,6 +128,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeNav, onSelectNav, collap
         {onToggle && (
           <button
             onClick={onToggle}
+            aria-label={collapsed ? 'Expandir menú lateral' : 'Colapsar menú lateral'}
+            title={collapsed ? 'Expandir menú lateral' : 'Colapsar menú lateral'}
             className={`w-full flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-[10px] font-medium transition-colors ${
               isDark ? 'text-zinc-500 hover:text-zinc-300 hover:bg-zinc-900/60' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'
             }`}

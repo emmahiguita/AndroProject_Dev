@@ -4,7 +4,7 @@ param(
     [switch]$Multi = $false
 )
 
-# ── Resolución dinámica de ADB (no hardcodeado) ─────────────────────────────
+# ── 1. Resolucion dinamica ultra-rapida de ADB ───────────────────────────────
 $adbCandidates = @(
     (Join-Path $env:LOCALAPPDATA 'Android\Sdk\platform-tools\adb.exe'),
     'C:\AndroProject\adb.exe',
@@ -15,37 +15,44 @@ if (-not $adb) {
     $cmd = Get-Command adb.exe -ErrorAction SilentlyContinue
     $adb = if ($cmd) { $cmd.Source } else { 'adb.exe' }
 }
+$env:ADB = $adb
+$env:ADB_MDNS_AUTO_CONNECT = "0"
 
-# ── Resolución dinámica de scrcpy/AndroProject.exe ──────────────────────────
-$scrcpyCandidates = @(
+# ── 2. Resolucion dinamica ultra-rapida de scrcpy ─────────────────────────────
+$scrcpyKnownPaths = @(
+    (Join-Path $env:LOCALAPPDATA 'Microsoft\WinGet\Packages\Genymobile.scrcpy_Microsoft.Winget.Source_8wekyb3d8bbwe\scrcpy-win64-v4.1\scrcpy.exe'),
     'C:\AndroProject\AndroProject.exe',
     'C:\AndroProject\scrcpy.exe'
 )
-$scrcpy = $scrcpyCandidates | Where-Object { Test-Path $_ } | Select-Object -First 1
+$scrcpy = $scrcpyKnownPaths | Where-Object { Test-Path $_ } | Select-Object -First 1
 if (-not $scrcpy) {
     $wingetPkgs = Join-Path $env:LOCALAPPDATA 'Microsoft\WinGet\Packages'
-    $found = Get-ChildItem -Path $wingetPkgs -Filter 'scrcpy.exe' -Recurse -ErrorAction SilentlyContinue |
-             Sort-Object LastWriteTime -Descending | Select-Object -First 1
-    $scrcpy = if ($found) { $found.FullName } else { 'scrcpy.exe' }
+    if (Test-Path $wingetPkgs) {
+        $found = Get-ChildItem -Path $wingetPkgs -Filter 'scrcpy.exe' -Recurse -ErrorAction SilentlyContinue |
+                 Sort-Object LastWriteTime -Descending | Select-Object -First 1
+        if ($found) { $scrcpy = $found.FullName }
+    }
+}
+if (-not $scrcpy) {
+    $cmd = Get-Command scrcpy.exe -ErrorAction SilentlyContinue
+    $scrcpy = if ($cmd) { $cmd.Source } else { 'scrcpy.exe' }
 }
 
 Write-Host "============================================================" -ForegroundColor Cyan
-Write-Host "  Dexterand - Multi-Device Launcher Ultra HD 60 FPS         " -ForegroundColor Cyan
+Write-Host "  AndroProject - Proyector de Pantalla de Alta Calidad      " -ForegroundColor Cyan
 Write-Host "============================================================" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "[1/3] Verificando servidor ADB..." -ForegroundColor DarkGray
 & $adb start-server | Out-Null
 
-# 2. Detectar dispositivos activos
+# ── 3. Detectar dispositivos activos ──────────────────────────────────────────
 $rawDevs = & $adb devices -l
 $devLines = $rawDevs | Where-Object { $_ -match '\bdevice\b' -and $_ -notmatch 'List of devices' }
 $devs = @($devLines | ForEach-Object { ($_ -split '\s+')[0] })
 
 if ($devs.Count -eq 0) {
-    Write-Host "[2/3] Buscando dispositivos en red Wi-Fi..." -ForegroundColor Yellow
+    Write-Host "[2/3] Buscando dispositivo en la red Wi-Fi (192.168.0.11)..." -ForegroundColor Yellow
     & $adb connect 192.168.0.11:5555 | Out-Null
-    & $adb connect 192.168.0.10:34159 | Out-Null
-    & $adb connect 192.168.0.10:38693 | Out-Null
     Start-Sleep -Milliseconds 800
     $rawDevs = & $adb devices -l
     $devLines = $rawDevs | Where-Object { $_ -match '\bdevice\b' -and $_ -notmatch 'List of devices' }
@@ -53,55 +60,102 @@ if ($devs.Count -eq 0) {
 }
 
 if ($devs.Count -gt 0) {
-    # Filtrar por target si se especifico
-    $selectedDevs = if ($TargetSerial) {
-        @($devs | Where-Object { $_ -eq $TargetSerial })
+    $selectedDevs = @()
+    if ($TargetSerial) {
+        $selectedDevs = @($devs | Where-Object { $_ -eq $TargetSerial })
     } elseif ($Multi) {
-        $devs
+        # En modo Multi: proyectar todos los teléfonos físicos distintos conectados
+        $usbSerials = @($devs | Where-Object { $_ -notmatch ':' })
+        $wifiSerials = @($devs | Where-Object { $_ -match ':' })
+        
+        $selectedDevs = [System.Collections.Generic.List[string]]::new()
+        foreach ($u in $usbSerials) { $selectedDevs.Add($u) }
+
+        # Desduplicar si el mismo teléfono está por USB y Wi-Fi a la vez
+        foreach ($w in $wifiSerials) {
+            $wModel = & $adb -s $w shell getprop ro.product.model 2>$null
+            $duplicate = $false
+            foreach ($u in $usbSerials) {
+                $uModel = & $adb -s $u shell getprop ro.product.model 2>$null
+                if ($uModel -and $wModel -and ($uModel.Trim() -eq $wModel.Trim())) {
+                    $duplicate = $true
+                    break
+                }
+            }
+            if (-not $duplicate) {
+                $selectedDevs.Add($w)
+            }
+        }
+        if ($selectedDevs.Count -eq 0) { $selectedDevs = @($devs) }
     } else {
-        # Si no se pidio multi ni target especifico, proyectar todos si hay mas de 1
-        $devs
+        # Modo individual (por defecto): Priorizar Samsung Galaxy A30/A30s USB
+        $samsungUsb = $devLines | Where-Object { ($_ -match 'R58N21SVSPE' -or $_ -match 'a30' -or $_ -match 'SM_A307G') -and $_ -notmatch ':' } | Select-Object -First 1
+        if ($samsungUsb) {
+            $selectedDevs = @(($samsungUsb -split '\s+')[0])
+        } else {
+            # Prioridad 2: Cualquier dispositivo USB conectado
+            $anyUsb = $devs | Where-Object { $_ -notmatch ':' } | Select-Object -First 1
+            if ($anyUsb) {
+                $selectedDevs = @($anyUsb)
+            } else {
+                # Prioridad 3: Samsung Wi-Fi
+                $samsungWifi = $devLines | Where-Object { ($_ -match '192.168.0.11' -or $_ -match 'SM_A307G' -or $_ -match 'a30') } | Select-Object -First 1
+                if ($samsungWifi) {
+                    $selectedDevs = @(($samsungWifi -split '\s+')[0])
+                } else {
+                    # Prioridad 4: Primer dispositivo disponible
+                    $selectedDevs = @($devs[0])
+                }
+            }
+        }
     }
 
-    Write-Host "[3/3] Dispositivos detectados ($($selectedDevs.Count)): $($selectedDevs -join ', ')" -ForegroundColor Green
+    Write-Host "[2/3] Dispositivo(s) seleccionado(s) ($($selectedDevs.Count)): $($selectedDevs -join ', ')" -ForegroundColor Green
 
     $index = 0
     foreach ($target in $selectedDevs) {
         $isWifi = $target -match ':'
-        $connType = if ($isWifi) { 'Wi-Fi' } else { 'USB' }
+        $connType = if ($isWifi) { "Wi-Fi" } else { "USB" }
         $devModel = & $adb -s $target shell getprop ro.product.model 2>$null
-        if (-not $devModel) { $devModel = "Android" } else { $devModel = $devModel.Trim() }
+        if (-not $devModel) {
+            $devModel = if ($target -match 'R58N21SVSPE|192.168.0.11') { "Samsung Galaxy A30s" } else { "Dispositivo Movil" }
+        } else {
+            $devModel = $devModel.Trim()
+        }
 
-        # Parametros adaptativos por dispositivo
-        $bitrate = if ($isWifi) { '8M' } else { '16M' }
-        $videoBuffer = if ($isWifi) { '10' } else { '0' }
-        $xPos = 60 + ($index * 380)
+        # Parametros optimizados para maxima estabilidad y fluidez (GPU Direct3D11, H.264 hardware)
+        $bitrate     = if ($isWifi) { "8M" } else { "16M" }
+        $maxFps      = if ($isWifi) { "30" } else { "60" }
+        $maxSize     = "1080"
+        $videoBuffer = if ($isWifi) { "40" } else { "0" }
+
+        $xPos = 100 + ($index * 400)
         $portStart = 27180 + ($index * 20)
         $portRange = "$portStart`:$($portStart + 15)"
+        $title = "AndroProject - $devModel ($connType)"
 
-        $title = "Dexterand - $devModel ($target)"
-
-        Write-Host "Iniciando proyeccion para $devModel ($target) en puerto $portRange [X=$xPos]..." -ForegroundColor Cyan
+        Write-Host "[3/3] Iniciando proyeccion en vivo para $devModel [$connType]..." -ForegroundColor Cyan
 
         $scrcpyArgs = @(
-            '-s', $target,
-            '--display-id=0',
-            '--video-codec=h264',
-            '-b', $bitrate,
-            '--max-size', '1080',
-            '--max-fps', '60',
+            "-s", $target,
+            "--display-id=0",
+            "--video-codec=h264",
+            "-b", $bitrate,
+            "--max-size", $maxSize,
+            "--max-fps=$maxFps",
             "--video-buffer=$videoBuffer",
-            '--render-driver=direct3d11',
-            '--window-width=350',
-            '--window-height=740',
+            "--render-driver=direct3d11",
+            "--window-width=380",
+            "--window-height=820",
             "--window-x=$xPos",
-            '--window-y=60',
-            '--no-audio',
-            '--stay-awake',
+            "--window-y=80",
+            "--no-audio",
+            "--stay-awake",
             "--port=$portRange",
             "--window-title=$title"
         )
 
+        # Quoting seguro para que ningun argumento con espacios o caracteres especiales rompa scrcpy
         $quotedArgs = @($scrcpyArgs | ForEach-Object {
             $arg = [string]$_
             if ($arg -match '[\s"]') {
@@ -110,19 +164,25 @@ if ($devs.Count -gt 0) {
                 $arg
             }
         })
-        $psi = New-Object System.Diagnostics.ProcessStartInfo
-        $psi.FileName = $scrcpy
-        $psi.Arguments = ($quotedArgs -join ' ')
-        $psi.UseShellExecute = $false
-        $psi.CreateNoWindow = $true
-        $null = [System.Diagnostics.Process]::Start($psi)
+
+        if ($selectedDevs.Count -eq 1) {
+            Write-Host "[3/3] Iniciando proyeccion scrcpy Direct3D11..." -ForegroundColor Green
+            & $scrcpy $scrcpyArgs
+        } else {
+            try {
+                $proc = Start-Process -FilePath $scrcpy -ArgumentList $scrcpyArgs -PassThru
+                Write-Host "[OK] Proyeccion iniciada para $devModel (PID: $($proc.Id))" -ForegroundColor Green
+            } catch {
+                Write-Host "[ERROR] Error al iniciar proyeccion para $devModel : $_" -ForegroundColor Red
+            }
+        }
         $index++
-        Start-Sleep -Milliseconds 400
     }
 } else {
     Write-Host "[ERROR] No se detecto ningun dispositivo Android conectado." -ForegroundColor Red
-    Write-Host "Por favor conecta tu telefono por cable USB o activa la depuracion Wi-Fi." -ForegroundColor Yellow
+    Write-Host "Verifica que el telefono este en la misma red Wi-Fi o conectado por USB con Depuracion USB activada." -ForegroundColor Yellow
     Write-Host ""
     Write-Host "Cerrando en 5 segundos..." -ForegroundColor DarkGray
     Start-Sleep -Seconds 5
 }
+

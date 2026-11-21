@@ -23,7 +23,8 @@ export async function buildContext(body: { serial?: string; ip?: string }): Prom
   if (!serial) {
     const { exec } = require('child_process');
     const { promisify } = require('util');
-    const execAsync = promisify(exec);
+    const execAsyncOrig = promisify(exec);
+    const execAsync = async (command: string, options: any = {}) => execAsyncOrig(command, { ...options, windowsHide: true });
     try {
       const { stdout } = await execAsync(`"${ADB}" devices`, { timeout: 3000 });
       serial = stdout.split('\n').slice(1).find((l: string) => l.includes('\tdevice'))?.split(/\s+/)[0];

@@ -31,9 +31,11 @@ export function useDevicePolling(): UseDevicePollingResult {
   const [isScanning, setIsScanning] = useState(false);
   const storeSetDevice = useAppStore((s) => s.setDevice);
   const storeSetActiveSerial = useAppStore((s) => s.setActiveSerial);
+  const storeSetDevicesList = useAppStore((s) => s.setDevicesList);
   const selectedRef = useRef(selectedSerial);
   selectedRef.current = selectedSerial;
   const prevDeviceStrRef = useRef<string>('');
+  const prevListStrRef = useRef<string>('');
 
   const refresh = useCallback(async () => {
     try {
@@ -44,9 +46,21 @@ export function useDevicePolling(): UseDevicePollingResult {
       if (!res.ok) return;
       const data = await res.json();
 
-      // Device list (for selector)
+      // Device list (for selector + MultiScreenGrid via Zustand)
       const devList: DeviceInfo[] = data.devices || [];
-      setDevices(devList);
+      const listStr = JSON.stringify(devList.map((d) => `${d.serial}:${d.state}:${d.platform || ''}`));
+      if (listStr !== prevListStrRef.current) {
+        prevListStrRef.current = listStr;
+        setDevices(devList);
+        storeSetDevicesList(
+          devList.map((d) => ({
+            serial: d.serial,
+            model: d.model || d.serial,
+            connectionType: d.connectionType || 'USB',
+            state: d.state || 'device',
+          }))
+        );
+      }
 
       // Full active device data (CPU, RAM, storage, battery, temp)
       const activeDevice: DeviceInfo | null = data.activeDevice || null;
@@ -90,7 +104,7 @@ export function useDevicePolling(): UseDevicePollingResult {
         storeSetActiveSerial(null);
       }
     } catch { /* offline */ }
-  }, [storeSetDevice, storeSetActiveSerial]);
+  }, [storeSetDevice, storeSetActiveSerial, storeSetDevicesList]);
 
   useEffect(() => {
     refresh();

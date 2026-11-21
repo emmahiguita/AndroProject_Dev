@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { AppShell } from '../components/layout/AppShell';
+import { FeatureErrorBoundary } from '../components/ui/FeatureErrorBoundary';
 
 import { DashboardView } from '../features/DashboardView';
 import { ProjectionView } from '../features/ProjectionView';
@@ -10,6 +11,7 @@ import { FlasherView } from '../features/FlasherView';
 import { CurarView } from '../features/CurarView';
 import { ArchivosView } from '../features/ArchivosView';
 import { ToolsView } from '../features/ToolsView';
+import { CliInjectorView } from '../features/CliInjectorView';
 import { OptimizerView } from '../features/OptimizerView';
 import { ConfigView } from '../features/ConfigView';
 
@@ -37,6 +39,7 @@ function ActiveView({
     case 'curar':      return <CurarView device={device} addLog={addLog} />;
     case 'archivos':   return <ArchivosView device={device} addLog={addLog} />;
     case 'tools':      return <ToolsView device={device} />;
+    case 'cli':        return <CliInjectorView device={device} />;
     case 'optimizer':  return <OptimizerView device={device} addLog={addLog} />;
     case 'config':     return <ConfigView addLog={addLog} />;
     default:           return <DashboardView device={device} addLog={addLog} onNavigate={onNavigate} />;
@@ -82,7 +85,9 @@ export default function Page() {
       onUnregisterDevice={adb.unregisterDevice}
       onToggleAutoConnect={adb.toggleAutoConnect}
     >
-      <ActiveView nav={activeNav} device={device} addLog={addLog} onNavigate={setActiveNav} />
+      <FeatureErrorBoundary onError={(err) => addLog(`[Vista ${activeNav}] ${err.message}`, 'error')}>
+        <ActiveView nav={activeNav} device={device} addLog={addLog} onNavigate={setActiveNav} />
+      </FeatureErrorBoundary>
     </AppShell>
   );
 }

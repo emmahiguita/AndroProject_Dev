@@ -3,16 +3,20 @@
  *
  * Implements IAirPlayReceiverEngine following Single Responsibility & Clean Architecture.
  * Receives Apple iPhone / iPad Screen Mirroring over Wi-Fi without needing an app on the iOS device.
- * Broadcasts mDNS / Bonjour services (_airplay._tcp, _raop._tcp) and handles AirPlay HTTP/RTSP discovery.
+ * Uses native AirPlayServer.exe (Direct3D11 + GStreamer + Apple Bonjour mDNSResponder on ports 7001/5001/7100)
+ * and provides real-time window frame capture (`PrintWindow` PW_RENDERFULLCONTENT) for web/popout views.
  */
 
-import { spawn, ChildProcess } from 'child_process';
+import { spawn, exec, ChildProcess } from 'child_process';
+import { promisify } from 'util';
 import http from 'http';
 import os from 'os';
 import path from 'path';
 import fs from 'fs';
 import { ANDROPROJECT_HOME, getLockFile, writeLock, killLockedProcess } from '@/lib/config';
 import type { DeviceInfo, AirPlayServerStatus } from '@/features/types';
+
+const execAsync = promisify(exec);
 
 export interface AirPlayServerOptions {
   serverName: string;
@@ -30,33 +34,57 @@ export interface IAirPlayReceiverEngine {
   getConnectedDevices(): DeviceInfo[];
   setServerName(name: string): Promise<boolean>;
   setPin(pin: string): Promise<boolean>;
+  setAudioEnabled(enabled: boolean): Promise<AirPlayServerStatus>;
   getLatestFrame(serial: string): Buffer;
+  getLatestFrameContentType(): string;
+  openNativeWindow(): Promise<boolean>;
+  toggleMouseControl(): { success: boolean; active: boolean; message: string };
+  registerClient(clientIp: string, clientName?: string, model?: string): void;
 }
 
 const DEFAULT_AIRPLAY_OPTIONS: AirPlayServerOptions = {
   serverName: 'AndroProject [PC]',
-  port: 7000,
+  port: 7001,
   maxFps: 60,
   pinRequired: false,
   pinCode: '',
-  audioEnabled: true,
+  audioEnabled: false,
 };
 
 const AIRPLAY_LOCK_NAME = 'airplay_receiver_server';
 
+function resolveAirPlayDir(): string {
+  const candidates = [
+    path.join(process.cwd(), 'bin', 'airplay'),
+    path.join(process.cwd(), 'androproject-gui', 'bin', 'airplay'),
+    'c:\\Users\\emman\\Desktop\\Proyectos\\AndroProject_Dev\\androproject-gui\\bin\\airplay',
+  ];
+  for (const dir of candidates) {
+    if (fs.existsSync(path.join(dir, 'AirPlayServer.exe'))) {
+      return dir;
+    }
+  }
+  return candidates[0];
+}
+
 function getLocalIpAndMac(): { ip: string; mac: string } {
   const ifaces = os.networkInterfaces();
-  let fallback = { ip: '127.0.0.1', mac: '00:11:22:33:44:55' };
+  let fallback = { ip: '192.168.0.6', mac: 'c8:53:09:dd:df:de' };
 
   for (const name of Object.keys(ifaces)) {
+    if (name.toLowerCase().includes('tailscale') || name.toLowerCase().includes('vpn') || name.toLowerCase().includes('wsl')) {
+      continue;
+    }
     const list = ifaces[name];
     if (!list) continue;
     for (const net of list) {
       if (net.family === 'IPv4' && !net.internal) {
-        if (net.address.startsWith('192.168.') || net.address.startsWith('10.') || net.address.startsWith('172.')) {
-          return { ip: net.address, mac: net.mac || 'd4:ab:61:17:a1:65' };
+        if (net.address.startsWith('192.168.')) {
+          return { ip: net.address, mac: (net.mac || 'c8:53:09:dd:df:de').toLowerCase() };
         }
-        fallback = { ip: net.address, mac: net.mac || 'd4:ab:61:17:a1:65' };
+        if (net.address.startsWith('10.') || net.address.startsWith('172.')) {
+          fallback = { ip: net.address, mac: (net.mac || 'c8:53:09:dd:df:de').toLowerCase() };
+        }
       }
     }
   }
@@ -70,6 +98,13 @@ class AirPlayReceiverEngine implements IAirPlayReceiverEngine {
   private httpServer: http.Server | null = null;
   private mdnsInstance: unknown = null;
   private announceInterval: NodeJS.Timeout | null = null;
+  private latestWindowFrame: Buffer | null = null;
+  private latestWindowFrameTs: number = 0;
+  private lastCaptureAttempt: number = 0;
+  private captureBackoffMs: number = 250;
+  private captureInFlight: boolean = false;
+  private mouseControlEnabled: boolean = true;
+
   private connectedClients: Map<string, {
     clientName: string;
     clientIp: string;
@@ -92,20 +127,148 @@ class AirPlayReceiverEngine implements IAirPlayReceiverEngine {
   }
 
   /**
-   * Starts the AirPlay 2 Screen Mirroring receiver server with Bonjour discovery.
+   * Checks if AirPlayServer.exe is currently running and returns its PID if found.
+   */
+  private async findRunningAirPlayPid(): Promise<number | null> {
+    try {
+      const { stdout } = await execAsync('tasklist /FI "IMAGENAME eq AirPlayServer.exe" /FO CSV /NH', {
+        windowsHide: true,
+        timeout: 2500,
+      });
+      const match = stdout.match(/"AirPlayServer\.exe","(\d+)"/i);
+      if (match && match[1]) {
+        return parseInt(match[1], 10);
+      }
+    } catch {}
+    return null;
+  }
+
+  /**
+   * Ensures airplay_settings.ini has HideInterface=0 and LocalVolume=0 (audio stays on phone).
+   */
+  private syncSettingsIni(airplayDir: string) {
+    const iniPath = path.join(airplayDir, 'airplay_settings.ini');
+    const serverName = this.currentOptions.serverName || 'AndroProject [PC]';
+    const iniContent = [
+      '[General]',
+      `DeviceName=${serverName}`,
+      'QualityPreset=0',
+      'AutoFullscreenOnConnect=0',
+      'OverlayState=0',
+      'ShowOverlay=0',
+      '',
+      '[Security]',
+      `RequirePin=${this.currentOptions.pinRequired ? 1 : 0}`,
+      'HidePin=0',
+      '',
+      '[Display]',
+      'MatchReceiverMonitor=0',
+      'CustomWidth=430',
+      'CustomHeight=920',
+      '',
+      '[ScreenCast]',
+      'Enabled=1',
+      'HideInterface=0',
+      'CropToVideo=1',
+      '',
+      '[Audio]',
+      'AutoAdjust=0',
+      `LocalVolume=${this.currentOptions.audioEnabled ? 1 : 0}`,
+      '',
+    ].join('\r\n');
+
+    try {
+      fs.writeFileSync(iniPath, iniContent, 'utf-8');
+    } catch (e) {
+      console.warn('[AirPlay Engine] No se pudo actualizar airplay_settings.ini:', e);
+    }
+  }
+
+  public async setAudioEnabled(enabled: boolean): Promise<AirPlayServerStatus> {
+    this.currentOptions.audioEnabled = Boolean(enabled);
+    const airplayDir = resolveAirPlayDir();
+    this.syncSettingsIni(airplayDir);
+    await this.stop();
+    return this.start({ audioEnabled: this.currentOptions.audioEnabled });
+  }
+
+  /**
+   * Ensures mDNSResponder.exe is running for Bonjour discovery.
+   */
+  private async ensureBonjourDaemon(airplayDir: string) {
+    try {
+      const { stdout } = await execAsync('tasklist /FI "IMAGENAME eq mDNSResponder.exe" /FO CSV /NH', {
+        windowsHide: true,
+        timeout: 2000,
+      });
+      if (!stdout.toLowerCase().includes('mdnsresponder.exe')) {
+        const mdnsExe = path.join(airplayDir, 'mDNSResponder.exe');
+        if (fs.existsSync(mdnsExe)) {
+          spawn(mdnsExe, [], {
+            cwd: airplayDir,
+            detached: true,
+            stdio: 'ignore',
+            windowsHide: true,
+          }).unref();
+        }
+      }
+    } catch {}
+  }
+
+  /**
+   * Brings the native AirPlay Receiver SDL2/Direct3D11 window to the foreground.
+   */
+  public async focusNativeWindow(): Promise<boolean> {
+    try {
+      const psScript = `
+Add-Type @"
+using System;
+using System.Runtime.InteropServices;
+using System.Text;
+public class AirWinFocus {
+  public delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);
+  [DllImport("user32.dll")] public static extern bool EnumWindows(EnumWindowsProc lpEnumFunc, IntPtr lParam);
+  [DllImport("user32.dll")] public static extern int GetWindowText(IntPtr hWnd, StringBuilder lpString, int nMaxCount);
+  [DllImport("user32.dll")] public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+  [DllImport("user32.dll")] public static extern bool SetForegroundWindow(IntPtr hWnd);
+}
+"@
+[AirWinFocus]::EnumWindows({
+  param($hWnd, $lParam)
+  $sb = New-Object System.Text.StringBuilder 256
+  [AirWinFocus]::GetWindowText($hWnd, $sb, 256) | Out-Null
+  $title = $sb.ToString()
+  if ($title -eq 'AirPlay Receiver') {
+    [AirWinFocus]::ShowWindow($hWnd, 9) | Out-Null
+    [AirWinFocus]::SetForegroundWindow($hWnd) | Out-Null
+  }
+  return $true
+}, [IntPtr]::Zero) | Out-Null
+      `;
+      const encoded = Buffer.from(psScript, 'utf16le').toString('base64');
+      await execAsync(`powershell.exe -NoProfile -ExecutionPolicy Bypass -EncodedCommand ${encoded}`, {
+        windowsHide: true,
+        timeout: 4000,
+      });
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Starts the AirPlay 2 Screen Mirroring receiver server with Bonjour discovery (video-only, audio stays on phone).
    */
   public async start(options?: Partial<AirPlayServerOptions>): Promise<AirPlayServerStatus> {
     this.currentOptions = {
       ...DEFAULT_AIRPLAY_OPTIONS,
       ...this.currentOptions,
       ...(options || {}),
-      port: (options?.port) || this.currentOptions.port || 7000,
-      serverName: (options?.serverName) || this.currentOptions.serverName || 'AndroProject [PC]',
+      port: options?.port || this.currentOptions.port || 7001,
+      serverName: options?.serverName || this.currentOptions.serverName || 'AndroProject [PC]',
+      audioEnabled: options?.audioEnabled !== undefined ? Boolean(options.audioEnabled) : Boolean(this.currentOptions.audioEnabled),
     };
     const lockFile = getLockFile(AIRPLAY_LOCK_NAME);
-
-    // Stop previous instance if alive
-    await this.stop();
 
     try {
       const nativeDir = path.join(ANDROPROJECT_HOME, 'airplay');
@@ -113,164 +276,80 @@ class AirPlayReceiverEngine implements IAirPlayReceiverEngine {
         fs.mkdirSync(nativeDir, { recursive: true });
       }
 
-      const { ip: localIp, mac } = getLocalIpAndMac();
-      const cleanMac = (mac || 'd4:ab:61:17:a1:65').replace(/[:-]/g, '').toUpperCase();
-      const hostname = os.hostname() || 'AndroProject-PC';
+      const airplayDir = resolveAirPlayDir();
+      const airplayExe = path.join(airplayDir, 'AirPlayServer.exe');
+      const libDir = path.join(airplayDir, 'lib');
+      const gstDir = path.join(libDir, 'gstreamer-1.0');
 
-      // 0. Launch native AirPlayServer executable with Bonjour if present
-      const airplayExe = path.join(process.cwd(), 'bin', 'airplay', 'AirPlayServer.exe');
-      if (fs.existsSync(airplayExe)) {
+      this.syncSettingsIni(airplayDir);
+      await this.ensureBonjourDaemon(airplayDir);
+
+      // Check if AirPlayServer.exe is already running so we don't interrupt an active session
+      let pid = await this.findRunningAirPlayPid();
+      const daemonCjs = path.join(airplayDir, 'daemon.cjs');
+
+      if (!pid && fs.existsSync(airplayExe)) {
         try {
-          this.serverProcess = spawn(airplayExe, [], {
-            cwd: path.dirname(airplayExe),
-            detached: false,
-            stdio: 'ignore',
-            windowsHide: true,
-            shell: false,
-          });
-          console.log(`[AirPlay Engine] Ventana nativa AirPlayServer abierta en el escritorio con Bonjour`);
+          if (fs.existsSync(daemonCjs)) {
+            this.serverProcess = spawn('node', [daemonCjs], {
+              cwd: airplayDir,
+              detached: true,
+              stdio: 'ignore',
+              windowsHide: false,
+              shell: false,
+              env: {
+                ...process.env,
+                PATH: `${airplayDir};${libDir};${gstDir};${process.env.PATH || ''}`,
+                GST_PLUGIN_PATH: gstDir,
+                GST_PLUGIN_SYSTEM_PATH: gstDir,
+                SDL_AUDIODRIVER: 'dummy',
+              },
+            });
+            this.serverProcess.unref();
+          } else {
+            this.serverProcess = spawn(airplayExe, [], {
+              cwd: airplayDir,
+              detached: true,
+              stdio: 'ignore',
+              windowsHide: false,
+              shell: false,
+              env: {
+                ...process.env,
+                PATH: `${airplayDir};${libDir};${gstDir};${process.env.PATH || ''}`,
+                GST_PLUGIN_PATH: gstDir,
+                GST_PLUGIN_SYSTEM_PATH: gstDir,
+                SDL_AUDIODRIVER: 'dummy',
+              },
+            });
+            this.serverProcess.unref();
+          }
+          await new Promise((r) => setTimeout(r, 800));
+          pid = (await this.findRunningAirPlayPid()) || this.serverProcess?.pid || null;
+          console.log(`[AirPlay Engine] Ventana nativa AirPlayServer abierta en el escritorio con Bonjour (PID ${pid})`);
         } catch (e: unknown) {
           const msg = e instanceof Error ? e.message : String(e);
           console.warn('[AirPlay Engine] Advertencia al iniciar binario nativo:', msg);
         }
+      } else if (pid) {
+        await this.focusNativeWindow();
       }
 
-      // 1. Native AirPlay Engine binds port 7000 directly for real RTSP & FairPlay H.264 video streaming
-      console.log(`[AirPlay Engine] Motor nativo AirPlay vinculado directamente en http://${localIp}:${this.currentOptions.port}`);
+      const { ip: localIp } = getLocalIpAndMac();
+      this.isRunning = Boolean(pid);
 
-      // 2. Start Bonjour / mDNS Broadcaster
-      try {
-        // eslint-disable-next-line @typescript-eslint/no-require-imports
-        const mdns = require('multicast-dns')({
-          interface: localIp,
-          multicast: true,
-          port: 5353,
-          ip: '224.0.0.251',
-          ttl: 255,
-          loopback: true,
-          reuseAddr: true,
-        });
-        this.mdnsInstance = mdns;
-
-        const broadcastAnnouncement = () => {
-          try {
-            const flagsTxt = this.currentOptions.pinRequired ? 'flags=0x4' : 'flags=0x0';
-            const sfTxt = this.currentOptions.pinRequired ? 'sf=0x4' : 'sf=0x0';
-
-            mdns.respond({
-              answers: [
-                {
-                  name: '_airplay._tcp.local',
-                  type: 'PTR',
-                  data: `${this.currentOptions.serverName}._airplay._tcp.local`,
-                  ttl: 120,
-                },
-                {
-                  name: `${this.currentOptions.serverName}._airplay._tcp.local`,
-                  type: 'SRV',
-                  data: {
-                    priority: 0,
-                    weight: 0,
-                    port: this.currentOptions.port,
-                    target: `${hostname}.local`,
-                  },
-                  ttl: 120,
-                },
-                {
-                  name: `${this.currentOptions.serverName}._airplay._tcp.local`,
-                  type: 'TXT',
-                  data: [
-                    Buffer.from(`deviceid=${mac}`),
-                    Buffer.from('features=0x5A7FFFF7,0x1E'),
-                    Buffer.from(flagsTxt),
-                    Buffer.from('model=AppleTV5,3'),
-                    Buffer.from('srcvers=220.68'),
-                    Buffer.from('vv=2'),
-                    Buffer.from('pk=3b6a27bcceb6a42d62a3a8d02a6f0d73653215771de243a63ac048a18b59da29'),
-                    Buffer.from('pi=2e388006-13ba-4041-9a67-25b1a4a73ae5'),
-                  ],
-                  ttl: 120,
-                },
-                {
-                  name: '_raop._tcp.local',
-                  type: 'PTR',
-                  data: `${cleanMac}@${this.currentOptions.serverName}._raop._tcp.local`,
-                  ttl: 120,
-                },
-                {
-                  name: `${cleanMac}@${this.currentOptions.serverName}._raop._tcp.local`,
-                  type: 'SRV',
-                  data: {
-                    priority: 0,
-                    weight: 0,
-                    port: this.currentOptions.port,
-                    target: `${hostname}.local`,
-                  },
-                  ttl: 120,
-                },
-                {
-                  name: `${cleanMac}@${this.currentOptions.serverName}._raop._tcp.local`,
-                  type: 'TXT',
-                  data: [
-                    Buffer.from(`txtvers=1`),
-                    Buffer.from(`ch=2`),
-                    Buffer.from(`cn=0,1,2,3`),
-                    Buffer.from(`et=0,3,5`),
-                    Buffer.from(`md=0,1,2`),
-                    Buffer.from(`sr=44100`),
-                    Buffer.from(`ss=16`),
-                    Buffer.from(`da=true`),
-                    Buffer.from(`sv=false`),
-                    Buffer.from(`ft=0x5A7FFFF7,0x1E`),
-                    Buffer.from(sfTxt),
-                    Buffer.from(`vn=65537`),
-                    Buffer.from(`tp=UDP`),
-                    Buffer.from(`vs=220.68`),
-                    Buffer.from(`am=AppleTV5,3`),
-                    Buffer.from(`pk=3b6a27bcceb6a42d62a3a8d02a6f0d73653215771de243a63ac048a18b59da29`),
-                  ],
-                  ttl: 120,
-                },
-                {
-                  name: `${hostname}.local`,
-                  type: 'A',
-                  data: localIp,
-                  ttl: 120,
-                },
-              ],
-            });
-          } catch {}
-        };
-
-        // Respond to iPhone incoming mDNS queries
-        mdns.on('query', (query: { questions: { name: string; type: string }[] }) => {
-          const isAirPlayQuery = query.questions?.some(q =>
-            q.name.includes('_airplay._tcp') || q.name.includes('_raop._tcp') || q.name.includes(hostname)
-          );
-          if (isAirPlayQuery) {
-            broadcastAnnouncement();
-          }
-        });
-
-        // Broadcast initial announcement + periodic heartbeat every 3 seconds
-        broadcastAnnouncement();
-        this.announceInterval = setInterval(broadcastAnnouncement, 3000);
-      } catch (mdnsErr: unknown) {
-        const msg = mdnsErr instanceof Error ? mdnsErr.message : String(mdnsErr);
-        console.warn('[AirPlay Bonjour] Error al inicializar mDNS:', msg);
-      }
-
-      this.isRunning = true;
-      if (this.serverProcess?.pid) {
+      if (pid) {
         writeLock(lockFile, {
-          pid: this.serverProcess.pid,
+          pid,
           serial: 'airplay',
-          processName: path.basename(airplayExe),
+          processName: 'AirPlayServer.exe',
           owner: 'airplay',
         });
       }
-      console.log(`[AirPlay Engine] Servidor AirPlay y Bonjour transmitiendo para iPhone en "${this.currentOptions.serverName}" (${localIp}:7000)`);
 
+      // Trigger initial window frame capture asynchronously
+      this.triggerWindowCapture();
+
+      console.log(`[AirPlay Engine] Servidor AirPlay 2 y Bonjour activo en "${this.currentOptions.serverName}" (${localIp}:7001)`);
       return this.getStatus();
     } catch (err: unknown) {
       this.isRunning = false;
@@ -286,6 +365,10 @@ class AirPlayReceiverEngine implements IAirPlayReceiverEngine {
   public async stop(): Promise<boolean> {
     const lockFile = getLockFile(AIRPLAY_LOCK_NAME);
     await killLockedProcess(lockFile);
+
+    try {
+      await execAsync('taskkill /F /IM AirPlayServer.exe /T', { windowsHide: true, timeout: 3000 });
+    } catch {}
 
     if (this.announceInterval) {
       clearInterval(this.announceInterval);
@@ -303,7 +386,7 @@ class AirPlayReceiverEngine implements IAirPlayReceiverEngine {
       try {
         this.httpServer.close();
       } catch {}
-        this.httpServer = null;
+      this.httpServer = null;
     }
 
     if (this.serverProcess) {
@@ -314,17 +397,57 @@ class AirPlayReceiverEngine implements IAirPlayReceiverEngine {
     }
 
     this.isRunning = false;
+    this.latestWindowFrame = null;
     this.connectedClients.clear();
     console.log('[AirPlay Engine] Servidor AirPlay detenido');
     return true;
   }
 
   /**
+   * Detects active TCP connections on ports 7001 / 7100 / 5001 from iOS devices on the LAN.
+   */
+  private async detectActiveSocketClients(): Promise<void> {
+    try {
+      const { stdout } = await execAsync('netstat -ano -p TCP', { windowsHide: true, timeout: 2000 });
+      const lines = stdout.split(/\r?\n/);
+      const activeIps = new Set<string>();
+
+      for (const line of lines) {
+        if (!line.includes('ESTABLISHED')) continue;
+        if (!line.includes(':7001') && !line.includes(':7100') && !line.includes(':5001')) continue;
+        const parts = line.trim().split(/\s+/);
+        if (parts.length < 4) continue;
+        const localAddr = parts[1];
+        const remoteAddr = parts[2];
+        if (!/:(7001|7100|5001)$/.test(localAddr)) continue;
+        const remoteIp = remoteAddr.split(':')[0];
+        if (remoteIp && remoteIp !== '127.0.0.1' && remoteIp !== '0.0.0.0' && !remoteIp.startsWith('[')) {
+          activeIps.add(remoteIp);
+          if (!this.connectedClients.has(remoteIp)) {
+            this.registerClient(remoteIp, 'iPhone (AirPlay 2)', 'iPhone 16 Pro');
+          }
+        }
+      }
+
+      for (const existingIp of Array.from(this.connectedClients.keys())) {
+        if (existingIp !== '192.168.0.25' && !activeIps.has(existingIp)) {
+          this.connectedClients.delete(existingIp);
+        }
+      }
+    } catch {}
+  }
+
+  /**
    * Retrieves current AirPlay receiver server status.
    */
   public async getStatus(): Promise<AirPlayServerStatus> {
-    const lockFile = getLockFile(AIRPLAY_LOCK_NAME);
-    const alive = this.isRunning || fs.existsSync(lockFile);
+    const pid = await this.findRunningAirPlayPid();
+    const alive = Boolean(pid);
+    this.isRunning = alive;
+
+    if (alive) {
+      await this.detectActiveSocketClients();
+    }
 
     const clientsList = Array.from(this.connectedClients.values()).map(c => ({
       clientName: c.clientName,
@@ -337,7 +460,7 @@ class AirPlayReceiverEngine implements IAirPlayReceiverEngine {
 
     return {
       running: alive,
-      port: this.currentOptions.port,
+      port: this.currentOptions.port || 7001,
       serverName: this.currentOptions.serverName,
       bonjourActive: alive,
       pinRequired: this.currentOptions.pinRequired,
@@ -347,26 +470,12 @@ class AirPlayReceiverEngine implements IAirPlayReceiverEngine {
   }
 
   /**
-   * Opens the native/floating iOS projector window on Windows Desktop.
+   * Opens and focuses the native Direct3D11 iOS projector window on Windows Desktop.
    */
   public async openNativeWindow(): Promise<boolean> {
     try {
       await this.start();
-      const psCommand = `
-        $AppUrl = "http://localhost:3001/ios-mirror"
-        $ChromePath = (Get-Command chrome.exe -ErrorAction SilentlyContinue).Source
-        if ($ChromePath) {
-            Start-Process chrome.exe -ArgumentList "--app=$AppUrl", "--window-size=430,900", "--window-position=1150,40"
-        } else {
-            Start-Process $AppUrl
-        }
-      `;
-      const encoded = Buffer.from(psCommand, 'utf16le').toString('base64');
-      spawn('powershell.exe', ['-WindowStyle', 'Hidden', '-ExecutionPolicy', 'Bypass', '-NoProfile', '-EncodedCommand', encoded], {
-        detached: true,
-        stdio: 'ignore',
-        windowsHide: true,
-      }).unref();
+      await this.focusNativeWindow();
       return true;
     } catch (e) {
       console.error('[AirPlay Engine] Error opening native window:', e);
@@ -374,8 +483,19 @@ class AirPlayReceiverEngine implements IAirPlayReceiverEngine {
     }
   }
 
+  public toggleMouseControl(): { success: boolean; active: boolean; message: string } {
+    this.mouseControlEnabled = !this.mouseControlEnabled;
+    return {
+      success: true,
+      active: this.mouseControlEnabled,
+      message: this.mouseControlEnabled
+        ? 'Control de ratón y gestos iOS activado'
+        : 'Control de ratón iOS desactivado',
+    };
+  }
+
   /**
-   * Registers an incoming iOS AirPlay connection (e.g. from Bonjour handshake).
+   * Registers an incoming iOS AirPlay connection.
    */
   public registerClient(clientIp: string, clientName: string = 'iPhone', model: string = 'iPhone 16 Pro') {
     this.connectedClients.set(clientIp, {
@@ -423,7 +543,7 @@ class AirPlayReceiverEngine implements IAirPlayReceiverEngine {
   }
 
   /**
-   * Injects a tap gesture on the iOS device (via Developer/WDA bridge or reverse touch).
+   * Injects a tap gesture on the iOS device (via WDA bridge or native window forward).
    */
   public async injectTap(x: number, y: number): Promise<{ success: boolean; message: string }> {
     console.log(`[AirPlay Touch] Injecting Tap at (${x}, ${y}) on iOS`);
@@ -485,22 +605,134 @@ class AirPlayReceiverEngine implements IAirPlayReceiverEngine {
   public async setServerName(name: string): Promise<boolean> {
     if (!name.trim()) return false;
     this.currentOptions.serverName = name.trim();
-    if (this.isRunning) {
-      await this.start(this.currentOptions);
-    }
+    const airplayDir = resolveAirPlayDir();
+    this.syncSettingsIni(airplayDir);
     return true;
   }
 
   public async setPin(pin: string): Promise<boolean> {
     this.currentOptions.pinCode = pin;
     this.currentOptions.pinRequired = Boolean(pin && pin.trim().length > 0);
+    const airplayDir = resolveAirPlayDir();
+    this.syncSettingsIni(airplayDir);
     return true;
   }
 
   /**
-   * Returns current AirPlay screen frame as a high-definition buffer.
+   * Captures the live Direct3D11/SDL2 AirPlay Receiver window using DPI-aware PrintWindow(PW_RENDERFULLCONTENT).
+   * Guarded against unnecessary CPU spikes when no iOS mirror session is active.
    */
-  public getLatestFrame(serial: string): Buffer {
+  private triggerWindowCapture(): void {
+    if (this.captureInFlight) return;
+    // Guard: Only capture if server is running and there is at least one active client
+    if (!this.isRunning || this.connectedClients.size === 0) return;
+
+    const now = Date.now();
+    if (now - this.lastCaptureAttempt < this.captureBackoffMs) return;
+
+    this.lastCaptureAttempt = now;
+    this.captureInFlight = true;
+    const psScript = `
+Add-Type -AssemblyName System.Drawing
+Add-Type @"
+using System;
+using System.Runtime.InteropServices;
+using System.Text;
+public class AirWinCapture {
+  public delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);
+  [DllImport("user32.dll")] public static extern bool SetProcessDPIAware();
+  [DllImport("user32.dll")] public static extern bool EnumWindows(EnumWindowsProc lpEnumFunc, IntPtr lParam);
+  [DllImport("user32.dll")] public static extern int GetWindowText(IntPtr hWnd, StringBuilder lpString, int nMaxCount);
+  [DllImport("user32.dll")] public static extern bool IsWindowVisible(IntPtr hWnd);
+  [DllImport("user32.dll")] public static extern bool GetClientRect(IntPtr hWnd, out RECT lpRect);
+  [DllImport("user32.dll")] public static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
+  [DllImport("user32.dll")] public static extern bool PrintWindow(IntPtr hWnd, IntPtr hdcBlt, uint nFlags);
+  public struct RECT { public int Left, Top, Right, Bottom; }
+}
+"@
+[AirWinCapture]::SetProcessDPIAware() | Out-Null
+$cleanHwnd = [IntPtr]::Zero
+$mainHwnd = [IntPtr]::Zero
+[AirWinCapture]::EnumWindows({
+  param($hWnd, $lParam)
+  $sb = New-Object System.Text.StringBuilder 256
+  [AirWinCapture]::GetWindowText($hWnd, $sb, 256) | Out-Null
+  $t = $sb.ToString()
+  if ($t -eq 'AirPlay Receiver - Clean Feed' -and [AirWinCapture]::IsWindowVisible($hWnd)) {
+    $r = New-Object AirWinCapture+RECT
+    [AirWinCapture]::GetWindowRect($hWnd, [ref]$r) | Out-Null
+    if (($r.Right - $r.Left) -gt 50) { $script:cleanHwnd = $hWnd }
+  } elseif ($t -eq 'AirPlay Receiver') {
+    $script:mainHwnd = $hWnd
+  }
+  return $true
+}, [IntPtr]::Zero) | Out-Null
+
+$target = if ($cleanHwnd -ne [IntPtr]::Zero) { $cleanHwnd } else { $mainHwnd }
+if ($target -ne [IntPtr]::Zero) {
+  $r = New-Object AirWinCapture+RECT
+  [AirWinCapture]::GetWindowRect($target, [ref]$r) | Out-Null
+  $w = $r.Right - $r.Left
+  $h = $r.Bottom - $r.Top
+  if ($w -gt 50 -and $h -gt 50) {
+    $bmp = New-Object System.Drawing.Bitmap($w, $h)
+    $g = [System.Drawing.Graphics]::FromImage($bmp)
+    $hdc = $g.GetHdc()
+    [AirWinCapture]::PrintWindow($target, $hdc, 2) | Out-Null
+    $g.ReleaseHdc($hdc)
+    $g.Dispose()
+    $ms = New-Object System.IO.MemoryStream
+    $bmp.Save($ms, [System.Drawing.Imaging.ImageFormat]::Png)
+    $bmp.Dispose()
+    [Convert]::ToBase64String($ms.ToArray())
+    $ms.Dispose()
+  }
+}
+    `;
+    const encoded = Buffer.from(psScript, 'utf16le').toString('base64');
+    execAsync(`powershell.exe -NoProfile -ExecutionPolicy Bypass -EncodedCommand ${encoded}`, {
+      windowsHide: true,
+      timeout: 3000,
+      maxBuffer: 10 * 1024 * 1024,
+    })
+      .then(({ stdout }) => {
+        const b64 = stdout.trim();
+        if (b64.length > 200) {
+          const buf = Buffer.from(b64, 'base64');
+          if (buf[0] === 0x89 && buf[1] === 0x50) {
+            this.latestWindowFrame = buf;
+            this.latestWindowFrameTs = Date.now();
+            this.captureBackoffMs = 250;
+            return;
+          }
+        }
+        this.captureBackoffMs = 2000;
+      })
+      .catch(() => {
+        this.captureBackoffMs = 2000;
+      })
+      .finally(() => {
+        this.captureInFlight = false;
+      });
+  }
+
+  public getLatestFrameContentType(): string {
+    if (this.latestWindowFrame && Date.now() - this.latestWindowFrameTs < 15000) {
+      return 'image/png';
+    }
+    return 'image/svg+xml';
+  }
+
+  /**
+   * Returns current AirPlay screen frame as a live PNG capture of AirPlayServer.exe (or SVG standby frame).
+   */
+  public getLatestFrame(_serial: string): Buffer {
+    this.triggerWindowCapture();
+
+    if (this.latestWindowFrame && Date.now() - this.latestWindowFrameTs < 15000) {
+      return this.latestWindowFrame;
+    }
+
     const now = new Date();
     const hours = String(now.getHours()).padStart(2, '0');
     const minutes = String(now.getMinutes()).padStart(2, '0');
@@ -514,194 +746,21 @@ class AirPlayReceiverEngine implements IAirPlayReceiverEngine {
           <stop offset="70%" stop-color="#2d124d" />
           <stop offset="100%" stop-color="#090514" />
         </linearGradient>
-        <linearGradient id="glow" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stop-color="#00e5ff" stop-opacity="0.4" />
-          <stop offset="100%" stop-color="#8a2be2" stop-opacity="0.2" />
-        </linearGradient>
         <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
           <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#000000" flood-opacity="0.45" />
         </filter>
       </defs>
-
-      <!-- Wallpaper Background -->
       <rect width="1179" height="2556" fill="url(#bg)" />
-
-      <!-- Ambient Glow Orbs -->
-      <circle cx="250" cy="650" r="380" fill="#00e5ff" opacity="0.12" filter="blur(60px)" />
-      <circle cx="950" cy="1450" r="450" fill="#a855f7" opacity="0.15" filter="blur(80px)" />
-      <circle cx="400" cy="2050" r="350" fill="#3b82f6" opacity="0.1" filter="blur(60px)" />
-
-      <!-- Status Bar -->
       <g font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Display', Roboto, sans-serif">
-        <!-- Time -->
         <text x="120" y="110" fill="#ffffff" font-size="44" font-weight="600" text-anchor="middle">${timeStr}</text>
-
-        <!-- Right Status (Cellular + Wi-Fi + Battery) -->
-        <g transform="translate(930, 80)">
-          <!-- 5G Signal Bars -->
-          <rect x="0" y="18" width="6" height="12" rx="3" fill="#ffffff" />
-          <rect x="12" y="14" width="6" height="16" rx="3" fill="#ffffff" />
-          <rect x="24" y="9" width="6" height="21" rx="3" fill="#ffffff" />
-          <rect x="36" y="4" width="6" height="26" rx="3" fill="#ffffff" />
-
-          <!-- Wi-Fi Icon -->
-          <path d="M 62 8 A 20 20 0 0 1 94 8 M 67 14 A 14 14 0 0 1 89 14 M 73 20 A 7 7 0 0 1 83 20 M 78 26 A 2 2 0 0 1 78 26.1" fill="none" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round" />
-
-          <!-- Battery Pill -->
-          <rect x="110" y="7" width="58" height="28" rx="8" fill="none" stroke="#ffffff" stroke-width="3" />
-          <path d="M 169 16 L 171 16 A 2 2 0 0 1 173 18 L 173 24 A 2 2 0 0 1 171 26 L 169 26" fill="#ffffff" opacity="0.6" />
-          <rect x="114" y="11" width="42" height="20" rx="5" fill="#22c97d" />
-        </g>
       </g>
-
-      <!-- Large Clock & Date Widget -->
       <g transform="translate(100, 240)">
-        <rect width="979" height="340" rx="56" fill="#ffffff" fill-opacity="0.08" stroke="#ffffff" stroke-opacity="0.12" stroke-width="2" filter="url(#shadow)" />
-        <text x="60" y="120" fill="#00e5ff" font-family="-apple-system, sans-serif" font-size="34" font-weight="700" letter-spacing="2">AIRPLAY 2 LIVE MIRRORING</text>
-        <text x="60" y="220" fill="#ffffff" font-family="-apple-system, sans-serif" font-size="78" font-weight="800">iPhone 16 Pro</text>
-        <text x="60" y="285" fill="#ffffff" fill-opacity="0.75" font-family="-apple-system, sans-serif" font-size="32" font-weight="500">Transmisión H.264 60 FPS • Audio Directo</text>
-        <circle cx="890" cy="170" r="48" fill="#00e5ff" fill-opacity="0.2" stroke="#00e5ff" stroke-width="3" />
-        <path d="M 878 152 L 906 170 L 878 188 Z" fill="#00e5ff" />
+        <rect width="979" height="380" rx="56" fill="#ffffff" fill-opacity="0.08" stroke="#ffffff" stroke-opacity="0.12" stroke-width="2" filter="url(#shadow)" />
+        <text x="60" y="120" fill="#00e5ff" font-family="-apple-system, sans-serif" font-size="34" font-weight="700" letter-spacing="2">AIRPLAY 2 RECEPTOR ACTIVO</text>
+        <text x="60" y="215" fill="#ffffff" font-family="-apple-system, sans-serif" font-size="68" font-weight="800">AndroProject [PC]</text>
+        <text x="60" y="285" fill="#ffffff" fill-opacity="0.8" font-family="-apple-system, sans-serif" font-size="32" font-weight="500">En tu iPhone: Centro de Control → Duplicar Pantalla</text>
+        <text x="60" y="335" fill="#22c97d" font-family="-apple-system, sans-serif" font-size="30" font-weight="600">● Puerto 7001 / Bonjour Listo (60 FPS Direct3D11)</text>
       </g>
-
-      <!-- App Icons Grid (SF Style 4 columns x 4 rows) -->
-      <g transform="translate(105, 680)">
-        <!-- Row 1 -->
-        <!-- FaceTime -->
-        <g transform="translate(0, 0)">
-          <rect width="180" height="180" rx="42" fill="#22c97d" filter="url(#shadow)" />
-          <circle cx="80" cy="90" r="35" fill="#ffffff" />
-          <polygon points="110,75 138,55 138,125 110,105" fill="#ffffff" />
-          <text x="90" y="225" fill="#ffffff" font-family="-apple-system, sans-serif" font-size="28" font-weight="500" text-anchor="middle">FaceTime</text>
-        </g>
-        <!-- Calendar -->
-        <g transform="translate(265, 0)">
-          <rect width="180" height="180" rx="42" fill="#ffffff" filter="url(#shadow)" />
-          <rect width="180" height="50" rx="42" fill="#ff3b30" />
-          <rect y="30" width="180" height="20" fill="#ff3b30" />
-          <text x="90" y="38" fill="#ffffff" font-family="-apple-system, sans-serif" font-size="22" font-weight="700" text-anchor="middle">SÁBADO</text>
-          <text x="90" y="138" fill="#1c1c1e" font-family="-apple-system, sans-serif" font-size="82" font-weight="300" text-anchor="middle">29</text>
-          <text x="90" y="225" fill="#ffffff" font-family="-apple-system, sans-serif" font-size="28" font-weight="500" text-anchor="middle">Calendario</text>
-        </g>
-        <!-- Photos -->
-        <g transform="translate(530, 0)">
-          <rect width="180" height="180" rx="42" fill="#ffffff" filter="url(#shadow)" />
-          <circle cx="90" cy="90" r="45" fill="#ff9500" opacity="0.8" />
-          <circle cx="65" cy="75" r="35" fill="#ff2d55" opacity="0.8" />
-          <circle cx="115" cy="75" r="35" fill="#5856d6" opacity="0.8" />
-          <circle cx="90" cy="115" r="35" fill="#34c759" opacity="0.8" />
-          <text x="90" y="225" fill="#ffffff" font-family="-apple-system, sans-serif" font-size="28" font-weight="500" text-anchor="middle">Fotos</text>
-        </g>
-        <!-- Camera -->
-        <g transform="translate(795, 0)">
-          <rect width="180" height="180" rx="42" fill="#636366" filter="url(#shadow)" />
-          <circle cx="90" cy="90" r="46" fill="#1c1c1e" stroke="#8e8e93" stroke-width="5" />
-          <circle cx="90" cy="90" r="26" fill="#0a84ff" />
-          <circle cx="130" cy="60" r="8" fill="#ffcc00" />
-          <text x="90" y="225" fill="#ffffff" font-family="-apple-system, sans-serif" font-size="28" font-weight="500" text-anchor="middle">Cámara</text>
-        </g>
-
-        <!-- Row 2 -->
-        <!-- Mail -->
-        <g transform="translate(0, 290)">
-          <rect width="180" height="180" rx="42" fill="#007aff" filter="url(#shadow)" />
-          <rect x="35" y="55" width="110" height="70" rx="14" fill="none" stroke="#ffffff" stroke-width="8" />
-          <polyline points="35,60 90,100 145,60" fill="none" stroke="#ffffff" stroke-width="8" stroke-linecap="round" />
-          <text x="90" y="225" fill="#ffffff" font-family="-apple-system, sans-serif" font-size="28" font-weight="500" text-anchor="middle">Mail</text>
-        </g>
-        <!-- Clock -->
-        <g transform="translate(265, 290)">
-          <rect width="180" height="180" rx="42" fill="#000000" filter="url(#shadow)" />
-          <circle cx="90" cy="90" r="68" fill="none" stroke="#ffffff" stroke-width="5" />
-          <line x1="90" y1="90" x2="90" y2="45" stroke="#ffffff" stroke-width="6" stroke-linecap="round" />
-          <line x1="90" y1="90" x2="125" y2="90" stroke="#ffffff" stroke-width="6" stroke-linecap="round" />
-          <line x1="90" y1="90" x2="65" y2="125" stroke="#ff9500" stroke-width="3" stroke-linecap="round" />
-          <circle cx="90" cy="90" r="5" fill="#ff9500" />
-          <text x="90" y="225" fill="#ffffff" font-family="-apple-system, sans-serif" font-size="28" font-weight="500" text-anchor="middle">Reloj</text>
-        </g>
-        <!-- Maps -->
-        <g transform="translate(530, 290)">
-          <rect width="180" height="180" rx="42" fill="#30d158" filter="url(#shadow)" />
-          <path d="M 40 140 L 80 40 L 140 140 Z" fill="#ff3b30" />
-          <circle cx="90" cy="90" r="18" fill="#ffffff" />
-          <text x="90" y="225" fill="#ffffff" font-family="-apple-system, sans-serif" font-size="28" font-weight="500" text-anchor="middle">Mapas</text>
-        </g>
-        <!-- Weather -->
-        <g transform="translate(795, 290)">
-          <rect width="180" height="180" rx="42" fill="#32ade6" filter="url(#shadow)" />
-          <circle cx="75" cy="85" r="32" fill="#ffcc00" />
-          <path d="M 65 115 A 30 30 0 0 1 125 115 A 20 20 0 0 1 145 135 A 15 15 0 0 1 130 150 L 60 150 A 25 25 0 0 1 65 115" fill="#ffffff" opacity="0.9" />
-          <text x="90" y="225" fill="#ffffff" font-family="-apple-system, sans-serif" font-size="28" font-weight="500" text-anchor="middle">Clima</text>
-        </g>
-
-        <!-- Row 3 -->
-        <!-- Reminders -->
-        <g transform="translate(0, 580)">
-          <rect width="180" height="180" rx="42" fill="#ffffff" filter="url(#shadow)" />
-          <circle cx="50" cy="60" r="14" fill="#007aff" />
-          <circle cx="50" cy="95" r="14" fill="#ff3b30" />
-          <circle cx="50" cy="130" r="14" fill="#ff9500" />
-          <rect x="80" y="55" width="65" height="10" rx="5" fill="#8e8e93" />
-          <rect x="80" y="90" width="55" height="10" rx="5" fill="#8e8e93" />
-          <rect x="80" y="125" width="45" height="10" rx="5" fill="#8e8e93" />
-          <text x="90" y="225" fill="#ffffff" font-family="-apple-system, sans-serif" font-size="28" font-weight="500" text-anchor="middle">Recordatorios</text>
-        </g>
-        <!-- Notes -->
-        <g transform="translate(265, 580)">
-          <rect width="180" height="180" rx="42" fill="#ffffff" filter="url(#shadow)" />
-          <rect width="180" height="40" fill="#ffcc00" />
-          <line x1="30" y1="75" x2="150" y2="75" stroke="#d1d1d6" stroke-width="4" />
-          <line x1="30" y1="110" x2="150" y2="110" stroke="#d1d1d6" stroke-width="4" />
-          <line x1="30" y1="145" x2="110" y2="145" stroke="#d1d1d6" stroke-width="4" />
-          <text x="90" y="225" fill="#ffffff" font-family="-apple-system, sans-serif" font-size="28" font-weight="500" text-anchor="middle">Notas</text>
-        </g>
-        <!-- App Store -->
-        <g transform="translate(530, 580)">
-          <rect width="180" height="180" rx="42" fill="#007aff" filter="url(#shadow)" />
-          <text x="90" y="130" fill="#ffffff" font-family="-apple-system, sans-serif" font-size="110" font-weight="800" text-anchor="middle">A</text>
-          <text x="90" y="225" fill="#ffffff" font-family="-apple-system, sans-serif" font-size="28" font-weight="500" text-anchor="middle">App Store</text>
-        </g>
-        <!-- Settings -->
-        <g transform="translate(795, 580)">
-          <rect width="180" height="180" rx="42" fill="#8e8e93" filter="url(#shadow)" />
-          <circle cx="90" cy="90" r="55" fill="none" stroke="#48484a" stroke-width="18" stroke-dasharray="24,8" />
-          <circle cx="90" cy="90" r="28" fill="#48484a" />
-          <text x="90" y="225" fill="#ffffff" font-family="-apple-system, sans-serif" font-size="28" font-weight="500" text-anchor="middle">Ajustes</text>
-        </g>
-      </g>
-
-      <!-- Glassmorphic iOS Dock -->
-      <g transform="translate(50, 2220)">
-        <rect width="1079" height="230" rx="64" fill="#ffffff" fill-opacity="0.18" stroke="#ffffff" stroke-opacity="0.25" stroke-width="1.5" filter="url(#shadow)" />
-
-        <!-- Phone -->
-        <g transform="translate(55, 25)">
-          <rect width="180" height="180" rx="42" fill="#34c759" filter="url(#shadow)" />
-          <path d="M 60 70 C 60 60, 70 55, 80 65 L 95 80 C 100 85, 95 95, 90 100 C 95 110, 105 120, 115 125 C 120 120, 130 115, 135 120 L 150 135 C 160 145, 155 155, 145 155 C 100 155, 60 115, 60 70 Z" fill="#ffffff" />
-        </g>
-        <!-- Safari -->
-        <g transform="translate(320, 25)">
-          <rect width="180" height="180" rx="42" fill="#ffffff" filter="url(#shadow)" />
-          <circle cx="90" cy="90" r="70" fill="#007aff" />
-          <polygon points="120,60 100,85 70,120 90,95" fill="#ff3b30" />
-          <polygon points="60,120 80,95 110,60 90,85" fill="#ffffff" />
-        </g>
-        <!-- Messages -->
-        <g transform="translate(585, 25)">
-          <rect width="180" height="180" rx="42" fill="#34c759" filter="url(#shadow)" />
-          <ellipse cx="90" cy="85" rx="60" ry="48" fill="#ffffff" />
-          <polygon points="50,115 50,135 75,125" fill="#ffffff" />
-        </g>
-        <!-- Music -->
-        <g transform="translate(850, 25)">
-          <rect width="180" height="180" rx="42" fill="#fa2d55" filter="url(#shadow)" />
-          <circle cx="65" cy="115" r="22" fill="#ffffff" />
-          <circle cx="120" cy="95" r="22" fill="#ffffff" />
-          <polygon points="80,115 80,50 135,30 135,95" fill="#ffffff" />
-        </g>
-      </g>
-
-      <!-- Home Bar Indicator -->
       <rect x="420" y="2500" width="340" height="12" rx="6" fill="#ffffff" fill-opacity="0.8" />
     </svg>`;
 

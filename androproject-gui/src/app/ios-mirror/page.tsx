@@ -1,73 +1,33 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useAirPlayServer } from '@/hooks/useAirPlayServer';
 import './ios-mirror.css';
 
 export default function IOSMirrorPage() {
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [connected, setConnected] = useState(false);
-  const [resolution, setResolution] = useState('');
-  const [fps, setFps] = useState<number>(60);
+  const { status } = useAirPlayServer();
+  const [frameSrc, setFrameSrc] = useState('/api/device-image?serial=airplay-ios&t=0');
 
   useEffect(() => {
-    let stream: MediaStream | null = null;
-    let frameCount = 0;
-    let lastTime = performance.now();
-    let animId: number;
+    // Only poll frame updates if the AirPlay receiver is running
+    const timer = setInterval(() => {
+      setFrameSrc(`/api/device-image?serial=airplay-ios&t=${Date.now()}`);
+    }, 350);
 
-    async function start() {
-      try {
-        stream = await navigator.mediaDevices.getDisplayMedia({
-          video: {
-            frameRate: { ideal: 60, max: 60 },
-          },
-          audio: false,
-        });
-
-        if (!videoRef.current) return;
-
-        videoRef.current.srcObject = stream;
-        await videoRef.current.play();
-        setConnected(true);
-
-        videoRef.current.onloadedmetadata = () => {
-          if (!videoRef.current) return;
-          setResolution(
-            `${videoRef.current.videoWidth} × ${videoRef.current.videoHeight}`
-          );
-        };
-
-        const track = stream.getVideoTracks()[0];
-        track.onended = () => {
-          setConnected(false);
-        };
-
-        // Real-time FPS counter
-        const countFrames = () => {
-          frameCount++;
-          const now = performance.now();
-          if (now - lastTime >= 1000) {
-            setFps(Math.round((frameCount * 1000) / (now - lastTime)));
-            frameCount = 0;
-            lastTime = now;
-          }
-          animId = requestAnimationFrame(countFrames);
-        };
-        animId = requestAnimationFrame(countFrames);
-
-      } catch (error) {
-        console.error('No se pudo iniciar AirPlay Clean Feed:', error);
-        setConnected(false);
-      }
-    }
-
-    start();
-
-    return () => {
-      if (animId) cancelAnimationFrame(animId);
-      stream?.getTracks().forEach(track => track.stop());
-    };
+    return () => clearInterval(timer);
   }, []);
+
+  const handleFocusNative = async () => {
+    try {
+      await fetch('/api/airplay', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'open_native_window' }),
+      });
+    } catch {}
+  };
+
+  const serverReady = status.running;
 
   return (
     <main className="deviceStage">
@@ -75,38 +35,25 @@ export default function IOSMirrorPage() {
         <div className="sideButton volumeUp" />
         <div className="sideButton volumeDown" />
         <div className="powerButton" />
-        
-        <div className="screen">
-          <video
-            ref={videoRef}
-            autoPlay
-            muted
-            playsInline
+
+        <div className="screen" onClick={handleFocusNative} style={{ cursor: 'pointer' }}>
+          <img
+            src={frameSrc}
+            alt="AirPlay 2 Live Mirror"
             className="video"
+            style={{ width: '100%', height: '100%', objectFit: 'contain' }}
           />
 
           <div className="dynamicIsland">
             <div className="camera" />
           </div>
 
-          {!connected && (
-            <div className="waiting">
-              <div className="spinner" />
-              <strong>Esperando iPhone</strong>
-              <span>
-                Centro de Control<br />
-                Duplicar Pantalla<br />
-                <span className="highlight">AndroProject [PC]</span>
-              </span>
-            </div>
-          )}
-
-          {connected && (
-            <div className="status">
-              <span className="liveDot" />
-              LIVE · {fps} FPS {resolution && `· ${resolution}`}
-            </div>
-          )}
+          <div className="status">
+            <span className="liveDot" />
+            {serverReady
+              ? 'AIRPLAY 2 LISTO · 60 FPS · AUDIO EN CELULAR'
+              : 'INICIANDO RECEPTOR AIRPLAY 2...'}
+          </div>
         </div>
       </section>
     </main>

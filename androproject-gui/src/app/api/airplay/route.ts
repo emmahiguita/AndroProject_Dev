@@ -4,11 +4,16 @@
 export const dynamic = 'force-dynamic';
 
 import { NextResponse } from 'next/server';
-import { airPlayReceiverEngine } from '@/lib/services/airplay-engine';
+import { container, TOKENS, IAirPlayReceiverEngine } from '@/core';
+
+function getAirPlayEngine(): IAirPlayReceiverEngine {
+  return container.resolve<IAirPlayReceiverEngine>(TOKENS.AirPlayEngine);
+}
 
 export async function GET() {
   try {
-    const status = await airPlayReceiverEngine.getStatus();
+    const engine = getAirPlayEngine();
+    const status = await engine.getStatus();
     return NextResponse.json({
       success: true,
       status,
@@ -21,44 +26,71 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
+    const engine = getAirPlayEngine();
     const body = await request.json();
     const action = body.action || 'status';
 
     switch (action) {
       case 'start': {
-        const status = await airPlayReceiverEngine.start({
+        const status = await engine.start({
           serverName: body.serverName,
           port: body.port,
           pinRequired: body.pinRequired,
           pinCode: body.pinCode,
           maxFps: body.maxFps,
-          audioEnabled: body.audioEnabled,
+          audioEnabled: body.audioEnabled !== undefined ? Boolean(body.audioEnabled) : undefined,
         });
-        return NextResponse.json({ success: true, message: 'Servidor AirPlay iniciado', status });
+        return NextResponse.json({
+          success: true,
+          message: status.audioEnabled
+            ? 'Servidor AirPlay iniciado (Audio en PC Opcional activado)'
+            : 'Servidor AirPlay iniciado (Audio en Celular por defecto)',
+          status,
+        });
+      }
+
+      case 'set_audio': {
+        const status = await engine.setAudioEnabled(Boolean(body.audioEnabled));
+        return NextResponse.json({
+          success: true,
+          message: status.audioEnabled
+            ? 'Audio en PC (Opcional) activado'
+            : 'Audio en Celular (Por defecto) activado',
+          status,
+        });
       }
 
       case 'stop': {
-        const stopped = await airPlayReceiverEngine.stop();
+        const stopped = await engine.stop();
         return NextResponse.json({ success: true, message: 'Servidor AirPlay detenido', stopped });
       }
 
       case 'set_name': {
-        const updated = await airPlayReceiverEngine.setServerName(body.name);
+        const updated = await engine.setServerName(body.name);
         return NextResponse.json({ success: updated, message: updated ? 'Nombre Bonjour actualizado' : 'Nombre no válido' });
       }
 
       case 'set_pin': {
-        const updated = await airPlayReceiverEngine.setPin(body.pin);
+        const updated = await engine.setPin(body.pin);
         return NextResponse.json({ success: updated, message: 'PIN actualizado' });
       }
 
-      case 'open_native_window': {
-        const launched = await airPlayReceiverEngine.openNativeWindow();
-        return NextResponse.json({ success: launched, message: launched ? 'Ventana nativa abierta en el escritorio' : 'No se pudo abrir la ventana' });
+      case 'open_native_window':
+      case 'focus_window': {
+        const launched = await engine.openNativeWindow();
+        return NextResponse.json({
+          success: launched,
+          message: launched ? 'Ventana nativa Direct3D11 abierta en el escritorio' : 'No se pudo abrir la ventana',
+        });
+      }
+
+      case 'toggle_mouse_control': {
+        const res = engine.toggleMouseControl();
+        return NextResponse.json(res);
       }
 
       case 'register_test_client': {
-        airPlayReceiverEngine.registerClient(
+        engine.registerClient(
           body.clientIp || '192.168.0.25',
           body.clientName || 'iPhone 16 Pro',
           body.model || 'iPhone 16 Pro',
@@ -67,7 +99,7 @@ export async function POST(request: Request) {
       }
 
       default: {
-        const status = await airPlayReceiverEngine.getStatus();
+        const status = await engine.getStatus();
         return NextResponse.json({ success: true, status });
       }
     }

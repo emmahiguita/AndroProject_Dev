@@ -11,6 +11,7 @@ import { useAppStore } from '@/stores';
 import { useTheme } from '@/hooks/useTheme';
 import { useActions } from '@/hooks/useActions';
 import { ViewShell } from '@/components/ViewShell';
+import { RealAppIcon } from '@/components/ui/RealAppIcon';
 import type { DeviceInfo, NavSection, AppInfo } from './types';
 
 interface DashboardViewProps {
@@ -228,66 +229,66 @@ export function DashboardView({ device: propDevice, onNavigate }: DashboardViewP
           </div>
         </div>
 
-        {/* ═══ Nano Strip de Telemetría (Ultra Delgado - 24px) ═══ */}
+        {/* ═══ Nano Strip de Telemetría (Monocromático Limpio) ═══ */}
         {device && (
           <div className="flex items-center gap-1.5 overflow-x-auto custom-scrollbar py-0.5">
             <button
               type="button"
               onClick={() => setShowMetricsSheet(true)}
-              className={`flex items-center gap-1.5 px-2 py-1 rounded-full border text-[10px] font-bold transition-all shrink-0 ${
-                dark ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/20' : 'bg-emerald-50 border-emerald-200 text-emerald-700'
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-[11px] font-medium transition-colors shrink-0 ${
+                dark ? 'bg-zinc-900 border-zinc-800 text-zinc-200 hover:bg-zinc-800' : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
               }`}
-              title="CPU usage — Click para gráficas completas"
+              title="Uso de CPU — Click para gráficas completas"
             >
-              <Cpu size={11} />
-              <span>CPU: {cpuPercent}%</span>
+              <Cpu size={11} className={dark ? 'text-zinc-400' : 'text-slate-500'} />
+              <span>CPU {cpuPercent}%</span>
             </button>
 
             <button
               type="button"
               onClick={() => setShowMetricsSheet(true)}
-              className={`flex items-center gap-1.5 px-2 py-1 rounded-full border text-[10px] font-bold transition-all shrink-0 ${
-                dark ? 'bg-blue-500/10 border-blue-500/20 text-blue-400 hover:bg-blue-500/20' : 'bg-blue-50 border-blue-200 text-blue-700'
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-[11px] font-medium transition-colors shrink-0 ${
+                dark ? 'bg-zinc-900 border-zinc-800 text-zinc-200 hover:bg-zinc-800' : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
               }`}
-              title="RAM usage — Click para análisis de memoria"
+              title="Uso de RAM — Click para análisis de memoria"
             >
-              <Activity size={11} />
-              <span>RAM: {ramPercent}%</span>
+              <Activity size={11} className={dark ? 'text-zinc-400' : 'text-slate-500'} />
+              <span>RAM {ramPercent}%</span>
             </button>
 
             <button
               type="button"
               onClick={() => setShowMetricsSheet(true)}
-              className={`flex items-center gap-1.5 px-2 py-1 rounded-full border text-[10px] font-bold transition-all shrink-0 ${
-                dark ? 'bg-orange-500/10 border-orange-500/20 text-orange-400 hover:bg-orange-500/20' : 'bg-orange-50 border-orange-200 text-orange-700'
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-[11px] font-medium transition-colors shrink-0 ${
+                dark ? 'bg-zinc-900 border-zinc-800 text-zinc-200 hover:bg-zinc-800' : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
               }`}
               title="Temperatura del dispositivo"
             >
-              <Thermometer size={11} />
-              <span>TEMP: {tempCelsius}°C</span>
+              <Thermometer size={11} className={dark ? 'text-zinc-400' : 'text-slate-500'} />
+              <span>TEMP {tempCelsius}°C</span>
             </button>
 
             <button
               type="button"
               onClick={() => setShowMetricsSheet(true)}
-              className={`flex items-center gap-1.5 px-2 py-1 rounded-full border text-[10px] font-bold transition-all shrink-0 ${
-                dark ? 'bg-purple-500/10 border-purple-500/20 text-purple-400 hover:bg-purple-500/20' : 'bg-purple-50 border-purple-200 text-purple-700'
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-[11px] font-medium transition-colors shrink-0 ${
+                dark ? 'bg-zinc-900 border-zinc-800 text-zinc-200 hover:bg-zinc-800' : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
               }`}
               title="Almacenamiento interno"
             >
-              <Database size={11} />
-              <span>DISCO: {storagePercent}%</span>
+              <Database size={11} className={dark ? 'text-zinc-400' : 'text-slate-500'} />
+              <span>DISCO {storagePercent}%</span>
             </button>
 
             <button
               type="button"
               onClick={() => setShowMetricsSheet(true)}
-              className={`flex items-center gap-1 px-2 py-1 rounded-full border text-[10px] font-bold shrink-0 transition-all ${
-                dark ? 'bg-white/5 border-white/10 text-white/60 hover:text-white hover:bg-white/10' : 'bg-slate-100 border-slate-200 text-slate-600 hover:bg-slate-200'
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-[11px] font-medium shrink-0 transition-colors ${
+                dark ? 'bg-zinc-900 border-zinc-800 text-zinc-300 hover:text-zinc-100 hover:bg-zinc-800' : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
               }`}
               title="Ver ficha técnica completa"
             >
-              <BarChart3 size={11} className={dark ? 'text-zinc-300' : 'text-zinc-600'} />
+              <BarChart3 size={11} className={dark ? 'text-zinc-400' : 'text-slate-500'} />
               <span>Detalles</span>
             </button>
           </div>
@@ -321,43 +322,43 @@ export function DashboardView({ device: propDevice, onNavigate }: DashboardViewP
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                 <MetricCard
                   dark={dark}
-                  icon={<Cpu size={14} className="text-emerald-500" />}
+                  icon={<Cpu size={14} className={dark ? 'text-zinc-300' : 'text-slate-600'} />}
                   label="CPU"
                   value={`${cpuPercent}%`}
                   status={cpuStatus}
                   statusColor={cpuStatusColor}
                   data={cpuHistory}
-                  sparkColor="#10b981"
+                  sparkColor="#a1a1aa"
                 />
                 <MetricCard
                   dark={dark}
-                  icon={<Activity size={14} className="text-blue-500" />}
+                  icon={<Activity size={14} className={dark ? 'text-zinc-300' : 'text-slate-600'} />}
                   label="RAM"
                   value={`${ramPercent}%`}
                   status={ramStatus}
                   statusColor={ramStatusColor}
                   data={ramHistory}
-                  sparkColor="#3b82f6"
+                  sparkColor="#a1a1aa"
                 />
                 <MetricCard
                   dark={dark}
-                  icon={<Thermometer size={14} className="text-orange-500" />}
+                  icon={<Thermometer size={14} className={dark ? 'text-zinc-300' : 'text-slate-600'} />}
                   label="Temperatura"
                   value={`${tempCelsius}°C`}
                   status={tempStatus}
                   statusColor={tempStatusColor}
                   data={tempHistory}
-                  sparkColor="#f97316"
+                  sparkColor="#a1a1aa"
                 />
                 <MetricCard
                   dark={dark}
-                  icon={<Database size={14} className="text-purple-500" />}
+                  icon={<Database size={14} className={dark ? 'text-zinc-300' : 'text-slate-600'} />}
                   label="Almacenamiento"
                   value={`${storagePercent}%`}
                   status={storStatus}
                   statusColor="purple"
                   data={storHistory}
-                  sparkColor="#a855f7"
+                  sparkColor="#a1a1aa"
                 />
               </div>
 
@@ -473,12 +474,12 @@ export function DashboardView({ device: propDevice, onNavigate }: DashboardViewP
                     key={app.packageName ? `${app.packageName}-${idx}` : `app-${idx}`}
                     className={`flex items-center gap-2 px-2 py-1.5 rounded-lg transition-colors group ${dark ? 'hover:bg-white/[0.03]' : 'hover:bg-slate-50'}`}
                   >
-                    <div
-                      className="w-7 h-7 rounded-lg flex items-center justify-center text-white text-[10px] font-bold shrink-0"
-                      style={{ backgroundColor: getAppColor(app.packageName) }}
-                    >
-                      {app.name.charAt(0).toUpperCase()}
-                    </div>
+                    <RealAppIcon
+                      packageName={app.packageName}
+                      appName={app.name}
+                      serial={device?.serial}
+                      fallbackColor={getAppColor(app.packageName)}
+                    />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-1.5">
                         <p className={`text-[11px] font-semibold truncate ${dark ? 'text-white/80' : 'text-slate-700'}`}>
@@ -553,26 +554,26 @@ function MetricCard({ dark, icon, label, value, status, statusColor, data, spark
   sparkColor: string;
 }) {
   const dotColor = {
-    green: 'bg-green-500',
-    blue: 'bg-blue-500',
-    orange: 'bg-orange-500',
-    purple: 'bg-purple-500',
+    green: 'bg-emerald-500',
+    blue: 'bg-zinc-400',
+    orange: 'bg-amber-500',
+    purple: 'bg-zinc-400',
   }[statusColor];
   const textColor = {
-    green: dark ? 'text-green-400' : 'text-green-600',
-    blue: dark ? 'text-blue-400' : 'text-blue-600',
-    orange: dark ? 'text-orange-400' : 'text-orange-600',
-    purple: dark ? 'text-purple-400' : 'text-purple-600',
+    green: dark ? 'text-emerald-400' : 'text-emerald-700',
+    blue: dark ? 'text-zinc-300' : 'text-slate-700',
+    orange: dark ? 'text-amber-400' : 'text-amber-700',
+    purple: dark ? 'text-zinc-300' : 'text-slate-700',
   }[statusColor];
   const iconBg = {
-    green: 'bg-emerald-500/15 text-emerald-500',
-    blue: 'bg-blue-500/15 text-blue-500',
-    orange: 'bg-orange-500/15 text-orange-500',
-    purple: 'bg-purple-500/15 text-purple-500',
+    green: 'bg-emerald-500/10 text-emerald-500',
+    blue: dark ? 'bg-zinc-800 text-zinc-300' : 'bg-slate-100 text-slate-600',
+    orange: 'bg-amber-500/10 text-amber-500',
+    purple: dark ? 'bg-zinc-800 text-zinc-300' : 'bg-slate-100 text-slate-600',
   }[statusColor];
 
   return (
-    <div className={`cosmic-card cosmic-rim relative rounded-xl border p-2.5 h-[76px] overflow-hidden ${dark ? 'bg-white/[0.025] border-white/[0.07]' : 'bg-white border-slate-200 shadow-sm'}`}>
+    <div className={`relative rounded-xl border p-2.5 h-[76px] overflow-hidden ${dark ? 'bg-zinc-900/60 border-zinc-800' : 'bg-white border-slate-200 shadow-sm'}`}>
       {/* Sparkline de fondo */}
       <div className="absolute inset-x-0 bottom-0 h-6 opacity-50 pointer-events-none">
         <Sparkline data={data} color={sparkColor} />

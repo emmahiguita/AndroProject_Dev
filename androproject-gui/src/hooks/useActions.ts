@@ -11,11 +11,10 @@ import { useAppStore } from '@/stores';
 export function useActions() {
   const activeSerial = useAppStore((s) => s.activeSerial);
   const deviceIP = useAppStore((s) => s.deviceIP);
-  const videoSource = useAppStore((s) => s.videoSource);
   const devicesList = useAppStore((s) => s.devicesList);
   const screenBusy = useAppStore((s) => s.screenBusy);
   const isScreenStreaming = useAppStore((s) => s.isScreenStreaming);
-  const isRecording = useAppStore((s) => s.isRecording);
+  const videoSource = useAppStore((s) => s.videoSource);
 
   const addLog = useAppStore((s) => s.addLog);
   const setDevice = useAppStore((s) => s.setDevice);
@@ -27,9 +26,6 @@ export function useActions() {
   const setSecureAppsList = useAppStore((s) => s.setSecureAppsList);
   const setScreenStreaming = useAppStore((s) => s.setScreenStreaming);
   const setScreenBusy = useAppStore((s) => s.setScreenBusy);
-  const setRecording = useAppStore((s) => s.setRecording);
-  const setRecordingElapsed = useAppStore((s) => s.setRecordingElapsed);
-  const setRecordingPath = useAppStore((s) => s.setRecordingPath);
   const setConfigData = useAppStore((s) => s.setConfigData);
   const setAppsList = useAppStore((s) => s.setAppsList);
   const setAppsLoading = useAppStore((s) => s.setAppsLoading);
@@ -38,8 +34,6 @@ export function useActions() {
   // Refs for screen reconnection (migrated from page.tsx)
   const wasScreenOpenRef = useRef(false);
   const screenReconnectAttemptRef = useRef(0);
-  const recordingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const recordingSecondsRef = useRef(0);
 
   // ── Core action runner ─────────────────────────────────────────
   const run = useCallback(async (
@@ -220,34 +214,6 @@ export function useActions() {
     }
   };
 
-  // ── Recording ──────────────────────────────────────────────────
-  const toggleRecord = async () => {
-    if (isRecording) {
-      if (recordingIntervalRef.current) clearInterval(recordingIntervalRef.current);
-      recordingIntervalRef.current = null;
-      setRecording(false);
-      setRecordingElapsed('00:00');
-      recordingSecondsRef.current = 0;
-      await run('stop_record', 'Detener grabación');
-    } else {
-      const r = await run('start_record', 'Iniciar grabación', { source: videoSource }, false);
-      if (r.success) {
-        setRecording(true);
-        setRecordingPath(r.path || null);
-        recordingSecondsRef.current = 0;
-        recordingIntervalRef.current = setInterval(() => {
-          recordingSecondsRef.current += 1;
-          const m = Math.floor(recordingSecondsRef.current / 60).toString().padStart(2, '0');
-          const s = (recordingSecondsRef.current % 60).toString().padStart(2, '0');
-          setRecordingElapsed(`${m}:${s}`);
-        }, 1000);
-        addLog('Grabación iniciada');
-      } else {
-        addLog(`Error al grabar: ${r.error || ''}`);
-      }
-    }
-  };
-
   // ── Key injection (ADB) ────────────────────────────────────────
   const sendKey = async (key: string) => {
     await run('keyevent', `Tecla ${key}`, { keycode: key }, false);
@@ -288,7 +254,6 @@ export function useActions() {
     startPatching,
     toggleScreenStreaming,
     projectAllScreens,
-    toggleRecord,
     sendKey,
     tapDevice,
     swipeDevice,

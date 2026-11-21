@@ -16,13 +16,13 @@ interface LogcatInspectorPanelProps {
 }
 
 const LEVEL_COLORS: Record<string, { badge: string; text: string; bg: string }> = {
-  V: { badge: 'bg-slate-500/20 text-slate-400 border-slate-500/30', text: 'text-slate-400', bg: 'hover:bg-slate-500/5' },
-  D: { badge: 'bg-sky-500/20 text-sky-400 border-sky-500/30', text: 'text-sky-300', bg: 'hover:bg-sky-500/5' },
-  I: { badge: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30', text: 'text-emerald-300', bg: 'hover:bg-emerald-500/5' },
-  W: { badge: 'bg-amber-500/20 text-amber-400 border-amber-500/30', text: 'text-amber-300', bg: 'hover:bg-amber-500/5' },
-  E: { badge: 'bg-red-500/25 text-red-400 border-red-500/40', text: 'text-red-300 font-medium', bg: 'bg-red-500/10 hover:bg-red-500/15' },
-  F: { badge: 'bg-red-600/35 text-red-200 border-red-500/50', text: 'text-red-200 font-bold', bg: 'bg-red-600/20 hover:bg-red-600/25' },
-  S: { badge: 'bg-purple-500/20 text-purple-400 border-purple-500/30', text: 'text-purple-300', bg: 'hover:bg-purple-500/5' },
+  V: { badge: 'bg-zinc-500/10 text-zinc-500 border-zinc-500/20', text: 'text-zinc-500', bg: 'hover:bg-zinc-500/5' },
+  D: { badge: 'bg-zinc-500/15 text-zinc-400 border-zinc-500/25', text: 'text-zinc-400', bg: 'hover:bg-zinc-500/5' },
+  I: { badge: 'bg-zinc-500/15 text-zinc-300 border-zinc-500/25', text: 'text-zinc-200', bg: 'hover:bg-zinc-500/5' },
+  W: { badge: 'bg-zinc-500/20 text-zinc-200 border-zinc-500/35', text: 'text-zinc-100 font-medium', bg: 'hover:bg-zinc-500/10' },
+  E: { badge: 'bg-red-500/15 text-red-500 border-red-500/30', text: 'text-red-500 font-medium', bg: 'bg-red-500/5 hover:bg-red-500/10' },
+  F: { badge: 'bg-red-600/20 text-red-500 border-red-500/40', text: 'text-red-500 font-bold', bg: 'bg-red-500/10 hover:bg-red-500/15' },
+  S: { badge: 'bg-zinc-700/25 text-zinc-400 border-zinc-600/30', text: 'text-zinc-400', bg: 'hover:bg-zinc-800/30' },
 };
 
 export const LogcatInspectorPanel: React.FC<LogcatInspectorPanelProps> = ({
@@ -260,7 +260,7 @@ export const LogcatInspectorPanel: React.FC<LogcatInspectorPanelProps> = ({
             className={`flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-medium border shrink-0 ${
               isConnected
                 ? isPaused
-                  ? 'bg-zinc-900 text-amber-300 border-amber-900/50'
+                  ? 'bg-zinc-900 text-zinc-200 border-zinc-700'
                   : 'bg-zinc-900 text-zinc-300 border-zinc-800'
                 : 'bg-zinc-900 text-zinc-500 border-zinc-800'
             }`}
@@ -498,7 +498,7 @@ export const LogcatInspectorPanel: React.FC<LogcatInspectorPanelProps> = ({
                     <span className="text-white/25 text-[9px] shrink-0 w-8 text-right font-mono truncate">
                       {entry.pid}
                     </span>
-                    <span className="text-cyan-400/90 font-semibold shrink-0 max-w-[120px] truncate" title={entry.tag}>
+                    <span className="text-zinc-200 font-semibold shrink-0 max-w-[120px] truncate" title={entry.tag}>
                       {entry.tag}:
                     </span>
                     <span className={`flex-1 break-all ${colors.text}`}>
@@ -507,7 +507,7 @@ export const LogcatInspectorPanel: React.FC<LogcatInspectorPanelProps> = ({
 
                     {/* Deduplication Repeat Badge */}
                     {entry.repeatCount > 1 && (
-                      <span className="px-1.5 py-0.2 rounded-full bg-cyan-500/20 text-cyan-300 font-bold text-[9px] shrink-0">
+                      <span className="px-1.5 py-0.2 rounded-full bg-zinc-700 text-zinc-100 font-bold text-[9px] shrink-0">
                         ×{entry.repeatCount}
                       </span>
                     )}
@@ -582,7 +582,7 @@ export const LogcatInspectorPanel: React.FC<LogcatInspectorPanelProps> = ({
                             {crash.crashType}
                           </span>
                           {crash.occurrences > 1 && (
-                            <span className="px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 font-bold text-[9px] border border-amber-500/30">
+                            <span className="px-1.5 py-0.2 rounded bg-zinc-800 text-zinc-200 font-bold text-[9px] border border-zinc-700">
                               {crash.occurrences} eventos
                             </span>
                           )}
@@ -651,7 +651,7 @@ export const LogcatInspectorPanel: React.FC<LogcatInspectorPanelProps> = ({
                               {crash.contextLogs.map((l) => (
                                 <div key={l.id} className="truncate">
                                   <span className="text-white/30">[{l.timestamp.slice(6, 12)}]</span>{' '}
-                                  <span className="text-cyan-400">{l.tag}:</span> {l.message}
+                                  <span className="text-zinc-200 font-semibold">{l.tag}:</span> {l.message}
                                 </div>
                               ))}
                             </div>

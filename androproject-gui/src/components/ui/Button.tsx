@@ -33,15 +33,15 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variantClasses: Record<ButtonVariant, string> = {
   primary:
-    'bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white font-medium shadow-sm',
+    'bg-[var(--btn-primary-bg)] text-[var(--btn-primary-text)] hover:bg-[var(--btn-primary-hov)] font-semibold shadow-xs',
   secondary:
-    'bg-surface-raised text-text-primary border border-border-strong hover:bg-surface-overlay',
+    'bg-surface-raised text-text-primary border border-border-default hover:bg-surface-overlay',
   outline:
-    'bg-transparent text-text-primary border border-border-strong hover:border-border-accent hover:text-text-accent',
+    'bg-transparent text-text-primary border border-border-strong hover:border-border-accent hover:bg-surface-overlay/50',
   ghost:
-    'bg-transparent text-text-secondary border border-transparent hover:bg-surface-raised hover:text-text-primary',
+    'bg-transparent text-text-secondary border border-transparent hover:bg-surface-overlay/60 hover:text-text-primary',
   danger:
-    'bg-semantic-danger text-white hover:bg-semantic-danger/90',
+    'bg-[var(--danger)] text-white hover:opacity-90 font-semibold',
 };
 
 const sizeClasses: Record<ButtonSize, string> = {

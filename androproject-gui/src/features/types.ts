@@ -42,6 +42,7 @@ export interface AirPlayServerStatus {
   bonjourActive: boolean;
   pinRequired: boolean;
   pinCode?: string;
+  audioEnabled?: boolean;
   connectedClients: {
     clientName: string;
     clientIp: string;
@@ -59,7 +60,7 @@ export type SystemLogs = {
   type: 'info' | 'success' | 'error';
 };
 
-export type NavSection = 'dashboard' | 'projection' | 'apps' | 'flasher' | 'curar' | 'archivos' | 'tools' | 'optimizer' | 'config';
+export type NavSection = 'dashboard' | 'projection' | 'apps' | 'flasher' | 'curar' | 'archivos' | 'tools' | 'cli' | 'optimizer' | 'config';
 
 export type QuickActionItem = {
   id: string;

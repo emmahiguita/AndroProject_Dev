@@ -21,14 +21,14 @@ export type RescueSyncStatus =
   | 'error';
 
 const STORAGE_KEY = 'androproject_rescue_sync_config';
-const WATCHDOG_INTERVAL_MS = 7000;
+const WATCHDOG_INTERVAL_MS = 10000;
 
 const DEFAULT_CONFIG: RescueSyncConfig = {
-  enabled: true,
+  enabled: false, // Desactivado por defecto para evitar bucles automáticos no deseados
   targetModel: 'A30',
   lastKnownIp: '192.168.0.11',
-  autoArmUsb: true,
-  keepAlivePing: true,
+  autoArmUsb: false,
+  keepAlivePing: false,
 };
 
 function loadConfig(): RescueSyncConfig {
@@ -41,6 +41,7 @@ function loadConfig(): RescueSyncConfig {
     return {
       ...DEFAULT_CONFIG,
       ...parsed,
+      enabled: false, // Forzar desactivado para cortar el ciclo inmediatamente
       lastKnownIp: parsed.lastKnownIp || '192.168.0.11',
     };
   } catch {
@@ -62,9 +63,8 @@ export function useRescueSync(devices: DeviceInfo[], onRefresh?: () => void) {
   const [lastSyncMsg, setLastSyncMsg] = useState<string>('En espera');
   const isSyncingRef = useRef<boolean>(false);
   const [isSyncing, setIsSyncing] = useState<boolean>(false);
-  const projectionRetryRef = useRef<Map<string, { failures: number; nextAttemptAt: number }>>(new Map());
 
-  // Load from localStorage on mount (eliminates SSR hydration mismatch)
+  // Load from localStorage on mount
   useEffect(() => {
     setIsMounted(true);
     const loaded = loadConfig();
@@ -114,11 +114,6 @@ export function useRescueSync(devices: DeviceInfo[], onRefresh?: () => void) {
     setConfig(prev => ({ ...prev, lastKnownIp: ip }));
   }, []);
 
-  const updateLastKnownIpRef = useRef(updateLastKnownIp);
-  useEffect(() => {
-    updateLastKnownIpRef.current = updateLastKnownIp;
-  }, [updateLastKnownIp]);
-
   // Watchdog & Reconnection loop
   useEffect(() => {
     if (!config.enabled) {
@@ -154,114 +149,14 @@ export function useRescueSync(devices: DeviceInfo[], onRefresh?: () => void) {
         if (!isWatchdogAlive) return;
         setStatus('connected');
         setLastSyncMsg(`Conectado (${matchedDevice.model || matchedDevice.serial})`);
-
-        // If connected via USB and autoArmUsb is enabled, ensure TCP/IP port 5555 is armed & connect Wi-Fi
-        if (matchedDevice.connectionType === 'USB' && currentConfig.autoArmUsb) {
-          try {
-            const res = await fetch('/api/actions', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ action: 'enable_wifi', serial: matchedDevice.serial }),
-            });
-            const data = await res.json();
-            if (data?.ip) {
-              if (data.ip !== currentConfig.lastKnownIp) {
-                updateLastKnownIpRef.current(data.ip);
-              }
-              onRefreshRef.current?.();
-            }
-          } catch { /* ignore */ }
-        }
-
-        // Auto-Project with bounded retries. A failed scrcpy must not relaunch every 7s forever.
-        try {
-          const prefKey = `androproject_stream_pref_${matchedDevice.serial}`;
-          const savedPref = typeof window !== 'undefined' ? localStorage.getItem(prefKey) : null;
-          const shouldStream = savedPref !== null ? savedPref === 'true' : true;
-
-          if (!shouldStream) {
-            projectionRetryRef.current.delete(matchedDevice.serial);
-          } else {
-            const checkRes = await fetch('/api/actions', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ action: 'check_screen', serial: matchedDevice.serial }),
-            });
-            const checkData = await checkRes.json().catch(() => null);
-
-            if (checkRes.ok && checkData?.alive) {
-              projectionRetryRef.current.delete(matchedDevice.serial);
-            } else if (checkRes.ok) {
-              const now = Date.now();
-              const previous = projectionRetryRef.current.get(matchedDevice.serial);
-
-              if (!previous || now >= previous.nextAttemptAt) {
-                const openRes = await fetch('/api/actions', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({
-                    action: 'open_screen',
-                    serial: matchedDevice.serial,
-                    maxSize: '1080',
-                    maxFps: '60',
-                    bitRate: matchedDevice.connectionType === 'Wi-Fi' ? '8M' : '16M',
-                    videoBuffer: matchedDevice.connectionType === 'Wi-Fi' ? '10' : '0',
-                  }),
-                });
-                const openData = await openRes.json().catch(() => null);
-
-                if (openRes.ok && openData?.success && openData?.alive !== false) {
-                  projectionRetryRef.current.set(matchedDevice.serial, {
-                    failures: 0,
-                    nextAttemptAt: now + 30_000,
-                  });
-                } else {
-                  const failures = (previous?.failures ?? 0) + 1;
-                  const delayMs = Math.min(120_000, 10_000 * (2 ** Math.min(failures - 1, 3)));
-                  projectionRetryRef.current.set(matchedDevice.serial, {
-                    failures,
-                    nextAttemptAt: now + delayMs,
-                  });
-                  if (isWatchdogAlive) {
-                    setStatus('error');
-                    setLastSyncMsg(
-                      `Proyección no inició: ${openData?.error || `HTTP ${openRes.status}`}. Reintento en ${Math.ceil(delayMs / 1000)}s`,
-                    );
-                  }
-                }
-              }
-            }
-          }
-        } catch {
-          const now = Date.now();
-          const previous = projectionRetryRef.current.get(matchedDevice.serial);
-          const failures = (previous?.failures ?? 0) + 1;
-          const delayMs = Math.min(120_000, 10_000 * (2 ** Math.min(failures - 1, 3)));
-          projectionRetryRef.current.set(matchedDevice.serial, {
-            failures,
-            nextAttemptAt: now + delayMs,
-          });
-        }
-
-        // Keep-alive ping
-        if (currentConfig.keepAlivePing && matchedDevice.connectionType === 'Wi-Fi') {
-          try {
-            await fetch('/api/actions', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ action: 'adb_shell', serial: matchedDevice.serial, cmd: 'getprop ro.product.model' }),
-            });
-          } catch { /* ignore */ }
-        }
         return;
       }
 
-      // 2. Device is NOT connected -> Trigger Auto-Reconnect
+      // 2. Device is NOT connected -> Trigger Reconnection
       isSyncingRef.current = true;
       setIsSyncing(true);
 
       try {
-        // Step A: If we have a saved IP, attempt direct connection
         if (currentConfig.lastKnownIp) {
           if (!isWatchdogAlive) return;
           setStatus('connecting');
@@ -282,35 +177,12 @@ export function useRescueSync(devices: DeviceInfo[], onRefresh?: () => void) {
               onRefreshRef.current?.();
               return;
             }
-          } catch { /* try radar */ }
+          } catch { /* direct connect failed */ }
         }
 
-        // Step B: Direct connect failed or no IP saved -> Run Radar Scan on local subnet
         if (!isWatchdogAlive) return;
-        setStatus('scanning_radar');
-        setLastSyncMsg('Buscando dispositivo en la red Wi-Fi...');
-
-        try {
-          const res = await fetch('/api/actions', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'scan_radar' }),
-          });
-          const data = await res.json();
-
-          if (data?.success) {
-            if (!isWatchdogAlive) return;
-            onRefreshRef.current?.();
-          } else {
-            if (!isWatchdogAlive) return;
-            setStatus('monitoring');
-            setLastSyncMsg('Esperando que el dispositivo se una a la red Wi-Fi');
-          }
-        } catch {
-          if (!isWatchdogAlive) return;
-          setStatus('monitoring');
-          setLastSyncMsg('Monitor de red activo');
-        }
+        setStatus('monitoring');
+        setLastSyncMsg('En espera de conexión');
       } finally {
         isSyncingRef.current = false;
         if (isWatchdogAlive) {
@@ -319,7 +191,6 @@ export function useRescueSync(devices: DeviceInfo[], onRefresh?: () => void) {
       }
     };
 
-    // Run immediately and every interval
     runWatchdog();
     const interval = setInterval(runWatchdog, WATCHDOG_INTERVAL_MS);
 
