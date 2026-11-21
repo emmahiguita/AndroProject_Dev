@@ -768,7 +768,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "androproject_gui_src_tauri_gen_schemas_desktop_schema",
-      "community": 2,
+      "community": 120,
       "norm_label": "desktop-schema.json"
     },
     {
@@ -778,7 +778,7 @@
       "source_location": "L2",
       "_origin": "ast",
       "id": "androproject_gui_src_tauri_gen_schemas_desktop_schema_schema",
-      "community": 2,
+      "community": 120,
       "norm_label": "$schema"
     },
     {
@@ -788,7 +788,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "androproject_gui_src_tauri_gen_schemas_desktop_schema_title",
-      "community": 2,
+      "community": 120,
       "norm_label": "title"
     },
     {
@@ -798,7 +798,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "androproject_gui_src_tauri_gen_schemas_desktop_schema_description",
-      "community": 2,
+      "community": 120,
       "norm_label": "description"
     },
     {
@@ -808,7 +808,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "androproject_gui_src_tauri_gen_schemas_desktop_schema_anyof",
-      "community": 2,
+      "community": 120,
       "norm_label": "anyof"
     },
     {
@@ -1348,7 +1348,7 @@
       "source_location": "L2197",
       "_origin": "ast",
       "id": "androproject_gui_src_tauri_gen_schemas_desktop_schema_definitions_value",
-      "community": 120,
+      "community": 2,
       "norm_label": "value"
     },
     {
@@ -1358,7 +1358,7 @@
       "source_location": "L2198",
       "_origin": "ast",
       "id": "androproject_gui_src_tauri_gen_schemas_desktop_schema_value_description",
-      "community": 120,
+      "community": 2,
       "norm_label": "description"
     },
     {
@@ -1368,7 +1368,7 @@
       "source_location": "L2199",
       "_origin": "ast",
       "id": "androproject_gui_src_tauri_gen_schemas_desktop_schema_value_anyof",
-      "community": 120,
+      "community": 2,
       "norm_label": "anyof"
     },
     {
@@ -8565,7 +8565,7 @@
       "label": "RescueSyncConfig",
       "file_type": "code",
       "source_file": "androproject-gui/src/hooks/useRescueSync.ts",
-      "source_location": "L6",
+      "source_location": "L17",
       "_origin": "ast",
       "id": "androproject_gui_src_hooks_userescuesync_rescuesyncconfig",
       "community": 54,
@@ -8575,7 +8575,7 @@
       "label": "RescueSyncStatus",
       "file_type": "code",
       "source_file": "androproject-gui/src/hooks/useRescueSync.ts",
-      "source_location": "L14",
+      "source_location": "L25",
       "_origin": "ast",
       "id": "androproject_gui_src_hooks_userescuesync_rescuesyncstatus",
       "community": 54,
@@ -8585,7 +8585,7 @@
       "label": "DEFAULT_CONFIG",
       "file_type": "code",
       "source_file": "androproject-gui/src/hooks/useRescueSync.ts",
-      "source_location": "L26",
+      "source_location": "L32",
       "_origin": "ast",
       "id": "androproject_gui_src_hooks_userescuesync_default_config",
       "community": 54,
@@ -8595,7 +8595,7 @@
       "label": "loadConfig()",
       "file_type": "code",
       "source_file": "androproject-gui/src/hooks/useRescueSync.ts",
-      "source_location": "L34",
+      "source_location": "L41",
       "_origin": "ast",
       "id": "androproject_gui_src_hooks_userescuesync_loadconfig",
       "community": 54,
@@ -8605,7 +8605,7 @@
       "label": "saveConfig()",
       "file_type": "code",
       "source_file": "androproject-gui/src/hooks/useRescueSync.ts",
-      "source_location": "L52",
+      "source_location": "L64",
       "_origin": "ast",
       "id": "androproject_gui_src_hooks_userescuesync_saveconfig",
       "community": 54,
@@ -8615,7 +8615,7 @@
       "label": "useRescueSync()",
       "file_type": "code",
       "source_file": "androproject-gui/src/hooks/useRescueSync.ts",
-      "source_location": "L59",
+      "source_location": "L69",
       "_origin": "ast",
       "id": "androproject_gui_src_hooks_userescuesync_userescuesync",
       "community": 54,
@@ -32139,7 +32139,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/hooks/useRescueSync.ts",
-      "source_location": "L4",
+      "source_location": "L15",
       "weight": 1.0,
       "source": "androproject_gui_src_hooks_userescuesync",
       "target": "androproject_gui_src_features_types",
@@ -32293,7 +32293,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/hooks/useRescueSync.ts",
-      "source_location": "L4",
+      "source_location": "L15",
       "weight": 1.0,
       "source": "androproject_gui_src_hooks_userescuesync",
       "target": "androproject_gui_src_features_types_deviceinfo",
@@ -33126,7 +33126,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/hooks/useRescueSync.ts",
-      "source_location": "L26",
+      "source_location": "L32",
       "weight": 1.0,
       "source": "androproject_gui_src_hooks_userescuesync",
       "target": "androproject_gui_src_hooks_userescuesync_default_config",
@@ -33136,7 +33136,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/hooks/useRescueSync.ts",
-      "source_location": "L34",
+      "source_location": "L41",
       "weight": 1.0,
       "source": "androproject_gui_src_hooks_userescuesync",
       "target": "androproject_gui_src_hooks_userescuesync_loadconfig",
@@ -33146,7 +33146,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/hooks/useRescueSync.ts",
-      "source_location": "L6",
+      "source_location": "L17",
       "weight": 1.0,
       "source": "androproject_gui_src_hooks_userescuesync",
       "target": "androproject_gui_src_hooks_userescuesync_rescuesyncconfig",
@@ -33156,7 +33156,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/hooks/useRescueSync.ts",
-      "source_location": "L14",
+      "source_location": "L25",
       "weight": 1.0,
       "source": "androproject_gui_src_hooks_userescuesync",
       "target": "androproject_gui_src_hooks_userescuesync_rescuesyncstatus",
@@ -33166,7 +33166,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/hooks/useRescueSync.ts",
-      "source_location": "L52",
+      "source_location": "L64",
       "weight": 1.0,
       "source": "androproject_gui_src_hooks_userescuesync",
       "target": "androproject_gui_src_hooks_userescuesync_saveconfig",
@@ -33176,7 +33176,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/hooks/useRescueSync.ts",
-      "source_location": "L59",
+      "source_location": "L69",
       "weight": 1.0,
       "source": "androproject_gui_src_hooks_userescuesync",
       "target": "androproject_gui_src_hooks_userescuesync_userescuesync",
@@ -33187,7 +33187,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/hooks/useRescueSync.ts",
-      "source_location": "L70",
+      "source_location": "L79",
       "weight": 1.0,
       "source": "androproject_gui_src_hooks_userescuesync_userescuesync",
       "target": "androproject_gui_src_hooks_userescuesync_loadconfig",
@@ -33198,7 +33198,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/hooks/useRescueSync.ts",
-      "source_location": "L93",
+      "source_location": "L89",
       "weight": 1.0,
       "source": "androproject_gui_src_hooks_userescuesync_userescuesync",
       "target": "androproject_gui_src_hooks_userescuesync_saveconfig",
@@ -41783,5 +41783,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "721835db1d18dc299b96a3e98ecebec3e2a7452d"
+  "built_at_commit": "4bc8f3be0c4c0e1a604bd1b81d090096b75bdfac"
 }

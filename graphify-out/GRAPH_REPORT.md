@@ -1,7 +1,7 @@
 # Graph Report - AndroProject_Dev  (2026-11-21)
 
 ## Corpus Check
-- 209 files · ~288,272 words
+- 209 files · ~288,355 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
@@ -10,7 +10,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `721835db`
+- Built from commit: `4bc8f3be`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -152,8 +152,8 @@ Cohesion: 0.06
 Nodes (62): AppInfo, getPackageInfo(), KNOWN_HIDDEN_PACKAGES, listApps(), listPackages(), listRunning(), deduplicate(), detect() (+54 more)
 
 ### Community 2 - "devDependencies"
-Cohesion: 0.13
-Nodes (14): anyOf, definitions, Number, PermissionEntry, Target, description, anyOf, description (+6 more)
+Cohesion: 0.15
+Nodes (13): definitions, Number, PermissionEntry, Target, Value, anyOf, description, anyOf (+5 more)
 
 ### Community 4 - "CommandResult"
 Cohesion: 0.10
@@ -436,8 +436,8 @@ Cohesion: 0.40
 Nodes (4): anyOf, description, $schema, title
 
 ### Community 120 - "Value"
-Cohesion: 0.67
-Nodes (3): Value, anyOf, description
+Cohesion: 0.40
+Nodes (4): anyOf, description, $schema, title
 
 ## Knowledge Gaps
 - **415 isolated node(s):** `INSTALL-OPPO-DIRECTO.sh script`, `eslintConfig`, `nextConfig`, `name`, `version` (+410 more)
@@ -457,7 +457,7 @@ _Questions this graph is uniquely positioned to answer:_
   _Cohesion score 0.1111111111111111 - nodes in this community are weakly interconnected._
 - **Should `safeExec` be split into smaller, more focused modules?**
   _Cohesion score 0.06298904538341157 - nodes in this community are weakly interconnected._
-- **Should `devDependencies` be split into smaller, more focused modules?**
-  _Cohesion score 0.13333333333333333 - nodes in this community are weakly interconnected._
 - **Should `CommandResult` be split into smaller, more focused modules?**
   _Cohesion score 0.1 - nodes in this community are weakly interconnected._
+- **Should `webrtc.py` be split into smaller, more focused modules?**
+  _Cohesion score 0.06827880512091039 - nodes in this community are weakly interconnected._

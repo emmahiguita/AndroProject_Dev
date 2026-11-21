@@ -160,8 +160,8 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/components/layout/Header.tsx": {
-    "mtime": 1795296675.6390781,
-    "ast_hash": "397b677646d907e764ce81893bde94fe",
+    "mtime": 1795303349.036001,
+    "ast_hash": "47460b81e3b3323b64125b91aff542a6",
     "semantic_hash": ""
   },
   "androproject-gui/src/components/layout/Sidebar.tsx": {
@@ -790,8 +790,8 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/hooks/useRescueSync.ts": {
-    "mtime": 1788799058.7567568,
-    "ast_hash": "2a1a8f2d7e648c75afe0f668b8a2c7cd",
+    "mtime": 1795303311.6758513,
+    "ast_hash": "b4483f84267908e440bb5337cf74396b",
     "semantic_hash": ""
   },
   "androproject-gui/public/projection_header_banner.png": {

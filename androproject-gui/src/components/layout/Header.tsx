@@ -152,7 +152,7 @@ export const Header: React.FC<HeaderProps> = ({
         <button
           type="button"
           suppressHydrationWarning
-          onClick={onToggleRescue}
+          onClick={() => onToggleRescue()}
           aria-label="Alternar Modo Rescate A30"
           title={rescueConfig.enabled ? `Modo Rescate ACTIVO · ${rescueMsg || 'Sincronización permanente'}` : 'Activar sincronización permanente A30'}
           className={`h-9 px-2.5 hidden sm:flex items-center gap-1.5 rounded-lg border text-xs font-semibold transition-colors ${
