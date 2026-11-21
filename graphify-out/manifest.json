@@ -455,8 +455,8 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/components/layout/DeviceFrame.tsx": {
-    "mtime": 1795304219.764319,
-    "ast_hash": "1264c2d812887970c751baeb9e630224",
+    "mtime": 1795304388.1297355,
+    "ast_hash": "749a208813fc37e48e77a0569a9f4035",
     "semantic_hash": ""
   },
   "androproject-gui/src/components/layout/WirelessConnectModal.tsx": {
@@ -655,8 +655,8 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/features/ProjectionView.tsx": {
-    "mtime": 1795293609.9010222,
-    "ast_hash": "f2d4990f8ad5af81ffa35ec907afb13c",
+    "mtime": 1795304406.0613134,
+    "ast_hash": "4b321312eb8bca21daa0354493f1d9b6",
     "semantic_hash": ""
   },
   "androproject-gui/src/hooks/useDeviceStream.ts": {
@@ -1442,6 +1442,11 @@
   "androproject-gui/src/components/layout/DeviceNavControls.tsx": {
     "mtime": 1795304196.358627,
     "ast_hash": "e84c12b02975bca9fcc06c40e3326865",
+    "semantic_hash": ""
+  },
+  "androproject-gui/src/components/projection/ProjectionToolbar.tsx": {
+    "mtime": 1795304346.0900373,
+    "ast_hash": "765fa86be2b00d9b72f3512874d6c7e4",
     "semantic_hash": ""
   }
 }

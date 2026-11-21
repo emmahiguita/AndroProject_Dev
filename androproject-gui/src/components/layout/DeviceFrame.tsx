@@ -24,16 +24,21 @@ interface DeviceFrameProps {
   onSendKey?: (keycode: string) => void;
   scrcpyActive?: boolean;
   onToggleScrcpy?: () => void;
+  minimized?: boolean;
+  onToggleMinimize?: () => void;
 }
 
 export const DeviceFrame: React.FC<DeviceFrameProps> = ({
   device, expanded, onSendKey, scrcpyActive, onToggleScrcpy,
+  minimized: propMinimized, onToggleMinimize,
 }) => {
   const { run } = useActions();
   const isIos = device.platform === 'ios' || device.serial?.startsWith('airplay-');
   const [useMjpegStream] = useState(!isIos);
   const [currentFps, setCurrentFps] = useState(0);
-  const [minimized, setMinimized] = useState(false);
+  const [localMinimized, setLocalMinimized] = useState(false);
+  const minimized = propMinimized !== undefined ? propMinimized : localMinimized;
+  const toggleMinimize = onToggleMinimize || (() => setLocalMinimized((m) => !m));
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   const [zoom, setZoom] = useState<ZoomState>({ scale: 1, ox: 0.5, oy: 0.5 });
@@ -54,13 +59,13 @@ export const DeviceFrame: React.FC<DeviceFrameProps> = ({
   }, []);
 
   const toggleMaximize = useCallback(async () => {
-    setMinimized(false);
+    if (minimized) toggleMinimize();
     setZoom({ scale: 1, ox: 0.5, oy: 0.5 });
     try {
       if (document.fullscreenElement) await document.exitFullscreen();
       else if (containerRef.current) await containerRef.current.requestFullscreen();
     } catch { /* Fullscreen bloqueado por política del navegador */ }
-  }, []);
+  }, [minimized, toggleMinimize]);
 
   const openIndependentPopout = useCallback(() => {
     const safeId = (device.serial || 'ios').replace(/[^a-zA-Z0-9]/g, '_');
@@ -150,7 +155,7 @@ export const DeviceFrame: React.FC<DeviceFrameProps> = ({
 
           {/* Controles reales de ventana: Minimizar, Maximizar (Fullscreen), Popout independiente */}
           <div className="flex items-center gap-1 pl-1 border-l border-zinc-800/80">
-            <button type="button" onClick={() => setMinimized((m) => !m)} className={ctrlBtn} title={minimized ? 'Restaurar visor' : 'Minimizar visor'}>
+            <button type="button" onClick={toggleMinimize} className={ctrlBtn} title={minimized ? 'Restaurar visor' : 'Minimizar visor'}>
               {minimized ? <Maximize2 size={11} /> : <Minus size={12} />}
             </button>
             <button type="button" onClick={toggleMaximize} className={ctrlBtn} title={isFullscreen ? 'Salir de pantalla completa' : 'Maximizar a pantalla completa'}>
@@ -167,7 +172,7 @@ export const DeviceFrame: React.FC<DeviceFrameProps> = ({
       {minimized ? (
         <div className="flex-1 flex flex-col items-center justify-center gap-2 p-4 text-center">
           <p className="text-xs text-zinc-400 font-mono">Visor minimizado — {device.model || device.serial}</p>
-          <button type="button" onClick={() => setMinimized(false)} className="px-3 py-1.5 rounded-lg border border-zinc-700 bg-zinc-900 hover:bg-zinc-800 text-xs font-semibold text-zinc-100 transition-colors cursor-pointer">
+          <button type="button" onClick={toggleMinimize} className="px-3 py-1.5 rounded-lg border border-zinc-700 bg-zinc-900 hover:bg-zinc-800 text-xs font-semibold text-zinc-100 transition-colors cursor-pointer">
             Restaurar pantalla
           </button>
         </div>
