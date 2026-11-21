@@ -78,8 +78,8 @@ function startSession(serial: string): ActiveSession {
     '-s', serial, 'shell', `CLASSPATH=${REMOTE_JAR}`,
     'app_process', '/', 'com.genymobile.scrcpy.Server', '4.1',
     `scid=${scid}`, 'log_level=info', 'tunnel_forward=true', 'audio=false', 'control=true',
-    'cleanup=false', 'max_size=1080', 'max_fps=60', 'video_bit_rate=8000000',
-    'stay_awake=true', 'video_codec_options=repeat-previous-frame-after=100000',
+    'cleanup=false', 'max_size=1080', 'max_fps=60', 'video_bit_rate=6000000',
+    'stay_awake=true', 'video_codec_options=i-frame-interval=1,repeat-previous-frame-after=100000',
   ], { windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'] });
 
   let readyResolve!: () => void;
@@ -103,7 +103,7 @@ function startSession(serial: string): ActiveSession {
     vSock.setNoDelay(true);
 
     vSock.on('data', (chunk: Buffer) => {
-      buf = buf.length === 0 ? Buffer.from(chunk) : Buffer.concat([buf, chunk]);
+      buf = buf.length === 0 ? chunk : Buffer.concat([buf, chunk]);
       if (!gotDummy && buf.length >= 1) {
         gotDummy = true;
         session.videoSock = vSock;
@@ -139,7 +139,7 @@ function startSession(serial: string): ActiveSession {
     const handleDisconnect = () => {
       connecting = false;
       if (gotDummy) destroySession(serial);
-      else if (!session.destroyed && retries < 20) { retries++; setTimeout(attemptConnect, 180); }
+      else if (!session.destroyed && retries < 30) { retries++; setTimeout(attemptConnect, 60); }
       else destroySession(serial);
     };
     vSock.on('error', handleDisconnect);
@@ -149,12 +149,12 @@ function startSession(serial: string): ActiveSession {
   const onLog = (d: Buffer) => {
     const txt = d.toString();
     if (txt.includes('ClassNotFoundException')) pushedSerials.delete(serial);
-    if (!gotDummy && txt.includes('INFO: Device:')) setTimeout(attemptConnect, 80);
+    if (!gotDummy && txt.includes('INFO: Device:')) setTimeout(attemptConnect, 40);
   };
   srvProc.stdout?.on('data', onLog);
   srvProc.stderr?.on('data', onLog);
   srvProc.on('exit', () => destroySession(serial));
-  setTimeout(attemptConnect, 350);
+  setTimeout(attemptConnect, 150);
 
   sessions.set(serial, session);
   return session;
