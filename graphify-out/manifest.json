@@ -655,8 +655,8 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/features/ProjectionView.tsx": {
-    "mtime": 1795304406.0613134,
-    "ast_hash": "4b321312eb8bca21daa0354493f1d9b6",
+    "mtime": 1795305321.0743592,
+    "ast_hash": "dd07f1a1d05fd8090a2898af8c500126",
     "semantic_hash": ""
   },
   "androproject-gui/src/hooks/useDeviceStream.ts": {

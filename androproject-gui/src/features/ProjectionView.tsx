@@ -10,7 +10,7 @@
 // ============================================================================
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { Sliders, Terminal } from 'lucide-react';
 import { useTheme } from '@/hooks/useTheme';
 import { useSplitPanel } from '@/hooks/useSplitPanel';
@@ -39,6 +39,7 @@ export function ProjectionView({ device }: { device?: DeviceInfo | null }) {
   const [frameMinimized, setFrameMinimized] = useState(false);
 
   const multiScreenEnabled = useAppStore((s) => s.multiScreenEnabled);
+  const setMultiScreenEnabled = useAppStore((s) => s.setMultiScreenEnabled);
   const toggleMultiScreen = useAppStore((s) => s.toggleMultiScreen);
   const devicesList = useAppStore((s) => s.devicesList);
 
@@ -48,6 +49,18 @@ export function ProjectionView({ device }: { device?: DeviceInfo | null }) {
     const usbModels = new Set(base.filter((d) => !d.serial.includes(':') && d.model).map((d) => d.model!.trim().toLowerCase()));
     return base.filter((d) => !(d.serial.includes(':') && d.model && usbModels.has(d.model.trim().toLowerCase())));
   }, [devicesList, device]);
+
+  // Activa automáticamente Multi-Pantalla cuando se detectan 2 o más móviles físicos
+  const prevDevCountRef = useRef(0);
+  useEffect(() => {
+    const count = uniqueDevices.length;
+    if (count >= 2 && prevDevCountRef.current < 2) {
+      setMultiScreenEnabled(true);
+    } else if (count <= 1 && prevDevCountRef.current >= 2) {
+      setMultiScreenEnabled(false);
+    }
+    prevDevCountRef.current = count;
+  }, [uniqueDevices.length, setMultiScreenEnabled]);
 
   if (!device) {
     return (
