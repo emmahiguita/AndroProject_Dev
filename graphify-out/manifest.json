@@ -455,8 +455,8 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/components/layout/DeviceFrame.tsx": {
-    "mtime": 1795288101.518996,
-    "ast_hash": "ae63e095804550adb86974c2fbee9f0a",
+    "mtime": 1795304219.764319,
+    "ast_hash": "1264c2d812887970c751baeb9e630224",
     "semantic_hash": ""
   },
   "androproject-gui/src/components/layout/WirelessConnectModal.tsx": {
@@ -935,8 +935,8 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/components/projection/MultiScreenGrid.tsx": {
-    "mtime": 1795288108.0699484,
-    "ast_hash": "891f9bdde31c2ec771008b3d603ad714",
+    "mtime": 1795304179.9450727,
+    "ast_hash": "b46559569e3d4e650d4cd092918b1b53",
     "semantic_hash": ""
   },
   "androproject-gui/src/core/container/ServiceContainer.ts": {
@@ -1280,8 +1280,8 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/lib/services/scrcpy-session-hub.ts": {
-    "mtime": 1795299159.4090314,
-    "ast_hash": "1e78f827318f72801102be665db05de9",
+    "mtime": 1795303763.5962713,
+    "ast_hash": "49038aeccba19251bb1862b79b52033f",
     "semantic_hash": ""
   },
   "androproject-gui/src/lib/services/scrcpy-protocol.ts": {
@@ -1437,6 +1437,11 @@
   "androproject-gui/src/lib/services/flash-device-inspector.ts": {
     "mtime": 1795301696.9127998,
     "ast_hash": "3a45a16c71fa4dbd7ee3d7887bf71711",
+    "semantic_hash": ""
+  },
+  "androproject-gui/src/components/layout/DeviceNavControls.tsx": {
+    "mtime": 1795304196.358627,
+    "ast_hash": "e84c12b02975bca9fcc06c40e3326865",
     "semantic_hash": ""
   }
 }

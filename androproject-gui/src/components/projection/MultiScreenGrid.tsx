@@ -129,6 +129,21 @@ export const MultiScreenGrid: React.FC<MultiScreenGridProps> = ({
   const activeSerial = useAppStore((s) => s.activeSerial);
   const isScreenStreaming = useAppStore((s) => s.isScreenStreaming);
 
+  // Si un mismo modelo físico está conectado por USB y Wi-Fi (IP:5555) a la vez, prioriza USB
+  const uniquePhysicalDevices = React.useMemo(() => {
+    const usbModels = new Set(
+      devices
+        .filter((d) => !d.serial.includes(':') && d.model)
+        .map((d) => d.model!.trim().toLowerCase()),
+    );
+    return devices.filter((d) => {
+      if (d.serial.includes(':') && d.model && usbModels.has(d.model.trim().toLowerCase())) {
+        return false;
+      }
+      return true;
+    });
+  }, [devices]);
+
   const openPopout = useCallback((serial: string) => {
     const width = 420;
     const height = 860;
@@ -141,7 +156,7 @@ export const MultiScreenGrid: React.FC<MultiScreenGridProps> = ({
     );
   }, []);
 
-  if (devices.length === 0) {
+  if (uniquePhysicalDevices.length === 0) {
     return (
       <div className={`flex flex-col items-center justify-center h-full p-8 text-center ${
         dark ? 'text-zinc-500' : 'text-slate-400'
@@ -158,15 +173,15 @@ export const MultiScreenGrid: React.FC<MultiScreenGridProps> = ({
   }
 
   const gridColsClass =
-    devices.length === 1
+    uniquePhysicalDevices.length === 1
       ? 'grid-cols-1'
-      : devices.length === 2
+      : uniquePhysicalDevices.length === 2
         ? 'grid-cols-1 md:grid-cols-2'
         : 'grid-cols-1 md:grid-cols-2 xl:grid-cols-3';
 
   return (
     <div className={`grid ${gridColsClass} gap-2.5 h-full w-full overflow-y-auto p-2.5 min-h-0`}>
-      {devices.map((device) => {
+      {uniquePhysicalDevices.map((device) => {
         const isActive = (activeSerial === device.serial && isScreenStreaming) || Boolean(device.connected);
         return (
           <DeviceScreenTile
