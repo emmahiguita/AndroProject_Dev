@@ -159,9 +159,9 @@ export const MultiScreenGrid: React.FC<MultiScreenGridProps> = ({
   if (uniquePhysicalDevices.length === 0) {
     return (
       <div className={`flex flex-col items-center justify-center h-full p-8 text-center ${
-        dark ? 'text-zinc-500' : 'text-slate-400'
+        dark ? 'text-zinc-400' : 'text-slate-600'
       }`}>
-        <Smartphone size={36} className="mb-3 opacity-40" />
+        <Smartphone size={36} className="mb-3 opacity-60" />
         <p className={`text-sm font-semibold ${dark ? 'text-zinc-300' : 'text-slate-700'}`}>
           No hay pantallas conectadas
         </p>

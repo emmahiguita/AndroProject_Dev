@@ -69,8 +69,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeNav, onSelectNav, collap
           </div>
           {!collapsed && (
             <div className="min-w-0">
-              <h1 className={`text-xs font-semibold tracking-tight ${isDark ? 'text-zinc-100' : 'text-slate-800'}`}>Dexterand</h1>
-              <p className="text-[10px] text-zinc-400 font-medium tracking-wider uppercase">Studio</p>
+              <h1 className={`text-xs font-semibold tracking-tight ${isDark ? 'text-zinc-100' : 'text-slate-900'}`}>Dexterand</h1>
+              <p className={`text-[10px] font-medium tracking-wider uppercase ${isDark ? 'text-zinc-400' : 'text-slate-600'}`}>Studio</p>
             </div>
           )}
         </div>
@@ -80,7 +80,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeNav, onSelectNav, collap
           {groups.map((group) => (
             <div key={group.label}>
               {!collapsed && (
-                <p className={`text-[9px] font-semibold uppercase tracking-[0.12em] px-3 mb-1.5 ${isDark ? 'text-zinc-500' : 'text-slate-400'}`}>
+                <p className={`text-[9px] font-semibold uppercase tracking-[0.12em] px-3 mb-1.5 ${isDark ? 'text-zinc-500' : 'text-slate-600'}`}>
                   {group.label}
                 </p>
               )}
@@ -98,13 +98,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeNav, onSelectNav, collap
                         active
                           ? isDark
                             ? 'bg-zinc-800/90 text-zinc-100 border border-zinc-700/60 shadow-sm'
-                            : 'bg-slate-100 text-slate-900'
+                            : 'bg-slate-200/80 text-slate-950 font-semibold'
                           : isDark
                             ? 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/60 border border-transparent'
-                            : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50'
+                            : 'text-slate-700 hover:text-slate-950 hover:bg-slate-100'
                       }`}
                     >
-                      <span className={`shrink-0 ${active ? (isDark ? 'text-zinc-100' : 'text-slate-900') : 'text-zinc-400'}`}>
+                      <span className={`shrink-0 ${active ? (isDark ? 'text-zinc-100' : 'text-slate-950') : (isDark ? 'text-zinc-400' : 'text-slate-600')}`}>
                         {item.icon}
                       </span>
                       {!collapsed && (
@@ -123,7 +123,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeNav, onSelectNav, collap
       </div>
 
       {/* Bottom section */}
-      <div className="shrink-0 px-2 pb-3 pt-2 space-y-2 border-t border-zinc-800/80">
+      <div className={`shrink-0 px-2 pb-3 pt-2 space-y-2 border-t ${isDark ? 'border-zinc-800/80' : 'border-slate-200'}`}>
         {/* Collapse button */}
         {onToggle && (
           <button
@@ -131,7 +131,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeNav, onSelectNav, collap
             aria-label={collapsed ? 'Expandir menú lateral' : 'Colapsar menú lateral'}
             title={collapsed ? 'Expandir menú lateral' : 'Colapsar menú lateral'}
             className={`w-full flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-[10px] font-medium transition-colors ${
-              isDark ? 'text-zinc-500 hover:text-zinc-300 hover:bg-zinc-900/60' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'
+              isDark ? 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/60' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
             }`}
           >
             {collapsed ? <ChevronRight size={12} /> : <ChevronLeft size={12} />}
@@ -145,15 +145,19 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeNav, onSelectNav, collap
             isDark ? 'bg-zinc-900/40 border-zinc-800/80' : 'bg-slate-50 border-slate-200'
           }`}>
             <div className="flex items-center gap-1.5 mb-1">
-              <Sparkles size={12} className={isDark ? 'text-zinc-400' : 'text-slate-600'} />
-              <span className={`text-[11px] font-semibold ${isDark ? 'text-zinc-200' : 'text-slate-700'}`}>Dexterand Studio</span>
+              <Sparkles size={12} className={isDark ? 'text-zinc-400' : 'text-slate-700'} />
+              <span className={`text-[11px] font-semibold ${isDark ? 'text-zinc-200' : 'text-slate-900'}`}>Dexterand Studio</span>
             </div>
-            <p className={`text-[10px] leading-relaxed mb-2.5 ${isDark ? 'text-zinc-500' : 'text-slate-400'}`}>
+            <p className={`text-[10px] leading-relaxed mb-2.5 ${isDark ? 'text-zinc-400' : 'text-slate-600'}`}>
               Control integral y diagnóstico forense móvil.
             </p>
             <button
               onClick={() => onSelectNav('config')}
-              className="w-full py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700/60 text-xs font-medium transition-colors cursor-pointer"
+              className={`w-full py-1.5 rounded-lg border text-xs font-medium transition-colors cursor-pointer ${
+                isDark
+                  ? 'bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border-zinc-700/60'
+                  : 'bg-slate-900 hover:bg-slate-800 text-white border-slate-900'
+              }`}
             >
               Ajustes del sistema
             </button>

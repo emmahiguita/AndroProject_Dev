@@ -154,12 +154,12 @@ export function CliInjectorView({ device }: { device?: DeviceInfo | null }) {
             className={`w-full rounded-lg border p-3 text-xs font-mono outline-none resize-y transition-colors ${
               dark
                 ? 'bg-zinc-900/60 border-zinc-800 text-zinc-100 placeholder:text-zinc-500 focus:border-zinc-600'
-                : 'bg-slate-50 border-slate-300 text-slate-900 placeholder:text-slate-400 focus:border-slate-500'
+                : 'bg-slate-50 border-slate-300 text-slate-900 placeholder:text-slate-500 focus:border-slate-500'
             }`}
           />
 
           <div className="flex items-center justify-between">
-            <span className={`text-[11px] ${dark ? 'text-zinc-500' : 'text-slate-400'}`}>Presiona Ctrl + Enter para ejecutar</span>
+            <span className={`text-[11px] ${dark ? 'text-zinc-400' : 'text-slate-600'}`}>Presiona Ctrl + Enter para ejecutar</span>
             <Button
               variant="primary"
               size="md"

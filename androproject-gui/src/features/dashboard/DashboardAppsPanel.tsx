@@ -54,12 +54,12 @@ function ActionRow({
         dark ? 'hover:bg-zinc-900' : 'hover:bg-slate-100'
       }`}
     >
-      <span className={`shrink-0 ${dark ? 'text-zinc-400' : 'text-slate-500'}`}>{icon}</span>
+      <span className={`shrink-0 ${dark ? 'text-zinc-400' : 'text-slate-600'}`}>{icon}</span>
       <div className="flex-1 min-w-0">
-        <p className={`text-[11px] font-semibold ${dark ? 'text-zinc-100' : 'text-slate-800'}`}>{title}</p>
-        <p className={`text-[10px] ${dark ? 'text-zinc-400' : 'text-slate-500'}`}>{sub}</p>
+        <p className={`text-[11px] font-semibold ${dark ? 'text-zinc-100' : 'text-slate-900'}`}>{title}</p>
+        <p className={`text-[10px] ${dark ? 'text-zinc-400' : 'text-slate-600'}`}>{sub}</p>
       </div>
-      <ChevronRight size={13} className={`shrink-0 ${dark ? 'text-zinc-500' : 'text-slate-400'}`} />
+      <ChevronRight size={13} className={`shrink-0 ${dark ? 'text-zinc-500' : 'text-slate-500'}`} />
     </button>
   );
 }
@@ -109,14 +109,14 @@ export const DashboardAppsPanel: React.FC<DashboardAppsPanelProps> = ({
         </div>
 
         {/* Buscador de paquetes */}
-        <div className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg mb-2 border ${dark ? 'bg-zinc-900 border-zinc-800' : 'bg-slate-50 border-slate-200'}`}>
-          <Search size={12} className={dark ? 'text-zinc-400' : 'text-slate-400'} />
+        <div className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg mb-2 border ${dark ? 'bg-zinc-900 border-zinc-800' : 'bg-slate-50 border-slate-300'}`}>
+          <Search size={12} className={dark ? 'text-zinc-400' : 'text-slate-600'} />
           <input
             type="text"
             placeholder="Buscar aplicaciones o paquetes..."
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            className={`flex-1 bg-transparent text-xs outline-none ${dark ? 'text-zinc-100 placeholder:text-zinc-500' : 'text-slate-800 placeholder:text-slate-400'}`}
+            className={`flex-1 bg-transparent text-xs outline-none ${dark ? 'text-zinc-100 placeholder:text-zinc-500' : 'text-slate-900 placeholder:text-slate-500'}`}
           />
         </div>
 
@@ -130,10 +130,10 @@ export const DashboardAppsPanel: React.FC<DashboardAppsPanelProps> = ({
               className={`px-2 py-0.5 rounded-md text-[10px] font-semibold border transition-colors ${
                 activeFilter === chip.key
                   ? dark ? 'bg-zinc-100 text-zinc-950 border-zinc-100' : 'bg-slate-900 text-white border-slate-900'
-                  : dark ? 'bg-zinc-900 text-zinc-400 border-zinc-800 hover:bg-zinc-800' : 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200'
+                  : dark ? 'bg-zinc-900 text-zinc-400 border-zinc-800 hover:bg-zinc-800' : 'bg-slate-100 text-slate-700 border-slate-300 hover:bg-slate-200'
               }`}
             >
-              {chip.label} {chip.count > 0 && <span className="opacity-75">({chip.count})</span>}
+              {chip.label} {chip.count > 0 && <span className="opacity-80">({chip.count})</span>}
             </button>
           ))}
         </div>
@@ -141,27 +141,27 @@ export const DashboardAppsPanel: React.FC<DashboardAppsPanelProps> = ({
         {/* Lista desplazable de aplicaciones con icono real APK */}
         <div className="space-y-0.5 max-h-[260px] overflow-y-auto custom-scrollbar">
           {appsLoading ? (
-            <div className={`text-xs text-center py-4 ${dark ? 'text-zinc-500' : 'text-slate-400'}`}>Cargando aplicaciones...</div>
+            <div className={`text-xs text-center py-4 ${dark ? 'text-zinc-400' : 'text-slate-600'}`}>Cargando aplicaciones...</div>
           ) : filteredApps.length > 0 ? (
             filteredApps.map((app, idx) => (
               <div
                 key={app.packageName ? `${app.packageName}-${idx}` : `app-${idx}`}
-                className={`flex items-center gap-2 px-2 py-1.5 rounded-lg transition-colors group ${dark ? 'hover:bg-zinc-900' : 'hover:bg-slate-50'}`}
+                className={`flex items-center gap-2 px-2 py-1.5 rounded-lg transition-colors group ${dark ? 'hover:bg-zinc-900' : 'hover:bg-slate-100'}`}
               >
                 <RealAppIcon packageName={app.packageName} appName={app.name} serial={serial} fallbackColor={getAppColor(app.packageName)} />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5">
-                    <p className={`text-xs font-semibold truncate ${dark ? 'text-zinc-100' : 'text-slate-800'}`}>{app.name}</p>
-                    {app.safeToRemove && <span className="text-[9px] px-1 py-0.5 rounded bg-emerald-500/15 text-emerald-500 font-bold shrink-0">SEGURO</span>}
-                    {app.isSystem && !app.safeToRemove && <span className={`text-[9px] px-1 py-0.5 rounded font-bold shrink-0 ${dark ? 'bg-zinc-800 text-zinc-300' : 'bg-slate-200 text-slate-700'}`}>SYS</span>}
+                    <p className={`text-xs font-semibold truncate ${dark ? 'text-zinc-100' : 'text-slate-900'}`}>{app.name}</p>
+                    {app.safeToRemove && <span className="text-[9px] px-1 py-0.5 rounded bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-bold shrink-0">SEGURO</span>}
+                    {app.isSystem && !app.safeToRemove && <span className={`text-[9px] px-1 py-0.5 rounded font-bold shrink-0 ${dark ? 'bg-zinc-800 text-zinc-300' : 'bg-slate-200 text-slate-800'}`}>SYS</span>}
                   </div>
-                  <p className={`text-[10px] font-mono truncate ${dark ? 'text-zinc-400' : 'text-slate-500'}`}>{app.packageName}</p>
+                  <p className={`text-[10px] font-mono truncate ${dark ? 'text-zinc-400' : 'text-slate-600'}`}>{app.packageName}</p>
                 </div>
                 <button
                   type="button"
                   onClick={() => onUninstall(app.packageName)}
                   disabled={appActionLoading === app.packageName}
-                  className="shrink-0 p-1 rounded-md opacity-0 group-hover:opacity-100 text-red-500 hover:bg-red-500/10 transition-all"
+                  className="shrink-0 p-1 rounded-md opacity-0 group-hover:opacity-100 text-red-600 hover:bg-red-500/10 transition-all"
                   title="Desinstalar paquete"
                 >
                   <Trash2 size={13} />
@@ -169,13 +169,13 @@ export const DashboardAppsPanel: React.FC<DashboardAppsPanelProps> = ({
               </div>
             ))
           ) : (
-            <div className={`text-xs text-center py-4 ${dark ? 'text-zinc-500' : 'text-slate-400'}`}>
+            <div className={`text-xs text-center py-4 ${dark ? 'text-zinc-400' : 'text-slate-600'}`}>
               {searchQuery ? 'Sin resultados para la búsqueda' : 'Sin aplicaciones listadas'}
             </div>
           )}
         </div>
 
-        <p className={`text-[10px] mt-2 pt-2 border-t ${dark ? 'text-zinc-400 border-zinc-800' : 'text-slate-500 border-slate-200'}`}>
+        <p className={`text-[10px] mt-2 pt-2 border-t ${dark ? 'text-zinc-400 border-zinc-800' : 'text-slate-600 border-slate-200'}`}>
           Mostrando {filteredApps.length} de {appsList.length} aplicaciones
           {safeCount > 0 && <span className="text-emerald-500 ml-1">· {safeCount} seguras para quitar</span>}
         </p>

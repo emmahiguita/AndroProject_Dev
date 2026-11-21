@@ -27,7 +27,7 @@ export function CurarView({ addLog: propAddLog }: CurarViewProps = {}) {
       className={`pb-2 px-3 font-bold text-[11px] border-b-2 transition-all flex items-center gap-1.5 ${
         curarSubTab === id
           ? 'border-brand text-brand-light'
-          : `border-transparent ${dark ? 'text-text-secondary hover:text-text-primary' : 'text-slate-400 hover:text-slate-700'}`
+          : `border-transparent ${dark ? 'text-text-secondary hover:text-text-primary' : 'text-slate-600 hover:text-slate-900'}`
       }`}
     >
       {icon} {label}

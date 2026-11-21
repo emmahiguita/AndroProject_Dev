@@ -130,7 +130,7 @@ export function DashboardView({ device: propDevice, onNavigate }: DashboardViewP
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div>
             <h1 className={`text-base font-bold ${dark ? 'text-zinc-100' : 'text-slate-900'}`}>Panel principal</h1>
-            <p className={`text-xs ${dark ? 'text-zinc-400' : 'text-slate-500'}`}>Telemetría real del kernel Android y gestión rápida del sistema</p>
+            <p className={`text-xs ${dark ? 'text-zinc-400' : 'text-slate-600'}`}>Telemetría real del kernel Android y gestión rápida del sistema</p>
           </div>
           <div className="flex items-center gap-2">
             <button type="button" onClick={() => nav('projection')} className={btnCls}><MonitorPlay size={13} /> Ver pantalla</button>
