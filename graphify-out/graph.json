@@ -1438,7 +1438,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "androproject_gui_src_tauri_gen_schemas_windows_schema",
-      "community": 98,
+      "community": 11,
       "norm_label": "windows-schema.json"
     },
     {
@@ -1448,7 +1448,7 @@
       "source_location": "L2",
       "_origin": "ast",
       "id": "androproject_gui_src_tauri_gen_schemas_windows_schema_schema",
-      "community": 98,
+      "community": 11,
       "norm_label": "$schema"
     },
     {
@@ -1458,7 +1458,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "androproject_gui_src_tauri_gen_schemas_windows_schema_title",
-      "community": 98,
+      "community": 11,
       "norm_label": "title"
     },
     {
@@ -1468,7 +1468,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "androproject_gui_src_tauri_gen_schemas_windows_schema_description",
-      "community": 98,
+      "community": 11,
       "norm_label": "description"
     },
     {
@@ -1478,7 +1478,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "androproject_gui_src_tauri_gen_schemas_windows_schema_anyof",
-      "community": 98,
+      "community": 11,
       "norm_label": "anyof"
     },
     {
@@ -2018,7 +2018,7 @@
       "source_location": "L2197",
       "_origin": "ast",
       "id": "androproject_gui_src_tauri_gen_schemas_windows_schema_definitions_value",
-      "community": 11,
+      "community": 93,
       "norm_label": "value"
     },
     {
@@ -2028,7 +2028,7 @@
       "source_location": "L2198",
       "_origin": "ast",
       "id": "androproject_gui_src_tauri_gen_schemas_windows_schema_value_description",
-      "community": 11,
+      "community": 93,
       "norm_label": "description"
     },
     {
@@ -2038,7 +2038,7 @@
       "source_location": "L2199",
       "_origin": "ast",
       "id": "androproject_gui_src_tauri_gen_schemas_windows_schema_value_anyof",
-      "community": 11,
+      "community": 93,
       "norm_label": "anyof"
     },
     {
@@ -5508,7 +5508,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "androproject_gui_src_app_ios_mirror_page",
-      "community": 69,
+      "community": 60,
       "norm_label": "page.tsx"
     },
     {
@@ -5518,7 +5518,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "androproject_gui_src_app_ios_mirror_page_iosmirrorpage",
-      "community": 69,
+      "community": 60,
       "norm_label": "iosmirrorpage()"
     },
     {
@@ -5708,7 +5708,7 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "androproject_gui_src_components_viewshell_viewshellprops",
-      "community": 91,
+      "community": 54,
       "norm_label": "viewshellprops"
     },
     {
@@ -5898,7 +5898,7 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "androproject_gui_src_components_layout_sidebar_sidebarprops",
-      "community": 91,
+      "community": 54,
       "norm_label": "sidebarprops"
     },
     {
@@ -5968,7 +5968,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "androproject_gui_src_components_layout_usestreamtracker",
-      "community": 79,
+      "community": 54,
       "norm_label": "usestreamtracker.ts"
     },
     {
@@ -5978,7 +5978,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "androproject_gui_src_components_layout_usestreamtracker_usestreamtrackerprops",
-      "community": 79,
+      "community": 54,
       "norm_label": "usestreamtrackerprops"
     },
     {
@@ -6368,7 +6368,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "androproject_gui_src_components_ui_badge",
-      "community": 82,
+      "community": 69,
       "norm_label": "badge.tsx"
     },
     {
@@ -6378,7 +6378,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "androproject_gui_src_components_ui_badge_badgetone",
-      "community": 82,
+      "community": 69,
       "norm_label": "badgetone"
     },
     {
@@ -6388,7 +6388,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "androproject_gui_src_components_ui_badge_badgesize",
-      "community": 82,
+      "community": 69,
       "norm_label": "badgesize"
     },
     {
@@ -6398,7 +6398,7 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "androproject_gui_src_components_ui_badge_badgeprops",
-      "community": 82,
+      "community": 69,
       "norm_label": "badgeprops"
     },
     {
@@ -6408,7 +6408,7 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "androproject_gui_src_components_ui_badge_toneclasses",
-      "community": 82,
+      "community": 69,
       "norm_label": "toneclasses"
     },
     {
@@ -6418,7 +6418,7 @@
       "source_location": "L34",
       "_origin": "ast",
       "id": "androproject_gui_src_components_ui_badge_sizeclasses",
-      "community": 82,
+      "community": 69,
       "norm_label": "sizeclasses"
     },
     {
@@ -6428,7 +6428,7 @@
       "source_location": "L39",
       "_origin": "ast",
       "id": "androproject_gui_src_components_ui_badge_badge",
-      "community": 82,
+      "community": 65,
       "norm_label": "badge()"
     },
     {
@@ -6648,7 +6648,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "androproject_gui_src_components_ui_input",
-      "community": 82,
+      "community": 69,
       "norm_label": "input.tsx"
     },
     {
@@ -6658,7 +6658,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "androproject_gui_src_components_ui_input_inputprops",
-      "community": 82,
+      "community": 69,
       "norm_label": "inputprops"
     },
     {
@@ -6668,7 +6668,7 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "androproject_gui_src_components_ui_input_input",
-      "community": 82,
+      "community": 69,
       "norm_label": "input()"
     },
     {
@@ -6708,7 +6708,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "androproject_gui_src_components_ui_dashboard_components",
-      "community": 93,
+      "community": 82,
       "norm_label": "dashboard-components.tsx"
     },
     {
@@ -6718,7 +6718,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "androproject_gui_src_components_ui_dashboard_components_themeprops",
-      "community": 93,
+      "community": 82,
       "norm_label": "themeprops"
     },
     {
@@ -6728,7 +6728,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "androproject_gui_src_components_ui_dashboard_components_quickactionprops",
-      "community": 93,
+      "community": 82,
       "norm_label": "quickactionprops"
     },
     {
@@ -6738,7 +6738,7 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "androproject_gui_src_components_ui_dashboard_components_quickaction",
-      "community": 93,
+      "community": 82,
       "norm_label": "quickaction()"
     },
     {
@@ -7058,7 +7058,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "androproject_gui_src_core_transports_airplaystreamtransport_airplaystreamtransport",
-      "community": 60,
+      "community": 104,
       "norm_label": "airplaystreamtransport"
     },
     {
@@ -7385,81 +7385,21 @@
       "label": "DashboardViewProps",
       "file_type": "code",
       "source_file": "androproject-gui/src/features/DashboardView.tsx",
-      "source_location": "L17",
+      "source_location": "L28",
       "_origin": "ast",
       "id": "androproject_gui_src_features_dashboardview_dashboardviewprops",
       "community": 91,
       "norm_label": "dashboardviewprops"
     },
     {
-      "label": "Sparkline()",
-      "file_type": "code",
-      "source_file": "androproject-gui/src/features/DashboardView.tsx",
-      "source_location": "L24",
-      "_origin": "ast",
-      "id": "androproject_gui_src_features_dashboardview_sparkline",
-      "community": 91,
-      "norm_label": "sparkline()"
-    },
-    {
-      "label": "AppsFilterDash",
-      "file_type": "code",
-      "source_file": "androproject-gui/src/features/DashboardView.tsx",
-      "source_location": "L54",
-      "_origin": "ast",
-      "id": "androproject_gui_src_features_dashboardview_appsfilterdash",
-      "community": 91,
-      "norm_label": "appsfilterdash"
-    },
-    {
-      "label": "APP_COLORS",
-      "file_type": "code",
-      "source_file": "androproject-gui/src/features/DashboardView.tsx",
-      "source_location": "L57",
-      "_origin": "ast",
-      "id": "androproject_gui_src_features_dashboardview_app_colors",
-      "community": 91,
-      "norm_label": "app_colors"
-    },
-    {
-      "label": "getAppColor()",
-      "file_type": "code",
-      "source_file": "androproject-gui/src/features/DashboardView.tsx",
-      "source_location": "L72",
-      "_origin": "ast",
-      "id": "androproject_gui_src_features_dashboardview_getappcolor",
-      "community": 91,
-      "norm_label": "getappcolor()"
-    },
-    {
       "label": "DashboardView()",
       "file_type": "code",
       "source_file": "androproject-gui/src/features/DashboardView.tsx",
-      "source_location": "L85",
+      "source_location": "L34",
       "_origin": "ast",
       "id": "androproject_gui_src_features_dashboardview_dashboardview",
-      "community": 91,
+      "community": 65,
       "norm_label": "dashboardview()"
-    },
-    {
-      "label": "MetricCard()",
-      "file_type": "code",
-      "source_file": "androproject-gui/src/features/DashboardView.tsx",
-      "source_location": "L546",
-      "_origin": "ast",
-      "id": "androproject_gui_src_features_dashboardview_metriccard",
-      "community": 91,
-      "norm_label": "metriccard()"
-    },
-    {
-      "label": "ActionRow()",
-      "file_type": "code",
-      "source_file": "androproject-gui/src/features/DashboardView.tsx",
-      "source_location": "L605",
-      "_origin": "ast",
-      "id": "androproject_gui_src_features_dashboardview_actionrow",
-      "community": 91,
-      "norm_label": "actionrow()"
     },
     {
       "label": "FlasherView.tsx",
@@ -7568,7 +7508,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "androproject_gui_src_features_toolsview",
-      "community": 65,
+      "community": 82,
       "norm_label": "toolsview.tsx"
     },
     {
@@ -7578,7 +7518,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "androproject_gui_src_features_toolsview_toolsviewprops",
-      "community": 79,
+      "community": 82,
       "norm_label": "toolsviewprops"
     },
     {
@@ -7852,6 +7792,166 @@
       "norm_label": "generatecontextsuggestions()"
     },
     {
+      "label": "DashboardAppsPanel.tsx",
+      "file_type": "code",
+      "source_file": "androproject-gui/src/features/dashboard/DashboardAppsPanel.tsx",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "androproject_gui_src_features_dashboard_dashboardappspanel",
+      "community": 91,
+      "norm_label": "dashboardappspanel.tsx"
+    },
+    {
+      "label": "DashboardAppsPanelProps",
+      "file_type": "code",
+      "source_file": "androproject-gui/src/features/dashboard/DashboardAppsPanel.tsx",
+      "source_location": "L23",
+      "_origin": "ast",
+      "id": "androproject_gui_src_features_dashboard_dashboardappspanel_dashboardappspanelprops",
+      "community": 91,
+      "norm_label": "dashboardappspanelprops"
+    },
+    {
+      "label": "ActionRow()",
+      "file_type": "code",
+      "source_file": "androproject-gui/src/features/dashboard/DashboardAppsPanel.tsx",
+      "source_location": "L40",
+      "_origin": "ast",
+      "id": "androproject_gui_src_features_dashboard_dashboardappspanel_actionrow",
+      "community": 91,
+      "norm_label": "actionrow()"
+    },
+    {
+      "label": "DashboardAppsPanel()",
+      "file_type": "code",
+      "source_file": "androproject-gui/src/features/dashboard/DashboardAppsPanel.tsx",
+      "source_location": "L68",
+      "_origin": "ast",
+      "id": "androproject_gui_src_features_dashboard_dashboardappspanel_dashboardappspanel",
+      "community": 91,
+      "norm_label": "dashboardappspanel()"
+    },
+    {
+      "label": "TelemetryModal.tsx",
+      "file_type": "code",
+      "source_file": "androproject-gui/src/features/dashboard/TelemetryModal.tsx",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "androproject_gui_src_features_dashboard_telemetrymodal",
+      "community": 91,
+      "norm_label": "telemetrymodal.tsx"
+    },
+    {
+      "label": "TelemetryModalProps",
+      "file_type": "code",
+      "source_file": "androproject-gui/src/features/dashboard/TelemetryModal.tsx",
+      "source_location": "L19",
+      "_origin": "ast",
+      "id": "androproject_gui_src_features_dashboard_telemetrymodal_telemetrymodalprops",
+      "community": 91,
+      "norm_label": "telemetrymodalprops"
+    },
+    {
+      "label": "MetricGaugeCard()",
+      "file_type": "code",
+      "source_file": "androproject-gui/src/features/dashboard/TelemetryModal.tsx",
+      "source_location": "L36",
+      "_origin": "ast",
+      "id": "androproject_gui_src_features_dashboard_telemetrymodal_metricgaugecard",
+      "community": 91,
+      "norm_label": "metricgaugecard()"
+    },
+    {
+      "label": "TelemetryModal()",
+      "file_type": "code",
+      "source_file": "androproject-gui/src/features/dashboard/TelemetryModal.tsx",
+      "source_location": "L109",
+      "_origin": "ast",
+      "id": "androproject_gui_src_features_dashboard_telemetrymodal_telemetrymodal",
+      "community": 91,
+      "norm_label": "telemetrymodal()"
+    },
+    {
+      "label": "dashboard-helpers.ts",
+      "file_type": "code",
+      "source_file": "androproject-gui/src/features/dashboard/dashboard-helpers.ts",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "androproject_gui_src_features_dashboard_dashboard_helpers",
+      "community": 91,
+      "norm_label": "dashboard-helpers.ts"
+    },
+    {
+      "label": "AppsFilterDash",
+      "file_type": "code",
+      "source_file": "androproject-gui/src/features/dashboard/dashboard-helpers.ts",
+      "source_location": "L15",
+      "_origin": "ast",
+      "id": "androproject_gui_src_features_dashboard_dashboard_helpers_appsfilterdash",
+      "community": 91,
+      "norm_label": "appsfilterdash"
+    },
+    {
+      "label": "TelemetryLevel",
+      "file_type": "code",
+      "source_file": "androproject-gui/src/features/dashboard/dashboard-helpers.ts",
+      "source_location": "L18",
+      "_origin": "ast",
+      "id": "androproject_gui_src_features_dashboard_dashboard_helpers_telemetrylevel",
+      "community": 91,
+      "norm_label": "telemetrylevel"
+    },
+    {
+      "label": "DeviceTelemetrySummary",
+      "file_type": "code",
+      "source_file": "androproject-gui/src/features/dashboard/dashboard-helpers.ts",
+      "source_location": "L21",
+      "_origin": "ast",
+      "id": "androproject_gui_src_features_dashboard_dashboard_helpers_devicetelemetrysummary",
+      "community": 91,
+      "norm_label": "devicetelemetrysummary"
+    },
+    {
+      "label": "APP_COLORS",
+      "file_type": "code",
+      "source_file": "androproject-gui/src/features/dashboard/dashboard-helpers.ts",
+      "source_location": "L39",
+      "_origin": "ast",
+      "id": "androproject_gui_src_features_dashboard_dashboard_helpers_app_colors",
+      "community": 91,
+      "norm_label": "app_colors"
+    },
+    {
+      "label": "getAppColor()",
+      "file_type": "code",
+      "source_file": "androproject-gui/src/features/dashboard/dashboard-helpers.ts",
+      "source_location": "L58",
+      "_origin": "ast",
+      "id": "androproject_gui_src_features_dashboard_dashboard_helpers_getappcolor",
+      "community": 91,
+      "norm_label": "getappcolor()"
+    },
+    {
+      "label": "parseTempNum()",
+      "file_type": "code",
+      "source_file": "androproject-gui/src/features/dashboard/dashboard-helpers.ts",
+      "source_location": "L74",
+      "_origin": "ast",
+      "id": "androproject_gui_src_features_dashboard_dashboard_helpers_parsetempnum",
+      "community": 91,
+      "norm_label": "parsetempnum()"
+    },
+    {
+      "label": "computeDeviceTelemetry()",
+      "file_type": "code",
+      "source_file": "androproject-gui/src/features/dashboard/dashboard-helpers.ts",
+      "source_location": "L86",
+      "_origin": "ast",
+      "id": "androproject_gui_src_features_dashboard_dashboard_helpers_computedevicetelemetry",
+      "community": 91,
+      "norm_label": "computedevicetelemetry()"
+    },
+    {
       "label": "types.ts",
       "file_type": "code",
       "source_file": "androproject-gui/src/features/types.ts",
@@ -7888,7 +7988,7 @@
       "source_location": "L38",
       "_origin": "ast",
       "id": "androproject_gui_src_features_types_airplayserverstatus",
-      "community": 69,
+      "community": 60,
       "norm_label": "airplayserverstatus"
     },
     {
@@ -7908,7 +8008,7 @@
       "source_location": "L63",
       "_origin": "ast",
       "id": "androproject_gui_src_features_types_navsection",
-      "community": 91,
+      "community": 54,
       "norm_label": "navsection"
     },
     {
@@ -8108,7 +8208,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "androproject_gui_src_hooks_useairplayserver",
-      "community": 69,
+      "community": 60,
       "norm_label": "useairplayserver.ts"
     },
     {
@@ -8118,7 +8218,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "androproject_gui_src_hooks_useairplayserver_useairplayserver",
-      "community": 69,
+      "community": 60,
       "norm_label": "useairplayserver()"
     },
     {
@@ -8128,7 +8228,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "androproject_gui_src_hooks_usedevicepolling",
-      "community": 79,
+      "community": 65,
       "norm_label": "usedevicepolling.ts"
     },
     {
@@ -8528,7 +8628,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_cn",
-      "community": 82,
+      "community": 69,
       "norm_label": "cn.ts"
     },
     {
@@ -8538,7 +8638,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_cn_classvalue",
-      "community": 82,
+      "community": 69,
       "norm_label": "classvalue"
     },
     {
@@ -8548,7 +8648,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_cn_cn",
-      "community": 82,
+      "community": 69,
       "norm_label": "cn()"
     },
     {
@@ -9008,7 +9108,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_airplay_engine",
-      "community": 104,
+      "community": 63,
       "norm_label": "airplay-engine.ts"
     },
     {
@@ -9048,7 +9148,7 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_airplay_engine_iairplayreceiverengine_start",
-      "community": 69,
+      "community": 60,
       "norm_label": ".start()"
     },
     {
@@ -9168,7 +9268,7 @@
       "source_location": "L45",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_airplay_engine_default_airplay_options",
-      "community": 104,
+      "community": 63,
       "norm_label": "default_airplay_options"
     },
     {
@@ -10668,7 +10768,7 @@
       "source_location": "L55",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_scrcpy_engine_iscrcpyengine",
-      "community": 74,
+      "community": 5,
       "norm_label": "iscrcpyengine"
     },
     {
@@ -24689,7 +24789,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/features/DashboardView.tsx",
-      "source_location": "L13",
+      "source_location": "L22",
       "weight": 1.0,
       "source": "androproject_gui_src_features_dashboardview",
       "target": "androproject_gui_src_components_viewshell",
@@ -24810,7 +24910,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/features/DashboardView.tsx",
-      "source_location": "L13",
+      "source_location": "L22",
       "weight": 1.0,
       "source": "androproject_gui_src_features_dashboardview",
       "target": "androproject_gui_src_components_viewshell_viewshell",
@@ -27605,10 +27705,10 @@
       "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
-      "source_file": "androproject-gui/src/features/DashboardView.tsx",
-      "source_location": "L14",
+      "source_file": "androproject-gui/src/features/dashboard/DashboardAppsPanel.tsx",
+      "source_location": "L19",
       "weight": 1.0,
-      "source": "androproject_gui_src_features_dashboardview",
+      "source": "androproject_gui_src_features_dashboard_dashboardappspanel",
       "target": "androproject_gui_src_components_ui_realappicon",
       "confidence_score": 1.0
     },
@@ -27627,10 +27727,10 @@
       "relation": "imports",
       "context": "import",
       "confidence": "EXTRACTED",
-      "source_file": "androproject-gui/src/features/DashboardView.tsx",
-      "source_location": "L14",
+      "source_file": "androproject-gui/src/features/dashboard/DashboardAppsPanel.tsx",
+      "source_location": "L19",
       "weight": 1.0,
-      "source": "androproject_gui_src_features_dashboardview",
+      "source": "androproject_gui_src_features_dashboard_dashboardappspanel",
       "target": "androproject_gui_src_components_ui_realappicon_realappicon",
       "confidence_score": 1.0
     },
@@ -29758,40 +29858,87 @@
       "target": "androproject_gui_src_stores_index_useappstore"
     },
     {
-      "relation": "contains",
+      "relation": "imports_from",
+      "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/features/DashboardView.tsx",
-      "source_location": "L605",
+      "source_location": "L23",
       "weight": 1.0,
       "source": "androproject_gui_src_features_dashboardview",
-      "target": "androproject_gui_src_features_dashboardview_actionrow",
+      "target": "androproject_gui_src_features_dashboard_dashboard_helpers",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/features/DashboardView.tsx",
+      "source_location": "L23",
+      "weight": 1.0,
+      "source": "androproject_gui_src_features_dashboardview",
+      "target": "androproject_gui_src_features_dashboard_dashboard_helpers_appsfilterdash",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/features/DashboardView.tsx",
+      "source_location": "L23",
+      "weight": 1.0,
+      "source": "androproject_gui_src_features_dashboardview",
+      "target": "androproject_gui_src_features_dashboard_dashboard_helpers_computedevicetelemetry",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/features/DashboardView.tsx",
+      "source_location": "L25",
+      "weight": 1.0,
+      "source": "androproject_gui_src_features_dashboardview",
+      "target": "androproject_gui_src_features_dashboard_dashboardappspanel",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/features/DashboardView.tsx",
+      "source_location": "L25",
+      "weight": 1.0,
+      "source": "androproject_gui_src_features_dashboardview",
+      "target": "androproject_gui_src_features_dashboard_dashboardappspanel_dashboardappspanel",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/features/DashboardView.tsx",
+      "source_location": "L24",
+      "weight": 1.0,
+      "source": "androproject_gui_src_features_dashboardview",
+      "target": "androproject_gui_src_features_dashboard_telemetrymodal",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/features/DashboardView.tsx",
+      "source_location": "L24",
+      "weight": 1.0,
+      "source": "androproject_gui_src_features_dashboardview",
+      "target": "androproject_gui_src_features_dashboard_telemetrymodal_telemetrymodal",
       "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/features/DashboardView.tsx",
-      "source_location": "L57",
-      "weight": 1.0,
-      "source": "androproject_gui_src_features_dashboardview",
-      "target": "androproject_gui_src_features_dashboardview_app_colors",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "androproject-gui/src/features/DashboardView.tsx",
-      "source_location": "L54",
-      "weight": 1.0,
-      "source": "androproject_gui_src_features_dashboardview",
-      "target": "androproject_gui_src_features_dashboardview_appsfilterdash",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "androproject-gui/src/features/DashboardView.tsx",
-      "source_location": "L85",
+      "source_location": "L34",
       "weight": 1.0,
       "source": "androproject_gui_src_features_dashboardview",
       "target": "androproject_gui_src_features_dashboardview_dashboardview",
@@ -29801,40 +29948,10 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/features/DashboardView.tsx",
-      "source_location": "L17",
+      "source_location": "L28",
       "weight": 1.0,
       "source": "androproject_gui_src_features_dashboardview",
       "target": "androproject_gui_src_features_dashboardview_dashboardviewprops",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "androproject-gui/src/features/DashboardView.tsx",
-      "source_location": "L72",
-      "weight": 1.0,
-      "source": "androproject_gui_src_features_dashboardview",
-      "target": "androproject_gui_src_features_dashboardview_getappcolor",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "androproject-gui/src/features/DashboardView.tsx",
-      "source_location": "L546",
-      "weight": 1.0,
-      "source": "androproject_gui_src_features_dashboardview",
-      "target": "androproject_gui_src_features_dashboardview_metriccard",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "androproject-gui/src/features/DashboardView.tsx",
-      "source_location": "L24",
-      "weight": 1.0,
-      "source": "androproject_gui_src_features_dashboardview",
-      "target": "androproject_gui_src_features_dashboardview_sparkline",
       "confidence_score": 1.0
     },
     {
@@ -29842,7 +29959,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/features/DashboardView.tsx",
-      "source_location": "L15",
+      "source_location": "L26",
       "weight": 1.0,
       "source": "androproject_gui_src_features_dashboardview",
       "target": "androproject_gui_src_features_types",
@@ -29853,18 +29970,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/features/DashboardView.tsx",
-      "source_location": "L15",
-      "weight": 1.0,
-      "source": "androproject_gui_src_features_dashboardview",
-      "target": "androproject_gui_src_features_types_appinfo",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "androproject-gui/src/features/DashboardView.tsx",
-      "source_location": "L15",
+      "source_location": "L26",
       "weight": 1.0,
       "source": "androproject_gui_src_features_dashboardview",
       "target": "androproject_gui_src_features_types_deviceinfo",
@@ -29875,7 +29981,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/features/DashboardView.tsx",
-      "source_location": "L15",
+      "source_location": "L26",
       "weight": 1.0,
       "source": "androproject_gui_src_features_dashboardview",
       "target": "androproject_gui_src_features_types_navsection",
@@ -29886,7 +29992,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/features/DashboardView.tsx",
-      "source_location": "L12",
+      "source_location": "L21",
       "weight": 1.0,
       "source": "androproject_gui_src_features_dashboardview",
       "target": "androproject_gui_src_hooks_useactions",
@@ -29897,7 +30003,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/features/DashboardView.tsx",
-      "source_location": "L12",
+      "source_location": "L21",
       "weight": 1.0,
       "source": "androproject_gui_src_features_dashboardview",
       "target": "androproject_gui_src_hooks_useactions_useactions",
@@ -29908,7 +30014,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/features/DashboardView.tsx",
-      "source_location": "L11",
+      "source_location": "L20",
       "weight": 1.0,
       "source": "androproject_gui_src_features_dashboardview",
       "target": "androproject_gui_src_hooks_usetheme",
@@ -29919,7 +30025,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/features/DashboardView.tsx",
-      "source_location": "L11",
+      "source_location": "L20",
       "weight": 1.0,
       "source": "androproject_gui_src_features_dashboardview",
       "target": "androproject_gui_src_hooks_usetheme_usetheme",
@@ -29930,7 +30036,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/features/DashboardView.tsx",
-      "source_location": "L10",
+      "source_location": "L19",
       "weight": 1.0,
       "source": "androproject_gui_src_features_dashboardview",
       "target": "androproject_gui_src_stores_index",
@@ -29941,7 +30047,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/features/DashboardView.tsx",
-      "source_location": "L10",
+      "source_location": "L19",
       "weight": 1.0,
       "source": "androproject_gui_src_features_dashboardview",
       "target": "androproject_gui_src_stores_index_useappstore",
@@ -29952,7 +30058,7 @@
       "context": "field",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/features/DashboardView.tsx",
-      "source_location": "L18",
+      "source_location": "L29",
       "weight": 1.0,
       "source": "androproject_gui_src_features_dashboardview_dashboardviewprops",
       "target": "androproject_gui_src_features_types_deviceinfo",
@@ -29963,7 +30069,7 @@
       "context": "field",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/features/DashboardView.tsx",
-      "source_location": "L20",
+      "source_location": "L31",
       "weight": 1.0,
       "source": "androproject_gui_src_features_dashboardview_dashboardviewprops",
       "target": "androproject_gui_src_features_types_navsection",
@@ -29973,12 +30079,12 @@
       "relation": "calls",
       "context": "call",
       "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
       "source_file": "androproject-gui/src/features/DashboardView.tsx",
-      "source_location": "L481",
+      "source_location": "L43",
       "weight": 1.0,
       "source": "androproject_gui_src_features_dashboardview_dashboardview",
-      "target": "androproject_gui_src_features_dashboardview_getappcolor",
-      "confidence_score": 1.0
+      "target": "androproject_gui_src_features_dashboard_dashboard_helpers_computedevicetelemetry"
     },
     {
       "relation": "calls",
@@ -29986,7 +30092,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "androproject-gui/src/features/DashboardView.tsx",
-      "source_location": "L91",
+      "source_location": "L40",
       "weight": 1.0,
       "source": "androproject_gui_src_features_dashboardview_dashboardview",
       "target": "androproject_gui_src_hooks_useactions_useactions"
@@ -29997,7 +30103,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "androproject-gui/src/features/DashboardView.tsx",
-      "source_location": "L86",
+      "source_location": "L35",
       "weight": 1.0,
       "source": "androproject_gui_src_features_dashboardview_dashboardview",
       "target": "androproject_gui_src_hooks_usetheme_usetheme"
@@ -30008,7 +30114,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "androproject-gui/src/features/DashboardView.tsx",
-      "source_location": "L87",
+      "source_location": "L36",
       "weight": 1.0,
       "source": "androproject_gui_src_features_dashboardview_dashboardview",
       "target": "androproject_gui_src_stores_index_useappstore"
@@ -30973,6 +31079,356 @@
       "weight": 1.0,
       "source": "androproject_gui_src_features_cli_cli_suggestions",
       "target": "androproject_gui_src_features_cli_cli_suggestions_generatecontextsuggestions",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/features/dashboard/DashboardAppsPanel.tsx",
+      "source_location": "L20",
+      "weight": 1.0,
+      "source": "androproject_gui_src_features_dashboard_dashboardappspanel",
+      "target": "androproject_gui_src_features_dashboard_dashboard_helpers",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/features/dashboard/DashboardAppsPanel.tsx",
+      "source_location": "L20",
+      "weight": 1.0,
+      "source": "androproject_gui_src_features_dashboard_dashboardappspanel",
+      "target": "androproject_gui_src_features_dashboard_dashboard_helpers_appsfilterdash",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/features/dashboard/DashboardAppsPanel.tsx",
+      "source_location": "L20",
+      "weight": 1.0,
+      "source": "androproject_gui_src_features_dashboard_dashboardappspanel",
+      "target": "androproject_gui_src_features_dashboard_dashboard_helpers_getappcolor",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/features/dashboard/DashboardAppsPanel.tsx",
+      "source_location": "L40",
+      "weight": 1.0,
+      "source": "androproject_gui_src_features_dashboard_dashboardappspanel",
+      "target": "androproject_gui_src_features_dashboard_dashboardappspanel_actionrow",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/features/dashboard/DashboardAppsPanel.tsx",
+      "source_location": "L68",
+      "weight": 1.0,
+      "source": "androproject_gui_src_features_dashboard_dashboardappspanel",
+      "target": "androproject_gui_src_features_dashboard_dashboardappspanel_dashboardappspanel",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/features/dashboard/DashboardAppsPanel.tsx",
+      "source_location": "L23",
+      "weight": 1.0,
+      "source": "androproject_gui_src_features_dashboard_dashboardappspanel",
+      "target": "androproject_gui_src_features_dashboard_dashboardappspanel_dashboardappspanelprops",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/features/dashboard/DashboardAppsPanel.tsx",
+      "source_location": "L21",
+      "weight": 1.0,
+      "source": "androproject_gui_src_features_dashboard_dashboardappspanel",
+      "target": "androproject_gui_src_features_types",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/features/dashboard/DashboardAppsPanel.tsx",
+      "source_location": "L21",
+      "weight": 1.0,
+      "source": "androproject_gui_src_features_dashboard_dashboardappspanel",
+      "target": "androproject_gui_src_features_types_appinfo",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/features/dashboard/DashboardAppsPanel.tsx",
+      "source_location": "L21",
+      "weight": 1.0,
+      "source": "androproject_gui_src_features_dashboard_dashboardappspanel",
+      "target": "androproject_gui_src_features_types_navsection",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "context": "field",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/features/dashboard/DashboardAppsPanel.tsx",
+      "source_location": "L32",
+      "weight": 1.0,
+      "source": "androproject_gui_src_features_dashboard_dashboardappspanel_dashboardappspanelprops",
+      "target": "androproject_gui_src_features_dashboard_dashboard_helpers_appsfilterdash",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "context": "field",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/features/dashboard/DashboardAppsPanel.tsx",
+      "source_location": "L26",
+      "weight": 1.0,
+      "source": "androproject_gui_src_features_dashboard_dashboardappspanel_dashboardappspanelprops",
+      "target": "androproject_gui_src_features_types_appinfo",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "context": "field",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/features/dashboard/DashboardAppsPanel.tsx",
+      "source_location": "L35",
+      "weight": 1.0,
+      "source": "androproject_gui_src_features_dashboard_dashboardappspanel_dashboardappspanelprops",
+      "target": "androproject_gui_src_features_types_navsection",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "androproject-gui/src/features/dashboard/DashboardAppsPanel.tsx",
+      "source_location": "L151",
+      "weight": 1.0,
+      "source": "androproject_gui_src_features_dashboard_dashboardappspanel_dashboardappspanel",
+      "target": "androproject_gui_src_features_dashboard_dashboard_helpers_getappcolor"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/features/dashboard/TelemetryModal.tsx",
+      "source_location": "L17",
+      "weight": 1.0,
+      "source": "androproject_gui_src_features_dashboard_telemetrymodal",
+      "target": "androproject_gui_src_features_dashboard_dashboard_helpers",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/features/dashboard/TelemetryModal.tsx",
+      "source_location": "L17",
+      "weight": 1.0,
+      "source": "androproject_gui_src_features_dashboard_telemetrymodal",
+      "target": "androproject_gui_src_features_dashboard_dashboard_helpers_devicetelemetrysummary",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/features/dashboard/TelemetryModal.tsx",
+      "source_location": "L17",
+      "weight": 1.0,
+      "source": "androproject_gui_src_features_dashboard_telemetrymodal",
+      "target": "androproject_gui_src_features_dashboard_dashboard_helpers_telemetrylevel",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/features/dashboard/TelemetryModal.tsx",
+      "source_location": "L36",
+      "weight": 1.0,
+      "source": "androproject_gui_src_features_dashboard_telemetrymodal",
+      "target": "androproject_gui_src_features_dashboard_telemetrymodal_metricgaugecard",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/features/dashboard/TelemetryModal.tsx",
+      "source_location": "L109",
+      "weight": 1.0,
+      "source": "androproject_gui_src_features_dashboard_telemetrymodal",
+      "target": "androproject_gui_src_features_dashboard_telemetrymodal_telemetrymodal",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/features/dashboard/TelemetryModal.tsx",
+      "source_location": "L19",
+      "weight": 1.0,
+      "source": "androproject_gui_src_features_dashboard_telemetrymodal",
+      "target": "androproject_gui_src_features_dashboard_telemetrymodal_telemetrymodalprops",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/features/dashboard/TelemetryModal.tsx",
+      "source_location": "L16",
+      "weight": 1.0,
+      "source": "androproject_gui_src_features_dashboard_telemetrymodal",
+      "target": "androproject_gui_src_features_types",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/features/dashboard/TelemetryModal.tsx",
+      "source_location": "L16",
+      "weight": 1.0,
+      "source": "androproject_gui_src_features_dashboard_telemetrymodal",
+      "target": "androproject_gui_src_features_types_deviceinfo",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "context": "field",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/features/dashboard/TelemetryModal.tsx",
+      "source_location": "L24",
+      "weight": 1.0,
+      "source": "androproject_gui_src_features_dashboard_telemetrymodal_telemetrymodalprops",
+      "target": "androproject_gui_src_features_dashboard_dashboard_helpers_devicetelemetrysummary",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "context": "field",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/features/dashboard/TelemetryModal.tsx",
+      "source_location": "L23",
+      "weight": 1.0,
+      "source": "androproject_gui_src_features_dashboard_telemetrymodal_telemetrymodalprops",
+      "target": "androproject_gui_src_features_types_deviceinfo",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/features/dashboard/dashboard-helpers.ts",
+      "source_location": "L39",
+      "weight": 1.0,
+      "source": "androproject_gui_src_features_dashboard_dashboard_helpers",
+      "target": "androproject_gui_src_features_dashboard_dashboard_helpers_app_colors",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/features/dashboard/dashboard-helpers.ts",
+      "source_location": "L15",
+      "weight": 1.0,
+      "source": "androproject_gui_src_features_dashboard_dashboard_helpers",
+      "target": "androproject_gui_src_features_dashboard_dashboard_helpers_appsfilterdash",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/features/dashboard/dashboard-helpers.ts",
+      "source_location": "L86",
+      "weight": 1.0,
+      "source": "androproject_gui_src_features_dashboard_dashboard_helpers",
+      "target": "androproject_gui_src_features_dashboard_dashboard_helpers_computedevicetelemetry",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/features/dashboard/dashboard-helpers.ts",
+      "source_location": "L21",
+      "weight": 1.0,
+      "source": "androproject_gui_src_features_dashboard_dashboard_helpers",
+      "target": "androproject_gui_src_features_dashboard_dashboard_helpers_devicetelemetrysummary",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/features/dashboard/dashboard-helpers.ts",
+      "source_location": "L58",
+      "weight": 1.0,
+      "source": "androproject_gui_src_features_dashboard_dashboard_helpers",
+      "target": "androproject_gui_src_features_dashboard_dashboard_helpers_getappcolor",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/features/dashboard/dashboard-helpers.ts",
+      "source_location": "L74",
+      "weight": 1.0,
+      "source": "androproject_gui_src_features_dashboard_dashboard_helpers",
+      "target": "androproject_gui_src_features_dashboard_dashboard_helpers_parsetempnum",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/features/dashboard/dashboard-helpers.ts",
+      "source_location": "L18",
+      "weight": 1.0,
+      "source": "androproject_gui_src_features_dashboard_dashboard_helpers",
+      "target": "androproject_gui_src_features_dashboard_dashboard_helpers_telemetrylevel",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/features/dashboard/dashboard-helpers.ts",
+      "source_location": "L12",
+      "weight": 1.0,
+      "source": "androproject_gui_src_features_dashboard_dashboard_helpers",
+      "target": "androproject_gui_src_features_types",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/features/dashboard/dashboard-helpers.ts",
+      "source_location": "L12",
+      "weight": 1.0,
+      "source": "androproject_gui_src_features_dashboard_dashboard_helpers",
+      "target": "androproject_gui_src_features_types_deviceinfo",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/src/features/dashboard/dashboard-helpers.ts",
+      "source_location": "L92",
+      "weight": 1.0,
+      "source": "androproject_gui_src_features_dashboard_dashboard_helpers_computedevicetelemetry",
+      "target": "androproject_gui_src_features_dashboard_dashboard_helpers_parsetempnum",
       "confidence_score": 1.0
     },
     {
@@ -40595,5 +41051,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "ce49afcb53004b2b7ba8f6901d17418d0f5a8316"
+  "built_at_commit": "4e8989683dd8ee7eb5d46442ab7b48e63bbf09eb"
 }

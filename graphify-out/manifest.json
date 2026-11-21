@@ -200,8 +200,8 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/features/DashboardView.tsx": {
-    "mtime": 1795295542.1914055,
-    "ast_hash": "b199dd276be54ab3b31caf5d822a8319",
+    "mtime": 1795300751.977596,
+    "ast_hash": "e8e17df8a42c82b7e8a8b024c08d972f",
     "semantic_hash": ""
   },
   "androproject-gui/src/features/FlasherView.tsx": {
@@ -1392,6 +1392,21 @@
   "androproject-gui/src/features/cli/cli-suggestions.ts": {
     "mtime": 1795299561.3022993,
     "ast_hash": "eddc1323172e906a8143a21fe91214a6",
+    "semantic_hash": ""
+  },
+  "androproject-gui/src/features/dashboard/DashboardAppsPanel.tsx": {
+    "mtime": 1795300694.7762768,
+    "ast_hash": "4b61d9eccd8f61cb98e98ab134fd24f0",
+    "semantic_hash": ""
+  },
+  "androproject-gui/src/features/dashboard/TelemetryModal.tsx": {
+    "mtime": 1795300645.534875,
+    "ast_hash": "3036ad862f693b5fc47e6f7a2e22a796",
+    "semantic_hash": ""
+  },
+  "androproject-gui/src/features/dashboard/dashboard-helpers.ts": {
+    "mtime": 1795300541.5903227,
+    "ast_hash": "e6305334fc036b7064d2fcabaf1df34b",
     "semantic_hash": ""
   }
 }
