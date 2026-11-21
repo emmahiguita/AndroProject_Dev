@@ -1335,13 +1335,13 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/app/api/ai-cli/route.ts": {
-    "mtime": 1795296017.625164,
-    "ast_hash": "219ae710d19f29a5d3448f49ab33a779",
+    "mtime": 1795299702.7742977,
+    "ast_hash": "cba979a3afb513f06029112b17fce14f",
     "semantic_hash": ""
   },
   "androproject-gui/src/features/CliInjectorView.tsx": {
-    "mtime": 1795296020.0119572,
-    "ast_hash": "d518cf4a412ff328ef8434b1217a1414",
+    "mtime": 1795299886.0835483,
+    "ast_hash": "88e595fd6de4f6c92356439ae3da7f85",
     "semantic_hash": ""
   },
   "androproject-gui/src/features/apps/AppInstallerPanel.tsx": {
@@ -1377,6 +1377,21 @@
   "androproject-gui/src/components/layout/useStreamTracker.ts": {
     "mtime": 1795299232.0036757,
     "ast_hash": "3117ccc3c78ca7a591f1ee4cf1f7519a",
+    "semantic_hash": ""
+  },
+  "androproject-gui/src/features/cli/CliEngineSelector.tsx": {
+    "mtime": 1795299834.87557,
+    "ast_hash": "6e8d0afb12a0c5101f4ec98c58c201d8",
+    "semantic_hash": ""
+  },
+  "androproject-gui/src/features/cli/CliResponseViewer.tsx": {
+    "mtime": 1795299857.4965518,
+    "ast_hash": "c5403c523c822a9805cf9ac44586f051",
+    "semantic_hash": ""
+  },
+  "androproject-gui/src/features/cli/cli-suggestions.ts": {
+    "mtime": 1795299561.3022993,
+    "ast_hash": "eddc1323172e906a8143a21fe91214a6",
     "semantic_hash": ""
   }
 }
