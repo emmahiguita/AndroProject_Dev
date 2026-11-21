@@ -1,7 +1,10 @@
-/**
- * Binary discovery utilities.
- * Extracted from config.ts — Single Responsibility: discover binaries on the system.
- */
+// ============================================================================
+// ARCHIVO: discovery.ts
+// QUÉ HACE: Localiza automáticamente binarios críticos (scrcpy.exe y scrcpy-server)
+//           en rutas locales de C:\AndroProject, WinGet y variables de entorno.
+// CÓMO FUNCIONA: Escanea rutas candidatas deterministas y devuelve la primera válida.
+// POR QUÉ: Evitar errores de "archivo no encontrado" al iniciar sesiones de streaming.
+// ============================================================================
 import fs from 'fs';
 import path from 'path';
 import { ANDROPROJECT_HOME } from './paths';
@@ -39,5 +42,20 @@ export function discoverAndroprojectBin(): string {
   return candidates.find((c) => fs.existsSync(c)) || candidates[candidates.length - 1];
 }
 
+export function discoverScrcpyServer(): string {
+  const envPath = process.env.ANDROPROJECT_SERVER_PATH;
+  const binCandidate = discoverAndroprojectBin();
+  const binDir = path.dirname(binCandidate);
+  const candidates = envPath
+    ? [envPath, path.join(binDir, 'scrcpy-server'), path.join(ANDROPROJECT_HOME, 'scrcpy-server')]
+    : [
+        path.join(ANDROPROJECT_HOME, 'scrcpy-server'),
+        path.join(binDir, 'scrcpy-server'),
+        path.join(ANDROPROJECT_HOME, 'scrcpy-server.jar'),
+      ];
+  return candidates.find((c) => fs.existsSync(c)) || candidates[0];
+}
+
 // Re-exported for backward compatibility with config.ts
 export const ANDROPROJECT_BIN = discoverAndroprojectBin();
+export const SCRCPY_SERVER_PATH = discoverScrcpyServer();

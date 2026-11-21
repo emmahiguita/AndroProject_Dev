@@ -1,16 +1,24 @@
+// ============================================================================
+// ARCHIVO: AppShell.tsx
+// QUÉ HACE: Shell principal responsivo: barra lateral + cabecera de control +
+//           área de contenido principal y modales de conexión.
+// CÓMO FUNCIONA: Orquesta la navegación, el tema visual, la detección de nuevos
+//           dispositivos y el estado de la transmisión scrcpy/WebCodecs.
+// POR QUÉ: Punto de entrada unificado para todas las vistas con soporte móvil y desktop.
+// ============================================================================
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { MonitorPlay, X } from 'lucide-react';
 import { Header } from './Header';
 import { Sidebar } from './Sidebar';
 import { WirelessConnectModal } from './WirelessConnectModal';
+import { AutoDetectionToast } from './AutoDetectionToast';
+import { useStreamTracker } from './useStreamTracker';
 import { useAppTheme } from '../ThemeProvider';
 import { useRescueSync } from '../../hooks/useRescueSync';
 import type { DeviceInfo, SystemLogs, NavSection } from '@/features/types';
 import type { RegisteredDevice } from '../../hooks/useAdbConnection';
 
-/* ── Breakpoints ── */
 const BP_MED = 1050;
 
 interface AppShellProps {
@@ -26,25 +34,18 @@ interface AppShellProps {
   activeNav: NavSection;
   onNavigate: (n: NavSection) => void;
   children: React.ReactNode;
-  /** ADB connection state */
   adbServerRunning?: boolean;
   onToggleAdb?: () => void;
   isAdbConnecting?: boolean;
   registeredDevices?: RegisteredDevice[];
-  onRegisterDevice?: (serial: string, model: string, connectionType: 'USB' | 'Wi-Fi', ip?: string, port?: string) => void;
+  onRegisterDevice?: (serial: string, model: string, type: 'USB' | 'Wi-Fi', ip?: string, port?: string) => void;
   onUnregisterDevice?: (serial: string) => void;
   onToggleAutoConnect?: (serial: string) => void;
 }
 
-/**
- * AppShell — Simple responsive layout: sidebar + main content.
- * Projection is now a full-page view accessed via sidebar nav.
- */
 export const AppShell: React.FC<AppShellProps> = ({
   devices, selectedSerial, onSelectSerial, isScanning, onScanRadar, onRefresh,
-  logs, addLog, clearLogs,
-  activeNav, onNavigate,
-  children,
+  addLog, activeNav, onNavigate, children,
   adbServerRunning = false, onToggleAdb, isAdbConnecting = false,
   registeredDevices = [], onRegisterDevice, onUnregisterDevice, onToggleAutoConnect,
 }) => {
@@ -52,160 +53,50 @@ export const AppShell: React.FC<AppShellProps> = ({
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [connectModal, setConnectModal] = useState(false);
   const [viewportMedium, setViewportMedium] = useState(true);
-  const sceneRef = useRef<HTMLDivElement>(null);
-
-  // Rescue Sync hook: keeps designated secondary device (e.g. Galaxy A30) permanently connected
-  const rescueSync = useRescueSync(devices, onRefresh);
-
-  // Auto-detection toast state
   const [detectedToast, setDetectedToast] = useState<DeviceInfo | null>(null);
   const prevSerialsRef = useRef<string>('');
+  const mainRef = useRef<HTMLElement>(null);
 
-  // Detect when new device appears
+  const rescueSync = useRescueSync(devices, onRefresh);
+  const { isTransmitting, toggleTransmit } = useStreamTracker({
+    selectedSerial, devices, onNavigate, addLog,
+  });
+
   useEffect(() => {
-    const activeDevs = devices.filter(d => d.state === 'device');
-    const currentSerials = activeDevs.map(d => d.serial).join(',');
-
+    const activeDevs = devices.filter((d) => d.state === 'device');
+    const currentSerials = activeDevs.map((d) => d.serial).join(',');
     if (activeDevs.length > 0 && currentSerials !== prevSerialsRef.current) {
-      // Find newly added device
-      const newlyAdded = activeDevs.find(d => !prevSerialsRef.current.includes(d.serial)) || activeDevs[0];
+      const newlyAdded = activeDevs.find((d) => !prevSerialsRef.current.includes(d.serial)) || activeDevs[0];
       setDetectedToast(newlyAdded);
     }
     prevSerialsRef.current = currentSerials;
   }, [devices]);
 
-  // Launch scrcpy and switch to projection
-  const handleConfirmTransmit = async () => {
+  const handleConfirmTransmit = () => {
     if (!detectedToast) return;
-    const targetSerial = detectedToast.serial;
+    onSelectSerial(detectedToast.serial);
     setDetectedToast(null);
-    onSelectSerial(targetSerial);
     onNavigate('projection');
-
-    try {
-      await fetch('/api/actions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'open_screen',
-          serial: targetSerial,
-          maxSize: '1080',
-          maxFps: '60',
-          bitRate: '16M',
-          stayAwake: true,
-          alwaysOnTop: true,
-        }),
-      });
-      addLog(`Transmisión iniciada para ${detectedToast.model}`, 'success');
-    } catch {
-      addLog(`Error al iniciar transmisión`, 'error');
-    }
+    addLog(`Proyección activada para ${detectedToast.model}`, 'success');
   };
 
-  // Per-device transmission status tracking
-  const [activeStreams, setActiveStreams] = useState<Record<string, boolean>>({});
-
-  useEffect(() => {
-    if (!selectedSerial) return;
-    let mounted = true;
-
-    const checkStream = async () => {
-      if (typeof document !== 'undefined' && document.visibilityState === 'hidden') return;
-      try {
-        const res = await fetch('/api/actions', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'check_screen', serial: selectedSerial }),
-        });
-        const data = await res.json();
-        if (mounted && data.success) {
-          setActiveStreams(prev => ({ ...prev, [selectedSerial]: !!data.alive }));
-        }
-      } catch {}
-    };
-
-    checkStream();
-    const interval = setInterval(checkStream, 4000);
-    return () => {
-      mounted = false;
-      clearInterval(interval);
-    };
-  }, [selectedSerial]);
-
-  const handleToggleTransmit = async () => {
-    if (!selectedSerial) return;
-    const isCurrentlyActive = !!activeStreams[selectedSerial];
-    const dev = devices.find(d => d.serial === selectedSerial);
-    const devName = dev?.model || selectedSerial;
-
-    if (isCurrentlyActive) {
-      try {
-        await fetch('/api/actions', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'stop_screen', serial: selectedSerial }),
-        });
-        setActiveStreams(prev => ({ ...prev, [selectedSerial]: false }));
-        addLog(`Transmisión scrcpy detenida: ${devName}`, 'info');
-      } catch {
-        addLog(`Error al detener transmisión de ${devName}`, 'error');
-      }
-    } else {
-      try {
-        await fetch('/api/actions', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            action: 'open_screen',
-            serial: selectedSerial,
-            maxSize: '1080',
-            maxFps: '60',
-            bitRate: '16M',
-            stayAwake: true,
-            alwaysOnTop: true,
-          }),
-        });
-        setActiveStreams(prev => ({ ...prev, [selectedSerial]: true }));
-        addLog(`Transmisión scrcpy 60 FPS iniciada: ${devName}`, 'success');
-      } catch {
-        addLog(`Error al iniciar transmisión de ${devName}`, 'error');
-      }
-    }
-  };
-
-  const mainRef = useRef<HTMLElement>(null);
-
-  useEffect(() => {
-    if (mainRef.current) {
-      mainRef.current.scrollTop = 0;
-    }
-  }, [activeNav]);
-
+  useEffect(() => { if (mainRef.current) mainRef.current.scrollTop = 0; }, [activeNav]);
   useEffect(() => {
     const check = () => setViewportMedium(window.innerWidth >= BP_MED);
     check();
     window.addEventListener('resize', check);
     return () => window.removeEventListener('resize', check);
   }, []);
-
-  useEffect(() => {
-    if (!viewportMedium) setSidebarOpen(false);
-  }, [viewportMedium]);
+  useEffect(() => { if (!viewportMedium) setSidebarOpen(false); }, [viewportMedium]);
 
   return (
-    <div ref={sceneRef} suppressHydrationWarning className={`fixed inset-0 flex overflow-hidden ${isDark ? 'bg-zinc-950 text-zinc-100' : 'bg-slate-50 text-slate-900'}`}>
-      {/* ═══ SIDEBAR / DRAWER ═══ */}
+    <div suppressHydrationWarning className={`fixed inset-0 flex overflow-hidden ${isDark ? 'bg-zinc-950 text-zinc-100' : 'bg-slate-50 text-slate-900'}`}>
       {viewportMedium ? (
-        <Sidebar
-          activeNav={activeNav}
-          onSelectNav={onNavigate}
-          collapsed={!sidebarOpen}
-          onToggle={() => setSidebarOpen(p => !p)}
-        />
+        <Sidebar activeNav={activeNav} onSelectNav={onNavigate} collapsed={!sidebarOpen} onToggle={() => setSidebarOpen((p) => !p)} />
       ) : (
         sidebarOpen && (
           <div className="fixed inset-0 z-50 flex">
-            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" onClick={() => setSidebarOpen(false)} />
+            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setSidebarOpen(false)} />
             <div className="relative z-10 h-full shadow-2xl">
               <Sidebar activeNav={activeNav} onSelectNav={(n) => { onNavigate(n); setSidebarOpen(false); }} />
             </div>
@@ -213,7 +104,6 @@ export const AppShell: React.FC<AppShellProps> = ({
         )
       )}
 
-      {/* ═══ MAIN COLUMN ═══ */}
       <div className="flex flex-col flex-1 min-w-0 h-full overflow-hidden">
         <Header
           devices={devices}
@@ -223,7 +113,7 @@ export const AppShell: React.FC<AppShellProps> = ({
           onOpenConnectModal={() => setConnectModal(true)}
           isScanning={isScanning}
           onRefresh={onRefresh}
-          onToggleSidebar={() => setSidebarOpen(p => !p)}
+          onToggleSidebar={() => setSidebarOpen((p) => !p)}
           sidebarOpen={sidebarOpen}
           projectionActive={activeNav === 'projection'}
           onNavigateProjection={() => onNavigate('projection')}
@@ -238,40 +128,26 @@ export const AppShell: React.FC<AppShellProps> = ({
           rescueStatus={rescueSync.status}
           rescueMsg={rescueSync.lastSyncMsg}
           onToggleRescue={rescueSync.toggleRescueSync}
-          isTransmitting={!!activeStreams[selectedSerial]}
-          onToggleTransmit={handleToggleTransmit}
+          isTransmitting={isTransmitting}
+          onToggleTransmit={toggleTransmit}
         />
 
-        {/* ═══ AUTO-DETECTION CONFIRMATION TOAST BANNER ═══ */}
-        {detectedToast && activeNav !== 'projection' && (
-          <div className="fixed bottom-3 right-3 sm:absolute sm:top-14 sm:bottom-auto sm:right-4 z-40 flex items-center gap-3 px-3.5 py-2.5 rounded-xl bg-zinc-900/95 border border-zinc-700 text-white shadow-2xl backdrop-blur-md animate-in fade-in slide-in-from-top-2 duration-200 max-w-[calc(100vw-24px)]">
-            <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
-            <div className="text-xs">
-              <p className="font-bold text-white">Dispositivo detectado</p>
-              <p className="text-[10px] text-white/50">{detectedToast.model} ({detectedToast.connectionType})</p>
-            </div>
-            <button
-              onClick={handleConfirmTransmit}
-              className="px-3 py-1 rounded-lg bg-zinc-100 hover:bg-zinc-200 text-zinc-900 text-[11px] font-bold transition-all flex items-center gap-1 shadow-sm shrink-0"
-            >
-              <MonitorPlay size={12} />
-              <span>Transmitir Ahora (60 FPS)</span>
-            </button>
-            <button
-              onClick={() => setDetectedToast(null)}
-              className="p-1 text-white/40 hover:text-white transition-colors"
-              title="Cerrar notificación"
-            >
-              <X size={13} />
-            </button>
-          </div>
+        {activeNav !== 'projection' && (
+          <AutoDetectionToast
+            device={detectedToast}
+            onConfirm={handleConfirmTransmit}
+            onClose={() => setDetectedToast(null)}
+          />
         )}
 
-        <main ref={mainRef} className={`relative flex-1 min-h-0 min-w-0 overflow-x-hidden ${
-          activeNav === 'projection'
-            ? 'overflow-hidden p-0 flex flex-col'
-            : 'overflow-y-auto custom-scrollbar p-2 md:p-3'
-        } ${isDark ? '' : 'bg-white'}`}>
+        <main
+          ref={mainRef}
+          className={`relative flex-1 min-h-0 min-w-0 overflow-x-hidden ${
+            activeNav === 'projection'
+              ? 'overflow-hidden p-0 flex flex-col'
+              : 'overflow-y-auto custom-scrollbar p-2 md:p-3'
+          } ${isDark ? '' : 'bg-white'}`}
+        >
           {children}
         </main>
       </div>

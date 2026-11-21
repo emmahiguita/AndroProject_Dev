@@ -235,8 +235,8 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/lib/config.ts": {
-    "mtime": 1786418372.255677,
-    "ast_hash": "09e0e1e925bcdd163866608e285620da",
+    "mtime": 1795298657.9699752,
+    "ast_hash": "db710799725a2637f935c9c1f863a6b6",
     "semantic_hash": ""
   },
   "androproject-gui/src/services/contracts.ts": {
@@ -450,8 +450,8 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/components/layout/AppShell.tsx": {
-    "mtime": 1795287800.573688,
-    "ast_hash": "94c16c490eacc775da4d3c5cfaeec834",
+    "mtime": 1795299245.8152049,
+    "ast_hash": "8f66ca4b83a5124970590d78fa5d55fa",
     "semantic_hash": ""
   },
   "androproject-gui/src/components/layout/DeviceFrame.tsx": {
@@ -475,8 +475,8 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/lib/discovery.ts": {
-    "mtime": 1786159959.812235,
-    "ast_hash": "6805d36e6a9e4283ed403bf551172e04",
+    "mtime": 1795298651.929087,
+    "ast_hash": "6381a49b611a7340686d2373101369df",
     "semantic_hash": ""
   },
   "androproject-gui/src/lib/locks.ts": {
@@ -1280,8 +1280,8 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/lib/services/scrcpy-session-hub.ts": {
-    "mtime": 1795294405.335809,
-    "ast_hash": "e98219916a5bbba5695d12b963619065",
+    "mtime": 1795299159.4090314,
+    "ast_hash": "1e78f827318f72801102be665db05de9",
     "semantic_hash": ""
   },
   "androproject-gui/src/lib/services/scrcpy-protocol.ts": {
@@ -1367,6 +1367,16 @@
   "androproject-gui/src/components/layout/DeviceManagerDropdown.tsx": {
     "mtime": 1795296610.5868344,
     "ast_hash": "10536a3393629913b67754f43328456e",
+    "semantic_hash": ""
+  },
+  "androproject-gui/src/components/layout/AutoDetectionToast.tsx": {
+    "mtime": 1795299223.1797745,
+    "ast_hash": "5dc07a6d918b4ed2ba37dbc45a26d975",
+    "semantic_hash": ""
+  },
+  "androproject-gui/src/components/layout/useStreamTracker.ts": {
+    "mtime": 1795299232.0036757,
+    "ast_hash": "3117ccc3c78ca7a591f1ee4cf1f7519a",
     "semantic_hash": ""
   }
 }

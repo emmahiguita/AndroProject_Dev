@@ -13,6 +13,7 @@ export {
 
 export {
   ANDROPROJECT_BIN,
+  SCRCPY_SERVER_PATH,
 } from './discovery';
 
 export {
@@ -23,9 +24,6 @@ export {
 } from './locks';
 
 // ── Constantes simples (solo env vars, no lógica) ────────────────
-export const SCRCPY_SERVER_PATH =
-  process.env.ANDROPROJECT_SERVER_PATH || 'AndroProject-server';
-
 export const SCRCPY_ICON_PATH =
   process.env.ANDROPROJECT_ICON_PATH || 'AndroProject.png';
 

@@ -60,18 +60,24 @@ function startSession(serial: string): ActiveSession {
   if (fs.existsSync(SCRCPY_SERVER_PATH)) {
     try {
       execFileSync(ADB, ['-s', serial, 'push', SCRCPY_SERVER_PATH, '/data/local/tmp/scrcpy-server.jar'], { windowsHide: true, timeout: 4000 });
-    } catch {}
+    } catch {
+      try { execFileSync(ADB, ['reconnect', 'offline'], { windowsHide: true, timeout: 2500 }); } catch {}
+    }
   }
-  execFileSync(ADB, ['-s', serial, 'forward', `tcp:${port}`, `localabstract:scrcpy_${scid}`], { windowsHide: true, timeout: 3000 });
+  try {
+    execFileSync(ADB, ['-s', serial, 'forward', `tcp:${port}`, `localabstract:scrcpy_${scid}`], { windowsHide: true, timeout: 3000 });
+  } catch {
+    execFileSync(ADB, ['reconnect', 'offline'], { windowsHide: true, timeout: 2500 });
+    execFileSync(ADB, ['-s', serial, 'forward', `tcp:${port}`, `localabstract:scrcpy_${scid}`], { windowsHide: true, timeout: 3000 });
+  }
 
   const srvProc = spawn(ADB, [
     '-s', serial, 'shell',
     'CLASSPATH=/data/local/tmp/scrcpy-server.jar',
     'app_process', '/', 'com.genymobile.scrcpy.Server', '4.1',
-    `scid=${scid}`, 'cleanup=false', 'tunnel_forward=true', 'audio=false', 'control=true',
-    'send_device_meta=false', 'send_frame_meta=true', 'send_dummy_byte=true',
-    'video_codec=h264', 'max_size=1600', 'max_fps=60', 'video_bit_rate=12000000',
-    'video_codec_options=profile=1,i-frame-interval=1,repeat-previous-frame-after=100000',
+    `scid=${scid}`, 'log_level=info', 'tunnel_forward=true', 'audio=false', 'control=true',
+    'cleanup=false', 'max_size=1080', 'max_fps=60', 'video_bit_rate=8000000',
+    'stay_awake=true',
   ], { windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'] });
 
   let readyResolve!: () => void;
@@ -103,10 +109,11 @@ function startSession(serial: string): ActiveSession {
     vSock.on('data', (chunk: Buffer) => {
       buf = buf.length === 0 ? Buffer.from(chunk) : Buffer.concat([buf, chunk]);
       if (!gotDummy && buf.length >= 1) { gotDummy = true; buf = buf.subarray(1); }
-      if (gotDummy && !gotHeader && buf.length >= 16) {
-        session.width = buf.readUInt32BE(8);
-        session.height = buf.readUInt32BE(12);
-        buf = buf.subarray(16);
+      // scrcpy 4.1 tunnel_forward: 1B dummy, luego 64B device + 4B codec + 4B flags + 4B width + 4B height
+      if (gotDummy && !gotHeader && buf.length >= 80) {
+        session.width = buf.readUInt32BE(72) || 486;
+        session.height = buf.readUInt32BE(76) || 1080;
+        buf = buf.subarray(80);
         gotHeader = true;
         session.readyResolve?.();
       }
