@@ -124,8 +124,23 @@ Write-Host "[4/5] Compilando Instalador_AndroProject.exe con IExpress..." -Foreg
 Start-Process -FilePath "iexpress.exe" -ArgumentList "/N /Q installer.sed" -Wait -NoNewWindow
 if (Test-Path "$OutputDir\Instalador_AndroProject.exe") {
     Copy-Item "$OutputDir\Instalador_AndroProject.exe" "$OutputDir\Instalador_ANDRO-IOS.exe" -Force
-    $ExeSize = [math]::Round((Get-Item "$OutputDir\Instalador_ANDRO-IOS.exe").Length / 1MB, 2)
-    Write-Host "      > Instalador_ANDRO-IOS.exe creado ($ExeSize MB)" -ForegroundColor Green
+    $TargetExe = "$OutputDir\Instalador_ANDRO-IOS.exe"
+    # Firma Authenticode oficial cuando existe certificado CA en variables de entorno
+    if ($env:SIGN_CERT_PFX -and (Test-Path $env:SIGN_CERT_PFX)) {
+        $cert = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2($env:SIGN_CERT_PFX, $env:SIGN_CERT_PASS)
+        Set-AuthenticodeSignature -FilePath $TargetExe -Certificate $cert -HashAlgorithm SHA256 -TimestampServer "http://timestamp.digicert.com" | Out-Null
+        Write-Host "      > Instalador firmado con Authenticode (PFX)." -ForegroundColor Green
+    } elseif ($env:SIGN_CERT_THUMBPRINT) {
+        $cert = Get-ChildItem "Cert:\CurrentUser\My\$($env:SIGN_CERT_THUMBPRINT)" -ErrorAction SilentlyContinue
+        if ($cert) {
+            Set-AuthenticodeSignature -FilePath $TargetExe -Certificate $cert -HashAlgorithm SHA256 -TimestampServer "http://timestamp.digicert.com" | Out-Null
+            Write-Host "      > Instalador firmado con Authenticode (Store)." -ForegroundColor Green
+        }
+    }
+    $hash = (Get-FileHash $TargetExe -Algorithm SHA256).Hash.ToLower()
+    "$hash  Instalador_ANDRO-IOS.exe" | Set-Content -Encoding ASCII "$OutputDir\SHA256SUMS.txt"
+    $ExeSize = [math]::Round((Get-Item $TargetExe).Length / 1MB, 2)
+    Write-Host "      > Instalador_ANDRO-IOS.exe creado ($ExeSize MB) | SHA256: $hash" -ForegroundColor Green
 } else {
     Write-Host "      ERROR: No se genero el .exe. Revisa installer.sed" -ForegroundColor Red
     exit 1

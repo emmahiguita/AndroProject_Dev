@@ -1,0 +1,59 @@
+name: Build & Sign ANDRO-IOS Windows Release
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup Rust stable
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install & build Next.js standalone
+        working-directory: androproject-gui
+        run: |
+          npm ci
+          npm run build
+          New-Item -ItemType Directory -Force -Path ".next\standalone\.next\static", ".next\standalone\public" | Out-Null
+          Copy-Item ".next\static\*" ".next\standalone\.next\static\" -Recurse -Force
+          Copy-Item "public\*" ".next\standalone\public\" -Recurse -Force
+
+      - name: Build Tauri native binary
+        working-directory: androproject-gui/src-tauri
+        run: cargo build --release
+
+      - name: Decode Code Signing Certificate (if configured)
+        if: ${{ secrets.WINDOWS_CERT_BASE64 != '' }}
+        shell: pwsh
+        run: |
+          [IO.File]::WriteAllBytes("cert.pfx", [Convert]::FromBase64String("${{ secrets.WINDOWS_CERT_BASE64 }}"))
+          "SIGN_CERT_PFX=$((Resolve-Path cert.pfx).Path)" | Out-File -FilePath $env:GITHUB_ENV -Append
+          "SIGN_CERT_PASS=${{ secrets.WINDOWS_CERT_PASSWORD }}" | Out-File -FilePath $env:GITHUB_ENV -Append
+
+      - name: Build Windows Installer (.exe + SHA256SUMS.txt)
+        shell: pwsh
+        run: |
+          powershell -ExecutionPolicy Bypass -File ".\AndroProject_Installer\build.ps1" -SkipTauriBuild
+
+      - name: Publish Release Assets
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            AndroProject_Installer/output/Instalador_ANDRO-IOS.exe
+            AndroProject_Installer/output/SHA256SUMS.txt
