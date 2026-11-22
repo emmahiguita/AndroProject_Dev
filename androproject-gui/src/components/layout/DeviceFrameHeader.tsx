@@ -10,7 +10,7 @@
 'use client';
 
 import React from 'react';
-import { MonitorPlay, Minus, Square, Minimize2, Maximize2, ExternalLink } from 'lucide-react';
+import { MonitorPlay, Circle, Square as StopSquare, Minus, Square, Minimize2, Maximize2, ExternalLink } from 'lucide-react';
 import type { DeviceInfo } from '../../features/types';
 
 interface DeviceFrameHeaderProps {
@@ -18,6 +18,9 @@ interface DeviceFrameHeaderProps {
   isIos: boolean;
   scrcpyActive?: boolean;
   onToggleScrcpy?: () => void;
+  isRecording?: boolean;
+  recordingSeconds?: number;
+  onToggleRecord?: () => void;
   currentFps: number;
   minimized: boolean;
   isFullscreen: boolean;
@@ -29,9 +32,11 @@ interface DeviceFrameHeaderProps {
 const CTRL_BTN =
   'w-6 h-6 rounded-md border border-zinc-800 bg-zinc-900/70 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 flex items-center justify-center transition-colors cursor-pointer';
 
+const fmtTime = (secs = 0) => `${Math.floor(secs / 60).toString().padStart(2, '0')}:${(secs % 60).toString().padStart(2, '0')}`;
+
 export const DeviceFrameHeader: React.FC<DeviceFrameHeaderProps> = ({
-  device, isIos, scrcpyActive, onToggleScrcpy, currentFps,
-  minimized, isFullscreen, onToggleMinimize, onToggleMaximize, onOpenPopout,
+  device, isIos, scrcpyActive, onToggleScrcpy, isRecording, recordingSeconds = 0, onToggleRecord,
+  currentFps, minimized, isFullscreen, onToggleMinimize, onToggleMaximize, onOpenPopout,
 }) => {
   const isDisconnected = device.state !== 'device';
 
@@ -51,6 +56,22 @@ export const DeviceFrameHeader: React.FC<DeviceFrameHeaderProps> = ({
       </div>
 
       <div className="flex items-center gap-1.5 shrink-0">
+        {onToggleRecord && !isIos && (
+          <button
+            type="button"
+            onClick={onToggleRecord}
+            title={isRecording ? 'Detener grabación MP4' : 'Grabar pantalla en MP4'}
+            className={`flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-lg border transition-colors cursor-pointer ${
+              isRecording
+                ? 'bg-rose-950/70 text-rose-300 border-rose-700/70 hover:bg-rose-900/70 animate-pulse'
+                : 'bg-zinc-800/80 text-zinc-200 border-zinc-700/50 hover:bg-zinc-700'
+            }`}
+          >
+            {isRecording ? <StopSquare size={10} fill="currentColor" /> : <Circle size={10} fill="currentColor" className="text-rose-400" />}
+            <span>{isRecording ? `REC ${fmtTime(recordingSeconds)}` : 'Grabar'}</span>
+          </button>
+        )}
+
         {onToggleScrcpy && !isIos && (
           <button
             type="button"

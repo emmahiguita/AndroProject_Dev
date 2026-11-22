@@ -18,13 +18,16 @@ import {
 } from 'lucide-react';
 import { ToolButton } from './DeviceInfoPrimitives';
 
+import type { RecordActionResult } from '@/hooks/useProjectionTypes';
+
 interface ProjectionToolsCardProps {
   dark: boolean;
   cardStyle: string;
   isRecording: boolean;
   recordingSeconds: number;
+  lastRecordedPath?: string | null;
   isBusy: boolean;
-  onToggleRecord: () => void;
+  onToggleRecord: () => Promise<RecordActionResult> | void;
   onSetOrientation: (mode: 'auto' | 'portrait' | 'landscape') => void;
   onPasteClipboard: () => void;
   onScreenshotClick: () => void;
@@ -49,7 +52,7 @@ const formatTime = (secs: number) => {
 };
 
 export const ProjectionToolsCard: React.FC<ProjectionToolsCardProps> = ({
-  dark, cardStyle, isRecording, recordingSeconds, isBusy,
+  dark, cardStyle, isRecording, recordingSeconds, lastRecordedPath, isBusy,
   onToggleRecord, onSetOrientation, onPasteClipboard, onScreenshotClick,
   onOpenAllApps, onExpandNotifications, onExpandQuickSettings, onTogglePowerScreen,
   onWakeScreen, onOpenSettings, onToggleMute, onMediaPlayPause, onCollapsePanels,
@@ -58,6 +61,14 @@ export const ProjectionToolsCard: React.FC<ProjectionToolsCardProps> = ({
   const orientBtnCls = `py-1.5 rounded-lg text-[10px] font-medium border transition-colors text-center cursor-pointer ${
     dark ? 'bg-zinc-900/60 border-zinc-800 text-zinc-300 hover:bg-zinc-800 hover:text-zinc-100' : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
   }`;
+
+  const handleRecordClick = async () => {
+    showToast(isRecording ? 'Deteniendo y guardando MP4...' : 'Iniciando grabación MP4...');
+    const res = await onToggleRecord();
+    if (res && typeof res === 'object') {
+      showToast(res.message || (res.recording ? 'Grabación MP4 en curso' : 'Grabación finalizada'), !res.success);
+    }
+  };
 
   return (
     <>
@@ -78,17 +89,23 @@ export const ProjectionToolsCard: React.FC<ProjectionToolsCardProps> = ({
 
         <button
           type="button"
-          onClick={onToggleRecord}
+          onClick={handleRecordClick}
           disabled={isBusy}
-          className={`w-full flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
+          className={`w-full flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-semibold transition-colors cursor-pointer disabled:opacity-50 ${
             isRecording
-              ? 'bg-zinc-800 border border-zinc-700 text-rose-300 hover:bg-zinc-700'
+              ? 'bg-rose-950/60 border border-rose-700/70 text-rose-300 hover:bg-rose-900/60'
               : 'bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700'
           }`}
         >
-          {isRecording ? <Square size={12} fill="currentColor" /> : <Circle size={12} fill="currentColor" />}
-          <span>{isRecording ? 'Detener Grabación' : 'Iniciar Grabación (MP4)'}</span>
+          {isRecording ? <Square size={12} fill="currentColor" /> : <Circle size={12} fill="currentColor" className="text-rose-400" />}
+          <span>{isRecording ? `Detener Grabación (${formatTime(recordingSeconds)})` : 'Grabar Pantalla (MP4)'}</span>
         </button>
+
+        {lastRecordedPath && !isRecording && (
+          <p className="text-[10px] font-mono text-emerald-400 truncate" title={lastRecordedPath}>
+            Guardado: {lastRecordedPath.split(/[\\/]/).pop()}
+          </p>
+        )}
       </div>
 
       <div className={`rounded-xl border p-3.5 ${cardStyle} space-y-2.5`}>

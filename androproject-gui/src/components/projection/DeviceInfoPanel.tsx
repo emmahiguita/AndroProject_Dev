@@ -16,6 +16,7 @@ import { CheckCircle2, AlertCircle } from 'lucide-react';
 import { useActions } from '@/hooks/useActions';
 import type { DeviceInfo } from '@/features/types';
 import type { ScrcpyOptions } from '@/hooks/useProjection';
+import type { RecordActionResult } from '@/hooks/useProjectionTypes';
 import { AirPlayStudioCard } from './AirPlayStudioCard';
 import { VisionNanoStudioCard } from './VisionNanoStudioCard';
 import { ProjectionToolsCard } from './ProjectionToolsCard';
@@ -29,7 +30,8 @@ interface DeviceInfoPanelProps {
   setScrcpyOptions: React.Dispatch<React.SetStateAction<ScrcpyOptions>>;
   isRecording: boolean;
   recordingSeconds: number;
-  onToggleRecord: () => void;
+  lastRecordedPath?: string | null;
+  onToggleRecord: () => Promise<RecordActionResult> | void;
   onScreenshot: () => Promise<string | null> | void;
   onPowerOff: () => void;
   onReboot: () => void;
@@ -124,7 +126,7 @@ export const DeviceInfoPanel: React.FC<DeviceInfoPanelProps> = (props) => {
           />
           <ProjectionToolsCard
             dark={dark} cardStyle={cardStyle} isRecording={props.isRecording}
-            recordingSeconds={props.recordingSeconds} isBusy={props.isBusy}
+            recordingSeconds={props.recordingSeconds} lastRecordedPath={props.lastRecordedPath} isBusy={props.isBusy}
             onToggleRecord={props.onToggleRecord} onSetOrientation={props.onSetOrientation}
             onPasteClipboard={handlePasteClipboard} onScreenshotClick={handleScreenshotClick}
             onOpenAllApps={props.onOpenAllApps} onExpandNotifications={props.onExpandNotifications}

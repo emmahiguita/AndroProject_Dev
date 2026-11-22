@@ -85,6 +85,8 @@ export function ProjectionView({ device }: { device?: DeviceInfo | null }) {
           dark={dark}
           scrcpyActive={projection.scrcpyActive}
           isRecording={projection.isRecording}
+          recordingSeconds={projection.recordingSeconds}
+          onToggleRecord={projection.toggleRecord}
           fullscreen={projection.fullscreen}
           minimized={frameMinimized}
           deviceLabel={device.model || device.serial}
@@ -129,6 +131,9 @@ export function ProjectionView({ device }: { device?: DeviceInfo | null }) {
                     onSendKey={projection.sendKey}
                     scrcpyActive={projection.scrcpyActive}
                     onToggleScrcpy={projection.toggleScrcpy}
+                    isRecording={projection.isRecording}
+                    recordingSeconds={projection.recordingSeconds}
+                    onToggleRecord={projection.toggleRecord}
                     minimized={frameMinimized}
                     onToggleMinimize={() => setFrameMinimized((m) => !m)}
                   />
@@ -165,7 +170,8 @@ export function ProjectionView({ device }: { device?: DeviceInfo | null }) {
                   <DeviceInfoPanel
                     device={device} dark={dark} scrcpyActive={projection.scrcpyActive} onToggleScrcpy={projection.toggleScrcpy}
                     scrcpyOptions={projection.scrcpyOptions} setScrcpyOptions={projection.setScrcpyOptions}
-                    isRecording={projection.isRecording} recordingSeconds={projection.recordingSeconds} onToggleRecord={projection.toggleRecord}
+                    isRecording={projection.isRecording} recordingSeconds={projection.recordingSeconds}
+                    lastRecordedPath={projection.lastRecordedPath} onToggleRecord={projection.toggleRecord}
                     onScreenshot={projection.screenshot} onPowerOff={projection.powerOff} onReboot={projection.reboot}
                     onTogglePowerScreen={projection.togglePowerScreen} onWakeScreen={projection.wakeScreen} onOpenAllApps={projection.openAllApps}
                     onToggleMute={projection.toggleMute} onMediaPlayPause={projection.mediaPlayPause} onOpenSettings={projection.openSettings}

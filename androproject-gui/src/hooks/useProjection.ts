@@ -18,6 +18,7 @@ import { useProjectionActions } from './useProjectionActions';
 import type { DeviceInfo } from '@/features/types';
 import {
   DEFAULT_SCRCPY_OPTIONS,
+  type RecordActionResult,
   type ScrcpyOptions,
   type UseProjectionReturn,
 } from './useProjectionTypes';
@@ -37,6 +38,7 @@ export function useProjection(device: DeviceInfo | null | undefined): UseProject
 
   const [isRecording, setIsRecording] = useState(false);
   const [recordingSeconds, setRecordingSeconds] = useState(0);
+  const [lastRecordedPath, setLastRecordedPath] = useState<string | null>(null);
   const recordTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const autoStartingRef = useRef(false);
   const prevDeviceSerialRef = useRef<string | undefined>(undefined);
@@ -75,21 +77,15 @@ export function useProjection(device: DeviceInfo | null | undefined): UseProject
 
   // Sincroniza estado de grabación activa al montar o cambiar de dispositivo
   useEffect(() => {
-    stopRecordTimer();
-    setIsRecording(false);
-    setRecordingSeconds(0);
+    stopRecordTimer(); setIsRecording(false); setRecordingSeconds(0);
     if (!serial || isIos) return;
-
     let isMounted = true;
     run('check_record', '', { serial }, false).then((res: any) => {
       if (!isMounted || !res?.recording) return;
-      const elapsed = typeof res.startedAt === 'number'
-        ? Math.max(0, Math.floor((Date.now() - res.startedAt) / 1000))
-        : 0;
-      setIsRecording(true);
-      startRecordTimer(elapsed);
+      const elapsed = typeof res.startedAt === 'number' ? Math.max(0, Math.floor((Date.now() - res.startedAt) / 1000)) : 0;
+      setIsRecording(true); startRecordTimer(elapsed);
+      if (typeof res.recordPath === 'string') setLastRecordedPath(res.recordPath);
     }).catch(() => {});
-
     return () => { isMounted = false; };
   }, [serial, isIos, run, startRecordTimer, stopRecordTimer]);
 
@@ -98,15 +94,11 @@ export function useProjection(device: DeviceInfo | null | undefined): UseProject
     if (!autoProject || !serial || scrcpyActive || autoStartingRef.current || isBusy) return;
     if (prevDeviceSerialRef.current === serial) return;
     prevDeviceSerialRef.current = serial;
-
     autoStartingRef.current = true;
-    run('open_screen', 'Auto-proyección detectada...', {
-      serial, ...scrcpyOptions,
-    }).then((res: any) => {
-      if (res?.success) setScrcpyActive(true);
-    }).catch(() => {}).finally(() => {
-      autoStartingRef.current = false;
-    });
+    run('open_screen', 'Auto-proyección detectada...', { serial, ...scrcpyOptions })
+      .then((res: any) => { if (res?.success) setScrcpyActive(true); })
+      .catch(() => {})
+      .finally(() => { autoStartingRef.current = false; });
   }, [autoProject, serial, scrcpyActive, isBusy, scrcpyOptions, run]);
 
   useEffect(() => () => stopRecordTimer(), [stopRecordTimer]);
@@ -117,53 +109,64 @@ export function useProjection(device: DeviceInfo | null | undefined): UseProject
     try {
       const data = await run('connect_adb', `Conectando a ${target}`, { target }, false);
       return { success: Boolean(data?.success), message: data?.message || data?.error };
-    } catch {
-      return { success: false, message: 'Error de conexión de red' };
-    } finally {
-      setIsConnecting(false);
-    }
+    } catch { return { success: false, message: 'Error de conexión de red' }; }
+    finally { setIsConnecting(false); }
   }, [run]);
 
   const toggleScrcpy = useCallback(async (customOpts?: Partial<ScrcpyOptions>) => {
     if (!serial) return;
     setIsBusy(true);
-    const opts = { ...scrcpyOptions, ...customOpts };
     try {
       if (scrcpyActive) {
         await run('stop_screen', 'Deteniendo scrcpy', { serial });
         setScrcpyActive(false);
       } else {
-        const res = await run('open_screen', 'Iniciando AndroProject nativo 60 FPS...', {
-          serial, ...opts,
-        });
+        const res = await run('open_screen', 'Iniciando AndroProject nativo 60 FPS...', { serial, ...scrcpyOptions, ...customOpts });
         if (res?.success) setScrcpyActive(true);
       }
-    } finally {
-      setIsBusy(false);
-    }
+    } finally { setIsBusy(false); }
   }, [scrcpyActive, scrcpyOptions, serial, run]);
 
-  const toggleRecord = useCallback(async () => {
-    if (!serial || isIos) return;
+  const toggleRecord = useCallback(async (): Promise<RecordActionResult> => {
+    if (!serial) return { success: false, recording: false, message: 'Sin dispositivo conectado' };
+    if (isIos) return { success: false, recording: false, message: 'Grabación scrcpy disponible para Android (ADB)' };
     setIsBusy(true);
     try {
       if (isRecording) {
         stopRecordTimer();
-        await run('stop_record', 'Deteniendo grabación...', { serial });
+        const res = await run('stop_record', 'Deteniendo grabación...', { serial });
         setIsRecording(false);
         setRecordingSeconds(0);
-      } else {
-        const res = await run('start_record', 'Iniciando grabación HD silenciosa...', {
-          serial,
-          videoSource: scrcpyOptions.videoSource,
-          bitRate: scrcpyOptions.bitRate,
-          maxFps: scrcpyOptions.maxFps,
-        });
-        if (res?.success) {
-          setIsRecording(true);
-          startRecordTimer(0);
-        }
+        const saved = typeof res?.recordPath === 'string' ? res.recordPath : null;
+        if (saved) setLastRecordedPath(saved);
+        return {
+          success: Boolean(res?.success),
+          recording: false,
+          message: res?.message || (saved ? `Grabación guardada: ${saved}` : 'Grabación detenida'),
+          recordPath: saved,
+        };
       }
+      const res = await run('start_record', 'Iniciando grabación HD silenciosa...', {
+        serial,
+        videoSource: scrcpyOptions.videoSource,
+        bitRate: scrcpyOptions.bitRate,
+        maxFps: scrcpyOptions.maxFps,
+      });
+      if (res?.success) {
+        setIsRecording(true);
+        startRecordTimer(0);
+        return {
+          success: true,
+          recording: true,
+          message: res.message || 'Grabación MP4 en curso',
+          recordPath: res.recordPath ?? null,
+        };
+      }
+      return {
+        success: false,
+        recording: false,
+        message: res?.error || 'No se pudo iniciar la grabación',
+      };
     } finally {
       setIsBusy(false);
     }
@@ -179,7 +182,7 @@ export function useProjection(device: DeviceInfo | null | undefined): UseProject
 
   return {
     scrcpyActive, toggleScrcpy, scrcpyOptions, setScrcpyOptions,
-    fullscreen, toggleFullscreen, isRecording, recordingSeconds, toggleRecord,
+    fullscreen, toggleFullscreen, isRecording, recordingSeconds, lastRecordedPath, toggleRecord,
     isBusy, connectAdb, isConnecting, autoProject, setAutoProject,
     ...actions,
   };

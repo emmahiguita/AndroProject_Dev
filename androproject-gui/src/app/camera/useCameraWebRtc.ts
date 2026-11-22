@@ -125,16 +125,14 @@ export function useCameraWebRtc() {
   }, [addLog, resetMetrics]);
 
   const startRecording = useCallback(() => {
-    const remoteStream = remoteStreamRef.current;
-    if (!remoteStream || remoteStream.getVideoTracks().length === 0) {
-      addLog('Aun no hay video remoto disponible para grabar.');
-      return;
-    }
+    const remote = remoteStreamRef.current;
+    const hasRemote = Boolean(remote && remote.getVideoTracks().some((t) => t.readyState === 'live'));
+    const target = hasRemote ? remote : streamRef.current;
+    if (!target || target.getVideoTracks().length === 0) { addLog('Inicia la cámara antes de grabar video.'); return; }
     try {
-      startWebmRecording(remoteStream, mediaRecorderRef, recordedChunksRef, setIsRecording, addLog);
-    } catch (error: unknown) {
-      addLog(`No se pudo iniciar la grabación: ${getCameraErrorMessage(error)}`);
-    }
+      startWebmRecording(target, mediaRecorderRef, recordedChunksRef, setIsRecording, addLog);
+      addLog(hasRemote ? 'Grabando stream remoto procesado (WebM)...' : 'Grabando stream local de cámara (WebM)...');
+    } catch (e: unknown) { addLog(`No se pudo iniciar la grabación: ${getCameraErrorMessage(e)}`); }
   }, [addLog]);
 
   const establishConnection = useCallback(async () => {

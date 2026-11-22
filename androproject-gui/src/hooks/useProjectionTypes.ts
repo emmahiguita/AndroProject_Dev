@@ -22,6 +22,13 @@ export interface ScrcpyOptions {
   enableAudio?: boolean;
 }
 
+export interface RecordActionResult {
+  success: boolean;
+  recording: boolean;
+  message?: string;
+  recordPath?: string | null;
+}
+
 export interface UseProjectionReturn {
   scrcpyActive: boolean;
   toggleScrcpy: (customOpts?: Partial<ScrcpyOptions>) => Promise<void>;
@@ -33,7 +40,8 @@ export interface UseProjectionReturn {
   screenshot: () => Promise<string | null>;
   isRecording: boolean;
   recordingSeconds: number;
-  toggleRecord: () => Promise<void>;
+  lastRecordedPath: string | null;
+  toggleRecord: () => Promise<RecordActionResult>;
   powerOff: () => Promise<void>;
   reboot: () => Promise<void>;
   volumeUp: () => Promise<void>;

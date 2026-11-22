@@ -11,12 +11,14 @@
 'use client';
 
 import React from 'react';
-import { Maximize, Minimize, LayoutGrid, Maximize2 } from 'lucide-react';
+import { Maximize, Minimize, LayoutGrid, Maximize2, Circle, Square } from 'lucide-react';
 
 interface ProjectionToolbarProps {
   dark: boolean;
   scrcpyActive: boolean;
   isRecording: boolean;
+  recordingSeconds?: number;
+  onToggleRecord?: () => void;
   fullscreen: boolean;
   minimized: boolean;
   deviceLabel: string;
@@ -28,8 +30,10 @@ interface ProjectionToolbarProps {
   onToggleFullscreen: () => void;
 }
 
+const fmtTime = (secs = 0) => `${Math.floor(secs / 60).toString().padStart(2, '0')}:${(secs % 60).toString().padStart(2, '0')}`;
+
 export const ProjectionToolbar: React.FC<ProjectionToolbarProps> = ({
-  dark, scrcpyActive, isRecording, fullscreen, minimized, deviceLabel,
+  dark, scrcpyActive, isRecording, recordingSeconds = 0, onToggleRecord, fullscreen, minimized, deviceLabel,
   multiScreenEnabled, deviceCount, onRestoreMinimize, onProjectAll,
   onToggleMultiScreen, onToggleFullscreen,
 }) => {
@@ -61,7 +65,21 @@ export const ProjectionToolbar: React.FC<ProjectionToolbarProps> = ({
         </span>
       )}
 
-      {isRecording && (
+      {onToggleRecord ? (
+        <button
+          type="button"
+          onClick={onToggleRecord}
+          title={isRecording ? 'Detener grabación MP4' : 'Iniciar grabación MP4'}
+          className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-semibold transition-colors cursor-pointer ${
+            isRecording
+              ? 'bg-rose-950/70 border-rose-700/70 text-rose-300 hover:bg-rose-900/70 animate-pulse'
+              : btnCls
+          }`}
+        >
+          {isRecording ? <Square size={11} fill="currentColor" /> : <Circle size={11} fill="currentColor" className="text-rose-400" />}
+          <span>{isRecording ? `REC ${fmtTime(recordingSeconds)}` : 'Grabar'}</span>
+        </button>
+      ) : isRecording && (
         <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-zinc-900 border border-zinc-700 text-[9px] font-bold text-red-400 animate-pulse">
           ● REC
         </span>

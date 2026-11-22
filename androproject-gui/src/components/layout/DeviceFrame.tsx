@@ -30,12 +30,16 @@ interface DeviceFrameProps {
   onSendKey?: (keycode: string) => void;
   scrcpyActive?: boolean;
   onToggleScrcpy?: () => void;
+  isRecording?: boolean;
+  recordingSeconds?: number;
+  onToggleRecord?: () => void;
   minimized?: boolean;
   onToggleMinimize?: () => void;
 }
 
 export const DeviceFrame: React.FC<DeviceFrameProps> = ({
   device, expanded, onSendKey, scrcpyActive, onToggleScrcpy,
+  isRecording, recordingSeconds, onToggleRecord,
   minimized: propMinimized, onToggleMinimize,
 }) => {
   const { run } = useActions();
@@ -135,6 +139,7 @@ export const DeviceFrame: React.FC<DeviceFrameProps> = ({
     <div ref={containerRef} className="flex flex-col flex-1 min-h-0 min-w-0 bg-zinc-950 outline-none">
       <DeviceFrameHeader
         device={device} isIos={isIos} scrcpyActive={scrcpyActive} onToggleScrcpy={onToggleScrcpy}
+        isRecording={isRecording} recordingSeconds={recordingSeconds} onToggleRecord={onToggleRecord}
         currentFps={currentFps} minimized={minimized} isFullscreen={isFullscreen}
         onToggleMinimize={toggleMinimize} onToggleMaximize={toggleMaximize} onOpenPopout={openIndependentPopout}
       />

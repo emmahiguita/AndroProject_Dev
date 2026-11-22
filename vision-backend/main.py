@@ -1,12 +1,22 @@
-import uvicorn
+# ============================================================================
+# ARCHIVO: main.py
+# QUÉ HACE: Punto de entrada FastAPI para el servidor Vision Backend (WebRTC,
+#           healthcheck y WebSocket de runtime).
+# CÓMO FUNCIONA: Configura CORS por entorno, monta `/vision/offer` y usa
+#           `lifespan` para cerrar todas las conexiones WebRTC al apagar.
+# POR QUÉ: Evitar sockets/tareas zombis en shutdown y mantener código limpio.
+# ============================================================================
+
 import logging
+import os
 from contextlib import asynccontextmanager
-from fastapi import FastAPI
+import uvicorn
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from api.routes import router as api_router
+from ingest.webrtc import close_all_connections, get_active_connection_count
 from processing.denoise import CUDA_AVAILABLE
 
-# Configurar logging estructurado
 logging.basicConfig(
     level=logging.INFO,
     format="[%(asctime)s] %(levelname)-7s %(name)s | %(message)s",
@@ -17,7 +27,7 @@ logger = logging.getLogger("vision-backend")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """CORREGIDO: lifespan en lugar de @app.on_event (deprecado en FastAPI)."""
+    """Gestiona inicio y cierre determinista de recursos WebRTC."""
     logger.info("=" * 60)
     logger.info("AndroProject Vision Backend v2.1.0 iniciando...")
     logger.info(f"GPU/CUDA: {'HABILITADO' if CUDA_AVAILABLE else 'CPU ONLY'}")
@@ -26,7 +36,8 @@ async def lifespan(app: FastAPI):
     logger.info("Audio: WebRTC pass-through (AudioPassThroughTrack)")
     logger.info("=" * 60)
     yield
-    logger.info("Vision Backend detenido.")
+    await close_all_connections()
+    logger.info("Vision Backend detenido limpiamente.")
 
 
 app = FastAPI(
@@ -35,13 +46,6 @@ app = FastAPI(
     version="2.1.0",
     lifespan=lifespan,
 )
-
-# ═══════════════════════════════════════════════════════════════════════════
-# CORS: lee FRONTEND_ORIGIN del entorno, o permite explícitamente las URLs
-# de desarrollo local. En producción, configurar FRONTEND_ORIGIN en las
-# variables de entorno (p. ej. https://androproject.mi-dominio.com).
-# ═══════════════════════════════════════════════════════════════════════════
-import os
 
 _CORS_ORIGINS = os.environ.get(
     "FRONTEND_ORIGIN",
@@ -68,9 +72,7 @@ async def root():
 
 @app.get("/health")
 async def health_check():
-    """Endpoint de salud: CUDA, WebRTC, métricas básicas."""
-    from ingest.webrtc import get_active_connection_count
-
+    """Endpoint de salud: estado CUDA/CPU y conexiones WebRTC activas."""
     return {
         "status": "healthy",
         "gpu": {
@@ -84,8 +86,6 @@ async def health_check():
         "version": "2.1.0",
     }
 
-
-from fastapi import WebSocket, WebSocketDisconnect
 
 @app.websocket("/ws/browser-runtime")
 async def websocket_browser_runtime(websocket: WebSocket):

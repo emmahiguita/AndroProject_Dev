@@ -114,17 +114,17 @@ export default function CameraTransmitter() {
               </>
             )}
           </div>
-          {active && (
+          {stream && (
             <button
               onClick={isRecording ? stopRecording : startRecording}
-              className={`w-full py-3 rounded-xl font-semibold text-xs flex items-center justify-center gap-2 transition-all ${
+              className={`w-full py-3 rounded-xl font-semibold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer ${
                 isRecording
-                  ? 'bg-zinc-800 hover:bg-zinc-700 text-red-300 border border-zinc-700 animate-pulse'
-                  : 'bg-zinc-800/80 hover:bg-zinc-800 text-zinc-300 border border-zinc-700'
+                  ? 'bg-rose-950/70 hover:bg-rose-900/70 text-rose-300 border border-rose-700/70 animate-pulse'
+                  : 'bg-zinc-800/80 hover:bg-zinc-800 text-zinc-200 border border-zinc-700'
               }`}
             >
-              <span className={`w-2 h-2 rounded-full ${isRecording ? 'bg-red-400' : 'bg-zinc-500'}`} />
-              {isRecording ? 'Detener grabación' : 'Grabar video (WebM)'}
+              <span className={`w-2 h-2 rounded-full ${isRecording ? 'bg-rose-400' : 'bg-rose-500'}`} />
+              {isRecording ? 'Detener grabación (Guardar WebM)' : 'Grabar video (WebM)'}
             </button>
           )}
         </div>
