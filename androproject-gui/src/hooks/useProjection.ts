@@ -1,178 +1,117 @@
-// ── useProjection — Projection & Studio business logic ──────────
-// SRP: manages scrcpy lifecycle, recording, orientation, quick controls.
-// ADB Connect + Auto-projection for Samsung devices on same network.
+// ============================================================================
+// ARCHIVO: useProjection.ts
+// QUÉ HACE: Hook principal del estudio de proyección: gestiona el ciclo de vida
+//           de VisionNano/AirPlay, grabación MP4, auto-proyección, pantalla
+//           completa y conexión ADB Wi-Fi.
+// CÓMO FUNCIONA: Realiza polling de `check_screen` respetando Visibility API,
+//           sincroniza `check_record` al cambiar de dispositivo y valida
+//           `res?.success` antes de actualizar estados de transmisión/grabación.
+// POR QUÉ: Evitar falsos positivos cuando el backend falla y delegar acciones
+//           atómicas a `useProjectionActions` mantiene el hook bajo 200 líneas.
+// ============================================================================
 
 'use client';
 
-import type React from 'react';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useActions } from './useActions';
+import { useProjectionActions } from './useProjectionActions';
 import type { DeviceInfo } from '@/features/types';
+import {
+  DEFAULT_SCRCPY_OPTIONS,
+  type ScrcpyOptions,
+  type UseProjectionReturn,
+} from './useProjectionTypes';
 
-export interface ScrcpyOptions {
-  maxSize: string;
-  maxFps: string;
-  bitRate: string;
-  turnScreenOff: boolean;
-  stayAwake: boolean;
-  alwaysOnTop: boolean;
-  borderless: boolean;
-  videoSource: 'display' | 'camera';
-  enableAudio?: boolean;
-}
+export type { ScrcpyOptions, UseProjectionReturn };
 
-export interface UseProjectionReturn {
-  scrcpyActive: boolean;
-  toggleScrcpy: (customOpts?: Partial<ScrcpyOptions>) => Promise<void>;
-  scrcpyOptions: ScrcpyOptions;
-  setScrcpyOptions: React.Dispatch<React.SetStateAction<ScrcpyOptions>>;
-  fullscreen: boolean;
-  toggleFullscreen: () => Promise<void>;
-  sendKey: (keycode: string) => Promise<void>;
-  screenshot: () => Promise<string | null>;
-  isRecording: boolean;
-  recordingSeconds: number;
-  toggleRecord: () => Promise<void>;
-  powerOff: () => Promise<void>;
-  reboot: () => Promise<void>;
-  volumeUp: () => Promise<void>;
-  volumeDown: () => Promise<void>;
-  goBack: () => Promise<void>;
-  goHome: () => Promise<void>;
-  openRecent: () => Promise<void>;
-  openAllApps: () => Promise<void>;
-  togglePowerScreen: () => Promise<void>;
-  wakeScreen: () => Promise<void>;
-  toggleMute: () => Promise<void>;
-  mediaPlayPause: () => Promise<void>;
-  openSettings: () => Promise<void>;
-  collapsePanels: () => Promise<void>;
-  expandNotifications: () => Promise<void>;
-  expandQuickSettings: () => Promise<void>;
-  setOrientation: (mode: 'auto' | 'portrait' | 'landscape') => Promise<void>;
-  isBusy: boolean;
-  // ADB Connect
-  connectAdb: (ip: string, port?: string) => Promise<{ success: boolean; message?: string }>;
-  isConnecting: boolean;
-  // Auto-projection
-  autoProject: boolean;
-  setAutoProject: (v: boolean) => void;
-}
-
-const DEFAULT_OPTIONS: ScrcpyOptions = {
-  maxSize: '1080',
-  maxFps: '60',
-  bitRate: '16M',
-  turnScreenOff: false,
-  stayAwake: true,
-  alwaysOnTop: true,
-  borderless: false,
-  videoSource: 'display',
-};
-
-/** Polling interval for scrcpy status check (ms) — 5s to minimise idle network traffic */
 const STATUS_POLL_MS = 5000;
 
 export function useProjection(device: DeviceInfo | null | undefined): UseProjectionReturn {
   const { run } = useActions();
   const [scrcpyActive, setScrcpyActive] = useState(false);
-  const [scrcpyOptions, setScrcpyOptions] = useState<ScrcpyOptions>(DEFAULT_OPTIONS);
+  const [scrcpyOptions, setScrcpyOptions] = useState<ScrcpyOptions>(DEFAULT_SCRCPY_OPTIONS);
   const [fullscreen, setFullscreen] = useState(false);
   const [isBusy, setIsBusy] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
   const [autoProject, setAutoProject] = useState(false);
 
-  // Recording state
   const [isRecording, setIsRecording] = useState(false);
   const [recordingSeconds, setRecordingSeconds] = useState(0);
   const recordTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  // Guard against double auto-start
   const autoStartingRef = useRef(false);
   const prevDeviceSerialRef = useRef<string | undefined>(undefined);
 
   const serial = device?.serial ?? undefined;
+  const isIos = Boolean(device?.platform === 'ios' || serial?.startsWith('airplay-') || serial?.startsWith('apple-'));
 
-  // ── Scrcpy status polling with Page Visibility API guard ──
+  const stopRecordTimer = useCallback(() => {
+    if (recordTimerRef.current) { clearInterval(recordTimerRef.current); recordTimerRef.current = null; }
+  }, []);
+
+  const startRecordTimer = useCallback((initialSeconds = 0) => {
+    stopRecordTimer();
+    setRecordingSeconds(initialSeconds);
+    recordTimerRef.current = setInterval(() => setRecordingSeconds((s) => s + 1), 1000);
+  }, [stopRecordTimer]);
+
+  // Polling de estado de proyección con Page Visibility API
   useEffect(() => {
     if (!serial) return;
     let isMounted = true;
     let intervalId: ReturnType<typeof setInterval> | null = null;
 
     const checkAlive = () => {
-      // Skip poll if the page is hidden — save CPU and network when user switches tabs
       if (document.visibilityState === 'hidden') return;
-      run('check_screen', '', { serial }, false).then((res: any) => {
-        if (isMounted) setScrcpyActive(res?.alive || false);
-      }).catch(() => {});
+      run('check_screen', '', { serial }, false).then((res: any) => { if (isMounted) setScrcpyActive(Boolean(res?.alive)); }).catch(() => {});
     };
-
-    const startInterval = () => {
-      if (intervalId) return;
-      checkAlive();
-      intervalId = setInterval(checkAlive, STATUS_POLL_MS);
-    };
-
-    const stopInterval = () => {
-      if (intervalId) { clearInterval(intervalId); intervalId = null; }
-    };
-
-    const onVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        startInterval();
-      } else {
-        stopInterval();
-      }
-    };
+    const startInterval = () => { if (!intervalId) { checkAlive(); intervalId = setInterval(checkAlive, STATUS_POLL_MS); } };
+    const stopInterval = () => { if (intervalId) { clearInterval(intervalId); intervalId = null; } };
+    const onVisibilityChange = () => (document.visibilityState === 'visible' ? startInterval() : stopInterval());
 
     startInterval();
     document.addEventListener('visibilitychange', onVisibilityChange);
-
-    return () => {
-      isMounted = false;
-      stopInterval();
-      document.removeEventListener('visibilitychange', onVisibilityChange);
-    };
+    return () => { isMounted = false; stopInterval(); document.removeEventListener('visibilitychange', onVisibilityChange); };
   }, [serial, run]);
 
-  // ── Auto-projection: start scrcpy when device appears ──
+  // Sincroniza estado de grabación activa al montar o cambiar de dispositivo
+  useEffect(() => {
+    stopRecordTimer();
+    setIsRecording(false);
+    setRecordingSeconds(0);
+    if (!serial || isIos) return;
+
+    let isMounted = true;
+    run('check_record', '', { serial }, false).then((res: any) => {
+      if (!isMounted || !res?.recording) return;
+      const elapsed = typeof res.startedAt === 'number'
+        ? Math.max(0, Math.floor((Date.now() - res.startedAt) / 1000))
+        : 0;
+      setIsRecording(true);
+      startRecordTimer(elapsed);
+    }).catch(() => {});
+
+    return () => { isMounted = false; };
+  }, [serial, isIos, run, startRecordTimer, stopRecordTimer]);
+
+  // Auto-proyección cuando aparece un nuevo dispositivo
   useEffect(() => {
     if (!autoProject || !serial || scrcpyActive || autoStartingRef.current || isBusy) return;
-
-    // Only auto-start if the device just appeared (serial changed)
     if (prevDeviceSerialRef.current === serial) return;
     prevDeviceSerialRef.current = serial;
 
     autoStartingRef.current = true;
     run('open_screen', 'Auto-proyección detectada...', {
-      serial,
-      maxSize: scrcpyOptions.maxSize,
-      maxFps: scrcpyOptions.maxFps,
-      bitRate: scrcpyOptions.bitRate,
-      turnScreenOff: scrcpyOptions.turnScreenOff,
-      stayAwake: scrcpyOptions.stayAwake,
-      alwaysOnTop: scrcpyOptions.alwaysOnTop,
-      videoSource: scrcpyOptions.videoSource,
-    }).then(() => {
-      setScrcpyActive(true);
+      serial, ...scrcpyOptions,
+    }).then((res: any) => {
+      if (res?.success) setScrcpyActive(true);
     }).catch(() => {}).finally(() => {
       autoStartingRef.current = false;
     });
   }, [autoProject, serial, scrcpyActive, isBusy, scrcpyOptions, run]);
 
-  // NOTE: prevDeviceSerialRef is intentionally updated ONLY inside the auto-project
-  // effect above, not in a separate useEffect. A second effect would race and
-  // overwrite the ref before the auto-project logic could detect the serial change.
+  useEffect(() => () => stopRecordTimer(), [stopRecordTimer]);
 
-  // Clean up record timer on unmount
-  useEffect(() => {
-    return () => {
-      if (recordTimerRef.current) clearInterval(recordTimerRef.current);
-    };
-  }, []);
-
-  // ── ADB Wi-Fi Connect ──
-  const connectAdb = useCallback(async (ip: string, port?: string): Promise<{ success: boolean; message?: string }> => {
+  const connectAdb = useCallback(async (ip: string, port?: string) => {
     const target = `${ip.trim()}:${(port || '5555').trim()}`;
     setIsConnecting(true);
     try {
@@ -185,7 +124,6 @@ export function useProjection(device: DeviceInfo | null | undefined): UseProject
     }
   }, [run]);
 
-  // ── Scrcpy lifecycle ──
   const toggleScrcpy = useCallback(async (customOpts?: Partial<ScrcpyOptions>) => {
     if (!serial) return;
     setIsBusy(true);
@@ -195,172 +133,54 @@ export function useProjection(device: DeviceInfo | null | undefined): UseProject
         await run('stop_screen', 'Deteniendo scrcpy', { serial });
         setScrcpyActive(false);
       } else {
-        await run('open_screen', 'Iniciando AndroProject nativo 60 FPS...', {
-          serial,
-          maxSize: opts.maxSize,
-          maxFps: opts.maxFps,
-          bitRate: opts.bitRate,
-          turnScreenOff: opts.turnScreenOff,
-          stayAwake: opts.stayAwake,
-          alwaysOnTop: opts.alwaysOnTop,
-          borderless: opts.borderless,
-          videoSource: opts.videoSource,
+        const res = await run('open_screen', 'Iniciando AndroProject nativo 60 FPS...', {
+          serial, ...opts,
         });
-        setScrcpyActive(true);
+        if (res?.success) setScrcpyActive(true);
       }
     } finally {
       setIsBusy(false);
     }
   }, [scrcpyActive, scrcpyOptions, serial, run]);
 
-  // ── Screen Recording ──
   const toggleRecord = useCallback(async () => {
-    if (!serial) return;
+    if (!serial || isIos) return;
     setIsBusy(true);
     try {
       if (isRecording) {
-        if (recordTimerRef.current) {
-          clearInterval(recordTimerRef.current);
-          recordTimerRef.current = null;
-        }
+        stopRecordTimer();
         await run('stop_record', 'Deteniendo grabación...', { serial });
         setIsRecording(false);
         setRecordingSeconds(0);
       } else {
-        await run('start_record', 'Iniciando grabación HD silenciosa...', {
+        const res = await run('start_record', 'Iniciando grabación HD silenciosa...', {
           serial,
           videoSource: scrcpyOptions.videoSource,
+          bitRate: scrcpyOptions.bitRate,
+          maxFps: scrcpyOptions.maxFps,
         });
-        setIsRecording(true);
-        setRecordingSeconds(0);
-        recordTimerRef.current = setInterval(() => {
-          setRecordingSeconds((s) => s + 1);
-        }, 1000);
+        if (res?.success) {
+          setIsRecording(true);
+          startRecordTimer(0);
+        }
       }
     } finally {
       setIsBusy(false);
     }
-  }, [isRecording, scrcpyOptions.videoSource, serial, run]);
+  }, [isRecording, isIos, scrcpyOptions.videoSource, scrcpyOptions.bitRate, scrcpyOptions.maxFps, serial, run, startRecordTimer, stopRecordTimer]);
 
-  // ── Fullscreen ──
   const toggleFullscreen = useCallback(async () => {
-    if (!document.fullscreenElement) {
-      await document.documentElement.requestFullscreen().catch(() => {});
-      setFullscreen(true);
-    } else {
-      await document.exitFullscreen().catch(() => {});
-      setFullscreen(false);
-    }
+    const enter = !document.fullscreenElement;
+    await (enter ? document.documentElement.requestFullscreen() : document.exitFullscreen()).catch(() => {});
+    setFullscreen(enter);
   }, []);
 
-  // ── Key commands ──
-  const sendKey = useCallback(async (keycode: string) => {
-    if (!serial) return;
-    await run('keyevent', '', { keycode, serial }, false);
-  }, [serial, run]);
-
-  const goBack = useCallback(() => sendKey('KEYCODE_BACK'), [sendKey]);
-  const goHome = useCallback(() => sendKey('KEYCODE_HOME'), [sendKey]);
-  const openRecent = useCallback(() => sendKey('KEYCODE_APP_SWITCH'), [sendKey]);
-  const openAllApps = useCallback(async () => {
-    if (!serial) return;
-    // Envía KEYCODE_ALL_APPS (keycode 284) para desplegar el menú principal con todas las aplicaciones
-    await run('keyevent', 'Menú de aplicaciones', { keycode: 'KEYCODE_ALL_APPS', serial }, false);
-  }, [serial, run]);
-  const volumeUp = useCallback(() => sendKey('KEYCODE_VOLUME_UP'), [sendKey]);
-  const volumeDown = useCallback(() => sendKey('KEYCODE_VOLUME_DOWN'), [sendKey]);
-  const toggleMute = useCallback(() => sendKey('KEYCODE_VOLUME_MUTE'), [sendKey]);
-  const mediaPlayPause = useCallback(() => sendKey('KEYCODE_MEDIA_PLAY_PAUSE'), [sendKey]);
-  const togglePowerScreen = useCallback(() => sendKey('KEYCODE_POWER'), [sendKey]);
-  const wakeScreen = useCallback(() => sendKey('KEYCODE_WAKEUP'), [sendKey]);
-  const openSettings = useCallback(async () => {
-    if (!serial) return;
-    await run('adb_shell', 'Abrir Ajustes', { cmd: 'am start -a android.settings.SETTINGS', serial }, false);
-  }, [serial, run]);
-
-  const collapsePanels = useCallback(async () => {
-    if (!serial) return;
-    await run('adb_shell', 'Contraer Paneles', { cmd: 'cmd statusbar collapse', serial }, false);
-  }, [serial, run]);
-
-  const expandNotifications = useCallback(async () => {
-    if (!serial) return;
-    await run('adb_shell', 'Notificaciones', { cmd: 'cmd statusbar expand-notifications', serial }, false);
-  }, [serial, run]);
-
-  const expandQuickSettings = useCallback(async () => {
-    if (!serial) return;
-    await run('adb_shell', 'Ajustes rápidos', { cmd: 'cmd statusbar expand-settings', serial }, false);
-  }, [serial, run]);
-
-  // ── Orientation ──
-  const setOrientation = useCallback(async (mode: 'auto' | 'portrait' | 'landscape') => {
-    if (!serial) return;
-    if (mode === 'auto') {
-      await run('adb_shell', 'Auto rotación', { cmd: 'settings put system accelerometer_rotation 1', serial }, false);
-    } else if (mode === 'portrait') {
-      await run('adb_shell', 'Modo vertical', { cmd: 'settings put system accelerometer_rotation 0 && settings put system user_rotation 0', serial }, false);
-    } else {
-      await run('adb_shell', 'Modo horizontal', { cmd: 'settings put system accelerometer_rotation 0 && settings put system user_rotation 1', serial }, false);
-    }
-  }, [serial, run]);
-
-  // ── Screenshot ──
-  const screenshot = useCallback(async (): Promise<string | null> => {
-    if (!serial) return null;
-    try {
-      const res = await run('screenshot', 'Capturando pantalla...', { serial });
-      return res?.path || null;
-    } catch {
-      return null;
-    }
-  }, [serial, run]);
-
-  // ── Power / Reboot ──
-  const powerOff = useCallback(async () => {
-    if (!serial) return;
-    await run('power_off', 'Apagando dispositivo...', { serial });
-  }, [serial, run]);
-
-  const reboot = useCallback(async () => {
-    if (!serial) return;
-    await run('reboot', 'Reiniciando dispositivo...', { serial });
-  }, [serial, run]);
+  const actions = useProjectionActions(serial, isIos, run);
 
   return {
-    scrcpyActive,
-    toggleScrcpy,
-    scrcpyOptions,
-    setScrcpyOptions,
-    fullscreen,
-    toggleFullscreen,
-    sendKey,
-    screenshot,
-    isRecording,
-    recordingSeconds,
-    toggleRecord,
-    powerOff,
-    reboot,
-    volumeUp,
-    volumeDown,
-    goBack,
-    goHome,
-    openRecent,
-    openAllApps,
-    togglePowerScreen,
-    wakeScreen,
-    toggleMute,
-    mediaPlayPause,
-    openSettings,
-    collapsePanels,
-    expandNotifications,
-    expandQuickSettings,
-    setOrientation,
-    isBusy,
-    connectAdb,
-    isConnecting,
-    autoProject,
-    setAutoProject,
+    scrcpyActive, toggleScrcpy, scrcpyOptions, setScrcpyOptions,
+    fullscreen, toggleFullscreen, isRecording, recordingSeconds, toggleRecord,
+    isBusy, connectAdb, isConnecting, autoProject, setAutoProject,
+    ...actions,
   };
 }
-

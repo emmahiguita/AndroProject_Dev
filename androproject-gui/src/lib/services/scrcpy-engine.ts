@@ -1,14 +1,14 @@
-/**
- * VisionNanoEngine — High-performance zero-latency hardware streaming service.
- * Clean Architecture & SOLID: SRP, OCP, DIP.
- * 
- * Enforces zero-latency video pipeline:
- *   - Direct3D11 GPU rendering (--render-driver=direct3d11)
- *   - Zero video buffering (--video-buffer=0)
- *   - Hardware H.264 video decoding with zero audio resync stalls (--no-audio)
- *   - Anti-bufferbloat adaptive bitrates (8M for Wi-Fi, 16M for USB)
- *   - Clean process lifecycle with PID locks and orphan garbage collection
- */
+// ============================================================================
+// ARCHIVO: scrcpy-engine.ts
+// QUÉ HACE: Gestiona el ciclo de vida de procesos nativos VisionNano (scrcpy)
+//           con renderizado GPU Direct3D11, locks por serial y limpieza.
+// CÓMO FUNCIONA: Delega la construcción de flags a `buildVisionNanoArgs`, lanza
+//           scrcpy desacoplado con archivo lock por dispositivo/display y
+//           permite verificar o detener sesiones sin dejar procesos zombis.
+// POR QUÉ: Centralizar el ciclo de vida garantiza idempotencia al iniciar y
+//           terminación determinista de árboles de procesos en Windows.
+// ============================================================================
+
 import { spawn } from 'child_process';
 import fs from 'fs';
 import path from 'path';
@@ -16,120 +16,36 @@ import {
   ANDROPROJECT_BIN, ADB,
   getLockFile, writeLock, readLock, isLockAlive, killLockedProcess,
 } from '@/lib/config';
+import {
+  buildVisionNanoArgs,
+  type VisionNanoOptions,
+  type ScrcpyEngineOptions,
+  type VisionNanoResult,
+  type ScrcpyStreamResult,
+  type IVisionNanoEngine,
+  type IScrcpyEngine,
+} from './scrcpy-args';
 
-export interface VisionNanoOptions {
-  serial: string;
-  displayId?: number | string;
-  maxSize?: number | string;
-  maxFps?: number | string;
-  bitRate?: string;
-  videoCodec?: 'h264' | 'h265' | 'av1';
-  turnScreenOff?: boolean;
-  stayAwake?: boolean;
-  alwaysOnTop?: boolean;
-  borderless?: boolean;
-  videoSource?: 'display' | 'camera';
-  videoBuffer?: number | string;
-  noAudio?: boolean;
-}
-
-export type ScrcpyEngineOptions = VisionNanoOptions;
-
-export interface VisionNanoResult {
-  success: boolean;
-  alive: boolean;
-  pid?: number;
-  message?: string;
-  error?: string;
-}
-
-export type ScrcpyStreamResult = VisionNanoResult;
-
-export interface IVisionNanoEngine {
-  buildArgs(options: VisionNanoOptions): string[];
-  start(options: VisionNanoOptions): Promise<VisionNanoResult>;
-  stop(serial: string): Promise<boolean>;
-  checkAlive(serial: string): Promise<boolean>;
-}
-
-export type IScrcpyEngine = IVisionNanoEngine;
+export type {
+  VisionNanoOptions,
+  ScrcpyEngineOptions,
+  VisionNanoResult,
+  ScrcpyStreamResult,
+  IVisionNanoEngine,
+  IScrcpyEngine,
+};
 
 export class VisionNanoEngine implements IVisionNanoEngine {
-  /**
-   * Scrcpy argument builder tailored for VisionNano 60 FPS GPU pipeline.
-   */
-  public buildArgs(options: VisionNanoOptions): string[] {
-    const { serial } = options;
-    const isWifi = /^\d{1,3}(\.\d{1,3}){3}(:\d+)?$/.test(serial);
-
-    const bitRate = options.bitRate ? String(options.bitRate) : (isWifi ? '4M' : '16M');
-    const maxSize = options.maxSize && options.maxSize !== '0' ? String(options.maxSize) : '960';
-    const maxFps = options.maxFps ? String(options.maxFps) : (isWifi ? '30' : '60');
-    const displayId = options.displayId !== undefined ? String(options.displayId) : '0';
-    // Para Wi-Fi es necesario algo de buffer para evitar que el cliente de scrcpy crashee por falta de frames
-    const videoBuffer = options.videoBuffer !== undefined ? String(options.videoBuffer) : (isWifi ? '50' : '0');
-
-    const args: string[] = ['-s', String(serial)];
-
-    if (options.videoSource !== 'camera') {
-      args.push(`--display-id=${displayId}`);
-    }
-
-    // Dynamic window positioning in cascade to prevent stacking windows on top of each other
-    const hash = Math.abs(String(serial).split('').reduce((acc, c) => acc + c.charCodeAt(0), 0));
-    const offset = (hash + Number(displayId || 0) * 2) % 6;
-    const wx = 100 + (offset * 80);
-    const wy = 80 + (offset * 50);
-
-    const windowTitle = options.videoSource === 'camera'
-      ? `AndroProject — ${serial} (Cámara)`
-      : `AndroProject — ${serial} (Display ${displayId})`;
-
-    // Deterministic non-colliding port range per serial (prevents port conflicts across multiple phones)
-    const serialHash = Math.abs(String(serial).split('').reduce((acc, c) => acc + c.charCodeAt(0), 0));
-    const portBase = 27180 + ((serialHash % 12) * 20);
-    const portRange = `${portBase}:${portBase + 15}`;
-
-    args.push(
-      '--video-codec=h264',
-      '-b', bitRate,
-      '--max-size', maxSize,
-      `--max-fps=${maxFps}`,
-      `--video-buffer=${videoBuffer}`,
-      '--render-driver=direct3d11',
-      '--window-width=380',
-      '--window-height=820',
-      `--window-x=${wx}`,
-      `--window-y=${wy}`,
-      `--port=${portRange}`,
-      '--no-audio',
-      `--window-title=${windowTitle}`,
-    );
-
-    if (options.borderless) {
-      args.push('--window-borderless');
-    }
-    if (options.stayAwake !== false) {
-      args.push('--stay-awake');
-    }
-    if (options.turnScreenOff) {
-      args.push('--turn-screen-off');
-    }
-    if (options.alwaysOnTop) {
-      args.push('--always-on-top');
-    }
-    if (options.videoSource === 'camera') {
-      args.push('--video-source=camera', '--camera-facing=back');
-    }
-
-    return args;
-  }
-
   private static activePids = new Map<string, number>();
 
+  /** Expone el constructor de argumentos CLI para mantener compatibilidad DIP. */
+  public buildArgs(options: VisionNanoOptions): string[] {
+    return buildVisionNanoArgs(options);
+  }
+
   /**
-   * Starts native VisionNano 60 FPS Direct3D11 GPU transmission for a target device.
-   * Idempotent: If already running for this serial, returns active status without restarting.
+   * Inicia la transmisión nativa VisionNano 60 FPS para el dispositivo indicado.
+   * Es idempotente: si el lock sigue vivo, devuelve el PID activo sin reiniciar.
    */
   public async start(options: VisionNanoOptions): Promise<VisionNanoResult> {
     const { serial } = options;
@@ -143,9 +59,7 @@ export class VisionNanoEngine implements IVisionNanoEngine {
 
     const lockFile = getLockFile(serial, options.displayId, options.videoSource);
 
-    // Idempotency: verify if already running
-    const alreadyAlive = await isLockAlive(lockFile);
-    if (alreadyAlive) {
+    if (await isLockAlive(lockFile)) {
       const lockData = readLock(lockFile);
       return {
         success: true,
@@ -157,7 +71,7 @@ export class VisionNanoEngine implements IVisionNanoEngine {
 
     await killLockedProcess(lockFile);
 
-    // Clean up any conflicting MJPEG stream for this serial to free hardware encoder
+    // Libera cualquier stream MJPEG previo para evitar contención en el encoder
     try {
       const { StreamManager } = await import('./stream-manager');
       StreamManager.cleanup(serial);
@@ -199,41 +113,27 @@ export class VisionNanoEngine implements IVisionNanoEngine {
     };
   }
 
-  /**
-   * Stops an active VisionNano process cleanly for this specific serial.
-   */
+  /** Detiene limpiamente el proceso VisionNano asociado al serial/display. */
   public async stop(serial: string, displayId: number | string = 0, source: string = 'display'): Promise<boolean> {
     const lockFile = getLockFile(serial, displayId, source);
     VisionNanoEngine.activePids.delete(lockFile);
     return await killLockedProcess(lockFile);
   }
 
-  /**
-   * Checks if VisionNano is currently running for a device display.
-   */
+  /** Verifica si el proceso VisionNano sigue vivo mediante su archivo lock. */
   public async checkAlive(serial: string, displayId: number | string = 0, source: string = 'display'): Promise<boolean> {
     const lockFile = getLockFile(serial, displayId, source);
     return await isLockAlive(lockFile);
   }
 
-  /**
-   * Cleanly stop all active sessions spawned by VisionNano.
-   */
+  /** Detiene todas las sesiones activas registradas por VisionNano. */
   public static async stopAll(): Promise<void> {
-    for (const [lockFile, pid] of VisionNanoEngine.activePids.entries()) {
-      try {
-        process.kill(pid);
-      } catch {}
-      try {
-        if (fs.existsSync(lockFile)) fs.unlinkSync(lockFile);
-      } catch {}
-    }
+    const lockFiles = Array.from(VisionNanoEngine.activePids.keys());
     VisionNanoEngine.activePids.clear();
+    await Promise.all(lockFiles.map((lockFile) => killLockedProcess(lockFile)));
   }
 }
 
-/** Singleton instance for production use */
 export const visionNanoEngine = new VisionNanoEngine();
 export const scrcpyEngine = visionNanoEngine;
 export const ScrcpyEngine = VisionNanoEngine;
-

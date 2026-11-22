@@ -89,8 +89,9 @@ const registry: Record<string, ActionHandler> = {
   close_screen:   (ctx) => stream.checkOrStopScreen(ctx, 'stop_screen'), // alias retrocompatible
 
   screenshot:     (ctx) => stream.screenshot(ctx),
-  start_record:   (ctx, body) => stream.startRecord(ctx, body as { videoSource?: string }),
+  start_record:   (ctx, body) => stream.startRecord(ctx, body as { videoSource?: string; bitRate?: string; maxFps?: string | number; maxSize?: string | number }),
   stop_record:    (ctx) => stream.stopRecord(ctx),
+  check_record:   (ctx) => stream.checkRecord(ctx),
 
   // Fastboot
   fastboot_reboot:          (ctx) => fastboot.fastbootReboot(ctx),

@@ -1,21 +1,29 @@
+// ============================================================================
+// ARCHIVO: stream.ts
+// QUÉ HACE: Endpoints de transmisión de pantalla (open_screen, check_screen,
+//           stop_screen), capturas PNG (screenshot) y re-exportación de
+//           grabación MP4 desde stream-recorder.ts.
+// CÓMO FUNCIONA: Enruta la proyección al ProjectionCoordinator (Android scrcpy
+//           o iOS AirPlay 2) y captura PNGs desde AirPlay o adb screencap.
+// POR QUÉ: Mantener las rutas de streaming y captura separadas de la lógica
+//           de grabación conserva cada archivo por debajo de 200 líneas.
+// ============================================================================
+
 import { NextResponse } from 'next/server';
-import { spawn } from 'child_process';
 import path from 'path';
 import fs from 'fs';
 import { ActionContext } from './_lib/context';
-import {
-  ANDROPROJECT_BIN, ANDROPROJECT_HOME, SCREENSHOTS_DIR, ADB,
-  SCRCPY_SERVER_PATH, SCRCPY_ICON_PATH,
-  getRecordLockFile,
-  writeLock, readLock, deleteLock, isLockAlive, killLockedProcess,
-} from '@/lib/config';
+import { SCREENSHOTS_DIR } from '@/lib/config';
 import { projectionCoordinator } from '@/lib/services/projection-coordinator';
 import type { DeviceInfo } from '@/features/types';
 import { adb } from '@/lib/services/adb-executor';
 import { airPlayReceiverEngine } from '@/lib/services/airplay-engine';
 
-// ── Screen Streaming (Unified via ProjectionCoordinator - SOLID) ──────────
+export { startRecord, stopRecord, checkRecord } from './_lib/stream-recorder';
 
+const MIN_SCREENSHOT_SIZE = 1024;
+
+/** Inicia la proyección nativa (VisionNano Android o AirPlay 2 iOS). */
 export async function openScreen(ctx: ActionContext, body: {
   videoSource?: string;
   displayId?: number | string;
@@ -66,6 +74,7 @@ export async function openScreen(ctx: ActionContext, body: {
   return NextResponse.json(result);
 }
 
+/** Verifica si la transmisión sigue activa o la detiene limpiamente. */
 export async function checkOrStopScreen(ctx: ActionContext, action: 'check_screen' | 'stop_screen') {
   const serial = ctx.targetSerial || 'default';
   const isIos = serial.startsWith('airplay-');
@@ -93,10 +102,7 @@ export async function checkOrStopScreen(ctx: ActionContext, action: 'check_scree
   return NextResponse.json({ success: false, error: 'Acción no válida' }, { status: 400 });
 }
 
-// ── Screenshot ─────────────────────────────────────────────────────
-
-const MIN_SCREENSHOT_SIZE = 1024;
-
+/** Captura una imagen PNG de alta resolución (AirPlay frame o ADB screencap). */
 export async function screenshot(ctx: ActionContext) {
   if (!fs.existsSync(SCREENSHOTS_DIR)) fs.mkdirSync(SCREENSHOTS_DIR, { recursive: true });
 
@@ -104,7 +110,6 @@ export async function screenshot(ctx: ActionContext) {
   const localPath = path.join(SCREENSHOTS_DIR, `screenshot_${timestamp}.png`);
   const serial = ctx.targetSerial || '';
 
-  // iOS AirPlay / Apple Device screenshot capture
   if (serial.startsWith('airplay-') || serial.startsWith('apple-')) {
     const frame = airPlayReceiverEngine.getLatestFrame(serial);
     if (frame && frame.length > MIN_SCREENSHOT_SIZE && frame[0] === 0x89 && frame[1] === 0x50) {
@@ -122,7 +127,11 @@ export async function screenshot(ctx: ActionContext) {
     }, { status: 422 });
   }
 
-  // Primary method: raw binary screencap via exec-out (Android)
+  if (!serial) {
+    return NextResponse.json({ success: false, error: 'No hay un dispositivo conectado' }, { status: 400 });
+  }
+
+  // Método primario: binario directo por exec-out sin escribir en el almacenamiento interno
   const res = await adb.execOut(serial, 'exec-out screencap -p');
   if (res.ok && res.stdout.length > MIN_SCREENSHOT_SIZE && res.stdout[0] === 0x89 && res.stdout[1] === 0x50) {
     fs.writeFileSync(localPath, res.stdout);
@@ -134,7 +143,7 @@ export async function screenshot(ctx: ActionContext) {
     });
   }
 
-  // Fallback method: on-device /sdcard capture
+  // Método respaldo: capturar en /sdcard y extraer por adb pull
   const devicePath = `/sdcard/screenshot_${timestamp}.png`;
   await adb.shell(serial, `screencap -p "${devicePath}"`);
   await adb.execFor(serial, `pull "${devicePath}" "${localPath}"`);
@@ -157,78 +166,4 @@ export async function screenshot(ctx: ActionContext) {
     success: false,
     error: 'No se pudo capturar la pantalla. Verifica que el dispositivo esté desbloqueado.',
   }, { status: 422 });
-}
-
-// ── Video Recording ────────────────────────────────────────────────
-
-export async function startRecord(ctx: ActionContext, body: { videoSource?: string }) {
-  const targetSerial = ctx.targetSerial || 'default';
-  const recordLockFile = getRecordLockFile(targetSerial);
-
-  const stillRunning = await isLockAlive(recordLockFile);
-  if (stillRunning) {
-    return NextResponse.json({ success: false, error: 'Ya hay una grabación en curso para este dispositivo' });
-  }
-  deleteLock(recordLockFile);
-
-  if (!fs.existsSync(SCREENSHOTS_DIR)) fs.mkdirSync(SCREENSHOTS_DIR, { recursive: true });
-  const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-  const recordPath = path.join(SCREENSHOTS_DIR, `grabacion_${timestamp}.mp4`);
-
-  const recordArgs: string[] = [];
-  if (ctx.targetSerial) recordArgs.push('-s', String(ctx.targetSerial));
-  recordArgs.push(
-    '--video-codec=h264',
-    '-b=16M',
-    '--max-fps=60',
-    '--max-size=0',
-    '--no-playback',
-    `--record=${recordPath}`,
-  );
-  if (body.videoSource === 'camera') {
-    recordArgs.push('--video-source=camera', '--camera-facing=back', '--no-audio');
-  }
-
-  const proc = spawn(ANDROPROJECT_BIN, recordArgs, {
-    cwd: ANDROPROJECT_HOME,
-    env: { ...process.env, ADB, SCRCPY_SERVER_PATH, SCRCPY_ICON_PATH },
-    windowsHide: true,
-  });
-
-  if (proc.pid) {
-    writeLock(recordLockFile, {
-      pid: proc.pid,
-      serial: targetSerial,
-      path: recordPath,
-      processName: path.basename(ANDROPROJECT_BIN),
-      owner: 'recording',
-    });
-    const cleanup = () => { deleteLock(recordLockFile); };
-    proc.on('exit', cleanup);
-    proc.on('error', cleanup);
-  }
-
-  return NextResponse.json({
-    success: true,
-    message: 'Grabación MP4 iniciada',
-    recordPath,
-  });
-}
-
-export async function stopRecord(ctx: ActionContext) {
-  const targetSerial = ctx.targetSerial || 'default';
-  const recordLockFile = getRecordLockFile(targetSerial);
-  let recordedPath: string | null = null;
-
-  if (fs.existsSync(recordLockFile)) {
-    const lock = readLock(recordLockFile);
-    recordedPath = (lock as any)?.path || null;
-    await killLockedProcess(recordLockFile);
-  }
-
-  return NextResponse.json({
-    success: true,
-    message: recordedPath ? `Grabación guardada: ${path.basename(recordedPath)}` : 'Grabación detenida',
-    recordPath: recordedPath,
-  });
 }
