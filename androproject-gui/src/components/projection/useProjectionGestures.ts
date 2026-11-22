@@ -2,16 +2,16 @@
 // ARCHIVO: useProjectionGestures.ts
 // QUÉ HACE: Traduce interacciones del usuario (tap, long-press, swipe, rueda)
 //           a comandos táctiles ADB de baja latencia y zoom del visor.
-// CÓMO FUNCIONA: Mantiene referencias limpias para evitar re-renders, limpia
-//           todos los temporizadores de ripples/long-press al desmontar y
-//           soporta scroll por rueda tanto en modo WebCodecs como snapshot.
+// CÓMO FUNCIONA: Delega geometría pura a `projection-math.ts`, limpia todos
+//           los temporizadores y protege `refreshNow` contra llamadas tras desmontar.
 // POR QUÉ: Desacoplar la física de gestos del renderizado visual (SRP, < 200L).
 // ============================================================================
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
-  clamp, clamp01, mapClientToDeviceCoords, MAX_SCALE, MIN_SCALE,
+  buildDragSwipePayload, buildWheelSwipePayload, clamp, clamp01,
+  mapClientToDeviceCoords, MAX_SCALE, MIN_SCALE,
   type TouchRipple, type ZoomState,
 } from './projection-math';
 
@@ -37,6 +37,7 @@ export function useProjectionGestures({
   serial, resolution, imgRef, screenRef, zoom, setZoom, imgError, shouldRefreshAfterTouch, refreshNow,
 }: UseProjectionGesturesParams) {
   const [ripples, setRipples] = useState<TouchRipple[]>([]);
+  const mountedRef = useRef(true);
   const rippleIdRef = useRef(0);
   const rippleTimersRef = useRef<Set<ReturnType<typeof setTimeout>>>(new Set());
   const wheelLockRef = useRef(0);
@@ -45,11 +46,16 @@ export function useProjectionGestures({
     moved: boolean; lastX: number; lastY: number; longPressTimer?: ReturnType<typeof setTimeout>;
   }>(null);
 
-  // Limpia todos los temporizadores activos al desmontar (cero memory leaks)
-  useEffect(() => () => {
-    rippleTimersRef.current.forEach((t) => clearTimeout(t));
-    rippleTimersRef.current.clear();
-    if (dragRef.current?.longPressTimer) clearTimeout(dragRef.current.longPressTimer);
+  // Limpia temporizadores y marca desmontaje para evitar actualizaciones zombis
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+      rippleTimersRef.current.forEach((t) => clearTimeout(t));
+      rippleTimersRef.current.clear();
+      if (dragRef.current?.longPressTimer) clearTimeout(dragRef.current.longPressTimer);
+      dragRef.current = null;
+    };
   }, []);
 
   const postTouch = useCallback((payload: Record<string, unknown>) => {
@@ -59,7 +65,7 @@ export function useProjectionGestures({
       body: JSON.stringify(payload),
       keepalive: true,
     })
-      .then(() => { if (shouldRefreshAfterTouch) refreshNow(); })
+      .then(() => { if (mountedRef.current && shouldRefreshAfterTouch) refreshNow(); })
       .catch(() => {});
   }, [refreshNow, shouldRefreshAfterTouch]);
 
@@ -77,7 +83,6 @@ export function useProjectionGestures({
   useEffect(() => {
     const el = screenRef.current;
     if (!el) return;
-
     const onWheel = (e: WheelEvent) => {
       e.preventDefault();
       const mediaEl = imgRef.current || el.querySelector('canvas');
@@ -97,25 +102,8 @@ export function useProjectionGestures({
       const now = performance.now();
       if (now - wheelLockRef.current < WHEEL_DEBOUNCE_MS) return;
       wheelLockRef.current = now;
-
       const p = toDeviceRef.current(e.clientX, e.clientY);
-      if (!p || !serial) return;
-      const steps = clamp(Math.round(Math.max(Math.abs(e.deltaX), Math.abs(e.deltaY)) / 60), 1, 6);
-      const amt = 90 * steps;
-
-      if (Math.abs(e.deltaY) >= Math.abs(e.deltaX)) {
-        const d = e.deltaY > 0 ? 1 : -1;
-        postTouchRef.current({
-          action: 'input_swipe', serial, x1: p.x, y1: clamp(p.y + d * amt, 0, p.devH),
-          x2: p.x, y2: clamp(p.y - d * amt, 0, p.devH), duration: 160,
-        });
-      } else {
-        const d = e.deltaX > 0 ? 1 : -1;
-        postTouchRef.current({
-          action: 'input_swipe', serial, x1: clamp(p.x - d * amt, 0, p.devW), y1: p.y,
-          x2: clamp(p.x + d * amt, 0, p.devW), y2: p.y, duration: 160,
-        });
-      }
+      if (p && serial) postTouchRef.current(buildWheelSwipePayload(serial, p, e.deltaX, e.deltaY));
     };
 
     el.addEventListener('wheel', onWheel, { passive: false });
@@ -173,8 +161,7 @@ export function useProjectionGestures({
         }));
       }
     }
-    d.lastX = e.clientX;
-    d.lastY = e.clientY;
+    d.lastX = e.clientX; d.lastY = e.clientY;
   };
 
   const onPointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -191,12 +178,8 @@ export function useProjectionGestures({
     } else if (d.moved && zoom.scale === 1) {
       const a = toDeviceRef.current(d.startX, d.startY);
       const b = toDeviceRef.current(e.clientX, e.clientY);
-      if (a && b && Math.hypot(b.x - a.x, b.y - a.y) >= MIN_SWIPE_DEVICE_PX) {
-        postTouchRef.current({
-          action: 'input_swipe', serial, x1: a.x, y1: a.y, x2: b.x, y2: b.y,
-          duration: clamp(Math.round(Math.hypot(b.x - a.x, b.y - a.y) * 1.2), 60, 600),
-        });
-      }
+      const swipe = a && b ? buildDragSwipePayload(serial, a, b, MIN_SWIPE_DEVICE_PX) : null;
+      if (swipe) postTouchRef.current(swipe);
     }
   };
 
@@ -204,6 +187,7 @@ export function useProjectionGestures({
     if (dragRef.current?.id === e.pointerId) {
       if (dragRef.current.longPressTimer) clearTimeout(dragRef.current.longPressTimer);
       dragRef.current = null;
+      e.currentTarget.releasePointerCapture?.(e.pointerId);
     }
   };
 

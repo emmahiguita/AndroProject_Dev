@@ -89,3 +89,51 @@ export function mapClientToDeviceCoords(
     devH,
   };
 }
+
+export interface DevicePoint {
+  x: number;
+  y: number;
+  devW: number;
+  devH: number;
+}
+
+/** Calcula el payload de `input_swipe` para scroll por rueda del mouse. */
+export function buildWheelSwipePayload(
+  serial: string,
+  p: DevicePoint,
+  deltaX: number,
+  deltaY: number,
+): Record<string, unknown> {
+  const steps = clamp(Math.round(Math.max(Math.abs(deltaX), Math.abs(deltaY)) / 60), 1, 6);
+  const amt = 90 * steps;
+  if (Math.abs(deltaY) >= Math.abs(deltaX)) {
+    const d = deltaY > 0 ? 1 : -1;
+    return {
+      action: 'input_swipe', serial,
+      x1: p.x, y1: clamp(p.y + d * amt, 0, p.devH),
+      x2: p.x, y2: clamp(p.y - d * amt, 0, p.devH), duration: 160,
+    };
+  }
+  const d = deltaX > 0 ? 1 : -1;
+  return {
+    action: 'input_swipe', serial,
+    x1: clamp(p.x - d * amt, 0, p.devW), y1: p.y,
+    x2: clamp(p.x + d * amt, 0, p.devW), y2: p.y, duration: 160,
+  };
+}
+
+/** Calcula el payload de `input_swipe` para arrastre táctil si supera el umbral. */
+export function buildDragSwipePayload(
+  serial: string,
+  a: DevicePoint,
+  b: DevicePoint,
+  minSwipePx = 8,
+): Record<string, unknown> | null {
+  const dist = Math.hypot(b.x - a.x, b.y - a.y);
+  if (dist < minSwipePx) return null;
+  return {
+    action: 'input_swipe', serial,
+    x1: a.x, y1: a.y, x2: b.x, y2: b.y,
+    duration: clamp(Math.round(dist * 1.2), 60, 600),
+  };
+}
