@@ -38,7 +38,7 @@ const DeviceScreenTile = React.memo<DeviceScreenTileProps>(function DeviceScreen
   const [zoom, setZoom] = useState<ZoomState>({ scale: 1, ox: 0.5, oy: 0.5 });
   const [fps, setFps] = useState<number>(60);
   const serial = device.serial;
-  const isIos = device.platform === 'ios' || serial.startsWith('airplay-');
+  const isIos = device.platform === 'ios' || serial.startsWith('airplay-') || serial.startsWith('apple-');
 
   const handleToggle = useCallback(() => {
     onToggleScrcpy?.(serial);

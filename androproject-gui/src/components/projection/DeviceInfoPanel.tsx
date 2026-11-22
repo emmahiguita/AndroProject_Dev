@@ -121,7 +121,7 @@ export const DeviceInfoPanel: React.FC<DeviceInfoPanelProps> = ({
     return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
   };
 
-  const isIos = device.platform === 'ios' || device.serial?.startsWith('airplay-');
+  const isIos = device.platform === 'ios' || device.serial?.startsWith('airplay-') || device.serial?.startsWith('apple-');
 
   return (
     <div className="p-3 space-y-3 relative">

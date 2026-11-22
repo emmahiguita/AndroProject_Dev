@@ -79,7 +79,8 @@ export const ProjectionCanvas: React.FC<ProjectionCanvasProps> = ({
   const zoomed = zoom.scale > 1;
   const isDisconnected = !connected || device.state !== 'device';
   const showLiveStream = useMjpegStream ? Boolean(device.serial && !mjpegError) : Boolean(frameUrl && !imgError);
-  const useWebCodecs = useMjpegStream && Boolean(device.serial) && !mjpegError && !device.serial.startsWith('airplay-');
+  const isIos = device.platform === 'ios' || device.serial.startsWith('airplay-') || device.serial.startsWith('apple-');
+  const useWebCodecs = useMjpegStream && Boolean(device.serial) && !mjpegError && !isIos;
 
   return (
     <div
