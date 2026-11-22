@@ -12,6 +12,7 @@ import React, { useState, useCallback } from 'react';
 import { Smartphone, ExternalLink, MonitorPlay } from 'lucide-react';
 import { ProjectionCanvas, ZoomState } from './ProjectionCanvas';
 import { useAppStore } from '@/stores';
+import { rustBridge } from '@/lib/services/tauri-bridge';
 import type { DeviceInfo } from '@/features/types';
 
 interface MultiScreenGridProps {
@@ -136,64 +137,40 @@ export const MultiScreenGrid: React.FC<MultiScreenGridProps> = ({
         .filter((d) => !d.serial.includes(':') && d.model)
         .map((d) => d.model!.trim().toLowerCase()),
     );
-    return devices.filter((d) => {
-      if (d.serial.includes(':') && d.model && usbModels.has(d.model.trim().toLowerCase())) {
-        return false;
-      }
-      return true;
-    });
+    return devices.filter((d) => !(d.serial.includes(':') && d.model && usbModels.has(d.model.trim().toLowerCase())));
   }, [devices]);
 
-  const openPopout = useCallback((serial: string) => {
-    const width = 420;
-    const height = 860;
-    const left = window.screenX + 50;
-    const top = window.screenY + 50;
+  const openPopout = useCallback(async (serial: string) => {
+    if (rustBridge.isDesktop()) { await rustBridge.openPopout(serial); return; }
     window.open(
       `/popout?serial=${encodeURIComponent(serial)}`,
       `popout_${serial.replace(/[^a-zA-Z0-9]/g, '_')}`,
-      `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=no,status=no`
+      `width=420,height=860,left=${window.screenX + 50},top=${window.screenY + 50},resizable=yes,scrollbars=no,status=no`,
     );
   }, []);
 
   if (uniquePhysicalDevices.length === 0) {
     return (
-      <div className={`flex flex-col items-center justify-center h-full p-8 text-center ${
-        dark ? 'text-zinc-400' : 'text-slate-600'
-      }`}>
+      <div className={`flex flex-col items-center justify-center h-full p-8 text-center ${dark ? 'text-zinc-400' : 'text-slate-600'}`}>
         <Smartphone size={36} className="mb-3 opacity-60" />
-        <p className={`text-sm font-semibold ${dark ? 'text-zinc-300' : 'text-slate-700'}`}>
-          No hay pantallas conectadas
-        </p>
-        <p className="text-xs mt-1">
-          Conecta uno o más dispositivos Android/iOS para proyectar en paralelo
-        </p>
+        <p className={`text-sm font-semibold ${dark ? 'text-zinc-300' : 'text-slate-700'}`}>No hay pantallas conectadas</p>
+        <p className="text-xs mt-1">Conecta uno o más dispositivos Android/iOS para proyectar en paralelo</p>
       </div>
     );
   }
 
-  const gridColsClass =
-    uniquePhysicalDevices.length === 1
-      ? 'grid-cols-1'
-      : uniquePhysicalDevices.length === 2
-        ? 'grid-cols-1 md:grid-cols-2'
-        : 'grid-cols-1 md:grid-cols-2 xl:grid-cols-3';
+  const gridColsClass = uniquePhysicalDevices.length === 1 ? 'grid-cols-1'
+    : uniquePhysicalDevices.length === 2 ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1 md:grid-cols-2 xl:grid-cols-3';
 
   return (
     <div className={`grid ${gridColsClass} gap-2.5 h-full w-full overflow-y-auto p-2.5 min-h-0`}>
-      {uniquePhysicalDevices.map((device) => {
-        const isActive = (activeSerial === device.serial && isScreenStreaming) || Boolean(device.connected);
-        return (
-          <DeviceScreenTile
-            key={device.serial}
-            device={device}
-            isActive={isActive}
-            dark={dark}
-            onToggleScrcpy={onToggleScrcpy}
-            onPopout={openPopout}
-          />
-        );
-      })}
+      {uniquePhysicalDevices.map((device) => (
+        <DeviceScreenTile
+          key={device.serial} device={device} dark={dark}
+          isActive={(activeSerial === device.serial && isScreenStreaming) || Boolean(device.connected)}
+          onToggleScrcpy={onToggleScrcpy} onPopout={openPopout}
+        />
+      ))}
     </div>
   );
 };

@@ -1,18 +1,19 @@
 // ============================================================================
 // ARCHIVO: route.ts (apps)
-// QUÉ HACE: Expone `POST /api/apps` para listar, desinstalar, deshabilitar,
-//           habilitar, detener o purgar datos de paquetes Android vía ADB.
-// CÓMO FUNCIONA: Valida `serial` y `packageName`, bloquea desinstalación o
-//           deshabilitación de paquetes críticos del sistema (`403`), aplica
-//           timeouts de 15s y verifica `Failure`/`Exception` en `stdout`.
-// POR QUÉ: Delegar catálogo y listado mantiene este archivo < 140 líneas (SRP)
-//           y evita falsos positivos o soft-bricks en paquetes críticos.
+// QUÉ HACE: Expone `POST /api/apps` para listar, abrir (`launch`), detener
+//           (`force_stop`), limpiar datos (`clear_data`), extraer APK a PC
+//           (`extract_apk`), habilitar, deshabilitar o desinstalar paquetes.
+// CÓMO FUNCIONA: Valida `serial` y `packageName`, protege paquetes críticos del
+//           sistema (`403`), ejecuta `adb` con timeout de 15s y verifica errores.
+// POR QUÉ: Proveer lógica real de administración de paquetes Android en < 160L.
 // ============================================================================
 
 import { NextResponse } from 'next/server';
 import { exec } from 'child_process';
 import { promisify } from 'util';
-import { ADB } from '@/lib/config';
+import fs from 'fs';
+import path from 'path';
+import { ADB, ANDROPROJECT_HOME } from '@/lib/config';
 import { assertValidPackageName, isValidDeviceSerial } from '@/lib/security/input-sanitizer';
 import { isCriticalSystem } from './_lib/app-catalog';
 import { listDeviceApps } from './_lib/app-list-builder';
@@ -30,7 +31,7 @@ const getErrorMessage = (error: unknown) => (error instanceof Error ? error.mess
 const SYSTEM_PARTITIONS = ['/system/', '/system_ext/', '/product/', '/vendor/', '/apex/'];
 
 function checkAdbFailure(stdout: string, fallbackMsg: string): NextResponse | null {
-  if (/Failure|Exception|Error:/i.test(stdout)) {
+  if (/Failure|Exception|Error:|No activities found/i.test(stdout)) {
     return NextResponse.json({ success: false, error: stdout.trim() || fallbackMsg }, { status: 422 });
   }
   return null;
@@ -65,6 +66,50 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: false, error: getErrorMessage(err) }, { status: 400 });
     }
 
+    if (action === 'launch') {
+      const { stdout } = await execAsync(
+        `${adbTarget} shell monkey -p ${safePkg} -c android.intent.category.LAUNCHER 1`,
+      );
+      const fail = checkAdbFailure(stdout, `No se pudo abrir ${safePkg}`);
+      if (fail) return fail;
+      return NextResponse.json({ success: true, message: `Aplicación ${safePkg} abierta en el dispositivo.` });
+    }
+
+    if (action === 'force_stop') {
+      await execAsync(`${adbTarget} shell am force-stop ${safePkg}`);
+      return NextResponse.json({ success: true, message: `Proceso de ${safePkg} detenido inmediatamente.` });
+    }
+
+    if (action === 'clear_data') {
+      if (isCriticalSystem(safePkg)) {
+        return NextResponse.json({ success: false, error: `Paquete crítico protegido: ${safePkg}` }, { status: 403 });
+      }
+      const { stdout } = await execAsync(`${adbTarget} shell pm clear ${safePkg}`);
+      const fail = checkAdbFailure(stdout, `No se pudieron purgar los datos de ${safePkg}`);
+      if (fail) return fail;
+      return NextResponse.json({ success: true, message: `Datos y caché de ${safePkg} purgados correctamente.` });
+    }
+
+    if (action === 'extract_apk') {
+      const { stdout: pathOut } = await execAsync(`${adbTarget} shell pm path ${safePkg}`, { timeout: 8000 });
+      const remotePath = pathOut
+        .split('\n')
+        .map((l) => l.trim().replace(/^package:/, ''))
+        .find((l) => l.endsWith('.apk'));
+      if (!remotePath || !/^[a-zA-Z0-9/_.-]+\.apk$/.test(remotePath)) {
+        return NextResponse.json({ success: false, error: `No se encontró la ruta APK de ${safePkg}` }, { status: 404 });
+      }
+      const backupDir = path.join(ANDROPROJECT_HOME, 'backups', 'apks');
+      await fs.promises.mkdir(backupDir, { recursive: true });
+      const destFile = path.join(backupDir, `${safePkg}.apk`);
+      await execAsync(`${adbTarget} pull "${remotePath}" "${destFile}"`, { timeout: 30000 });
+      return NextResponse.json({
+        success: true,
+        path: destFile,
+        message: `APK respaldado en PC: ${destFile}`,
+      });
+    }
+
     if (action === 'uninstall') {
       if (isCriticalSystem(safePkg)) {
         return NextResponse.json({ success: false, error: `Paquete crítico del sistema protegido: ${safePkg}` }, { status: 403 });
@@ -79,7 +124,7 @@ export async function POST(req: Request) {
       if (fail) return fail;
       return NextResponse.json({
         success: true,
-        message: isSystem ? `Aplicación de fábrica ${safePkg} desinstalada de forma segura.` : `Aplicación ${safePkg} desinstalada correctamente.`,
+        message: isSystem ? `App de fábrica ${safePkg} desinstalada para el usuario actual.` : `Aplicación ${safePkg} desinstalada.`,
       });
     }
 
@@ -90,26 +135,14 @@ export async function POST(req: Request) {
       const { stdout } = await execAsync(`${adbTarget} shell pm disable-user --user 0 ${safePkg}`);
       const fail = checkAdbFailure(stdout, `No se pudo deshabilitar ${safePkg}`);
       if (fail) return fail;
-      return NextResponse.json({ success: true, message: `Aplicación ${safePkg} deshabilitada correctamente.` });
+      return NextResponse.json({ success: true, message: `Aplicación ${safePkg} deshabilitada.` });
     }
 
     if (action === 'enable') {
       const { stdout } = await execAsync(`${adbTarget} shell pm enable ${safePkg}`);
       const fail = checkAdbFailure(stdout, `No se pudo habilitar ${safePkg}`);
       if (fail) return fail;
-      return NextResponse.json({ success: true, message: `Aplicación ${safePkg} habilitada y lista para usar.` });
-    }
-
-    if (action === 'force_stop') {
-      await execAsync(`${adbTarget} shell am force-stop ${safePkg}`);
-      return NextResponse.json({ success: true, message: `Proceso de ${safePkg} detenido inmediatamente.` });
-    }
-
-    if (action === 'clear_data') {
-      const { stdout } = await execAsync(`${adbTarget} shell pm clear ${safePkg}`);
-      const fail = checkAdbFailure(stdout, `No se pudieron purgar los datos de ${safePkg}`);
-      if (fail) return fail;
-      return NextResponse.json({ success: true, message: `Datos y caché de ${safePkg} purgados.` });
+      return NextResponse.json({ success: true, message: `Aplicación ${safePkg} habilitada.` });
     }
 
     return NextResponse.json({ success: false, error: 'Acción no reconocida' }, { status: 400 });

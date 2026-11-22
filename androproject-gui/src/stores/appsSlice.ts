@@ -31,7 +31,7 @@ export interface AppsSlice {
 }
 
 export const createAppsSlice: StateCreator<AppsSlice, [], [], AppsSlice> = (set) => ({
-  appsSubTab: 'installer',
+  appsSubTab: 'manager',
   appsList: [],
   appsLoading: false,
   appsFilter: 'all',

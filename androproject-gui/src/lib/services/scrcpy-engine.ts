@@ -71,12 +71,6 @@ export class VisionNanoEngine implements IVisionNanoEngine {
 
     await killLockedProcess(lockFile);
 
-    // Libera cualquier stream MJPEG previo para evitar contención en el encoder
-    try {
-      const { StreamManager } = await import('./stream-manager');
-      StreamManager.cleanup(serial);
-    } catch {}
-
     const args = this.buildArgs(options);
     const scrcpyDir = path.dirname(ANDROPROJECT_BIN);
     const adbDir = path.dirname(ADB);

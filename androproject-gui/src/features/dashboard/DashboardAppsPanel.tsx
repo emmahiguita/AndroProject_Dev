@@ -14,7 +14,7 @@
 import React from 'react';
 import {
   MonitorPlay, Wrench, RefreshCw, Info,
-  Search, Trash2, ChevronRight,
+  Search, Trash2, Play, ChevronRight,
 } from 'lucide-react';
 import { RealAppIcon } from '@/components/ui/RealAppIcon';
 import { getAppColor, type AppsFilterDash } from './dashboard-helpers';
@@ -159,9 +159,21 @@ export const DashboardAppsPanel: React.FC<DashboardAppsPanelProps> = ({
                 </div>
                 <button
                   type="button"
+                  onClick={() => fetch('/api/apps', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'launch', packageName: app.packageName, serial }),
+                  })}
+                  className="shrink-0 p-1 rounded-md opacity-0 group-hover:opacity-100 text-emerald-500 hover:bg-emerald-500/10 transition-all cursor-pointer"
+                  title="Abrir aplicación en el teléfono"
+                >
+                  <Play size={13} />
+                </button>
+                <button
+                  type="button"
                   onClick={() => onUninstall(app.packageName)}
-                  disabled={appActionLoading === app.packageName}
-                  className="shrink-0 p-1 rounded-md opacity-0 group-hover:opacity-100 text-red-600 hover:bg-red-500/10 transition-all"
+                  disabled={appActionLoading === app.packageName || app.criticalSystem}
+                  className="shrink-0 p-1 rounded-md opacity-0 group-hover:opacity-100 text-red-600 hover:bg-red-500/10 transition-all cursor-pointer disabled:opacity-30"
                   title="Desinstalar paquete"
                 >
                   <Trash2 size={13} />

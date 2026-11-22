@@ -1,24 +1,29 @@
 // ============================================================================
 // ARCHIVO: AppsView.tsx
-// QUÉ HACE: Orquestador de Aplicaciones (instalar APK + gestionar paquetes).
-// CÓMO FUNCIONA: Carga paquetes desde `/api/apps`, prioriza Rust nativo en
-//           Tauri con fallback HTTP y delega UI a AppInstaller/AppManager.
-// POR QUÉ: Refactor SRP (< 200 líneas), monocromo, legible claro/oscuro.
+// QUÉ HACE: Orquestador de Aplicaciones (administrar paquetes + instalar APK/IPA).
+// CÓMO FUNCIONA: Resuelve el serial real (`device?.serial || s.activeSerial`),
+//           ejecuta las acciones ADB (`list`, `launch`, `force_stop`,
+//           `clear_data`, `extract_apk`, `enable`, `disable`, `uninstall`),
+//           protege paquetes críticos y actualiza el catálogo de inmediato.
+// POR QUÉ: Garantizar que todos los botones del módulo Aplicaciones tengan
+//          lógica real verificada y feedback inmediato (< 195 líneas, SRP).
 // ============================================================================
 
 'use client';
 
-import { useMemo, useCallback, useEffect } from 'react';
+import { useMemo, useCallback, useEffect, useState } from 'react';
 import { useAppStore } from '@/stores';
 import { useTheme } from '@/hooks/useTheme';
 import { ViewShell } from '@/components/ViewShell';
 import { rustBridge } from '@/lib/services/tauri-bridge';
 import { AppInstallerPanel } from './apps/AppInstallerPanel';
 import { AppManagerPanel } from './apps/AppManagerPanel';
-import { formatBytes, formatDate, getErrorMessage } from './apps/app-formatters';
+import { filterAndSortApps, formatBytes, formatDate, getErrorMessage } from './apps/app-formatters';
 import type { AppInfo, DeviceInfo } from './types';
 
 export { formatBytes, formatDate };
+
+type PkgAction = 'uninstall' | 'disable' | 'enable' | 'force_stop' | 'clear_data' | 'launch' | 'extract_apk';
 
 interface AppsViewProps {
   device?: DeviceInfo | null;
@@ -29,129 +34,116 @@ export function AppsView({ device: propDevice, addLog: propAddLog }: AppsViewPro
   const { dark } = useTheme();
   const s = useAppStore();
   const device = propDevice || s.device;
+  const targetSerial = device?.serial || s.activeSerial;
+  const isConnected = Boolean(device?.connected || (targetSerial && targetSerial !== 'Hardware Level'));
+  const [statusMessage, setStatusMessage] = useState<{ text: string; isError?: boolean } | null>(null);
 
-  const log = useCallback(
-    (msg: string) => {
-      if (propAddLog) propAddLog(msg);
+  const notify = useCallback(
+    (msg: string, isError = false) => {
+      setStatusMessage({ text: msg, isError });
+      if (propAddLog) propAddLog(msg, isError ? 'error' : 'info');
       else s.addLog(msg);
     },
-    [propAddLog, s]
+    [propAddLog, s],
   );
 
-  /** Consulta el catálogo real de paquetes instalados en el teléfono conectado. */
   const fetchApps = useCallback(async () => {
-    if (!s.activeSerial || s.activeSerial === 'Hardware Level') return;
+    if (!targetSerial || targetSerial === 'Hardware Level') return;
     s.setAppsLoading(true);
     s.setSelectedPackages(new Set());
     try {
       const res = await fetch('/api/apps', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'list', serial: s.activeSerial }),
+        body: JSON.stringify({ action: 'list', serial: targetSerial }),
       });
       const data = await res.json();
       if (data.success && data.apps) s.setAppsList(data.apps);
-      else log(`Error cargando apps: ${data.error}`);
+      else notify(`Error cargando apps: ${data.error || 'fallo ADB'}`, true);
     } catch (err: unknown) {
-      log(`Error de red cargando apps: ${getErrorMessage(err)}`);
+      notify(`Error de red cargando apps: ${getErrorMessage(err)}`, true);
     } finally {
       s.setAppsLoading(false);
     }
-  }, [s, log]);
+  }, [targetSerial, s, notify]);
 
   useEffect(() => {
-    if (s.appsSubTab === 'manager' && s.activeSerial && s.activeSerial !== 'Hardware Level') {
-      fetchApps();
-    }
+    if (targetSerial && targetSerial !== 'Hardware Level') fetchApps();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [s.appsSubTab, s.activeSerial]);
+  }, [targetSerial]);
 
-  /** Aplica búsqueda, categoría y orden sobre la lista real de paquetes. */
-  const filteredApps = useMemo(() => {
-    const q = s.appsSearch.toLowerCase();
-    const filtered = s.appsList.filter((app) => {
-      if (q && !app.name.toLowerCase().includes(q) && !app.packageName.toLowerCase().includes(q)) return false;
-      if (s.appsFilter === 'system') return app.isSystem || app.isBloatware;
-      if (s.appsFilter === 'user') return !app.isSystem;
-      if (s.appsFilter === 'hidden') return app.isHidden;
-      if (s.appsFilter === 'adware') return app.hasOverlay;
-      if (s.appsFilter === 'disabled') return app.isDisabled;
-      if (s.appsFilter === 'google') return app.isGoogle;
-      if (s.appsFilter === 'malware') return app.isMalware;
-      if (s.appsFilter === 'bloatware') return app.isBloatware;
-      if (s.appsFilter === 'safe') return app.safeToRemove;
-      if (s.appsFilter === 'critical') return app.criticalSystem;
-      return true;
-    });
-    return filtered.sort((a, b) => {
-      if (s.appsSort === 'name_asc') return a.name.localeCompare(b.name);
-      if (s.appsSort === 'name_desc') return b.name.localeCompare(a.name);
-      if (s.appsSort === 'date_desc') return (b.date || 0) - (a.date || 0);
-      if (s.appsSort === 'date_asc') return (a.date || 0) - (b.date || 0);
-      if (s.appsSort === 'size_desc') return (b.size || 0) - (a.size || 0);
-      if (s.appsSort === 'size_asc') return (a.size || 0) - (b.size || 0);
-      return 0;
-    });
-  }, [s.appsList, s.appsSearch, s.appsFilter, s.appsSort]);
+  const filteredApps = useMemo(
+    () => filterAndSortApps(s.appsList, s.appsSearch, s.appsFilter, s.appsSort),
+    [s.appsList, s.appsSearch, s.appsFilter, s.appsSort],
+  );
 
-  /** Ejecuta una acción sobre un paquete usando Rust nativo si está en Tauri o API web. */
-  const runPkgAction = async (action: 'uninstall' | 'disable' | 'enable', pkgName: string, refresh = true) => {
+  const runPkgAction = async (action: PkgAction, pkgName: string, refresh = true) => {
+    const app = s.appsList.find((a) => a.packageName === pkgName);
+    if (app?.criticalSystem && (action === 'uninstall' || action === 'disable' || action === 'clear_data')) {
+      notify(`Paquete crítico del sistema protegido: ${pkgName}`, true);
+      return;
+    }
     s.setAppActionLoading(pkgName);
     try {
-      if (rustBridge.isDesktop() && s.activeSerial && s.activeSerial !== 'Hardware Level') {
-        const rustOut = await rustBridge.appActionFast(s.activeSerial, pkgName, action);
-        if (rustOut !== null) {
-          log(`[Rust] ${action} ${pkgName}: ${rustOut.trim() || 'OK'}`);
-          if (refresh) fetchApps();
+      if (action !== 'extract_apk' && rustBridge.isDesktop() && targetSerial && targetSerial !== 'Hardware Level') {
+        const rustOut = await rustBridge.appActionFast(targetSerial, pkgName, action);
+        if (rustOut !== null && !/Failure|Exception|Error:/i.test(rustOut)) {
+          notify(`[Nativo] ${action} → ${pkgName} completado.`);
+          if (refresh && (action === 'uninstall' || action === 'disable' || action === 'enable')) await fetchApps();
           return;
         }
       }
       const res = await fetch('/api/apps', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action, packageName: pkgName, serial: s.activeSerial }),
+        body: JSON.stringify({ action, packageName: pkgName, serial: targetSerial }),
       });
       const data = await res.json();
-      if (data.success) { log(data.message); if (refresh) fetchApps(); }
-      else log(`Error (${action}): ${data.error}`);
+      if (data.success) {
+        notify(data.message || `Acción ${action} aplicada a ${pkgName}.`);
+        if (refresh && (action === 'uninstall' || action === 'disable' || action === 'enable')) await fetchApps();
+      } else {
+        notify(`Error (${action} en ${pkgName}): ${data.error || 'fallo ADB'}`, true);
+      }
     } catch (err: unknown) {
-      log(`Error de red: ${getErrorMessage(err)}`);
+      notify(`Error de red: ${getErrorMessage(err)}`, true);
     } finally {
       s.setAppActionLoading(null);
     }
   };
 
   const handleAppUninstall = async (pkgName: string) => {
-    const app = s.appsList.find((a) => a.packageName === pkgName);
-    const msg = app?.criticalSystem
-      ? `Peligro: "${pkgName}" es crítica del sistema. ¿Desinstalar de todas formas?`
-      : `¿Desinstalar "${pkgName}"?`;
-    if (!confirm(msg)) return;
+    if (!confirm(`¿Desinstalar "${pkgName}" del dispositivo?`)) return;
     await runPkgAction('uninstall', pkgName);
+  };
+
+  const handleAppClearData = async (pkgName: string) => {
+    if (!confirm(`¿Limpiar todos los datos y caché de "${pkgName}"?`)) return;
+    await runPkgAction('clear_data', pkgName, false);
   };
 
   const toggleSelectAllFiltered = (list: AppInfo[]) => {
     const names = list.map((a) => a.packageName);
-    const allSel = names.every((n) => s.selectedPackages.has(n));
+    const allSel = names.length > 0 && names.every((n) => s.selectedPackages.has(n));
     const next = new Set(s.selectedPackages);
-    if (allSel) names.forEach((n) => next.delete(n));
-    else names.forEach((n) => next.add(n));
+    names.forEach((n) => (allSel ? next.delete(n) : next.add(n)));
     s.setSelectedPackages(next);
   };
 
-  const handleBulkUninstall = async () => {
+  const handleBulkAction = async (action: 'uninstall' | 'disable' | 'enable' | 'force_stop') => {
     if (s.selectedPackages.size === 0) return;
     const criticalSet = new Set(s.appsList.filter((a) => a.criticalSystem).map((a) => a.packageName));
-    const safeTargets = Array.from(s.selectedPackages).filter((p) => !criticalSet.has(p));
-    if (safeTargets.length === 0) {
-      log('Los paquetes seleccionados son críticos del sistema y están protegidos.');
+    const targets = Array.from(s.selectedPackages).filter((p) => action === 'enable' || action === 'force_stop' || !criticalSet.has(p));
+    if (targets.length === 0) {
+      notify('Los paquetes seleccionados son críticos del sistema y están protegidos.', true);
       return;
     }
-    if (!confirm(`¿Desinstalar ${safeTargets.length} aplicaciones seleccionadas?`)) return;
+    if ((action === 'uninstall' || action === 'disable') && !confirm(`¿Aplicar "${action}" a ${targets.length} aplicaciones seleccionadas?`)) return;
     s.setAppsLoading(true);
-    for (const pkgName of safeTargets) await runPkgAction('uninstall', pkgName, false);
+    for (const pkgName of targets) await runPkgAction(action, pkgName, false);
     s.setSelectedPackages(new Set());
-    await fetchApps();
+    if (action !== 'force_stop') await fetchApps();
+    else s.setAppsLoading(false);
   };
 
   const tabCls = (active: boolean) =>
@@ -163,30 +155,35 @@ export function AppsView({ device: propDevice, addLog: propAddLog }: AppsViewPro
 
   return (
     <ViewShell navId="apps">
-      <div className={`flex gap-6 overflow-x-auto border-b pb-2 ${dark ? 'border-zinc-800' : 'border-slate-200'}`}>
-        <button type="button" onClick={() => s.setAppsSubTab('installer')} className={tabCls(s.appsSubTab === 'installer')}>
-          Instalar APK
-        </button>
-        <button type="button" onClick={() => s.setAppsSubTab('manager')} className={tabCls(s.appsSubTab === 'manager')}>
-          Administrar Aplicaciones
-        </button>
+      <div className={`flex items-center justify-between gap-4 border-b pb-2 ${dark ? 'border-zinc-800' : 'border-slate-200'}`}>
+        <div className="flex gap-6 overflow-x-auto">
+          <button type="button" onClick={() => s.setAppsSubTab('manager')} className={tabCls(s.appsSubTab === 'manager')}>
+            Administrar Aplicaciones ({s.appsList.length})
+          </button>
+          <button type="button" onClick={() => s.setAppsSubTab('installer')} className={tabCls(s.appsSubTab === 'installer')}>
+            Instalar APK / IPA
+          </button>
+        </div>
       </div>
 
       {s.appsSubTab === 'installer' ? (
-        <AppInstallerPanel dark={dark} addLog={log} activeSerial={s.activeSerial} connected={Boolean(device?.connected)} />
+        <AppInstallerPanel dark={dark} addLog={(m) => notify(m)} activeSerial={targetSerial} connected={isConnected} onInstalled={fetchApps} />
       ) : (
         <AppManagerPanel
-          dark={dark}
-          connected={Boolean(device?.connected)}
-          serial={device?.serial || s.activeSerial || undefined}
+          dark={dark} connected={isConnected} serial={targetSerial || undefined}
+          totalCount={s.appsList.length} statusMessage={statusMessage}
           appsSearch={s.appsSearch} setAppsSearch={s.setAppsSearch}
           appsFilter={s.appsFilter} setAppsFilter={(v) => (s.setAppsFilter as (x: unknown) => void)(v)}
           appsSort={s.appsSort} setAppsSort={s.setAppsSort}
           appsViewMode={s.appsViewMode} setAppsViewMode={(v) => (s.setAppsViewMode as (x: unknown) => void)(v)}
           appsLoading={s.appsLoading} fetchApps={fetchApps} filteredApps={filteredApps}
           selectedPackages={s.selectedPackages} togglePackageSelection={s.togglePackageSelection}
-          toggleSelectAllFiltered={toggleSelectAllFiltered} handleBulkUninstall={handleBulkUninstall}
+          toggleSelectAllFiltered={toggleSelectAllFiltered} handleBulkAction={handleBulkAction}
           appActionLoading={s.appActionLoading}
+          handleAppLaunch={(p) => runPkgAction('launch', p, false)}
+          handleAppForceStop={(p) => runPkgAction('force_stop', p, false)}
+          handleAppClearData={handleAppClearData}
+          handleAppExtractApk={(p) => runPkgAction('extract_apk', p, false)}
           handleAppUninstall={handleAppUninstall}
           handleAppEnable={(p) => runPkgAction('enable', p)}
           handleAppDisable={(p) => runPkgAction('disable', p)}

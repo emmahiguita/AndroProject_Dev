@@ -1,12 +1,12 @@
 // ============================================================================
 // ARCHIVO: DeviceInfoPanel.tsx
 // QUÉ HACE: Panel lateral del estudio de proyección que orquesta notificaciones
-//           toast, portapapeles, capturas y delega la UI a tarjetas por plataforma.
+//           toast, portapapeles, capturas, reinicio en caliente de VisionNano y
+//           herramientas de navegación/volumen/energía por plataforma.
 // CÓMO FUNCIONA: Detecta si el dispositivo es iOS o Android para renderizar
 //           `AirPlayStudioCard` o `VisionNanoStudioCard` + `ProjectionToolsCard`,
-//           gestionando el temporizador único del toast sin fugas de memoria.
-// POR QUÉ: Mantener este orquestador < 200 líneas (SRP) y corregir el toast
-//           en capturas fallidas y herramientas Android mostradas en iOS.
+//           ejecutando `set_stay_awake` por ADB cuando el usuario cambia el switch.
+// POR QUÉ: Mantener este orquestador < 175 líneas (SRP) sin acciones huérfanas.
 // ============================================================================
 
 'use client';
@@ -25,7 +25,7 @@ interface DeviceInfoPanelProps {
   device: DeviceInfo;
   dark: boolean;
   scrcpyActive: boolean;
-  onToggleScrcpy: (opts?: Partial<ScrcpyOptions>) => void;
+  onToggleScrcpy: (opts?: Partial<ScrcpyOptions>) => Promise<void> | void;
   scrcpyOptions: ScrcpyOptions;
   setScrcpyOptions: React.Dispatch<React.SetStateAction<ScrcpyOptions>>;
   isRecording: boolean;
@@ -38,6 +38,11 @@ interface DeviceInfoPanelProps {
   onTogglePowerScreen: () => void;
   onWakeScreen?: () => void;
   onOpenAllApps?: () => void;
+  onGoBack?: () => void;
+  onGoHome?: () => void;
+  onOpenRecent?: () => void;
+  onVolumeUp?: () => void;
+  onVolumeDown?: () => void;
   onToggleMute?: () => void;
   onMediaPlayPause?: () => void;
   onOpenSettings?: () => void;
@@ -75,11 +80,8 @@ export const DeviceInfoPanel: React.FC<DeviceInfoPanelProps> = (props) => {
   const handleScreenshotClick = async () => {
     showToast('Capturando pantalla HD...');
     const savedPath = await props.onScreenshot();
-    if (savedPath) {
-      showToast('Captura guardada en Capturas');
-    } else {
-      showToast('Error al capturar pantalla', true);
-    }
+    if (savedPath) showToast(`Captura guardada: ${savedPath.split(/[\\/]/).pop()}`);
+    else showToast('Error al capturar pantalla', true);
   };
 
   const handlePasteClipboard = async () => {
@@ -93,6 +95,20 @@ export const DeviceInfoPanel: React.FC<DeviceInfoPanelProps> = (props) => {
     }
   };
 
+  const handleToggleStayAwake = async (enabled: boolean) => {
+    if (!device.serial) return;
+    const res = await run('set_stay_awake', 'Mantener pantalla activa', { enabled, serial: device.serial }, false);
+    showToast(res?.success ? `Stay Awake: ${enabled ? 'ACTIVO' : 'INACTIVO'}` : 'Error aplicando Stay Awake', !res?.success);
+  };
+
+  const handleRestartScrcpy = async (opts?: Partial<ScrcpyOptions>) => {
+    if (!device.serial) return;
+    showToast('Reiniciando VisionNano 60 FPS con nuevos ajustes...');
+    await run('stop_screen', 'Deteniendo scrcpy...', { serial: device.serial }, false);
+    const res = await run('open_screen', 'Iniciando scrcpy...', { serial: device.serial, ...props.scrcpyOptions, ...opts }, false);
+    showToast(res?.success ? 'VisionNano 60 FPS actualizado' : 'No se pudo reiniciar VisionNano', !res?.success);
+  };
+
   const cardStyle = `${dark ? 'bg-zinc-900/40 border-zinc-800/70' : 'bg-white border-slate-200 shadow-sm'}`;
   const isIos = device.platform === 'ios' || device.serial?.startsWith('airplay-') || device.serial?.startsWith('apple-');
 
@@ -101,9 +117,7 @@ export const DeviceInfoPanel: React.FC<DeviceInfoPanelProps> = (props) => {
       {toast && (
         <div className="sticky top-2 z-30 flex items-center justify-center animate-in fade-in slide-in-from-top-1 duration-150">
           <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-900/95 border border-zinc-700 text-zinc-200 text-xs font-medium shadow-xl backdrop-blur-md">
-            {toast.isError
-              ? <AlertCircle size={13} className="text-rose-400" />
-              : <CheckCircle2 size={13} className="text-emerald-400" />}
+            {toast.isError ? <AlertCircle size={13} className="text-rose-400" /> : <CheckCircle2 size={13} className="text-emerald-400" />}
             <span>{toast.msg}</span>
           </div>
         </div>
@@ -121,6 +135,7 @@ export const DeviceInfoPanel: React.FC<DeviceInfoPanelProps> = (props) => {
           <VisionNanoStudioCard
             dark={dark} cardStyle={cardStyle} scrcpyActive={props.scrcpyActive}
             isBusy={props.isBusy} onToggleScrcpy={props.onToggleScrcpy}
+            onRestartScrcpy={handleRestartScrcpy} onToggleStayAwake={handleToggleStayAwake}
             scrcpyOptions={props.scrcpyOptions} setScrcpyOptions={props.setScrcpyOptions}
             autoProject={Boolean(props.autoProject)} onToggleAutoProject={props.onToggleAutoProject}
           />
@@ -129,12 +144,14 @@ export const DeviceInfoPanel: React.FC<DeviceInfoPanelProps> = (props) => {
             recordingSeconds={props.recordingSeconds} lastRecordedPath={props.lastRecordedPath} isBusy={props.isBusy}
             onToggleRecord={props.onToggleRecord} onSetOrientation={props.onSetOrientation}
             onPasteClipboard={handlePasteClipboard} onScreenshotClick={handleScreenshotClick}
-            onOpenAllApps={props.onOpenAllApps} onExpandNotifications={props.onExpandNotifications}
-            onExpandQuickSettings={props.onExpandQuickSettings} onTogglePowerScreen={props.onTogglePowerScreen}
-            onWakeScreen={props.onWakeScreen} onOpenSettings={props.onOpenSettings}
-            onToggleMute={props.onToggleMute} onMediaPlayPause={props.onMediaPlayPause}
-            onCollapsePanels={props.onCollapsePanels} onReboot={props.onReboot}
-            onPowerOff={props.onPowerOff} showToast={showToast}
+            onOpenAllApps={props.onOpenAllApps} onGoBack={props.onGoBack}
+            onGoHome={props.onGoHome} onOpenRecent={props.onOpenRecent}
+            onVolumeUp={props.onVolumeUp} onVolumeDown={props.onVolumeDown}
+            onExpandNotifications={props.onExpandNotifications} onExpandQuickSettings={props.onExpandQuickSettings}
+            onTogglePowerScreen={props.onTogglePowerScreen} onWakeScreen={props.onWakeScreen}
+            onOpenSettings={props.onOpenSettings} onToggleMute={props.onToggleMute}
+            onMediaPlayPause={props.onMediaPlayPause} onCollapsePanels={props.onCollapsePanels}
+            onReboot={props.onReboot} onPowerOff={props.onPowerOff} showToast={showToast}
           />
         </>
       )}

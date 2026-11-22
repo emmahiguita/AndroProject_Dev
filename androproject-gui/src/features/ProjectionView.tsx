@@ -1,16 +1,16 @@
 // ============================================================================
 // ARCHIVO: ProjectionView.tsx
 // QUÉ HACE: Estudio de proyección interactiva 60 FPS con soporte de panel
-//           dividido (visor + Estudio/Logcat), modo Multi-Pantalla paralelo y
-//           colapso fluido al minimizar el visor del dispositivo.
+//           dividido (visor + Estudio/Logcat), modo Multi-Pantalla paralelo,
+//           ventana flotante (Popout Tauri/Web) y colapso al minimizar.
 // CÓMO FUNCIONA: Coordina `ProjectionToolbar`, `DeviceFrame`, `MultiScreenGrid`
-//           y las pestañas de Estudio/Logcat. Al minimizar el visor, libera
-//           el 100% del ancho para el panel derecho y desmonta el stream.
+//           y las pestañas de Estudio/Logcat conectando todas las acciones de
+//           `useProjection` sin dejar funciones huérfanas.
 // POR QUÉ: Mantener una interfaz fluida, responsiva y bajo 200 líneas (SOLID).
 // ============================================================================
 'use client';
 
-import React, { useState, useMemo, useEffect, useRef } from 'react';
+import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { Sliders, Terminal } from 'lucide-react';
 import { useTheme } from '@/hooks/useTheme';
 import { useSplitPanel } from '@/hooks/useSplitPanel';
@@ -18,6 +18,7 @@ import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { useProjection } from '@/hooks/useProjection';
 import { useActions } from '@/hooks/useActions';
 import { useAppStore } from '@/stores';
+import { rustBridge } from '@/lib/services/tauri-bridge';
 import { ViewShell } from '@/components/ViewShell';
 import { SplitDivider } from '@/components/projection/SplitDivider';
 import { EmptyState } from '@/components/projection/EmptyState';
@@ -50,7 +51,6 @@ export function ProjectionView({ device }: { device?: DeviceInfo | null }) {
     return base.filter((d) => !(d.serial.includes(':') && d.model && usbModels.has(d.model.trim().toLowerCase())));
   }, [devicesList, device]);
 
-  // Lista memoizada con `state` real para evitar falsos "Desconectado" y re-renders en MultiScreenGrid
   const multiScreenDevices = useMemo(() => uniqueDevices.map((d) => {
     const isIos = d.serial.startsWith('airplay-') || d.serial.startsWith('apple-');
     return {
@@ -68,6 +68,19 @@ export function ProjectionView({ device }: { device?: DeviceInfo | null }) {
     prevDevCountRef.current = count;
   }, [uniqueDevices.length, setMultiScreenEnabled]);
 
+  const handleOpenPopout = useCallback(async () => {
+    if (!device?.serial) return;
+    if (rustBridge.isDesktop()) {
+      await rustBridge.openPopout(device.serial);
+      return;
+    }
+    window.open(
+      `/popout?serial=${encodeURIComponent(device.serial)}`,
+      `popout_${device.serial.replace(/[^a-zA-Z0-9]/g, '_')}`,
+      'width=420,height=860,left=80,top=80,resizable=yes,scrollbars=no,status=no',
+    );
+  }, [device?.serial]);
+
   if (!device) return <ViewShell navId="projection" fill><EmptyState dark={dark} onConnectAdb={projection.connectAdb} isConnecting={projection.isConnecting} /></ViewShell>;
   if (isMobile) return <ViewShell navId="projection" fill><MobileProjection device={device} dark={dark} projection={projection} /></ViewShell>;
 
@@ -82,19 +95,14 @@ export function ProjectionView({ device }: { device?: DeviceInfo | null }) {
     <ViewShell navId="projection" fill>
       <div className="flex flex-col flex-1 min-h-0">
         <ProjectionToolbar
-          dark={dark}
-          scrcpyActive={projection.scrcpyActive}
-          isRecording={projection.isRecording}
-          recordingSeconds={projection.recordingSeconds}
-          onToggleRecord={projection.toggleRecord}
-          fullscreen={projection.fullscreen}
-          minimized={frameMinimized}
-          deviceLabel={device.model || device.serial}
-          multiScreenEnabled={multiScreenEnabled}
-          deviceCount={uniqueDevices.length}
-          onRestoreMinimize={() => setFrameMinimized(false)}
-          onProjectAll={handleProjectAll}
-          onToggleMultiScreen={toggleMultiScreen}
+          dark={dark} scrcpyActive={projection.scrcpyActive} isBusy={projection.isBusy}
+          isRecording={projection.isRecording} recordingSeconds={projection.recordingSeconds}
+          onToggleScrcpy={() => projection.toggleScrcpy()} onToggleRecord={projection.toggleRecord}
+          onScreenshot={() => { projection.screenshot(); }} onPopout={handleOpenPopout}
+          fullscreen={projection.fullscreen} minimized={frameMinimized}
+          deviceLabel={device.model || device.serial} multiScreenEnabled={multiScreenEnabled}
+          deviceCount={uniqueDevices.length} onRestoreMinimize={() => setFrameMinimized(false)}
+          onProjectAll={handleProjectAll} onToggleMultiScreen={toggleMultiScreen}
           onToggleFullscreen={projection.toggleFullscreen}
         />
 
@@ -121,20 +129,14 @@ export function ProjectionView({ device }: { device?: DeviceInfo | null }) {
             onPointerUp={onPointerUp}
             style={{ userSelect: isDragging ? 'none' : 'auto' }}
           >
-            {/* Izquierda: Visor interactivo (se oculta limpiamente al minimizar para dar 100% ancho al panel derecho) */}
             {!frameMinimized && (
               <>
                 <div className="flex flex-col min-w-0 min-h-0" style={{ width: `${ratio * 100}%` }}>
                   <DeviceFrame
-                    device={device}
-                    expanded={true}
-                    onSendKey={projection.sendKey}
-                    scrcpyActive={projection.scrcpyActive}
-                    onToggleScrcpy={projection.toggleScrcpy}
-                    isRecording={projection.isRecording}
-                    recordingSeconds={projection.recordingSeconds}
-                    onToggleRecord={projection.toggleRecord}
-                    minimized={frameMinimized}
+                    device={device} expanded={true} onSendKey={projection.sendKey}
+                    scrcpyActive={projection.scrcpyActive} onToggleScrcpy={projection.toggleScrcpy}
+                    isRecording={projection.isRecording} recordingSeconds={projection.recordingSeconds}
+                    onToggleRecord={projection.toggleRecord} minimized={frameMinimized}
                     onToggleMinimize={() => setFrameMinimized((m) => !m)}
                   />
                 </div>
@@ -142,12 +144,10 @@ export function ProjectionView({ device }: { device?: DeviceInfo | null }) {
               </>
             )}
 
-            {/* Derecha: Estudio & Logcat */}
             <div className="flex flex-col min-h-0 overflow-hidden" style={{ width: frameMinimized ? '100%' : `${(1 - ratio) * 100}%`, minWidth: 0 }}>
               <div className="flex items-center p-1.5 border-b border-zinc-800 bg-zinc-950/80 gap-1 shrink-0">
                 <button
-                  type="button"
-                  onClick={() => setActiveTab('studio')}
+                  type="button" onClick={() => setActiveTab('studio')}
                   className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
                     activeTab === 'studio' ? 'bg-zinc-800 text-zinc-100 border border-zinc-700' : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50'
                   }`}
@@ -155,8 +155,7 @@ export function ProjectionView({ device }: { device?: DeviceInfo | null }) {
                   <Sliders size={13} /> <span>Estudio &amp; Control</span>
                 </button>
                 <button
-                  type="button"
-                  onClick={() => setActiveTab('logcat')}
+                  type="button" onClick={() => setActiveTab('logcat')}
                   className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
                     activeTab === 'logcat' ? 'bg-zinc-800 text-zinc-100 border border-zinc-700' : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50'
                   }`}
@@ -173,9 +172,12 @@ export function ProjectionView({ device }: { device?: DeviceInfo | null }) {
                     isRecording={projection.isRecording} recordingSeconds={projection.recordingSeconds}
                     lastRecordedPath={projection.lastRecordedPath} onToggleRecord={projection.toggleRecord}
                     onScreenshot={projection.screenshot} onPowerOff={projection.powerOff} onReboot={projection.reboot}
-                    onTogglePowerScreen={projection.togglePowerScreen} onWakeScreen={projection.wakeScreen} onOpenAllApps={projection.openAllApps}
-                    onToggleMute={projection.toggleMute} onMediaPlayPause={projection.mediaPlayPause} onOpenSettings={projection.openSettings}
-                    onCollapsePanels={projection.collapsePanels} onExpandNotifications={projection.expandNotifications} onExpandQuickSettings={projection.expandQuickSettings}
+                    onTogglePowerScreen={projection.togglePowerScreen} onWakeScreen={projection.wakeScreen}
+                    onOpenAllApps={projection.openAllApps} onGoBack={projection.goBack} onGoHome={projection.goHome}
+                    onOpenRecent={projection.openRecent} onVolumeUp={projection.volumeUp} onVolumeDown={projection.volumeDown}
+                    onToggleMute={projection.toggleMute} onMediaPlayPause={projection.mediaPlayPause}
+                    onOpenSettings={projection.openSettings} onCollapsePanels={projection.collapsePanels}
+                    onExpandNotifications={projection.expandNotifications} onExpandQuickSettings={projection.expandQuickSettings}
                     onSetOrientation={projection.setOrientation} isBusy={projection.isBusy} onConnectAdb={projection.connectAdb}
                     isConnecting={projection.isConnecting} autoProject={projection.autoProject} onToggleAutoProject={projection.setAutoProject}
                   />

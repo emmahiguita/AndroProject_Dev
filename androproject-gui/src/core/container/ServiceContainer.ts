@@ -83,7 +83,6 @@ export const TOKENS = {
   AirPlayTransport: 'IAirPlayTransport',
   IosBridge: 'IIosBridge',
   ProjectionCoordinator: 'IProjectionCoordinator',
-  StreamManager: 'IStreamManager',
   SessionManager: 'ISessionManager',
 } as const;
 

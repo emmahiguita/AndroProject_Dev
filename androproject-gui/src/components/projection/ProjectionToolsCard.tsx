@@ -1,11 +1,11 @@
 // ============================================================================
 // ARCHIVO: ProjectionToolsCard.tsx
-// QUÉ HACE: Tarjetas de Grabador MP4 en segundo plano, selector de
-//           orientación y herramientas rápidas del sistema para Android.
+// QUÉ HACE: Tarjetas de Grabador MP4, selector de orientación, control de
+//           volumen/navegación y herramientas rápidas del sistema Android.
 // CÓMO FUNCIONA: Muestra el cronómetro de grabación, botones Auto/Vertical/
-//           Horizontal y acciones ADB (captura, portapapeles, energía, etc.).
-// POR QUÉ: Aislar las herramientas Android evita mostrarlas erróneamente en
-//           dispositivos iOS y mantiene DeviceInfoPanel.tsx < 200 líneas.
+//           Horizontal y ejecuta keyevents y comandos ADB reales.
+// POR QUÉ: Conectar todas las acciones de `useProjectionActions` (incluyendo
+//          Volumen +/-, Home, Atrás, Recientes) con bordes neutros (< 185L).
 // ============================================================================
 
 'use client';
@@ -13,11 +13,10 @@
 import React from 'react';
 import {
   Video, Square, Circle, ClipboardPaste, Camera, LayoutGrid,
-  Bell, Sliders, Power, Sun, Settings, VolumeX, PlayCircle,
-  ChevronUp, RotateCcw,
+  Bell, Sliders, Power, Sun, Settings, VolumeX, Volume2, Volume1,
+  PlayCircle, ChevronUp, RotateCcw, Home, ArrowLeft, Layers,
 } from 'lucide-react';
 import { ToolButton } from './DeviceInfoPrimitives';
-
 import type { RecordActionResult } from '@/hooks/useProjectionTypes';
 
 interface ProjectionToolsCardProps {
@@ -32,6 +31,11 @@ interface ProjectionToolsCardProps {
   onPasteClipboard: () => void;
   onScreenshotClick: () => void;
   onOpenAllApps?: () => void;
+  onGoBack?: () => void;
+  onGoHome?: () => void;
+  onOpenRecent?: () => void;
+  onVolumeUp?: () => void;
+  onVolumeDown?: () => void;
   onExpandNotifications: () => void;
   onExpandQuickSettings: () => void;
   onTogglePowerScreen: () => void;
@@ -54,7 +58,8 @@ const formatTime = (secs: number) => {
 export const ProjectionToolsCard: React.FC<ProjectionToolsCardProps> = ({
   dark, cardStyle, isRecording, recordingSeconds, lastRecordedPath, isBusy,
   onToggleRecord, onSetOrientation, onPasteClipboard, onScreenshotClick,
-  onOpenAllApps, onExpandNotifications, onExpandQuickSettings, onTogglePowerScreen,
+  onOpenAllApps, onGoBack, onGoHome, onOpenRecent, onVolumeUp, onVolumeDown,
+  onExpandNotifications, onExpandQuickSettings, onTogglePowerScreen,
   onWakeScreen, onOpenSettings, onToggleMute, onMediaPlayPause, onCollapsePanels,
   onReboot, onPowerOff, showToast,
 }) => {
@@ -93,7 +98,7 @@ export const ProjectionToolsCard: React.FC<ProjectionToolsCardProps> = ({
           disabled={isBusy}
           className={`w-full flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-semibold transition-colors cursor-pointer disabled:opacity-50 ${
             isRecording
-              ? 'bg-rose-950/60 border border-rose-700/70 text-rose-300 hover:bg-rose-900/60'
+              ? 'bg-zinc-900 border border-zinc-700 text-rose-300 hover:bg-zinc-800'
               : 'bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700'
           }`}
         >
@@ -127,40 +132,22 @@ export const ProjectionToolsCard: React.FC<ProjectionToolsCardProps> = ({
         <div className="grid grid-cols-2 gap-1.5 pt-1">
           <ToolButton dark={dark} icon={<ClipboardPaste size={13} className="text-zinc-400" />} label="Pegar del PC" onClick={onPasteClipboard} />
           <ToolButton dark={dark} icon={<Camera size={13} className="text-zinc-400" />} label="Captura HD" onClick={onScreenshotClick} />
-          {onOpenAllApps && (
-            <ToolButton dark={dark} icon={<LayoutGrid size={13} className="text-zinc-400" />} label="Todas las Apps"
-              onClick={() => { onOpenAllApps(); showToast('Abriendo aplicaciones'); }} />
-          )}
-          <ToolButton dark={dark} icon={<Bell size={13} className="text-zinc-400" />} label="Notificaciones"
-            onClick={() => { onExpandNotifications(); showToast('Desplegando notificaciones'); }} />
-          <ToolButton dark={dark} icon={<Sliders size={13} className="text-zinc-400" />} label="Ajustes Rápidos"
-            onClick={() => { onExpandQuickSettings(); showToast('Ajustes rápidos'); }} />
-          <ToolButton dark={dark} icon={<Power size={13} className="text-zinc-400" />} label="Bloquear Pantalla"
-            onClick={() => { onTogglePowerScreen(); showToast('Bloqueando pantalla'); }} />
-          {onWakeScreen && (
-            <ToolButton dark={dark} icon={<Sun size={13} className="text-zinc-400" />} label="Despertar Pantalla"
-              onClick={() => { onWakeScreen(); showToast('Despertando pantalla'); }} />
-          )}
-          {onOpenSettings && (
-            <ToolButton dark={dark} icon={<Settings size={13} className="text-zinc-400" />} label="Ajustes Sistema"
-              onClick={() => { onOpenSettings(); showToast('Abriendo Ajustes'); }} />
-          )}
-          {onToggleMute && (
-            <ToolButton dark={dark} icon={<VolumeX size={13} className="text-zinc-400" />} label="Silenciar"
-              onClick={() => { onToggleMute(); showToast('Alternando silencio'); }} />
-          )}
-          {onMediaPlayPause && (
-            <ToolButton dark={dark} icon={<PlayCircle size={13} className="text-zinc-400" />} label="Play / Pausa"
-              onClick={() => { onMediaPlayPause(); showToast('Play / Pausa multimedia'); }} />
-          )}
-          {onCollapsePanels && (
-            <ToolButton dark={dark} icon={<ChevronUp size={13} className="text-zinc-400" />} label="Cerrar Paneles"
-              onClick={() => { onCollapsePanels(); showToast('Cerrando paneles'); }} />
-          )}
-          <ToolButton dark={dark} icon={<RotateCcw size={13} className="text-zinc-400" />} label="Reiniciar"
-            onClick={() => { onReboot(); showToast('Reiniciando...'); }} />
-          <ToolButton dark={dark} icon={<Power size={13} className="text-rose-400" />} label="Apagar"
-            onClick={() => { onPowerOff(); showToast('Apagando...'); }} danger />
+          {onGoBack && <ToolButton dark={dark} icon={<ArrowLeft size={13} className="text-zinc-400" />} label="Atrás" onClick={() => { onGoBack(); showToast('Tecla Atrás'); }} />}
+          {onGoHome && <ToolButton dark={dark} icon={<Home size={13} className="text-zinc-400" />} label="Inicio (Home)" onClick={() => { onGoHome(); showToast('Pantalla de Inicio'); }} />}
+          {onOpenRecent && <ToolButton dark={dark} icon={<Layers size={13} className="text-zinc-400" />} label="Apps Recientes" onClick={() => { onOpenRecent(); showToast('Multitarea / Recientes'); }} />}
+          {onOpenAllApps && <ToolButton dark={dark} icon={<LayoutGrid size={13} className="text-zinc-400" />} label="Todas las Apps" onClick={() => { onOpenAllApps(); showToast('Abriendo cajón de apps'); }} />}
+          {onVolumeUp && <ToolButton dark={dark} icon={<Volume2 size={13} className="text-zinc-400" />} label="Subir Volumen" onClick={() => { onVolumeUp(); showToast('Volumen +'); }} />}
+          {onVolumeDown && <ToolButton dark={dark} icon={<Volume1 size={13} className="text-zinc-400" />} label="Bajar Volumen" onClick={() => { onVolumeDown(); showToast('Volumen -'); }} />}
+          {onToggleMute && <ToolButton dark={dark} icon={<VolumeX size={13} className="text-zinc-400" />} label="Silenciar" onClick={() => { onToggleMute(); showToast('Alternando silencio'); }} />}
+          {onMediaPlayPause && <ToolButton dark={dark} icon={<PlayCircle size={13} className="text-zinc-400" />} label="Play / Pausa" onClick={() => { onMediaPlayPause(); showToast('Play / Pausa multimedia'); }} />}
+          <ToolButton dark={dark} icon={<Bell size={13} className="text-zinc-400" />} label="Notificaciones" onClick={() => { onExpandNotifications(); showToast('Desplegando notificaciones'); }} />
+          <ToolButton dark={dark} icon={<Sliders size={13} className="text-zinc-400" />} label="Ajustes Rápidos" onClick={() => { onExpandQuickSettings(); showToast('Ajustes rápidos'); }} />
+          {onCollapsePanels && <ToolButton dark={dark} icon={<ChevronUp size={13} className="text-zinc-400" />} label="Cerrar Paneles" onClick={() => { onCollapsePanels(); showToast('Cerrando paneles'); }} />}
+          {onOpenSettings && <ToolButton dark={dark} icon={<Settings size={13} className="text-zinc-400" />} label="Ajustes Sistema" onClick={() => { onOpenSettings(); showToast('Abriendo Ajustes'); }} />}
+          <ToolButton dark={dark} icon={<Power size={13} className="text-zinc-400" />} label="Bloquear Pantalla" onClick={() => { onTogglePowerScreen(); showToast('Bloqueando pantalla'); }} />
+          {onWakeScreen && <ToolButton dark={dark} icon={<Sun size={13} className="text-zinc-400" />} label="Despertar Pantalla" onClick={() => { onWakeScreen(); showToast('Despertando pantalla'); }} />}
+          <ToolButton dark={dark} icon={<RotateCcw size={13} className="text-zinc-400" />} label="Reiniciar" onClick={() => { onReboot(); showToast('Reiniciando...'); }} />
+          <ToolButton dark={dark} icon={<Power size={13} className="text-rose-400" />} label="Apagar" onClick={() => { onPowerOff(); showToast('Apagando...'); }} danger />
         </div>
       </div>
     </>
