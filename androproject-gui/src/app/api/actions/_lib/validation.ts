@@ -95,6 +95,9 @@ export const shadeStyleSchema = z.object({
   solidTheme: z.boolean().optional(),
   animationsFast: z.boolean().optional(),
 });
+export const perfProfileSchema = z.object({
+  profile: z.enum(['balanced', 'fluid', 'gaming', 'restore']),
+});
 
 // ── Per-action validation map ────────────────────────────────────────
 export const actionSchemas: Record<string, z.ZodType<unknown>> = {
@@ -127,6 +130,7 @@ export const actionSchemas: Record<string, z.ZodType<unknown>> = {
   set_bluetooth_codec:       bluetoothCodecSchema,
   set_bluetooth_absolute_volume: bluetoothAbsoluteVolumeSchema,
   set_shade_style:           shadeStyleSchema,
+  apply_perf_profile:        perfProfileSchema,
 };
 
 /**

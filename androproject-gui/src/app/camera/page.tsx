@@ -37,7 +37,7 @@ export default function CameraTransmitter() {
         </div>
         <div className="flex items-center gap-1.5 bg-zinc-900/90 rounded-full px-2.5 py-1 border border-zinc-800">
           <span className={`w-1.5 h-1.5 rounded-full ${
-            active ? 'bg-emerald-500 shadow-sm shadow-emerald-500/50 animate-pulse' : reconnecting ? 'bg-amber-500 animate-pulse' : 'bg-zinc-600'
+            active ? 'bg-emerald-500 animate-pulse' : reconnecting ? 'bg-amber-500 animate-pulse' : 'bg-zinc-600'
           }`} />
           <span className="text-[9px] font-medium tracking-wide text-zinc-300">
             {active ? 'Transmitiendo' : reconnecting ? 'Reconectando...' : 'Inactivo'}
@@ -119,7 +119,7 @@ export default function CameraTransmitter() {
               onClick={isRecording ? stopRecording : startRecording}
               className={`w-full py-3 rounded-xl font-semibold text-xs flex items-center justify-center gap-2 transition-all ${
                 isRecording
-                  ? 'bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/40 animate-pulse shadow-sm shadow-red-500/20'
+                  ? 'bg-zinc-800 hover:bg-zinc-700 text-red-300 border border-zinc-700 animate-pulse'
                   : 'bg-zinc-800/80 hover:bg-zinc-800 text-zinc-300 border border-zinc-700'
               }`}
             >

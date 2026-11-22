@@ -69,7 +69,7 @@ export const FlasherImagePanel: React.FC<FlasherImagePanelProps> = ({
                   active
                     ? dark ? 'bg-zinc-100 text-zinc-950 border-zinc-100' : 'bg-slate-900 text-white border-slate-900'
                     : p.critical
-                    ? dark ? 'bg-red-950/20 border-red-900/50 text-red-300 hover:bg-red-950/40' : 'bg-red-50 border-red-200 text-red-700 hover:bg-red-100'
+                    ? dark ? 'bg-zinc-900 border-zinc-700 text-red-300 hover:bg-zinc-800' : 'bg-slate-50 border-slate-300 text-red-700 hover:bg-slate-100'
                     : dark ? 'bg-zinc-900 border-zinc-800 text-zinc-300 hover:bg-zinc-800' : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
                 }`}
                 title={p.desc}
@@ -79,12 +79,11 @@ export const FlasherImagePanel: React.FC<FlasherImagePanelProps> = ({
             );
           })}
         </div>
-
         {/* Descripción técnica de la partición seleccionada */}
         {selectedPartObj && (
           <div className={`px-2.5 py-1.5 rounded border text-[11px] flex items-center gap-2 ${
             selectedPartObj.critical
-              ? dark ? 'bg-red-950/30 border-red-900/50 text-red-300' : 'bg-red-50 border-red-200 text-red-800'
+              ? dark ? 'bg-zinc-900/70 border-zinc-700 text-red-300' : 'bg-slate-50 border-slate-300 text-red-800'
               : dark ? 'bg-zinc-900/70 border-zinc-800 text-zinc-300' : 'bg-slate-50 border-slate-200 text-slate-700'
           }`}>
             <AlertTriangle size={13} className="shrink-0" />

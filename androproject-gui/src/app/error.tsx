@@ -17,7 +17,7 @@ export default function Error({
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100 flex items-center justify-center p-8 font-sans">
       <div className="max-w-md w-full bg-zinc-900 border border-zinc-800 rounded-2xl p-8 text-center shadow-2xl">
-        <div className="w-14 h-14 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center mx-auto mb-5">
+        <div className="w-14 h-14 rounded-2xl bg-zinc-800 border border-zinc-700 flex items-center justify-center mx-auto mb-5">
           <AlertTriangle size={28} className="text-red-400" />
         </div>
         <h1 className="text-lg font-bold tracking-tight text-zinc-100 mb-1.5">Error del Sistema</h1>

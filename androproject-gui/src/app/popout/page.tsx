@@ -77,7 +77,7 @@ function PopoutContent() {
       {/* ═══ Header Bar ═══ */}
       <header className="flex items-center justify-between px-3.5 py-2 bg-zinc-900/95 border-b border-zinc-800 backdrop-blur-md shrink-0 z-30">
         <div className="flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-sm shadow-emerald-500/50" />
+          <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
           <span className="text-xs font-semibold tracking-tight text-zinc-100 flex items-center gap-1.5">
             <Smartphone size={14} className="text-zinc-400" />
             <span>{device.model || (isIos ? 'iPhone Pro Mirror' : 'Android Mirror')}</span>
@@ -92,7 +92,7 @@ function PopoutContent() {
             <button
               type="button"
               onClick={() => setIsMuted(m => !m)}
-              className={`p-1.5 rounded-lg border transition-all ${isMuted ? 'bg-rose-500/20 border-rose-500/40 text-rose-300' : 'bg-zinc-800/80 border-zinc-700 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-700'}`}
+              className={`p-1.5 rounded-lg border transition-all ${isMuted ? 'bg-zinc-800 border-zinc-700 text-rose-300' : 'bg-zinc-800/80 border-zinc-700 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-700'}`}
               title={isMuted ? 'Silenciado' : 'Audio AirPlay Activo'}
             >
               {isMuted ? <VolumeX size={13} /> : <Volume2 size={13} />}
@@ -109,7 +109,7 @@ function PopoutContent() {
           <button
             type="button"
             onClick={() => window.close()}
-            className="p-1.5 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-300 hover:bg-rose-500/20 transition-all"
+            className="p-1.5 rounded-lg bg-zinc-800/80 border border-zinc-700 text-zinc-300 hover:text-rose-300 hover:bg-zinc-700 transition-all"
             title="Cerrar Ventana"
           >
             <X size={13} />

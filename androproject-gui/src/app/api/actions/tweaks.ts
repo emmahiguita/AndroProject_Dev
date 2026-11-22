@@ -4,6 +4,9 @@ import { ActionContext } from './_lib/context';
 
 // ── GPU Tweaks ─────────────────────────────────────────────────────
 
+const ALLOWED_GPU_VALUES = new Set(['skiagl', 'skiavk', 'opengl', '0', '1', 'true', 'false']);
+const SAFE_INT_RE = /^\d{1,6}$/;
+
 export async function setGpuTweak(ctx: ActionContext, body: { key: string; value?: string; reset?: boolean }) {
   const gpuKeys: Record<string, string> = {
     force_gpu: 'hardware.hwui.renderer',
@@ -11,13 +14,17 @@ export async function setGpuTweak(ctx: ActionContext, body: { key: string; value
     force_msaa: 'hardware.hwui.msaa',
   };
   const settingKey = gpuKeys[body.key];
-  if (!settingKey) return NextResponse.json({ success: false, error: 'Clave GPU inválida' });
+  if (!settingKey) return NextResponse.json({ success: false, error: 'Clave GPU inválida' }, { status: 400 });
 
   let r;
   if (body.reset) {
     r = await safeExec(`${ctx.adbTarget} shell settings delete global ${settingKey}`);
   } else {
-    r = await safeExec(`${ctx.adbTarget} shell settings put global ${settingKey} ${body.value}`);
+    const safeVal = String(body.value ?? '').trim();
+    if (!ALLOWED_GPU_VALUES.has(safeVal)) {
+      return NextResponse.json({ success: false, error: 'Valor GPU no permitido' }, { status: 400 });
+    }
+    r = await safeExec(`${ctx.adbTarget} shell settings put global ${settingKey} ${safeVal}`);
   }
   return NextResponse.json({ success: r.ok, message: r.ok ? `${body.key}=${body.reset ? 'reset' : body.value}` : r.err });
 }
@@ -58,14 +65,17 @@ export async function setBluetoothCodec(
     if (!r.ok) errors.push(`codec:${r.err}`);
   }
   if (sampleRate) {
+    if (!SAFE_INT_RE.test(sampleRate)) return NextResponse.json({ success: false, error: 'sampleRate inválido' }, { status: 400 });
     const r = await safeExec(`${ctx.adbTarget} shell settings put global bluetooth_a2dp_sample_rate_selection ${sampleRate}`);
     if (!r.ok) errors.push(`rate:${r.err}`);
   }
   if (bitsPerSample) {
+    if (!SAFE_INT_RE.test(bitsPerSample)) return NextResponse.json({ success: false, error: 'bitsPerSample inválido' }, { status: 400 });
     const r = await safeExec(`${ctx.adbTarget} shell settings put global bluetooth_a2dp_bits_per_sample_selection ${bitsPerSample}`);
     if (!r.ok) errors.push(`bits:${r.err}`);
   }
   if (codec === 'ldac' && ldacQuality) {
+    if (!SAFE_INT_RE.test(ldacQuality)) return NextResponse.json({ success: false, error: 'ldacQuality inválido' }, { status: 400 });
     const r = await safeExec(`${ctx.adbTarget} shell settings put global bluetooth_a2dp_ldac_playback_quality ${ldacQuality}`);
     if (!r.ok) errors.push(`ldac:${r.err}`);
   }

@@ -15,6 +15,7 @@ import * as fastboot from './fastboot';
 import * as diagnostics from './diagnostics';
 import * as detect from './detect';
 import * as apps from './apps';
+import * as boost from './boost';
 
 type ActionHandler = (ctx: ActionContext, body: Record<string, unknown>) => Promise<NextResponse>;
 
@@ -106,6 +107,8 @@ const registry: Record<string, ActionHandler> = {
 
   // Optimizer
   optimize_ram:           async (ctx, _body) => optimizeRam(ctx),
+  apply_perf_profile:     (ctx, body) => boost.applyPerformanceProfile(ctx, body as { profile: boost.PerfProfileId }),
+  get_perf_status:        (ctx) => boost.getPerformanceStatus(ctx),
 };
 
 // ── Optimize RAM handler ─────────────────────────────────────────
@@ -144,8 +147,10 @@ async function optimizeRam(ctx: ActionContext) {
 
 // ── Wireless ADB connection handler ───────────────────────────────
 async function connectAdb(body: Record<string, unknown>) {
-  const target = (body.target as string) || '';
-  if (!target) return NextResponse.json({ success: false, error: 'IP:puerto requerido' }, { status: 400 });
+  const target = String(body.target ?? '').trim();
+  if (!target || !/^[a-zA-Z0-9.-]{1,253}(:\d{1,5})?$/.test(target)) {
+    return NextResponse.json({ success: false, error: 'IP:puerto inválido o requerido' }, { status: 400 });
+  }
   const { ok, out, err } = await safeExec(`"${ADB}" connect ${target}`, 10000);
   return NextResponse.json({ success: ok, message: ok ? `Conectado a ${target}` : err });
 }

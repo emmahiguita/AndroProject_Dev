@@ -75,7 +75,7 @@ export const ProjectionOverlays: React.FC<ProjectionOverlaysProps> = ({
       <div className={`absolute top-4 left-1/2 -translate-x-1/2 px-3.5 py-1.5 rounded-lg backdrop-blur-md border shadow-lg flex items-center gap-2 z-40 animate-in fade-in slide-in-from-top-2 duration-150 ${
         dropStatus.status === 'uploading' ? 'bg-zinc-900/95 border-zinc-700 text-zinc-200'
         : dropStatus.status === 'success' ? 'bg-zinc-900/95 border-zinc-700 text-emerald-400'
-        : 'bg-zinc-900/95 border-red-900/50 text-red-400'
+        : 'bg-zinc-900/95 border-zinc-700 text-red-400'
       }`}>
         {dropStatus.status === 'uploading' && <Loader2 size={13} className="animate-spin text-zinc-400" />}
         {dropStatus.status === 'success' && <CheckCircle2 size={13} />}

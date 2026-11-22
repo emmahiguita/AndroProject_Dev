@@ -108,7 +108,7 @@ function AntivirusPanel({ propAddLog }: { propAddLog?: (msg: string, type?: 'inf
       </Card>
 
       {appsList.length > 0 && malwareApps.length === 0 && (
-        <Card className="bg-semantic-success/5 border-semantic-success/20 text-center">
+        <Card className="border-border text-center">
           <Shield size={24} className="mx-auto mb-2 text-emerald-400" />
           <p className="font-bold text-emerald-400 text-xs">Sin coincidencias por nombre de paquete</p>
           <p className={`text-[11px] ${t.textSub} mt-1`}>Usa el botón <strong>Escaneo profundo</strong> arriba para auditar permisos, Accesibilidad y apps ocultas.</p>

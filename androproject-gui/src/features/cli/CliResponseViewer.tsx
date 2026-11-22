@@ -70,7 +70,7 @@ export const CliResponseViewer: React.FC<CliResponseViewerProps> = ({
       {/* Mensaje de error o salida del terminal */}
       {error ? (
         <div className={`p-3 rounded-lg border flex items-start gap-2.5 ${
-          dark ? 'bg-red-950/30 border-red-900/50 text-red-300' : 'bg-red-50 border-red-200 text-red-800'
+          dark ? 'bg-zinc-900/70 border-zinc-800 text-red-300' : 'bg-slate-50 border-slate-200 text-red-800'
         }`}>
           <AlertCircle size={16} className="shrink-0 mt-0.5 text-red-500" />
           <p className="text-xs font-mono break-words">{error}</p>

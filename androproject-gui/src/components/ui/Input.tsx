@@ -71,7 +71,7 @@ export function Input({
             'disabled:opacity-50 disabled:pointer-events-none',
             icon ? 'pl-9' : null,
             error
-              ? 'border-semantic-danger focus-visible:outline-semantic-danger'
+              ? 'border-border-strong focus:border-border-accent'
               : 'border-border focus:border-border-accent',
             className,
           )}

@@ -70,7 +70,7 @@ export const ProjectionToolsCard: React.FC<ProjectionToolsCardProps> = ({
             </h3>
           </div>
           {isRecording && (
-            <span className="font-mono text-[10px] text-rose-400 font-medium px-2 py-0.5 rounded-md bg-rose-500/10 border border-rose-500/20">
+            <span className="font-mono text-[10px] text-rose-400 font-medium px-2 py-0.5 rounded-md bg-zinc-900 border border-zinc-700">
               REC {formatTime(recordingSeconds)}
             </span>
           )}
@@ -82,7 +82,7 @@ export const ProjectionToolsCard: React.FC<ProjectionToolsCardProps> = ({
           disabled={isBusy}
           className={`w-full flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
             isRecording
-              ? 'bg-rose-500/15 border border-rose-500/30 text-rose-300 hover:bg-rose-500/25'
+              ? 'bg-zinc-800 border border-zinc-700 text-rose-300 hover:bg-zinc-700'
               : 'bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700'
           }`}
         >

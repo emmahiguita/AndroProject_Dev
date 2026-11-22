@@ -5,6 +5,7 @@ import { Zap, Cpu, HardDrive, RefreshCw, CheckCircle2, Sparkles } from 'lucide-r
 import { ViewShell } from '../components/ViewShell';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
+import { TurboBoostPanel } from './optimizer/TurboBoostPanel';
 import { DeviceInfo } from './types';
 
 interface OptimizerViewProps {
@@ -162,6 +163,8 @@ export const OptimizerView: React.FC<OptimizerViewProps> = ({ device, addLog }) 
             </p>
           </Card>
         </div>
+
+        <TurboBoostPanel device={device} addLog={addLog} />
 
         <p className="text-[9px] text-text-tertiary flex items-center gap-1">
           <Sparkles size={10} /> Lectura y optimización en tiempo real mediante comandos ADB nativos.

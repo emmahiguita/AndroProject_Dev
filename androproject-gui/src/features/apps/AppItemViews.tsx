@@ -35,8 +35,8 @@ function AppBadges({ app, dark }: { app: AppInfo; dark: boolean }) {
     ? 'bg-zinc-900 text-zinc-300 border-zinc-700'
     : 'bg-slate-100 text-slate-700 border-slate-300';
   const danger = dark
-    ? 'bg-red-950/60 text-red-300 border-red-900'
-    : 'bg-red-50 text-red-700 border-red-200';
+    ? 'bg-zinc-900 text-red-300 border-zinc-700'
+    : 'bg-slate-100 text-red-700 border-slate-300';
 
   return (
     <div className="flex items-center gap-1 flex-wrap">

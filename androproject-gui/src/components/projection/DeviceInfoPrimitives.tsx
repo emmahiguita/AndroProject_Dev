@@ -79,8 +79,8 @@ export function ToolButton({
       className={`flex items-center gap-2 px-2.5 py-2 rounded-lg text-left transition-colors text-xs font-medium border cursor-pointer ${
         danger
           ? dark
-            ? 'text-rose-400 bg-rose-500/5 hover:bg-rose-500/10 border-rose-500/20'
-            : 'text-red-600 bg-red-50 hover:bg-red-100 border-red-200'
+            ? 'text-rose-400 bg-zinc-900/50 hover:bg-zinc-800/80 border-zinc-800/80'
+            : 'text-red-600 bg-slate-50 hover:bg-slate-100 border-slate-200'
           : dark
             ? 'text-zinc-300 bg-zinc-900/50 hover:bg-zinc-800/80 border-zinc-800/80 hover:text-zinc-100'
             : 'text-slate-700 bg-slate-50 hover:bg-slate-100 border-slate-200'

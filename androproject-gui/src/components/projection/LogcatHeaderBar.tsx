@@ -72,7 +72,7 @@ export const LogcatHeaderBar: React.FC<LogcatHeaderBarProps> = ({
               {activeApp.packageName}
             </span>
             <span className={`px-1 py-0.2 rounded border text-[9px] font-medium shrink-0 ${
-              activeAppErrors > 0 ? 'bg-rose-500/20 text-rose-300 border-rose-500/30' : 'bg-zinc-800 text-zinc-400 border-zinc-700'
+              activeAppErrors > 0 ? 'bg-zinc-800 text-rose-300 border-zinc-700' : 'bg-zinc-800 text-zinc-400 border-zinc-700'
             }`}>
               {activeAppErrors > 0 ? `${activeAppErrors} err` : 'ok'}
             </span>
@@ -97,15 +97,15 @@ export const LogcatHeaderBar: React.FC<LogcatHeaderBarProps> = ({
     </div>
 
     {latestCrash && (
-      <div className="mx-2 mt-1.5 p-2 rounded-xl bg-rose-950/80 border border-rose-800/80 text-rose-200 shrink-0 flex items-center justify-between gap-2 shadow-sm">
+      <div className="mx-2 mt-1.5 p-2 rounded-xl bg-zinc-900 border border-zinc-700 text-zinc-200 shrink-0 flex items-center justify-between gap-2 shadow-sm">
         <div className="flex items-center gap-2 min-w-0">
           <Flame size={14} className="text-rose-400 shrink-0" />
           <div className="min-w-0 truncate">
-            <span className="font-semibold text-xs text-rose-100 mr-2">Fallo Detectado</span>
-            <span className="text-[9px] px-1.5 py-0.2 rounded bg-rose-900/80 border border-rose-700 font-mono text-rose-300 mr-2">
+            <span className="font-semibold text-xs text-zinc-100 mr-2">Fallo Detectado</span>
+            <span className="text-[9px] px-1.5 py-0.2 rounded bg-zinc-800 border border-zinc-700 font-mono text-rose-300 mr-2">
               {latestCrash.crashType}
             </span>
-            <span className="font-mono text-[10px] text-rose-200 truncate">
+            <span className="font-mono text-[10px] text-zinc-300 truncate">
               {latestCrash.packageName} (PID: {latestCrash.pid})
             </span>
           </div>
@@ -114,11 +114,11 @@ export const LogcatHeaderBar: React.FC<LogcatHeaderBarProps> = ({
           <button
             type="button"
             onClick={() => onOpenLatestCrash(latestCrash)}
-            className="px-2 py-0.5 rounded-md bg-rose-900 hover:bg-rose-800 text-white font-medium text-[10px] border border-rose-700 transition-colors cursor-pointer"
+            className="px-2 py-0.5 rounded-md bg-zinc-800 hover:bg-zinc-700 text-white font-medium text-[10px] border border-zinc-700 transition-colors cursor-pointer"
           >
             StackTrace
           </button>
-          <button type="button" onClick={onDismissCrash} className="px-1.5 py-0.5 rounded-md text-rose-400 hover:text-white hover:bg-rose-900/50 transition-colors text-xs">
+          <button type="button" onClick={onDismissCrash} className="px-1.5 py-0.5 rounded-md text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors text-xs">
             ✕
           </button>
         </div>

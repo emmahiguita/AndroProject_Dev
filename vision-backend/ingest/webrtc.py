@@ -1,187 +1,93 @@
-import logging
+# ============================================================================
+# ARCHIVO: webrtc.py
+# QUÉ HACE: Gestiona el ciclo de vida de conexiones WebRTC (`RTCPeerConnection`),
+#           servidores STUN/TURN reales y limpieza de conexiones huérfanas.
+# CÓMO FUNCIONA: Construye `RTCConfiguration(iceServers=...)` en el constructor
+#           de `RTCPeerConnection`, adjunta `VideoTransformTrack` y
+#           `AudioPassThroughTrack`, y mantiene referencia fuerte al task de GC.
+# POR QUÉ: Corregir el bug donde `pc._iceServers` era ignorado por `aiortc`,
+#           prevenir fugas de tareas asyncio y mantener SRP (< 200 líneas).
+# ============================================================================
+
 import asyncio
-import time
-from aiortc import RTCPeerConnection, RTCSessionDescription, MediaStreamTrack
-from av import VideoFrame
-from processing.denoise import process_frame, CUDA_AVAILABLE
+import logging
+import os
+from typing import Optional
+from aiortc import (
+    MediaStreamTrack,
+    RTCConfiguration,
+    RTCIceServer,
+    RTCPeerConnection,
+    RTCSessionDescription,
+)
+from processing.denoise import CUDA_AVAILABLE
+from ingest.tracks import AudioPassThroughTrack, VideoTransformTrack
 
 logger = logging.getLogger(__name__)
 
-# Keep track of active peer connections (internal — use get_active_connections() to access)
 _pcs: set = set()
-_stale_cleanup_started = False
+_cleanup_task: Optional[asyncio.Task] = None
 
 
 def get_active_connection_count() -> int:
-    """Thread-safe accessor for active WebRTC connections count."""
+    """Devuelve el número de conexiones WebRTC activas."""
     return len(_pcs)
 
 
 def get_active_connections() -> set:
-    """Returns a copy of the active connection set (read-only usage)."""
+    """Devuelve una copia de solo lectura del conjunto de conexiones activas."""
     return set(_pcs)
 
 
-class VideoTransformTrack(MediaStreamTrack):
-    """
-    A video stream track that transforms frames from another track.
-    Includes latency and performance telemetry.
-    """
-
-    kind = "video"
-
-    def __init__(self, track):
-        super().__init__()
-        self.track = track
-        # Performance counters
-        self.frame_count = 0
-        self.total_process_time = 0.0
-        self.max_process_time = 0.0
-        self.last_report_time = time.monotonic()
-        self.report_interval = 5.0  # seconds
-
-    async def recv(self):
-        try:
-            frame = await self.track.recv()
-        except Exception as e:
-            logger.debug(f"[VIDEO] Stream track ended/closed: {e}")
-            raise
-
-        t_start = time.perf_counter()
-
-        # Convert av.VideoFrame to numpy array (BGR format for OpenCV)
-        img = frame.to_ndarray(format="bgr24")
-
-        # Process the frame (Denoise / GPU Acceleration)
-        processed_img = process_frame(img)
-
-        process_ms = (time.perf_counter() - t_start) * 1000
-        self.frame_count += 1
-        self.total_process_time += process_ms
-        if process_ms > self.max_process_time:
-            self.max_process_time = process_ms
-
-        # Periodic performance report
-        now = time.monotonic()
-        if now - self.last_report_time >= self.report_interval and self.frame_count > 0:
-            avg_ms = self.total_process_time / self.frame_count
-            fps = self.frame_count / (now - self.last_report_time)
-            logger.info(
-                f"[VIDEO] FPS={fps:.1f} | Procesamiento avg={avg_ms:.1f}ms "
-                f"max={self.max_process_time:.1f}ms | "
-                f"Res={img.shape[1]}x{img.shape[0]} | "
-                f"GPU={'CUDA' if CUDA_AVAILABLE else 'CPU'}"
+def _build_ice_configuration() -> RTCConfiguration:
+    """Construye la configuración oficial STUN/TURN aceptada por aiortc."""
+    servers = [
+        RTCIceServer(urls=["stun:stun.l.google.com:19302", "stun:stun1.l.google.com:19302"]),
+    ]
+    turn_url = os.environ.get("TURN_SERVER_URL", "").strip()
+    if turn_url:
+        servers.append(
+            RTCIceServer(
+                urls=[turn_url],
+                username=os.environ.get("TURN_USERNAME", ""),
+                credential=os.environ.get("TURN_CREDENTIAL", ""),
             )
-            # Reset counters
-            self.frame_count = 0
-            self.total_process_time = 0.0
-            self.max_process_time = 0.0
-            self.last_report_time = now
-
-        # Convert back to av.VideoFrame
-        new_frame = VideoFrame.from_ndarray(processed_img, format="bgr24")
-        new_frame.pts = frame.pts
-        new_frame.time_base = frame.time_base
-        return new_frame
-
-
-class AudioPassThroughTrack(MediaStreamTrack):
-    """
-    A lightweight audio track that passes through audio frames
-    without modification to avoid feedback loops.
-    """
-
-    kind = "audio"
-
-    def __init__(self, track):
-        super().__init__()
-        self.track = track
-        self.frame_count = 0
-        self.last_report_time = time.monotonic()
-
-    async def recv(self):
-        try:
-            frame = await self.track.recv()
-        except Exception as e:
-            logger.debug(f"[AUDIO] Stream track ended/closed: {e}")
-            raise
-        self.frame_count += 1
-        now = time.monotonic()
-        if now - self.last_report_time >= 10.0 and self.frame_count > 0:
-            logger.info(
-                f"[AUDIO] Frames recibidos: {self.frame_count} | Audio fluyendo correctamente"
-            )
-            self.frame_count = 0
-            self.last_report_time = now
-        return frame
+        )
+        logger.info(f"TURN server configured: {turn_url}")
+    return RTCConfiguration(iceServers=servers)
 
 
 async def _cleanup_stale_connections():
-    """Periodically close connections that have been orphaned for >30s."""
-    global _stale_cleanup_started
-    if _stale_cleanup_started:
-        return
-    _stale_cleanup_started = True
+    """Cierra periódicamente conexiones en estado failed/closed cada 30s."""
+    global _cleanup_task
     try:
         while True:
             await asyncio.sleep(30)
-            dead = [
-                pc for pc in list(_pcs) if pc.connectionState in ("failed", "closed")
-            ]
+            dead = [pc for pc in list(_pcs) if pc.connectionState in ("failed", "closed")]
             for pc in dead:
-                logger.warning(
-                    f"Cleaning up stale connection in state '{pc.connectionState}'"
-                )
+                logger.warning(f"Cleaning up stale connection in state '{pc.connectionState}'")
                 _pcs.discard(pc)
                 try:
                     await pc.close()
                 except Exception:
                     pass
             if dead:
-                logger.info(
-                    f"Stale cleanup: removed {len(dead)} connections, {len(_pcs)} remaining"
-                )
+                logger.info(f"Stale cleanup: removed {len(dead)} connections, {len(_pcs)} remaining")
     finally:
-        _stale_cleanup_started = False
-
-
-# ── ICE / TURN configuration ──────────────────────────────────────────
-# For LAN: default STUN from Google is sufficient.
-# For WAN / remote access: set TURN_SERVER_URL and TURN_CREDENTIAL env vars.
-# If TURN is configured, it's used for NAT traversal when P2P fails.
-ICE_SERVERS = [
-    {"urls": "stun:stun.l.google.com:19302"},
-    {"urls": "stun:stun1.l.google.com:19302"},
-]
-import os
-
-_turn_url = os.environ.get("TURN_SERVER_URL", "")
-_turn_user = os.environ.get("TURN_USERNAME", "")
-_turn_cred = os.environ.get("TURN_CREDENTIAL", "")
-if _turn_url:
-    ICE_SERVERS.append(
-        {
-            "urls": _turn_url,
-            "username": _turn_user,
-            "credential": _turn_cred,
-        }
-    )
-    logger.info(f"TURN server configured: {_turn_url}")
+        _cleanup_task = None
 
 
 async def handle_offer(sdp: str, type: str) -> RTCSessionDescription:
+    """Procesa una oferta SDP entrante y retorna la respuesta SDP local."""
+    global _cleanup_task
     offer = RTCSessionDescription(sdp=sdp, type=type)
-    pc = RTCPeerConnection()
-    # Aplicar servidores ICE para NAT traversal
-    pc._iceServers = ICE_SERVERS  # type: ignore[attr-defined]
+    pc = RTCPeerConnection(configuration=_build_ice_configuration())
     _pcs.add(pc)
 
-    # Start the stale connection cleanup loop (idempotent)
-    asyncio.create_task(_cleanup_stale_connections())
+    if _cleanup_task is None or _cleanup_task.done():
+        _cleanup_task = asyncio.create_task(_cleanup_stale_connections())
 
-    logger.info(
-        f"GPU status: {'CUDA enabled' if CUDA_AVAILABLE else 'CPU only (CUDA not available)'}"
-    )
+    logger.info(f"GPU status: {'CUDA enabled' if CUDA_AVAILABLE else 'CPU only (CUDA not available)'}")
 
     @pc.on("connectionstatechange")
     async def on_connectionstatechange():
@@ -193,14 +99,14 @@ async def handle_offer(sdp: str, type: str) -> RTCSessionDescription:
                 await pc.close()
             except Exception:
                 pass
-            # Notify about active connections remaining
             logger.info(f"Active connections remaining: {len(_pcs)}")
 
     @pc.on("iceconnectionstatechange")
     async def on_iceconnectionstatechange():
         ice_state = pc.iceConnectionState
-        if ice_state in ("failed", "disconnected", "closed"):
-            logger.info(f"ICE state -> {ice_state}, scheduling cleanup")
+        # "disconnected" es transitorio en WebRTC: solo cerrar en failed/closed
+        if ice_state in ("failed", "closed"):
+            logger.info(f"ICE state -> {ice_state}, closing peer connection")
             _pcs.discard(pc)
             try:
                 await pc.close()
@@ -210,17 +116,11 @@ async def handle_offer(sdp: str, type: str) -> RTCSessionDescription:
     @pc.on("track")
     def on_track(track: MediaStreamTrack):
         logger.info(f"Track received: kind={track.kind}, id={track.id}")
-
         if track.kind == "video":
-            # Apply OpenCV processing to the incoming video track
-            local_video = VideoTransformTrack(track)
-            # Send the processed video back to the sender
-            pc.addTrack(local_video)
+            pc.addTrack(VideoTransformTrack(track))
             logger.info("Video processing pipeline established")
-
         elif track.kind == "audio":
-            local_audio = AudioPassThroughTrack(track)
-            pc.addTrack(local_audio)
+            pc.addTrack(AudioPassThroughTrack(track))
             logger.info("Audio pass-through established (not blackholed)")
 
     try:
@@ -237,3 +137,20 @@ async def handle_offer(sdp: str, type: str) -> RTCSessionDescription:
         except Exception:
             pass
         raise
+
+
+async def close_all_connections() -> None:
+    """Cierra ordenadamente todas las conexiones WebRTC y el task de limpieza al apagar."""
+    global _cleanup_task
+    if _cleanup_task and not _cleanup_task.done():
+        _cleanup_task.cancel()
+        try:
+            await _cleanup_task
+        except asyncio.CancelledError:
+            pass
+    _cleanup_task = None
+    active = list(_pcs)
+    _pcs.clear()
+    if active:
+        await asyncio.gather(*(pc.close() for pc in active), return_exceptions=True)
+        logger.info(f"Closed {len(active)} active WebRTC peer connection(s) on shutdown.")

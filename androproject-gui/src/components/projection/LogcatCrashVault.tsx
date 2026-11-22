@@ -63,13 +63,13 @@ export const LogcatCrashVault: React.FC<LogcatCrashVaultProps> = ({
             <div
               key={crash.id}
               className={`rounded-xl border p-2.5 transition-all ${
-                isSelected ? 'bg-red-950/40 border-red-500/60 ring-1 ring-red-500/40 shadow-lg' : 'bg-white/[0.02] border-white/[0.08] hover:bg-white/[0.04]'
+                isSelected ? 'bg-zinc-900 border-zinc-600 shadow-lg' : 'bg-white/[0.02] border-white/[0.08] hover:bg-white/[0.04]'
               }`}
             >
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
                   <div className="flex items-center gap-1.5 flex-wrap">
-                    <span className="px-1.5 py-0.2 rounded bg-red-500/20 text-red-300 font-bold text-[9px] border border-red-500/30">
+                    <span className="px-1.5 py-0.2 rounded bg-zinc-800 text-red-300 font-bold text-[9px] border border-zinc-700">
                       {crash.crashType}
                     </span>
                     {crash.occurrences > 1 && (
@@ -89,7 +89,7 @@ export const LogcatCrashVault: React.FC<LogcatCrashVaultProps> = ({
                 <div className="flex flex-col items-end gap-1 shrink-0">
                   <button
                     type="button" onClick={() => onSelectCrash(isSelected ? null : crash)}
-                    className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-red-500/20 hover:bg-red-500/35 text-red-200 border border-red-500/30 text-[10px] font-bold transition-all cursor-pointer"
+                    className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-100 border border-zinc-700 text-[10px] font-bold transition-all cursor-pointer"
                   >
                     <FileText size={11} /><span>{isSelected ? 'Ocultar' : 'Ver StackTrace'}</span>
                   </button>
@@ -115,7 +115,7 @@ export const LogcatCrashVault: React.FC<LogcatCrashVaultProps> = ({
                     </button>
                   </div>
 
-                  <pre className="p-2.5 rounded-lg bg-black/80 border border-red-500/30 text-red-200 font-mono text-[9px] whitespace-pre-wrap break-all max-h-56 overflow-y-auto select-text leading-relaxed">
+                  <pre className="p-2.5 rounded-lg bg-black/80 border border-zinc-800 text-red-200 font-mono text-[9px] whitespace-pre-wrap break-all max-h-56 overflow-y-auto select-text leading-relaxed">
                     {crash.stackTrace.join('\n')}
                   </pre>
 

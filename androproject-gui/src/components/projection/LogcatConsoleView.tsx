@@ -138,7 +138,7 @@ export const LogcatConsoleView: React.FC<LogcatConsoleViewProps> = ({
                 key={entry.id} onClick={() => setSelectedEntry(entry)}
                 className={`group flex items-start gap-1.5 px-1.5 py-0.5 rounded cursor-pointer transition-colors leading-relaxed ${colors.bg} ${
                   isSelected ? 'bg-zinc-800 ring-1 ring-zinc-500' : ''
-                } ${entry.isCrash ? 'border-l-2 border-red-500 pl-2 bg-red-950/30' : ''}`}
+                } ${entry.isCrash ? 'border-l-2 border-zinc-500 pl-2 bg-zinc-900/80' : ''}`}
               >
                 <span className="text-white/30 text-[9px] shrink-0">{entry.timestamp.slice(6, 12)}</span>
                 <span className={`px-1 py-0 rounded text-[9px] font-bold border shrink-0 ${colors.badge}`}>{entry.level}</span>

@@ -62,7 +62,7 @@ export const ProjectionToolbar: React.FC<ProjectionToolbarProps> = ({
       )}
 
       {isRecording && (
-        <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-500/10 border border-red-500/20 text-[9px] font-bold text-red-400 animate-pulse">
+        <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-zinc-900 border border-zinc-700 text-[9px] font-bold text-red-400 animate-pulse">
           ● REC
         </span>
       )}

@@ -6,11 +6,22 @@ import { ActionContext } from './_lib/context';
 
 interface ScaleMap { [key: string]: string }
 
+const ALLOWED_ANIM_KEYS = new Set([
+  'window_animation_scale',
+  'transition_animation_scale',
+  'animator_duration_scale',
+]);
+const SAFE_SCALE_RE = /^(?:0(?:\.\d+)?|[1-9]\d?(?:\.\d+)?)$/;
+
 export async function setAnimationBatch(ctx: ActionContext, body: { scales: ScaleMap }) {
   const { scales } = body;
   const errors: string[] = [];
   for (const [k, v] of Object.entries(scales || {})) {
-    const r = await safeExec(`${ctx.adbTarget} shell settings put global ${k} ${v}`);
+    if (!ALLOWED_ANIM_KEYS.has(k) || !SAFE_SCALE_RE.test(String(v).trim())) {
+      errors.push(`${k}: valor o clave inválida`);
+      continue;
+    }
+    const r = await safeExec(`${ctx.adbTarget} shell settings put global ${k} ${String(v).trim()}`);
     if (!r.ok) errors.push(`${k}: ${r.err}`);
   }
   return NextResponse.json({
@@ -27,9 +38,12 @@ export async function setAnimationScale(ctx: ActionContext, body: { type: string
     animator: 'animator_duration_scale',
   };
   const key = keys[type];
-  if (!key) return NextResponse.json({ success: false, error: 'Tipo inválido' });
-  const r = await safeExec(`${ctx.adbTarget} shell settings put global ${key} ${value}`);
-  return NextResponse.json({ success: r.ok, message: r.ok ? `${key}=${value}x` : r.err });
+  const safeVal = String(value ?? '').trim();
+  if (!key || !SAFE_SCALE_RE.test(safeVal)) {
+    return NextResponse.json({ success: false, error: 'Tipo o escala de animación inválida' }, { status: 400 });
+  }
+  const r = await safeExec(`${ctx.adbTarget} shell settings put global ${key} ${safeVal}`);
+  return NextResponse.json({ success: r.ok, message: r.ok ? `${key}=${safeVal}x` : r.err });
 }
 
 export async function getAnimationScale(ctx: ActionContext) {

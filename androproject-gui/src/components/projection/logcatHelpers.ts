@@ -20,8 +20,8 @@ export const LEVEL_COLORS: Record<string, { badge: string; text: string; bg: str
   D: { badge: 'bg-zinc-500/15 text-zinc-400 border-zinc-500/25', text: 'text-zinc-400', bg: 'hover:bg-zinc-500/5' },
   I: { badge: 'bg-zinc-500/15 text-zinc-300 border-zinc-500/25', text: 'text-zinc-200', bg: 'hover:bg-zinc-500/5' },
   W: { badge: 'bg-zinc-500/20 text-zinc-200 border-zinc-500/35', text: 'text-zinc-100 font-medium', bg: 'hover:bg-zinc-500/10' },
-  E: { badge: 'bg-red-500/15 text-red-500 border-red-500/30', text: 'text-red-500 font-medium', bg: 'bg-red-500/5 hover:bg-red-500/10' },
-  F: { badge: 'bg-red-600/20 text-red-500 border-red-500/40', text: 'text-red-500 font-bold', bg: 'bg-red-500/10 hover:bg-red-500/15' },
+  E: { badge: 'bg-zinc-800 text-red-500 border-zinc-700', text: 'text-red-500 font-medium', bg: 'bg-zinc-900/40 hover:bg-zinc-800/60' },
+  F: { badge: 'bg-zinc-800 text-red-500 border-zinc-700', text: 'text-red-500 font-bold', bg: 'bg-zinc-900/60 hover:bg-zinc-800/80' },
   S: { badge: 'bg-zinc-700/25 text-zinc-400 border-zinc-600/30', text: 'text-zinc-400', bg: 'hover:bg-zinc-800/30' },
 };
 

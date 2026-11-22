@@ -100,8 +100,8 @@ export const DriverManagerPanel: React.FC = () => {
       {statusMsg && (
         <div className={`p-2 rounded-lg text-[11px] border ${
           statusMsg.ok
-            ? dark ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-300' : 'bg-emerald-50 border-emerald-200 text-emerald-700'
-            : dark ? 'bg-red-500/10 border-red-500/20 text-red-300' : 'bg-red-50 border-red-200 text-red-700'
+            ? dark ? 'bg-zinc-900/70 border-zinc-800 text-emerald-300' : 'bg-slate-50 border-slate-200 text-emerald-700'
+            : dark ? 'bg-zinc-900/70 border-zinc-800 text-red-300' : 'bg-slate-50 border-slate-200 text-red-700'
         }`}>
           {statusMsg.text}
         </div>
@@ -127,7 +127,7 @@ export const DriverManagerPanel: React.FC = () => {
             </div>
           ))}
           {report.mobileProblems.map((p) => (
-            <div key={p.instanceId} className={`p-2 rounded-lg border text-[10px] flex items-start gap-2 ${dark ? 'bg-amber-500/5 border-amber-500/20 text-amber-300' : 'bg-amber-50 border-amber-200 text-amber-800'}`}>
+            <div key={p.instanceId} className={`p-2 rounded-lg border text-[10px] flex items-start gap-2 ${dark ? 'bg-zinc-900/70 border-zinc-800 text-amber-300' : 'bg-slate-50 border-slate-200 text-amber-800'}`}>
               <AlertTriangle size={13} className="shrink-0 mt-0.5" />
               <div className="min-w-0">
                 <div className="font-bold">{p.description} ({p.driverInf || 'sin driver'})</div>

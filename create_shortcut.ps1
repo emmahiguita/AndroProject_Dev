@@ -1,4 +1,4 @@
-# ============================================================================
+﻿# ============================================================================
 # Crea los accesos directos de AndroProject en el Escritorio
 # ============================================================================
 
@@ -22,12 +22,18 @@ if (Test-Path $oldShortcut) {
     Remove-Item $oldShortcut -Force -ErrorAction SilentlyContinue
 }
 
-# 1. Acceso directo principal: Dashboard (Backend + App)
+# 1. Acceso directo principal: Versión Nativa de Escritorio (Tauri + Auto-Servicios)
 $s1Path = Join-Path $Desktop "AndroProject Dashboard.lnk"
 $s1 = $WshShell.CreateShortcut($s1Path)
-$s1.TargetPath = Join-Path $ROOT "start.bat"
-$s1.WorkingDirectory = $ROOT
-$s1.Description = "AndroProject v2.1.0 - Panel de Control (Backend + Desktop App)"
+$desktopExe = "C:\AndroProject\AndroProject_Desktop.exe"
+if (Test-Path $desktopExe) {
+    $s1.TargetPath = $desktopExe
+    $s1.WorkingDirectory = $ROOT
+} else {
+    $s1.TargetPath = Join-Path $ROOT "start.bat"
+    $s1.WorkingDirectory = $ROOT
+}
+$s1.Description = "AndroProject v2.1.0 - Aplicacion Nativa de Escritorio (Tauri + Vision Backend)"
 if (Test-Path $iconPath) { $s1.IconLocation = $iconPath }
 $s1.Save()
 

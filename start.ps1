@@ -10,7 +10,7 @@ $FRONTEND_BAT = Join-Path $ROOT "run_desktop.bat"
 
 # Puertos configurables (centralizar para evitar inconsistencias)
 $BACKEND_PORT = 8000
-$FRONTEND_PORT = 3001
+$FRONTEND_PORT = 3000
 
 Write-Host ""
 Write-Host "  ============================================" -ForegroundColor Cyan

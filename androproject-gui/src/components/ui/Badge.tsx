@@ -24,11 +24,11 @@ export interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
 
 const toneClasses: Record<BadgeTone, string> = {
   neutral: 'bg-surface-raised text-text-secondary border-border',
-  brand: 'bg-brand/10 text-brand-light border-brand/25',
-  success: 'bg-semantic-success/10 text-emerald-400 border-semantic-success/25',
-  warning: 'bg-semantic-warning/10 text-amber-400 border-semantic-warning/25',
-  danger: 'bg-semantic-danger/10 text-red-400 border-semantic-danger/25',
-  info: 'bg-semantic-info/10 text-sky-400 border-semantic-info/25',
+  brand: 'bg-brand/10 text-brand-light border-border',
+  success: 'bg-surface-raised text-emerald-400 border-border',
+  warning: 'bg-surface-raised text-amber-400 border-border',
+  danger: 'bg-surface-raised text-red-400 border-border',
+  info: 'bg-surface-raised text-sky-400 border-border',
 };
 
 const sizeClasses: Record<BadgeSize, string> = {

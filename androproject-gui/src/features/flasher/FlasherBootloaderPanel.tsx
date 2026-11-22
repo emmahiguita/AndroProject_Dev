@@ -176,7 +176,7 @@ export const FlasherBootloaderPanel: React.FC<FlasherBootloaderPanelProps> = ({
         <div
           className={`rounded border px-3 py-2 text-xs font-mono whitespace-pre-wrap ${
             cmdResult.isError
-              ? dark ? 'bg-red-950/30 border-red-900/60 text-red-300' : 'bg-red-50 border-red-200 text-red-800'
+              ? dark ? 'bg-zinc-900 border-zinc-800 text-red-300' : 'bg-slate-100 border-slate-300 text-red-800'
               : dark ? 'bg-zinc-900 border-zinc-800 text-zinc-200' : 'bg-slate-100 border-slate-300 text-slate-800'
           }`}
         >
