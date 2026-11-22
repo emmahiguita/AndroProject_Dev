@@ -1,12 +1,29 @@
-/**
- * Device action handlers.
- * SOLID: SRP (each function does one thing), DIP (uses service interfaces).
- */
+// ============================================================================
+// ARCHIVO: device.ts
+// QUÉ HACE: Endpoints de ciclo de vida ADB, energía (reboot/powerOff),
+//           detección de app en primer plano y envío seguro de keyevents.
+// CÓMO FUNCIONA: Valida estrictamente seriales y keycodes antes de invocar
+//           `adb.exec`/`adb.shell` para prevenir inyección de comandos, y
+//           re-exporta las acciones de entrada desde `_lib/device-input.ts`.
+// POR QUÉ: Mantener este módulo < 200 líneas (SRP) y cerrar vectores de
+//           inyección en `disconnectDevice` y `keyevent`.
+// ============================================================================
+
 import { NextResponse } from 'next/server';
 import { adb } from '@/lib/services/adb-executor';
 import { ActionContext } from './_lib/context';
 
-// ── ADB Lifecycle ──────────────────────────────────────────────────
+export {
+  inputText,
+  setClipboard,
+  pasteClipboard,
+  inputTap,
+  inputSwipe,
+  adbShell,
+} from './_lib/device-input';
+
+const SAFE_SERIAL_RE = /^[a-zA-Z0-9._:-]+$/;
+const SAFE_KEYCODE_RE = /^[A-Z0-9_]{1,48}$/i;
 
 export async function restartAdb() {
   await adb.exec('kill-server');
@@ -69,17 +86,15 @@ export async function disconnectDevice(body: { serial?: string; all?: boolean })
     const { ok } = await adb.exec('disconnect', 10000);
     return NextResponse.json({ success: ok, message: ok ? 'Todos los dispositivos Wi-Fi desconectados' : 'Error al desconectar' });
   }
-  if (!body.serial) {
-    return NextResponse.json({ success: false, error: 'Serial requerido' }, { status: 400 });
+  const serial = String(body.serial || '').trim();
+  if (!serial || !SAFE_SERIAL_RE.test(serial)) {
+    return NextResponse.json({ success: false, error: 'Serial requerido o con formato inválido' }, { status: 400 });
   }
-  const { ok } = await adb.exec(`disconnect ${body.serial}`, 10000);
-  return NextResponse.json({ success: ok, message: ok ? `Desconectado ${body.serial}` : 'Error al desconectar' });
+  const { ok } = await adb.exec(`disconnect ${serial}`, 10000);
+  return NextResponse.json({ success: ok, message: ok ? `Desconectado ${serial}` : 'Error al desconectar' });
 }
 
-// ── Reboot / Power ─────────────────────────────────────────────────
-
 export async function reboot(ctx: ActionContext) {
-  // FIX BUG#14: guard explicito — nunca ejecutar sin serial (afectaria todos los dispositivos)
   if (!ctx.targetSerial) {
     return NextResponse.json({ success: false, error: 'Se requiere serial de dispositivo para reiniciar' }, { status: 400 });
   }
@@ -111,8 +126,6 @@ export async function powerOff(ctx: ActionContext) {
   return NextResponse.json({ success: true, message: 'Apagando dispositivo...' });
 }
 
-// ── Foreground App / Input ─────────────────────────────────────────
-
 export async function getForegroundApp(ctx: ActionContext) {
   const target = ctx.targetSerial || '';
   if (target.startsWith('airplay-') || target.startsWith('apple-')) {
@@ -123,10 +136,13 @@ export async function getForegroundApp(ctx: ActionContext) {
     }
     return NextResponse.json({ success: true, package: 'com.apple.springboard' });
   }
+  if (!target) {
+    return NextResponse.json({ success: false, error: 'Se requiere serial de dispositivo' }, { status: 400 });
+  }
 
   const [windowResult, activityResult] = await Promise.all([
-    adb.execFor(ctx.targetSerial!, 'shell dumpsys window windows'),
-    adb.execFor(ctx.targetSerial!, 'shell dumpsys activity activities'),
+    adb.execFor(target, 'shell dumpsys window windows'),
+    adb.execFor(target, 'shell dumpsys activity activities'),
   ]);
   const output = `${windowResult.out || ''}\n${activityResult.out || ''}`;
   const match =
@@ -142,226 +158,29 @@ export async function getForegroundApp(ctx: ActionContext) {
 
 export async function keyevent(ctx: ActionContext, body: { keycode: string }) {
   const target = ctx.targetSerial || '';
+  if (!target) {
+    return NextResponse.json({ success: false, error: 'Se requiere serial de dispositivo' }, { status: 400 });
+  }
+
+  const code = String(body.keycode || '').trim();
+  if (!SAFE_KEYCODE_RE.test(code)) {
+    return NextResponse.json({ success: false, error: 'Keycode inválido' }, { status: 400 });
+  }
+
   if (target.startsWith('airplay-') || target.startsWith('apple-')) {
     const { iosBridge } = await import('@/lib/services/ios-bridge');
-    const code = String(body.keycode || '').toUpperCase();
-    if (code.includes('HOME')) {
-      const res = await iosBridge.pressButton('home');
-      return NextResponse.json(res);
-    }
-    if (code.includes('POWER') || code.includes('LOCK')) {
-      const res = await iosBridge.pressButton('lock');
-      return NextResponse.json(res);
-    }
-    if (code.includes('VOLUME_UP')) {
-      const res = await iosBridge.pressButton('volumeUp');
-      return NextResponse.json(res);
-    }
-    if (code.includes('VOLUME_DOWN')) {
-      const res = await iosBridge.pressButton('volumeDown');
-      return NextResponse.json(res);
-    }
-    if (code.includes('BACK')) {
-      // iOS Back is left-edge swipe gesture
+    const upper = code.toUpperCase();
+    if (upper.includes('HOME')) return NextResponse.json(await iosBridge.pressButton('home'));
+    if (upper.includes('POWER') || upper.includes('LOCK')) return NextResponse.json(await iosBridge.pressButton('lock'));
+    if (upper.includes('VOLUME_UP')) return NextResponse.json(await iosBridge.pressButton('volumeUp'));
+    if (upper.includes('VOLUME_DOWN')) return NextResponse.json(await iosBridge.pressButton('volumeDown'));
+    if (upper.includes('BACK')) {
       await iosBridge.swipe(10, 500, 250, 500, 150);
       return NextResponse.json({ success: true, message: 'Gesto Atrás iOS ejecutado' });
     }
-    return NextResponse.json({ success: true, message: `Tecla iOS simulada: ${body.keycode}` });
+    return NextResponse.json({ success: true, message: `Tecla iOS simulada: ${code}` });
   }
 
-  await adb.shell(ctx.targetSerial!, `input keyevent ${body.keycode}`);
-  return NextResponse.json({ success: true, message: `Tecla enviada: ${body.keycode}` });
+  await adb.shell(target, `input keyevent ${code}`);
+  return NextResponse.json({ success: true, message: `Tecla enviada: ${code}` });
 }
-
-// ── Touch input / text synthesis ───────────────────────────────────
-
-export async function inputText(ctx: ActionContext, body: { text: string }) {
-  const { text } = body;
-  if (!text || typeof text !== 'string') {
-    return NextResponse.json({ success: false, error: 'Texto requerido' }, { status: 400 });
-  }
-
-  const target = ctx.targetSerial || '';
-  if (!target) {
-    return NextResponse.json({ success: false, error: 'Serial de dispositivo requerido' }, { status: 400 });
-  }
-
-  if (target.startsWith('airplay-') || target.startsWith('apple-')) {
-    const { airPlayReceiverEngine } = await import('@/lib/services/airplay-engine');
-    const res = await airPlayReceiverEngine.injectText(text);
-    return NextResponse.json(res);
-  }
-
-  const hasUnicodeOrNewline = /[^\x20-\x7E]|\n|\r/.test(text);
-
-  // If text contains Unicode (tildes, ñ, emojis), newlines, or is a paragraph (>60 chars),
-  // use high-fidelity clipboard injection + paste keyevent.
-  if (hasUnicodeOrNewline || text.length > 60) {
-    const escapedSh = text.replace(/'/g, "'\\''");
-    const clipRes = await adb.shell(target, `cmd clipboard set '${escapedSh}'`);
-    if (clipRes.ok) {
-      await adb.shell(target, 'input keyevent 279');
-      return NextResponse.json({ success: true, message: 'Texto inyectado fielmente vía portapapeles' });
-    }
-  }
-
-  // Direct ASCII fallback for simple words
-  const escaped = text.replace(/([\\$`"!\s])/g, (char) => (char === ' ' ? '%s' : `\\${char}`));
-  await adb.shell(target, `input text "${escaped}"`);
-  return NextResponse.json({ success: true, message: 'Texto enviado al dispositivo' });
-}
-
-export async function setClipboard(ctx: ActionContext, body: { text: string }) {
-  const { text } = body;
-  if (typeof text !== 'string') {
-    return NextResponse.json({ success: false, error: 'Texto requerido' }, { status: 400 });
-  }
-
-  const target = ctx.targetSerial || '';
-  if (!target) {
-    return NextResponse.json({ success: false, error: 'Serial de dispositivo requerido' }, { status: 400 });
-  }
-
-  if (target.startsWith('airplay-') || target.startsWith('apple-')) {
-    const { airPlayReceiverEngine } = await import('@/lib/services/airplay-engine');
-    const res = await airPlayReceiverEngine.injectText(text);
-    return NextResponse.json(res);
-  }
-
-  const escapedSh = text.replace(/'/g, "'\\''");
-  const cmdRes = await adb.shell(target, `cmd clipboard set '${escapedSh}'`);
-  if (cmdRes.ok) {
-    return NextResponse.json({ success: true, message: 'Portapapeles sincronizado con Android' });
-  }
-
-  // Fallback
-  const escaped = text.replace(/([\\$`"!\s])/g, (char) => (char === ' ' ? '%s' : `\\${char}`));
-  await adb.shell(target, `input text "${escaped}"`);
-  return NextResponse.json({ success: true, message: 'Texto inyectado en el dispositivo' });
-}
-
-export async function pasteClipboard(ctx: ActionContext, body: { text?: string }) {
-  const target = ctx.targetSerial || '';
-  if (!target) {
-    return NextResponse.json({ success: false, error: 'Serial de dispositivo requerido' }, { status: 400 });
-  }
-
-  const text = typeof body.text === 'string' ? body.text : '';
-
-  if (target.startsWith('airplay-')) {
-    if (text) {
-      const { airPlayReceiverEngine } = await import('@/lib/services/airplay-engine');
-      const res = await airPlayReceiverEngine.injectText(text);
-      return NextResponse.json(res);
-    }
-    return NextResponse.json({ success: false, error: 'Texto no proporcionado' }, { status: 400 });
-  }
-
-  if (text) {
-    const escapedSh = text.replace(/'/g, "'\\''");
-    await adb.shell(target, `cmd clipboard set '${escapedSh}'`);
-  }
-
-  await adb.shell(target, 'input keyevent 279');
-  return NextResponse.json({
-    success: true,
-    message: text ? 'Texto pegado en el dispositivo' : 'Comando Pegar ejecutado',
-  });
-}
-
-function isValidPoint(v: unknown): v is number {
-  const n = typeof v === 'number' ? v : parseFloat(String(v));
-  return typeof n === 'number' && Number.isFinite(n) && n >= 0 && n <= 10000;
-}
-
-export async function inputTap(ctx: ActionContext, body: { x: number; y: number }) {
-  const x = typeof body.x === 'number' ? body.x : parseFloat(String(body.x));
-  const y = typeof body.y === 'number' ? body.y : parseFloat(String(body.y));
-  if (!isValidPoint(x) || !isValidPoint(y)) {
-    return NextResponse.json({ success: false, error: 'Coordenadas de tap inválidas' }, { status: 400 });
-  }
-
-  const target = ctx.targetSerial || '';
-  if (target.startsWith('airplay-') || target.startsWith('apple-')) {
-    const { airPlayReceiverEngine } = await import('@/lib/services/airplay-engine');
-    const res = await airPlayReceiverEngine.injectTap(Math.round(x), Math.round(y));
-    return NextResponse.json(res);
-  }
-
-  await adb.shell(target, `input tap ${Math.round(x)} ${Math.round(y)}`);
-  return NextResponse.json({ success: true, message: `Tap en (${Math.round(x)}, ${Math.round(y)})` });
-}
-
-export async function inputSwipe(
-  ctx: ActionContext,
-  body: { x1: number; y1: number; x2: number; y2: number; duration?: number },
-) {
-  const x1 = typeof body.x1 === 'number' ? body.x1 : parseFloat(String(body.x1));
-  const y1 = typeof body.y1 === 'number' ? body.y1 : parseFloat(String(body.y1));
-  const x2 = typeof body.x2 === 'number' ? body.x2 : parseFloat(String(body.x2));
-  const y2 = typeof body.y2 === 'number' ? body.y2 : parseFloat(String(body.y2));
-  if (![x1, y1, x2, y2].every(isValidPoint)) {
-    return NextResponse.json({ success: false, error: 'Coordenadas de swipe inválidas' }, { status: 400 });
-  }
-
-  const duration = Math.max(20, Math.min(5000, Math.round(Number(body.duration ?? 120))));
-  const target = ctx.targetSerial || '';
-  if (target.startsWith('airplay-') || target.startsWith('apple-')) {
-    const { airPlayReceiverEngine } = await import('@/lib/services/airplay-engine');
-    const res = await airPlayReceiverEngine.injectSwipe(Math.round(x1), Math.round(y1), Math.round(x2), Math.round(y2), duration);
-    return NextResponse.json(res);
-  }
-
-  await adb.shell(target, `input swipe ${Math.round(x1)} ${Math.round(y1)} ${Math.round(x2)} ${Math.round(y2)} ${duration}`);
-  return NextResponse.json({ success: true, message: 'Gesto enviado' });
-}
-
-// ── Interactive ADB Shell ──────────────────────────────────────────
-
-const BLOCKED_PATTERNS = [
-  /rm\s+-rf?\s+\/(?!\s*(data|sdcard|cache|tmp))/i,
-  /mkfs/i,
-  /dd\s+.*of=\/dev\/block/i,
-  /fastboot\s+erase/i,
-];
-
-export async function adbShell(ctx: ActionContext, body: { cmd: string }) {
-  let { cmd } = body;
-  if (!cmd || typeof cmd !== 'string' || cmd.length > 1024) {
-    return NextResponse.json({ success: false, error: 'Comando inválido o demasiado largo' }, { status: 400 });
-  }
-
-  // Normalizar: si el usuario escribe "adb shell ..." o "adb ...", remover prefijo
-  cmd = cmd.trim();
-  if (cmd.startsWith('adb shell ')) {
-    cmd = cmd.slice(10).trim();
-  } else if (cmd.startsWith('adb ')) {
-    cmd = cmd.slice(4).trim();
-  }
-
-  for (const pattern of BLOCKED_PATTERNS) {
-    if (pattern.test(cmd)) {
-      return NextResponse.json({ success: false, error: `Comando bloqueado por seguridad: ${cmd.slice(0, 40)}` }, { status: 403 });
-    }
-  }
-
-  if (!ctx.targetSerial) {
-    return NextResponse.json({ success: false, error: 'No hay dispositivo seleccionado o conectado para ejecutar el shell' }, { status: 400 });
-  }
-
-  const result = await adb.shell(ctx.targetSerial, cmd, 15000);
-
-  // Limpiar secuencias de escape ANSI para evitar texto corrupto en la UI
-  const cleanAnsi = (str: string) => str.replace(/[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g, '');
-  const out = cleanAnsi(result.out || '');
-  const err = cleanAnsi(result.err || '');
-
-  if (!result.ok && !out) {
-    return NextResponse.json({ success: false, error: err || 'Sin respuesta del dispositivo', output: '' });
-  }
-  return NextResponse.json({
-    success: true,
-    output: out || err || '(sin salida)',
-  });
-}
-
