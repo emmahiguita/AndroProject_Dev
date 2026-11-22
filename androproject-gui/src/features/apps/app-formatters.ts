@@ -1,7 +1,7 @@
 // ============================================================================
 // ARCHIVO: app-formatters.ts
-// QUÉ HACE: Utilidades puras de formateo, filtrado y ordenamiento para el
-//           gestor de aplicaciones Android.
+// QUÉ HACE: Utilidades puras de formateo, filtrado, ordenamiento y resumen de
+//           auditoría de seguridad (virus/adware/overlay) para Aplicaciones.
 // CÓMO FUNCIONA: Funciones puras sin estado ni efectos secundarios.
 // POR QUÉ: Separar utilidades de la UI bajo SRP y mantener archivos < 200 líneas.
 // ============================================================================
@@ -45,10 +45,10 @@ export function filterAndSortApps(
     if (filter === 'system') return app.isSystem || app.isBloatware;
     if (filter === 'user') return !app.isSystem;
     if (filter === 'hidden') return app.isHidden;
-    if (filter === 'adware') return app.hasOverlay;
+    if (filter === 'adware') return app.hasOverlay || (app.isHidden && !app.isSystem);
     if (filter === 'disabled') return app.isDisabled;
     if (filter === 'google') return app.isGoogle;
-    if (filter === 'malware') return app.isMalware;
+    if (filter === 'malware') return app.isMalware || (app.hasOverlay && !app.isSystem) || (app.isHidden && !app.isSystem);
     if (filter === 'bloatware') return app.isBloatware;
     if (filter === 'safe') return app.safeToRemove;
     if (filter === 'critical') return app.criticalSystem;
@@ -63,4 +63,15 @@ export function filterAndSortApps(
     if (sort === 'size_asc') return (a.size || 0) - (b.size || 0);
     return 0;
   });
+}
+
+/** Resume hallazgos de amenazas, adware con overlay y apps ocultas de usuario. */
+export function summarizeAppThreats(appsList: AppInfo[]) {
+  const malwareCount = appsList.filter((a) => a.isMalware).length;
+  const overlayCount = appsList.filter((a) => a.hasOverlay && !a.isSystem).length;
+  const hiddenUserCount = appsList.filter((a) => a.isHidden && !a.isSystem).length;
+  const totalSuspect = appsList.filter(
+    (a) => a.isMalware || (a.hasOverlay && !a.isSystem) || (a.isHidden && !a.isSystem),
+  ).length;
+  return { malwareCount, overlayCount, hiddenUserCount, totalSuspect };
 }

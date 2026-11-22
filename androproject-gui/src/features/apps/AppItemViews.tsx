@@ -46,7 +46,9 @@ function AppBadges({ app, dark }: { app: AppInfo; dark: boolean }) {
       {app.safeToRemove && <span className={`${pill} ${neutral}`}><ShieldCheck size={9} /> SEGURO</span>}
       {app.criticalSystem && <span className={`${pill} ${neutral}`}><Lock size={9} /> CRÍTICO</span>}
       {app.isBloatware && <span className={`${pill} ${neutral}`}><Trash2 size={9} /> BLOAT</span>}
-      {app.isMalware && <span className={`${pill} ${danger}`}><AlertTriangle size={9} /> AMENAZA</span>}
+      {app.isMalware && <span className={`${pill} ${danger}`} title={app.threatName}><AlertTriangle size={9} /> {app.threatName || 'AMENAZA'}</span>}
+      {app.hasOverlay && <span className={`${pill} ${danger}`} title="Permiso SYSTEM_ALERT_WINDOW activo (puede mostrar publicidad emergente)"><AlertTriangle size={9} /> PUBLICIDAD / OVERLAY</span>}
+      {app.isHidden && !app.isSystem && <span className={`${pill} ${danger}`} title="App de usuario sin icono en el launcher"><EyeOff size={9} /> OCULTA</span>}
       {app.isDisabled && <span className={`text-[9px] px-1.5 py-0.5 rounded border font-semibold ${neutral}`}>DESACTIVADA</span>}
     </div>
   );

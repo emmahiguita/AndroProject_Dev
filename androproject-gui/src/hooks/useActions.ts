@@ -86,10 +86,17 @@ export function useActions() {
   }, [activeSerial, deviceIP, addLog, fetchDevice]);
 
   const fetchApps = async () => {
+    const serial = activeSerial || useAppStore.getState().device?.serial;
+    if (!serial || serial === 'Hardware Level') return;
     setAppsLoading(true);
     try {
-      const d = await postActionRequest('list_apps', activeSerial, deviceIP);
-      if (d.success) { setAppsList(d.apps || []); addLog(`${(d.apps || []).length} aplicaciones cargadas`); }
+      const res = await fetch('/api/apps', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'list', serial }),
+      });
+      const d = await res.json();
+      if (d.success && d.apps) { setAppsList(d.apps); addLog(`${d.apps.length} aplicaciones analizadas`); }
       else addLog(`Error: ${d.error}`);
     } catch { addLog('Error al cargar aplicaciones'); }
     finally { setAppsLoading(false); }

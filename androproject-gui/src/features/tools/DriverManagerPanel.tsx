@@ -9,7 +9,7 @@
 // ============================================================================
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Usb, ShieldCheck, AlertTriangle, RefreshCw, Download } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -24,7 +24,7 @@ export const DriverManagerPanel: React.FC = () => {
   const [driverPath, setDriverPath] = useState('');
   const [statusMsg, setStatusMsg] = useState<{ text: string; ok: boolean } | null>(null);
 
-  const scanDrivers = async () => {
+  const scanDrivers = useCallback(async () => {
     setLoading(true);
     try {
       const r = await fetch('/api/drivers');
@@ -38,10 +38,16 @@ export const DriverManagerPanel: React.FC = () => {
           fastbootDevices: d.fastbootDevices || [],
         });
       }
+    } catch {
+      setStatusMsg({ text: 'No se pudo consultar PnPUtil (/api/drivers)', ok: false });
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    scanDrivers();
+  }, [scanDrivers]);
 
   const runDriverAction = async (action: 'verify_cat' | 'install_inf') => {
     if (!driverPath.trim()) return;
