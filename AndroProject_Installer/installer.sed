@@ -21,11 +21,11 @@ AdminQuietInstCmd=%AdminQuietInstCmd%
 UserQuietInstCmd=%UserQuietInstCmd%
 SourceFiles=SourceFiles
 [Strings]
-InstallPrompt=Deseas instalar AndroProject v1.0 en tu PC?
+InstallPrompt=Deseas instalar ANDRO-IOS v3.2.0 en tu PC?
 DisplayLicense=
-FinishMessage=Instalacion de AndroProject completada exitosamente!
+FinishMessage=Instalacion de ANDRO-IOS completada exitosamente!
 TargetName=output\Instalador_AndroProject.exe
-FriendlyName=Instalador AndroProject v1.0
+FriendlyName=Instalador ANDRO-IOS v3.2.0
 AppLaunched=cmd.exe /c "setup.bat"
 PostInstallCmd=<None>
 AdminQuietInstCmd=cmd.exe /c "setup.bat"

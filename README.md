@@ -14,6 +14,7 @@
 > **Instalación rápida en Windows (1 clic):**
 > 1. Descarga **[`Instalador_ANDRO-IOS.exe`](https://github.com/emmahiguita/AndroProject_Dev/releases/latest/download/Instalador_ANDRO-IOS.exe)** y ejecútalo (instala en `C:\AndroProject` y crea acceso directo en el Escritorio).
 > 2. O desde el repo clonado ejecuta `powershell -ExecutionPolicy Bypass -File .\AndroProject_Installer\build.ps1`.
+> 3. **Desinstalación**: ejecuta [uninstall.bat](./AndroProject_Installer/uninstall.bat) o elimina `C:\AndroProject` y el acceso directo `ANDRO-IOS.lnk`.
 
 ---
 
