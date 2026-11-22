@@ -70,17 +70,17 @@ set PS_SCRIPT=%TEMP%\AndroProject_Shortcut.ps1
 (
     echo $WshShell = New-Object -ComObject WScript.Shell
     echo $Desktop = [Environment]::GetFolderPath("Desktop"^)
-    echo $Shortcut = $WshShell.CreateShortcut("$Desktop\AndroProject Dashboard.lnk"^)
-    echo $Shortcut.TargetPath = "C:\AndroProject\Dashboard\AndroProject.exe"
+    echo $Shortcut = $WshShell.CreateShortcut("$Desktop\ANDRO-IOS.lnk"^)
+    echo $Shortcut.TargetPath = "C:\AndroProject\Dashboard\ANDRO-IOS.exe"
     echo $Shortcut.WorkingDirectory = "C:\AndroProject\Dashboard"
-    echo $Shortcut.Description = "AndroProject v2.1.0 -- Panel de Control Completo"
+    echo $Shortcut.Description = "ANDRO-IOS v3.2.0 -- Panel de Control Android e iOS"
     echo if (Test-Path "C:\AndroProject\AndroProject.ico"^) { $Shortcut.IconLocation = "C:\AndroProject\AndroProject.ico" }
     echo $Shortcut.Save(^)
 ) > "%PS_SCRIPT%"
 
 powershell -ExecutionPolicy Bypass -NoProfile -File "%PS_SCRIPT%"
 del "%PS_SCRIPT%"
-echo        ^> Acceso directo "AndroProject Dashboard" creado en el Escritorio.
+echo        ^> Acceso directo "ANDRO-IOS" creado en el Escritorio.
 
 echo.
 echo  ============================================================

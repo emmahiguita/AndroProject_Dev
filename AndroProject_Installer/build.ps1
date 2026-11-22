@@ -15,7 +15,7 @@ $TempDir      = Join-Path $InstallerDir "temp_build"
 $Candidates = @(
     "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\Genymobile.scrcpy_Microsoft.Winget.Source_8wekyb3d8bbwe\scrcpy-win64-v4.1",
     "C:\AndroProject",
-    "C:\Users\emman\Downloads\scrcpy-win64-v4.0"
+    "$env:USERPROFILE\Downloads\scrcpy-win64-v4.0"
 )
 $SourceReleaseDir = $Candidates | Where-Object { Test-Path $_ } | Select-Object -First 1
 
@@ -58,6 +58,9 @@ foreach ($key in $RenameMap.Keys) {
         Rename-Item "$TempDir\$key" $RenameMap[$key] -Force
     }
 }
+if (Test-Path "$TempDir\AndroProject-server") {
+    Copy-Item "$TempDir\AndroProject-server" "$TempDir\scrcpy-server" -Force
+}
 
 if (Test-Path "$GuiDir\public\icon.ico") {
     Copy-Item "$GuiDir\public\icon.ico" "$TempDir\AndroProject.ico" -Force
@@ -83,9 +86,14 @@ if (Test-Path "$GuiDir") {
     $TauriExe = Get-ChildItem -Path "$GuiDir\src-tauri\target\release" -Filter "*.exe" -File -ErrorAction SilentlyContinue |
         Where-Object { $_.Name -notmatch 'uninstall|setup' } | Select-Object -First 1
     if ($TauriExe) {
-        Write-Host "      > Copiando GUI compilada ($($TauriExe.Name)) al instalador..." -ForegroundColor Green
+        Write-Host "      > Copiando GUI compilada ($($TauriExe.Name)) y Next.js standalone..." -ForegroundColor Green
         New-Item -ItemType Directory -Force -Path "$TempDir\Dashboard" | Out-Null
+        Copy-Item $TauriExe.FullName "$TempDir\Dashboard\ANDRO-IOS.exe" -Force
         Copy-Item $TauriExe.FullName "$TempDir\Dashboard\AndroProject.exe" -Force
+        if (Test-Path "$GuiDir\.next\standalone") {
+            New-Item -ItemType Directory -Force -Path "$TempDir\Dashboard\next-standalone" | Out-Null
+            Copy-Item "$GuiDir\.next\standalone\*" "$TempDir\Dashboard\next-standalone\" -Recurse -Force
+        }
     } else {
         Write-Host "      ERROR: No se encontro el binario Tauri compilado en src-tauri\target\release." -ForegroundColor Red
         exit 1

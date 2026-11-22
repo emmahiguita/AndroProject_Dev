@@ -40,13 +40,29 @@ fn is_port_open(port: u16) -> bool {
     TcpStream::connect_timeout(&addr, Duration::from_millis(120)).is_ok()
 }
 
-/// Localiza la raíz del repositorio `AndroProject_Dev` para auto-iniciar servicios.
+/// Localiza la raíz de instalación o repositorio (`C:\AndroProject`, exe_dir o dev) sin rutas fijas de usuario.
 fn resolve_project_root() -> PathBuf {
-    let candidate = PathBuf::from(r"C:\Users\emman\Desktop\Proyectos\AndroProject_Dev");
-    if candidate.exists() {
-        return candidate;
+    if let Ok(env_home) = std::env::var("ANDROPROJECT_HOME") {
+        let p = PathBuf::from(env_home);
+        if p.exists() {
+            return p;
+        }
     }
-    std::env::current_dir().unwrap_or_else(|_| PathBuf::from("."))
+    if let Ok(exe) = std::env::current_exe() {
+        if let Some(exe_dir) = exe.parent() {
+            if exe_dir.join(r"next-standalone\server.js").exists() {
+                return exe_dir.parent().unwrap_or(exe_dir).to_path_buf();
+            }
+            if exe_dir.join(r"Dashboard\next-standalone\server.js").exists() {
+                return exe_dir.to_path_buf();
+            }
+        }
+    }
+    let installed = PathBuf::from(r"C:\AndroProject");
+    if installed.join(r"Dashboard\next-standalone\server.js").exists() {
+        return installed;
+    }
+    std::env::current_dir().unwrap_or_else(|_| installed)
 }
 
 /// Inicia automáticamente Vision Backend (:8000) y Next.js (:3000) si no están activos.
@@ -66,22 +82,35 @@ fn ensure_platform_services() {
         }
     }
 
-    // 2. Auto-arranque del servidor GUI Next.js en puerto 3000
+    // 2. Auto-arranque del servidor GUI Next.js en puerto 3000 (instalado o repo dev)
     if !is_port_open(3000) {
-        let gui_dir = root.join("androproject-gui");
-        let standalone_js = gui_dir.join(r".next\standalone\server.js");
+        let installed_js = root.join(r"Dashboard\next-standalone\server.js");
+        let dev_gui_dir = root.join("androproject-gui");
+        let dev_js = dev_gui_dir.join(r".next\standalone\server.js");
+        let (standalone_js, work_dir) = if installed_js.exists() {
+            (installed_js, root.join(r"Dashboard\next-standalone"))
+        } else {
+            (dev_js, dev_gui_dir.clone())
+        };
+        let node_bin = if root.join("node.exe").exists() {
+            root.join("node.exe")
+        } else {
+            PathBuf::from("node")
+        };
+
         if standalone_js.exists() {
-            let mut cmd = Command::new("node");
+            let mut cmd = Command::new(node_bin);
             cmd.arg(&standalone_js)
-                .current_dir(&gui_dir)
+                .current_dir(&work_dir)
                 .env("PORT", "3000")
-                .env("HOSTNAME", "127.0.0.1");
+                .env("HOSTNAME", "127.0.0.1")
+                .env("ANDROPROJECT_HOME", &root);
             #[cfg(target_os = "windows")]
             cmd.creation_flags(CREATE_NO_WINDOW);
             let _ = cmd.spawn();
-        } else if gui_dir.exists() {
+        } else if dev_gui_dir.exists() {
             let mut cmd = Command::new("cmd.exe");
-            cmd.args(["/c", "npm", "run", "dev"]).current_dir(&gui_dir);
+            cmd.args(["/c", "npm", "run", "dev"]).current_dir(&dev_gui_dir);
             #[cfg(target_os = "windows")]
             cmd.creation_flags(CREATE_NO_WINDOW);
             let _ = cmd.spawn();
