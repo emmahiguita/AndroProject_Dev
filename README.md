@@ -24,6 +24,15 @@
 | ![Recorrido Completo Modo Oscuro y Claro](./docs/images/androproject-walkthrough.gif) | ![Grabación Real de Transmisión Móvil](./docs/images/mobile-transmission-record.gif) |
 | [Descargar MP4 HD (`androproject-walkthrough.mp4`)](./docs/images/androproject-walkthrough.mp4) | [Descargar MP4 HD (`mobile-transmission-record.mp4`)](./docs/images/mobile-transmission-record.mp4) |
 
+## Code signing policy
+
+Free code signing provided by [SignPath.io](https://about.signpath.io/), certificate by [SignPath Foundation](https://signpath.org/).
+
+- **Team roles**:
+  - **Committers & Authors**: [@emmahiguita](https://github.com/emmahiguita)
+  - **Reviewers & Approvers**: [@emmahiguita](https://github.com/emmahiguita)
+- **Privacy policy**: This program will not transfer any information to other networked systems unless specifically requested by the user or the person installing or operating it. Local device telemetry and screen mirroring operate strictly over the user's own USB/LAN connection.
+
 ## Modo Oscuro 2026 vs Modo Claro
 
 | Módulo | Modo Oscuro 2026 | Modo Claro |
