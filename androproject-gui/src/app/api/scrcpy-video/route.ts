@@ -38,7 +38,10 @@ export async function GET(req: NextRequest) {
 
       unsub = subscribeScrcpyVideo(serial, (frame) => {
         try {
-          controller.enqueue(new Uint8Array(frame));
+          // Evita acumulación de buffer si el consumidor HTTP va lento
+          if (controller.desiredSize !== null && controller.desiredSize < -128) return;
+          // Vista zero-copy sobre el Buffer Node.js (evita clonar bytes a 60 FPS)
+          controller.enqueue(new Uint8Array(frame.buffer, frame.byteOffset, frame.byteLength));
         } catch {
           unsub?.();
         }

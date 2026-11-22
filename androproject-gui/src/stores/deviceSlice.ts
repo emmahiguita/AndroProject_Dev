@@ -22,6 +22,7 @@ export interface DeviceSlice {
   // ── Multi-Screen Concurrent Projection ──
   activeSessions: string[];
   multiScreenEnabled: boolean;
+  setMultiScreenEnabled: (enabled: boolean) => void;
   toggleMultiScreen: () => void;
   addSession: (serial: string) => void;
   removeSession: (serial: string) => void;
@@ -62,6 +63,7 @@ export const createDeviceSlice: StateCreator<DeviceSlice, [], [], DeviceSlice> =
   // Multi-screen state
   activeSessions: [],
   multiScreenEnabled: false,
+  setMultiScreenEnabled: (enabled) => set({ multiScreenEnabled: enabled }),
   toggleMultiScreen: () => set((state) => ({ multiScreenEnabled: !state.multiScreenEnabled })),
   addSession: (serial) => set((state) => ({
     activeSessions: state.activeSessions.includes(serial)

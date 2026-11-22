@@ -18,7 +18,7 @@ import { ADB, SCRCPY_SERVER_PATH } from '@/lib/config';
 import { packH264Frame, classifyH264Payload, buildTouchPacket } from './scrcpy-protocol';
 
 interface ActiveSession {
-  serial: string; port: number; srvProc: ChildProcess;
+  serial: string; port: number; srvProc: ChildProcess; createdAt: number;
   videoSock: net.Socket | null; ctrlSock: net.Socket | null;
   width: number; height: number;
   configPacket: Buffer | null; lastKeyPacket: Buffer | null;
@@ -78,14 +78,14 @@ function startSession(serial: string): ActiveSession {
     '-s', serial, 'shell', `CLASSPATH=${REMOTE_JAR}`,
     'app_process', '/', 'com.genymobile.scrcpy.Server', '4.1',
     `scid=${scid}`, 'log_level=info', 'tunnel_forward=true', 'audio=false', 'control=true',
-    'cleanup=false', 'max_size=1080', 'max_fps=60', 'video_bit_rate=6000000',
-    'stay_awake=true', 'video_codec_options=i-frame-interval=1,repeat-previous-frame-after=100000',
+    'cleanup=false', 'max_size=1080', 'max_fps=60', 'video_bit_rate=8000000',
+    'stay_awake=true', 'video_codec_options=i-frame-interval=2,repeat-previous-frame-after=100000',
   ], { windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'] });
 
   let readyResolve!: () => void;
   const readyPromise = new Promise<void>((res) => { readyResolve = res; });
   const session: ActiveSession = {
-    serial, port, srvProc, videoSock: null, ctrlSock: null,
+    serial, port, srvProc, createdAt: Date.now(), videoSock: null, ctrlSock: null,
     width: 486, height: 1080, configPacket: null, lastKeyPacket: null,
     listeners: new Set(), readyResolve, readyPromise, idleTimer: null, destroyed: false,
   };
@@ -162,7 +162,7 @@ function startSession(serial: string): ActiveSession {
 
 export async function getOrStartScrcpySession(serial: string): Promise<ActiveSession> {
   let s = sessions.get(serial);
-  if (s && !s.destroyed && !s.configPacket && s.videoSock === null) {
+  if (s && !s.destroyed && !s.configPacket && s.videoSock === null && Date.now() - s.createdAt > 5000) {
     destroySession(serial);
     s = undefined;
   }

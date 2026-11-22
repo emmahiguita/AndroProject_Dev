@@ -164,27 +164,21 @@ export function startWebCodecsH264Player(
 
             if (!configured || decoder.state === 'closed') continue;
             if (waitingForKey && !isKey) continue;
-
-            // Tope estricto de cola (<= 3 frames) para latencia mínima sin lag acumulado
-            if (!isKey && decoder.decodeQueueSize > 3) {
-              waitingForKey = true;
-              continue;
-            }
+            // Solo resincroniza si hay congestión severa (>16 frames en cola)
+            if (!isKey && decoder.decodeQueueSize > 16) { waitingForKey = true; continue; }
 
             const chunkData = isKey && spsPps ? concatBytes(spsPps, payload) : payload;
             waitingForKey = false;
             decoder.decode(new EncodedVideoChunk({
               type: isKey ? 'key' : 'delta',
-              timestamp: performance.now() * 1000,
+              timestamp: Math.round(performance.now() * 1000),
               data: chunkData,
             }));
           }
         }
       } catch {
         // Reconexión rápida silenciosa conservando el último fotograma dibujado
-      } finally {
-        closeDecoder();
-      }
+      } finally { closeDecoder(); }
 
       if (!stopped) {
         await new Promise((r) => setTimeout(r, retryDelay));
@@ -194,9 +188,5 @@ export function startWebCodecsH264Player(
   };
 
   runLoop();
-  return () => {
-    stopped = true;
-    activeAbort?.abort();
-    closeDecoder();
-  };
+  return () => { stopped = true; activeAbort?.abort(); closeDecoder(); };
 }

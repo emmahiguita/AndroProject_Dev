@@ -260,8 +260,8 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/stores/deviceSlice.ts": {
-    "mtime": 1788376330.677189,
-    "ast_hash": "5d28a36cd5a614b6207dfd411c1166ee",
+    "mtime": 1795305717.8328364,
+    "ast_hash": "5f001cdebdfe174e61d8b2f0926a743e",
     "semantic_hash": ""
   },
   "androproject-gui/src/stores/flasherSlice.ts": {
@@ -770,8 +770,8 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/components/projection/ProjectionCanvas.tsx": {
-    "mtime": 1795290860.476884,
-    "ast_hash": "1ec9c44998851628c95b32e6621dba44",
+    "mtime": 1795305661.3335862,
+    "ast_hash": "11827f2de3d6e047d5c1c636dbf6d34e",
     "semantic_hash": ""
   },
   "androproject-gui/public/logo.png": {
@@ -1270,8 +1270,8 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/app/api/scrcpy-video/route.ts": {
-    "mtime": 1795290698.3186362,
-    "ast_hash": "e9af3765cc41baac6ecbbf9c75b91b25",
+    "mtime": 1795305563.8138897,
+    "ast_hash": "b560ff9479e06888526c24dca662e9de",
     "semantic_hash": ""
   },
   "androproject-gui/src/components/projection/WebCodecsCanvas.tsx": {
@@ -1280,8 +1280,8 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/lib/services/scrcpy-session-hub.ts": {
-    "mtime": 1795304616.2767286,
-    "ast_hash": "44e068063c74b75f835873e062847ef3",
+    "mtime": 1795305575.3071244,
+    "ast_hash": "4ef51f62dd80b11d6924eca46738461b",
     "semantic_hash": ""
   },
   "androproject-gui/src/lib/services/scrcpy-protocol.ts": {
@@ -1305,8 +1305,8 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/lib/services/webcodecs-h264-player.ts": {
-    "mtime": 1795304629.5401418,
-    "ast_hash": "9628e661836b79dc20dfc90098964a53",
+    "mtime": 1795305583.962305,
+    "ast_hash": "3ca71f8e55a6d0575cf421297346e297",
     "semantic_hash": ""
   },
   "androproject-gui/src/lib/security/input-sanitizer.ts": {
@@ -1447,6 +1447,26 @@
   "androproject-gui/src/components/projection/ProjectionToolbar.tsx": {
     "mtime": 1795304346.0900373,
     "ast_hash": "765fa86be2b00d9b72f3512874d6c7e4",
+    "semantic_hash": ""
+  },
+  "androproject-gui/src/components/projection/ProjectionOverlays.tsx": {
+    "mtime": 1795305631.6179497,
+    "ast_hash": "98a530bfd86980573de3ba23dfb933c2",
+    "semantic_hash": ""
+  },
+  "androproject-gui/src/components/projection/projection-math.ts": {
+    "mtime": 1795305630.353585,
+    "ast_hash": "71625cec6b3ca333039a271c149f202c",
+    "semantic_hash": ""
+  },
+  "androproject-gui/src/components/projection/useProjectionDrop.ts": {
+    "mtime": 1795305649.2107744,
+    "ast_hash": "d2325c9540b9561694e7c57b58d4343e",
+    "semantic_hash": ""
+  },
+  "androproject-gui/src/components/projection/useProjectionGestures.ts": {
+    "mtime": 1795305651.0623453,
+    "ast_hash": "e9792007b7addb0962ca9107b2aa3751",
     "semantic_hash": ""
   }
 }
