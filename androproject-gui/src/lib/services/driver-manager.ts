@@ -148,7 +148,7 @@ export async function installInfDriver(infPath: string): Promise<{
 
   // Elevación UAC segura vía $env:DRIVER_INF_PATH y propagación real de $p.ExitCode
   const psScript = '$p = Start-Process -FilePath pnputil -ArgumentList @("/add-driver",$env:DRIVER_INF_PATH,"/install") -Verb RunAs -Wait -PassThru; exit $p.ExitCode';
-  const uac = await runSafe('powershell', ['-NoProfile', '-Command', psScript], 45000, { DRIVER_INF_PATH: clean });
+  const uac = await runSafe('powershell', ['-NoProfile', '-WindowStyle', 'Hidden', '-Command', psScript], 45000, { DRIVER_INF_PATH: clean });
   const ok = uac.exitCode === 0 || uac.exitCode === 3010;
   return {
     success: ok,

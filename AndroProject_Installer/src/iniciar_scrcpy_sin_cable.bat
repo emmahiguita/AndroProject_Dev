@@ -34,7 +34,7 @@ set PS_SCRIPT=%TEMP%\Escaner_Android_Rapido.ps1
     echo foreach ($found in $openIps^) { Write-Host $found; exit }
 ) > "%PS_SCRIPT%"
 
-for /f "delims=" %%I in ('powershell -ExecutionPolicy Bypass -NoProfile -File "%PS_SCRIPT%"') do set IP_CELULAR=%%I
+for /f "delims=" %%I in ('powershell -ExecutionPolicy Bypass -NoProfile -WindowStyle Hidden -File "%PS_SCRIPT%"') do set IP_CELULAR=%%I
 del "%PS_SCRIPT%" 2>nul
 
 if "%IP_CELULAR%"=="" (

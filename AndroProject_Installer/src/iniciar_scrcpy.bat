@@ -29,7 +29,7 @@ set PS_SCRIPT=%TEMP%\Select_ADB_Device.ps1
     echo }
 ) > "%PS_SCRIPT%"
 
-for /f "tokens=1,* delims=:" %%A in ('powershell -ExecutionPolicy Bypass -NoProfile -File "%PS_SCRIPT%"') do (
+for /f "tokens=1,* delims=:" %%A in ('powershell -ExecutionPolicy Bypass -NoProfile -WindowStyle Hidden -File "%PS_SCRIPT%"') do (
     set DEV_STATUS=%%A
     set SINGLE_DEV=%%B
 )

@@ -2,17 +2,38 @@ name: Build & Sign ANDRO-IOS Windows Release
 
 on:
   workflow_dispatch:
+    inputs:
+      signpath_test_policy:
+        description: 'SignPath test policy slug for a private test build'
+        type: string
+        required: false
   push:
     tags:
       - 'v*'
 
 permissions:
+  actions: read
   contents: write
 
 jobs:
   build-windows:
     runs-on: windows-latest
+    env:
+      HAS_SIGNPATH: ${{ secrets.SIGNPATH_API_TOKEN != '' && secrets.SIGNPATH_ORGANIZATION_ID != '' }}
+      HAS_PFX: ${{ secrets.WINDOWS_CERT_BASE64 != '' }}
     steps:
+      - name: Check signing credentials
+        shell: pwsh
+        env:
+          TEST_POLICY: ${{ inputs.signpath_test_policy }}
+        run: |
+          if ($env:TEST_POLICY -and $env:HAS_SIGNPATH -ne 'true') {
+            throw 'A SignPath test build requires SIGNPATH_API_TOKEN and SIGNPATH_ORGANIZATION_ID.'
+          }
+          if ($env:GITHUB_EVENT_NAME -eq 'push' -and $env:HAS_SIGNPATH -ne 'true' -and $env:HAS_PFX -ne 'true') {
+            throw 'Windows releases require SignPath credentials or a code-signing PFX.'
+          }
+
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -37,49 +58,97 @@ jobs:
         working-directory: androproject-gui/src-tauri
         run: cargo build --release
 
-      - name: Decode Code Signing Certificate (PFX fallback if configured)
-        if: ${{ secrets.WINDOWS_CERT_BASE64 != '' }}
+      - name: Prepare scrcpy runtime for the installer
         shell: pwsh
         run: |
-          [IO.File]::WriteAllBytes("cert.pfx", [Convert]::FromBase64String("${{ secrets.WINDOWS_CERT_BASE64 }}"))
-          "SIGN_CERT_PFX=$((Resolve-Path cert.pfx).Path)" | Out-File -FilePath $env:GITHUB_ENV -Append
-          "SIGN_CERT_PASS=${{ secrets.WINDOWS_CERT_PASSWORD }}" | Out-File -FilePath $env:GITHUB_ENV -Append
+          $archive = Join-Path $env:RUNNER_TEMP 'scrcpy-win64-v4.1.zip'
+          Invoke-WebRequest -Uri 'https://github.com/Genymobile/scrcpy/releases/download/v4.1/scrcpy-win64-v4.1.zip' -OutFile $archive
+          $expected = '5b12172b3264b2889f4583ee64752ce832e29bc8b1089dca81093459697165db'
+          if ((Get-FileHash -LiteralPath $archive -Algorithm SHA256).Hash -ne $expected) {
+            throw 'scrcpy v4.1 SHA-256 verification failed.'
+          }
+          Expand-Archive -LiteralPath $archive -DestinationPath $env:RUNNER_TEMP
+
+      - name: Decode Code Signing Certificate (PFX fallback if configured)
+        if: env.HAS_SIGNPATH != 'true' && env.HAS_PFX == 'true'
+        shell: pwsh
+        env:
+          WINDOWS_CERT_BASE64: ${{ secrets.WINDOWS_CERT_BASE64 }}
+        run: |
+          $certPath = Join-Path $env:RUNNER_TEMP 'androproject-signing.pfx'
+          [IO.File]::WriteAllBytes($certPath, [Convert]::FromBase64String($env:WINDOWS_CERT_BASE64))
+          "SIGN_CERT_PFX=$certPath" >> $env:GITHUB_ENV
 
       - name: Build Windows Installer (.exe + SHA256SUMS.txt)
         shell: pwsh
+        env:
+          SIGN_CERT_PASS: ${{ env.HAS_SIGNPATH != 'true' && secrets.WINDOWS_CERT_PASSWORD || '' }}
         run: |
-          powershell -ExecutionPolicy Bypass -File ".\AndroProject_Installer\build.ps1" -SkipTauriBuild
+          $scrcpy = Join-Path $env:RUNNER_TEMP 'scrcpy-win64-v4.1'
+          & '.\AndroProject_Installer\build.ps1' -SkipTauriBuild -ScrcpyReleaseDir $scrcpy
 
       - name: Upload unsigned installer artifact for SignPath
         id: upload-unsigned
-        if: ${{ secrets.SIGNPATH_API_TOKEN != '' && secrets.SIGNPATH_ORGANIZATION_ID != '' }}
+        if: env.HAS_SIGNPATH == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: unsigned-installer
           path: AndroProject_Installer/output/Instalador_ANDRO-IOS.exe
+          if-no-files-found: error
 
-      - name: Submit signing request to SignPath.io (Open Source CA)
-        if: ${{ secrets.SIGNPATH_API_TOKEN != '' && secrets.SIGNPATH_ORGANIZATION_ID != '' }}
+      - name: Submit signing request to SignPath.io
+        if: env.HAS_SIGNPATH == 'true'
         uses: signpath/github-action-submit-signing-request@v3
         with:
           api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
           organization-id: ${{ secrets.SIGNPATH_ORGANIZATION_ID }}
           project-slug: 'andro-ios'
-          signing-policy-slug: 'release-signing'
+          signing-policy-slug: ${{ inputs.signpath_test_policy || 'release-signing' }}
           github-artifact-id: ${{ steps.upload-unsigned.outputs.artifact-id }}
           wait-for-completion: true
           output-artifact-directory: 'AndroProject_Installer/signed'
 
-      - name: Refresh SHA256SUMS.txt after SignPath signing
-        if: ${{ secrets.SIGNPATH_API_TOKEN != '' && secrets.SIGNPATH_ORGANIZATION_ID != '' }}
+      - name: Check installer signature and refresh SHA256SUMS.txt
+        if: env.HAS_SIGNPATH == 'true' || env.HAS_PFX == 'true'
         shell: pwsh
+        env:
+          TEST_POLICY: ${{ inputs.signpath_test_policy }}
         run: |
-          Copy-Item "AndroProject_Installer\signed\Instalador_ANDRO-IOS.exe" "AndroProject_Installer\output\Instalador_ANDRO-IOS.exe" -Force
-          $hash = (Get-FileHash "AndroProject_Installer\output\Instalador_ANDRO-IOS.exe" -Algorithm SHA256).Hash.ToLower()
-          "$hash  Instalador_ANDRO-IOS.exe" | Set-Content -Encoding ASCII "AndroProject_Installer\output\SHA256SUMS.txt"
+          $installer = 'AndroProject_Installer/output/Instalador_ANDRO-IOS.exe'
+          $candidate = $installer
+          if ($env:HAS_SIGNPATH -eq 'true') {
+            $candidate = 'AndroProject_Installer/signed/Instalador_ANDRO-IOS.exe'
+          }
+          $signature = Get-AuthenticodeSignature -LiteralPath $candidate
+          if ($signature.SignatureType -ne 'Authenticode' -or -not $signature.SignerCertificate) {
+            throw 'The installer has no embedded Authenticode signature.'
+          }
+          if ($signature.Status -ne 'Valid') {
+            # PowerShell reports a self-signed root as UnknownError on a clean runner.
+            $untrustedRoot = [ComponentModel.Win32Exception]::new(-2146762487).Message
+            if (-not $env:TEST_POLICY -or $signature.StatusMessage.Trim() -ne $untrustedRoot.Trim()) {
+              throw "Authenticode verification failed ($($signature.Status)): $($signature.StatusMessage)"
+            }
+          }
+          Write-Host "Authenticode: $($signature.StatusMessage) Publisher: $($signature.SignerCertificate.Subject)"
+          if ($candidate -ne $installer) {
+            Copy-Item -LiteralPath $candidate -Destination $installer -Force
+          }
+          $hash = (Get-FileHash -LiteralPath $installer -Algorithm SHA256).Hash.ToLowerInvariant()
+          "$hash  Instalador_ANDRO-IOS.exe" | Set-Content -Encoding ASCII 'AndroProject_Installer/output/SHA256SUMS.txt'
+
+      - name: Upload installer from manual build
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-installer
+          if-no-files-found: error
+          path: |
+            AndroProject_Installer/output/Instalador_ANDRO-IOS.exe
+            AndroProject_Installer/output/SHA256SUMS.txt
 
       - name: Publish Release Assets
-        if: startsWith(github.ref, 'refs/tags/v')
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         with:
           files: |

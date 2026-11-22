@@ -3,7 +3,10 @@
 #  Uso: Doble clic en build.ps1 o ejecutar desde PowerShell
 # =============================================================
 
-param([switch]$SkipTauriBuild)
+param(
+    [switch]$SkipTauriBuild,
+    [string]$ScrcpyReleaseDir
+)
 
 $ErrorActionPreference = "Stop"
 $InstallerDir = $PSScriptRoot
@@ -17,7 +20,10 @@ $Candidates = @(
     "C:\AndroProject",
     "$env:USERPROFILE\Downloads\scrcpy-win64-v4.0"
 )
-$SourceReleaseDir = $Candidates | Where-Object { Test-Path $_ } | Select-Object -First 1
+$SourceReleaseDir = $ScrcpyReleaseDir
+if (-not $SourceReleaseDir) {
+    $SourceReleaseDir = $Candidates | Where-Object { Test-Path $_ } | Select-Object -First 1
+}
 
 Set-Location $InstallerDir
 
@@ -29,6 +35,7 @@ Write-Host ""
 
 # --- PASO 1: Limpiar output anterior ---
 Write-Host "[1/5] Limpiando archivos anteriores..." -ForegroundColor Yellow
+New-Item -ItemType Directory -Force -Path $OutputDir | Out-Null
 if (Test-Path "AndroProject_data.zip") { Remove-Item "AndroProject_data.zip" -Force }
 if (Test-Path "$OutputDir\Instalador_AndroProject.exe") { Remove-Item "$OutputDir\Instalador_AndroProject.exe" -Force }
 if (Test-Path $TempDir) { Remove-Item $TempDir -Recurse -Force }
@@ -37,7 +44,7 @@ Write-Host "      > Limpieza completada." -ForegroundColor Green
 # --- PASO 2: Preparar archivos con nombre AndroProject ---
 Write-Host ""
 Write-Host "[2/5] Preparando archivos sin redundancia y renombrando..." -ForegroundColor Yellow
-if (-not (Test-Path $SourceReleaseDir)) {
+if (-not $SourceReleaseDir -or -not (Test-Path -LiteralPath $SourceReleaseDir -PathType Container)) {
     Write-Host "      ERROR: No se encontro la carpeta de release: $SourceReleaseDir" -ForegroundColor Red
     exit 1
 }
@@ -61,6 +68,16 @@ foreach ($key in $RenameMap.Keys) {
 }
 if (Test-Path "$TempDir\AndroProject-server") {
     Copy-Item "$TempDir\AndroProject-server" "$TempDir\scrcpy-server" -Force
+}
+
+# Parchear el PE Header de AndroProject.exe a Subsystem 2 (Windows GUI) para eliminar consolas CMD
+$TargetBin = "$TempDir\AndroProject.exe"
+if (Test-Path $TargetBin) {
+    $bytes = [System.IO.File]::ReadAllBytes($TargetBin)
+    $peOffset = [BitConverter]::ToInt32($bytes, 0x3C)
+    $bytes[$peOffset + 0x5C] = 2 # IMAGE_SUBSYSTEM_WINDOWS_GUI
+    [System.IO.File]::WriteAllBytes($TargetBin, $bytes)
+    Write-Host "      > AndroProject.exe configurado con Subsystem 2 (GUI puro sin ventana CMD)." -ForegroundColor Green
 }
 
 if (Test-Path "$GuiDir\public\icon.ico") {
@@ -125,6 +142,7 @@ Start-Process -FilePath "iexpress.exe" -ArgumentList "/N /Q installer.sed" -Wait
 if (Test-Path "$OutputDir\Instalador_AndroProject.exe") {
     Copy-Item "$OutputDir\Instalador_AndroProject.exe" "$OutputDir\Instalador_ANDRO-IOS.exe" -Force
     $TargetExe = "$OutputDir\Instalador_ANDRO-IOS.exe"
+    & (Join-Path $InstallerDir 'Set-InstallerIcon.ps1') -InstallerPath $TargetExe -IconPath (Join-Path $GuiDir 'public/icon.ico')
     # Firma Authenticode oficial cuando existe certificado CA en variables de entorno
     if ($env:SIGN_CERT_PFX -and (Test-Path $env:SIGN_CERT_PFX)) {
         $cert = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2($env:SIGN_CERT_PFX, $env:SIGN_CERT_PASS)
@@ -156,7 +174,7 @@ Write-Host "      > Listo." -ForegroundColor Green
 Write-Host ""
 Write-Host "============================================================" -ForegroundColor Cyan
 Write-Host "   EXITO: El instalador esta listo en:" -ForegroundColor Green
-Write-Host "   $OutputDir\Instalador_AndroProject.exe" -ForegroundColor White
+Write-Host "   $TargetExe" -ForegroundColor White
 Write-Host "============================================================" -ForegroundColor Cyan
 Write-Host ""
 # Read-Host "Presiona Enter para cerrar"

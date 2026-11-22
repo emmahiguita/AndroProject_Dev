@@ -53,9 +53,10 @@ export function spawnAirPlayProcess(airplayDir: string) {
   const gstDir = path.join(libDir, 'gstreamer-1.0');
   const daemonCjs = path.join(airplayDir, ['daemon', 'cjs'].join('.'));
   const env = { ...process.env, PATH: `${airplayDir};${libDir};${gstDir};${process.env.PATH || ''}`, GST_PLUGIN_PATH: gstDir, GST_PLUGIN_SYSTEM_PATH: gstDir, SDL_AUDIODRIVER: 'dummy' };
+  const nodeBin = process.execPath || 'node';
   const proc = fs.existsSync(daemonCjs)
-    ? spawn('cmd.exe', ['/c', 'node', daemonCjs], { cwd: airplayDir, detached: true, stdio: 'ignore', windowsHide: false, shell: false, env })
-    : spawn(airplayExe, [], { cwd: airplayDir, detached: true, stdio: 'ignore', windowsHide: false, shell: false, env });
+    ? spawn(nodeBin, [daemonCjs], { cwd: airplayDir, detached: true, stdio: 'ignore', windowsHide: true, shell: false, env })
+    : spawn(airplayExe, [], { cwd: airplayDir, detached: true, stdio: 'ignore', windowsHide: true, shell: false, env });
   proc.unref();
   return proc;
 }
@@ -110,7 +111,7 @@ public class AirWinFocus {
 }, [IntPtr]::Zero) | Out-Null`;
   try {
     const enc = Buffer.from(ps, 'utf16le').toString('base64');
-    await execAsync(`powershell.exe -NoProfile -ExecutionPolicy Bypass -EncodedCommand ${enc}`, { windowsHide: true, timeout: 4000 });
+    await execAsync(`powershell.exe -NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -EncodedCommand ${enc}`, { windowsHide: true, timeout: 4000 });
     return true;
   } catch { return false; }
 }
@@ -154,7 +155,7 @@ if ($target -ne [IntPtr]::Zero) {
   }
 }`;
   const enc = Buffer.from(ps, 'utf16le').toString('base64');
-  const { stdout } = await execAsync(`powershell.exe -NoProfile -ExecutionPolicy Bypass -EncodedCommand ${enc}`, {
+  const { stdout } = await execAsync(`powershell.exe -NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -EncodedCommand ${enc}`, {
     windowsHide: true, timeout: 3000, maxBuffer: 10 * 1024 * 1024,
   });
   const b64 = stdout.trim();

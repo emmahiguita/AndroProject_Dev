@@ -93,7 +93,7 @@ export async function radar() {
 
   try {
     const encoded = Buffer.from(psScript, 'utf16le').toString('base64');
-    const rScan = await safeExec(`powershell -ExecutionPolicy Bypass -NoProfile -EncodedCommand ${encoded}`, 10000);
+    const rScan = await safeExec(`powershell -ExecutionPolicy Bypass -NoProfile -WindowStyle Hidden -EncodedCommand ${encoded}`, 10000);
     const ips = rScan.ok ? rScan.out.trim().split(/\r?\n/).map(s => s.trim()).filter(Boolean) : [];
     if (ips.length > 0) {
       // Limpiar conexiones stale antes de reconectar para no acumular "offline"
