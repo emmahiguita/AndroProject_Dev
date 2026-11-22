@@ -79,8 +79,8 @@ export class DeviceInfoFetcher implements IDeviceInfoFetcher {
     let staticData = staticPropsCache.get(serial);
     if (!staticData) {
       const [propsResult, sizeResult] = await Promise.all([
-        this.adb.execFor(serial, 'shell getprop', 4000),
-        this.adb.execFor(serial, 'shell wm size', 2000),
+        this.adb.execFor(serial, ['shell', 'getprop'], 4000),
+        this.adb.execFor(serial, ['shell', 'wm', 'size'], 2000),
       ]);
 
       if (!propsResult.ok) return null;
@@ -119,7 +119,7 @@ export class DeviceInfoFetcher implements IDeviceInfoFetcher {
       'head -n 1 /proc/stat',
     ].join("; echo '===SEC==='; ");
 
-    const batchResult = await this.adb.shell(serial, batchCmd, 3000);
+    const batchResult = await this.adb.execFor(serial, ['shell', batchCmd], 3000);
     const sections = (batchResult.out || '').split('===SEC===');
 
     const cpuStartOut = sections[0] || '';

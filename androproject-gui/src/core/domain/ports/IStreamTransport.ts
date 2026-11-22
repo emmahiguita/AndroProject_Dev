@@ -19,6 +19,8 @@ export interface StreamSessionConfig {
   stayAwake?: boolean;
   alwaysOnTop?: boolean;
   borderless?: boolean;
+  videoBuffer?: number | string;
+  noAudio?: boolean;
 }
 
 export interface StreamSessionResult {

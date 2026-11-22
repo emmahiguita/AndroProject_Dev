@@ -3,11 +3,12 @@
  * SOLID: DIP (depend on abstraction, not concretions).
  * SRP: Only executes ADB commands, nothing else.
  */
-import { exec } from 'child_process';
+import { exec, execFile } from 'child_process';
 import { promisify } from 'util';
 import { ADB } from '@/lib/config';
 
 const execAsyncOrig = promisify(exec);
+const execFileAsync = promisify(execFile);
 const execAsync = async (command: string, options: { timeout?: number; encoding?: BufferEncoding; maxBuffer?: number } = {}) => {
   const result = await execAsyncOrig(command, { encoding: 'utf8', ...options, windowsHide: true });
   return {
@@ -26,9 +27,9 @@ export interface IAdbExecutor {
   /** Path to the ADB binary */
   readonly adbPath: string;
   /** Execute an ADB command with timeout. Never throws. */
-  exec(args: string, timeoutMs?: number): Promise<AdbExecResult>;
+  exec(args: string | readonly string[], timeoutMs?: number): Promise<AdbExecResult>;
   /** Execute an ADB command against a specific device */
-  execFor(serial?: string, args?: string, timeoutMs?: number): Promise<AdbExecResult>;
+  execFor(serial?: string, args?: string | readonly string[], timeoutMs?: number): Promise<AdbExecResult>;
   /** Execute a shell command on the device */
   shell(serial?: string, cmd?: string, timeoutMs?: number): Promise<AdbExecResult>;
   /** Execute exec-out (for binary data like screencap) */
@@ -38,9 +39,11 @@ export interface IAdbExecutor {
 export class AdbExecutor implements IAdbExecutor {
   readonly adbPath = ADB;
 
-  async exec(args: string, timeoutMs: number = 10000): Promise<AdbExecResult> {
+  async exec(args: string | readonly string[], timeoutMs: number = 10000): Promise<AdbExecResult> {
     try {
-      const { stdout, stderr } = await execAsync(`"${this.adbPath}" ${args}`, { timeout: timeoutMs });
+      const { stdout, stderr } = typeof args === 'string'
+        ? await execAsync(`"${this.adbPath}" ${args}`, { timeout: timeoutMs })
+        : await execFileAsync(this.adbPath, args, { encoding: 'utf8', timeout: timeoutMs, windowsHide: true });
       return { ok: true, out: stdout, err: stderr };
     } catch (error: unknown) {
       const failure = error as { stdout?: unknown };
@@ -50,9 +53,9 @@ export class AdbExecutor implements IAdbExecutor {
     }
   }
 
-  async execFor(serial?: string, args: string = '', timeoutMs: number = 10000): Promise<AdbExecResult> {
-    const prefix = (serial && serial !== 'undefined' && serial !== 'default') ? `-s ${serial} ` : '';
-    return this.exec(`${prefix}${args}`, timeoutMs);
+  async execFor(serial?: string, args: string | readonly string[] = '', timeoutMs: number = 10000): Promise<AdbExecResult> {
+    if (!serial || serial === 'undefined' || serial === 'default') return this.exec(args, timeoutMs);
+    return this.exec(typeof args === 'string' ? `-s ${serial} ${args}` : ['-s', serial, ...args], timeoutMs);
   }
 
   async shell(serial?: string, cmd: string = '', timeoutMs: number = 15000): Promise<AdbExecResult> {

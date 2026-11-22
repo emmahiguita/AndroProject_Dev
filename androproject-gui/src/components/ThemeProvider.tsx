@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useSyncExternalStore } from 'react';
 
 type Theme = 'dark' | 'light';
 
@@ -20,31 +20,31 @@ export function useAppTheme() {
   return useContext(ThemeContext);
 }
 
-export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>('dark');
+const themeEvent = 'androproject-theme-change';
+const getTheme = (): Theme => document.documentElement.dataset.theme === 'light' ? 'light' : 'dark';
+const getServerTheme = (): Theme => 'dark';
 
-  // Load saved preference on mount
-  useEffect(() => {
-    const saved = localStorage.getItem('androproject-theme') as Theme | null;
-    if (saved === 'light' || saved === 'dark') {
-      setTheme(saved);
-    }
-  }, []);
+function subscribeToTheme(listener: () => void) {
+  window.addEventListener(themeEvent, listener);
+  return () => window.removeEventListener(themeEvent, listener);
+}
 
-  // Sync to DOM attribute and Tailwind class for CSS tokens & dark: utilities
-  useEffect(() => {
-    const root = document.documentElement;
-    root.setAttribute('data-theme', theme);
-    root.classList.toggle('light', theme === 'light');
-    root.classList.toggle('dark', theme === 'dark');
-    root.style.colorScheme = theme;
+function toggleTheme() {
+  const theme = getTheme() === 'dark' ? 'light' : 'dark';
+  const root = document.documentElement;
+  root.dataset.theme = theme;
+  root.classList.toggle('light', theme === 'light');
+  root.classList.toggle('dark', theme === 'dark');
+  try {
     localStorage.setItem('androproject-theme', theme);
-  }, [theme]);
+  } catch {
+    // The current session can still change theme when storage is unavailable.
+  }
+  window.dispatchEvent(new Event(themeEvent));
+}
 
-  const toggleTheme = useCallback(() => {
-    setTheme(prev => prev === 'dark' ? 'light' : 'dark');
-  }, []);
-
+export function ThemeProvider({ children }: { children: React.ReactNode }) {
+  const theme = useSyncExternalStore(subscribeToTheme, getTheme, getServerTheme);
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme, isDark: theme === 'dark' }}>
       {children}

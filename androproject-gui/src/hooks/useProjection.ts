@@ -118,8 +118,8 @@ export function useProjection(device: DeviceInfo | null | undefined): UseProject
     setIsBusy(true);
     try {
       if (scrcpyActive) {
-        await run('stop_screen', 'Deteniendo scrcpy', { serial });
-        setScrcpyActive(false);
+        const res = await run('stop_screen', 'Deteniendo scrcpy', { serial });
+        if (res?.success) setScrcpyActive(false);
       } else {
         const res = await run('open_screen', 'Iniciando AndroProject nativo 60 FPS...', { serial, ...scrcpyOptions, ...customOpts });
         if (res?.success) setScrcpyActive(true);

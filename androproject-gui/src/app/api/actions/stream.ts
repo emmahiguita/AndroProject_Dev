@@ -19,6 +19,7 @@ import type { IProjectionCoordinator } from '@/lib/services/projection-coordinat
 import type { IScreenCapture } from '@/lib/services/screen-capture';
 import type { DeviceInfo } from '@/features/types';
 import { airPlayReceiverEngine } from '@/lib/services/airplay-engine';
+import { isValidDeviceSerial } from '@/lib/security/input-sanitizer';
 
 export { startRecord, stopRecord, checkRecord } from './_lib/stream-recorder';
 
@@ -36,14 +37,15 @@ export async function openScreen(ctx: ActionContext, body: {
   alwaysOnTop?: boolean;
   borderless?: boolean;
   videoBuffer?: number | string;
+  enableAudio?: boolean;
   platform?: 'android' | 'ios';
 }) {
-  const targetSerial = ctx.targetSerial || (body.platform === 'ios' ? 'airplay-ios' : '');
-  if (!targetSerial) {
+  const targetSerial = ctx.targetSerial?.trim() || (body.platform === 'ios' ? 'airplay-ios' : '');
+  if (!isValidDeviceSerial(targetSerial)) {
     return NextResponse.json({ success: false, error: 'No hay un dispositivo conectado' }, { status: 400 });
   }
 
-  const isIos = (targetSerial && targetSerial.startsWith('airplay-')) || body.platform === 'ios';
+  const isIos = /^(airplay|apple)-/.test(targetSerial) || body.platform === 'ios';
   const device: DeviceInfo = {
     serial: targetSerial,
     model: isIos ? 'Apple iPhone' : 'Android Device',
@@ -63,6 +65,7 @@ export async function openScreen(ctx: ActionContext, body: {
     alwaysOnTop: body.alwaysOnTop,
     borderless: body.borderless,
     videoBuffer: body.videoBuffer,
+    noAudio: body.enableAudio !== true,
     videoSource: body.videoSource as 'display' | 'camera',
     platform: device.platform,
   });
@@ -78,8 +81,9 @@ export async function openScreen(ctx: ActionContext, body: {
 
 /** Verifica si la transmisión sigue activa o la detiene limpiamente. */
 export async function checkOrStopScreen(ctx: ActionContext, action: 'check_screen' | 'stop_screen') {
-  const serial = ctx.targetSerial || 'default';
-  const isIos = serial.startsWith('airplay-');
+  const serial = ctx.targetSerial?.trim();
+  if (!isValidDeviceSerial(serial)) return NextResponse.json({ success: true, alive: false, sessions: [] });
+  const isIos = /^(airplay|apple)-/.test(serial);
   const device: DeviceInfo = {
     serial,
     model: isIos ? 'Apple iPhone' : 'Android Device',
@@ -95,6 +99,8 @@ export async function checkOrStopScreen(ctx: ActionContext, action: 'check_scree
 
   if (action === 'stop_screen') {
     const stopped = await coordinator.stop(device);
+    const alive = await coordinator.isAlive(device);
+    if (alive) return NextResponse.json({ success: false, alive: true, error: 'Una sesión de pantalla sigue activa. Intenta cerrarla de nuevo.' }, { status: 500 });
     return NextResponse.json({
       success: true,
       alive: false,

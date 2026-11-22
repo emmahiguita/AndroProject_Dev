@@ -85,7 +85,7 @@ export default function Page() {
       onUnregisterDevice={adb.unregisterDevice}
       onToggleAutoConnect={adb.toggleAutoConnect}
     >
-      <FeatureErrorBoundary onError={(err) => addLog(`[Vista ${activeNav}] ${err.message}`, 'error')}>
+      <FeatureErrorBoundary key={activeNav} onError={(err) => addLog(`[Vista ${activeNav}] ${err.message}`, 'error')}>
         <ActiveView nav={activeNav} device={device} addLog={addLog} onNavigate={setActiveNav} />
       </FeatureErrorBoundary>
     </AppShell>

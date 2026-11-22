@@ -18,6 +18,7 @@ import { ADB, ANDROPROJECT_HOME } from '@/lib/config';
 import { assertValidPackageName, isValidDeviceSerial } from '@/lib/security/input-sanitizer';
 import { isCriticalSystem } from './_lib/app-catalog';
 import { listDeviceApps, invalidateAppListCache } from './_lib/app-list-builder';
+import { launchDevicePackage } from './_lib/app-launcher';
 
 const execAsyncOrig = promisify(exec);
 const execAsync = async (command: string, options: { timeout?: number; encoding?: BufferEncoding; maxBuffer?: number } = {}) => {
@@ -70,12 +71,16 @@ export async function POST(req: Request) {
     }
 
     if (action === 'launch') {
-      const { stdout } = await execAsync(
-        `${adbTarget} shell monkey -p ${safePkg} -c android.intent.category.LAUNCHER 1`,
+      const result = await launchDevicePackage(adbTarget, safePkg, execAsync);
+      return NextResponse.json(
+        {
+          success: result.success,
+          message: result.message,
+          error: result.error,
+          openedSettings: result.openedSettings,
+        },
+        { status: result.status },
       );
-      const fail = checkAdbFailure(stdout, `No se pudo abrir ${safePkg}`);
-      if (fail) return fail;
-      return NextResponse.json({ success: true, message: `Aplicación ${safePkg} abierta en el dispositivo.` });
     }
 
     if (action === 'force_stop') {
@@ -95,11 +100,12 @@ export async function POST(req: Request) {
 
     if (action === 'extract_apk') {
       const { stdout: pathOut } = await execAsync(`${adbTarget} shell pm path ${safePkg}`, { timeout: 8000 });
-      const remotePath = pathOut
-        .split('\n')
+      const apkLines = pathOut
+        .split(/\r?\n/)
         .map((l) => l.trim().replace(/^package:/, ''))
-        .find((l) => l.endsWith('.apk'));
-      if (!remotePath || !/^[a-zA-Z0-9/_.-]+\.apk$/.test(remotePath)) {
+        .filter((l) => l.endsWith('.apk'));
+      const remotePath = apkLines.find((l) => l.endsWith('/base.apk')) || apkLines[0];
+      if (!remotePath || !/^[a-zA-Z0-9/_.~=@+-]+\.apk$/.test(remotePath)) {
         return NextResponse.json({ success: false, error: `No se encontró la ruta APK de ${safePkg}` }, { status: 404 });
       }
       const backupDir = path.join(ANDROPROJECT_HOME, 'backups', 'apks');

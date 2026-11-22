@@ -7,11 +7,11 @@
 // POR QUÉ: Separar el escaneo PnP de `/api/device/route.ts` (SRP, < 200L).
 // ============================================================================
 
-import { exec } from 'child_process';
+import { execFile } from 'child_process';
 import { promisify } from 'util';
 import type { DetectedDevice } from './device-detector';
 
-const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
 
 let lastUsbScanTime = 0;
 let cachedAndroidHardwareName: string | null = null;
@@ -43,7 +43,7 @@ export async function detectHardwareFallback() {
   if (now - lastUsbScanTime >= 6000) {
     lastUsbScanTime = now;
     try {
-      const { stdout } = await execAsync('pnputil /enum-devices /connected /class USB', {
+      const { stdout } = await execFileAsync('pnputil.exe', ['/enum-devices', '/connected', '/class', 'USB'], {
         windowsHide: true,
         timeout: 2000,
       });

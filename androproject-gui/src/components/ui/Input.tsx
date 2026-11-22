@@ -68,11 +68,11 @@ export function Input({
             'h-10 w-full rounded-md border bg-surface-base px-3 text-sm text-text-primary',
             'placeholder:text-text-tertiary',
             'transition-colors duration-150 ease-out',
-            'disabled:opacity-50 disabled:pointer-events-none',
+            'disabled:opacity-65',
             icon ? 'pl-9' : null,
             error
-              ? 'border-border-strong focus:border-border-accent'
-              : 'border-border focus:border-border-accent',
+              ? 'border-semantic-danger'
+              : 'border-border-control',
             className,
           )}
           {...rest}

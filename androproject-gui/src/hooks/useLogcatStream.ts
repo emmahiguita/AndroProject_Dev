@@ -12,7 +12,7 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import type { LogcatEntry } from '@/app/api/logcat/route';
+import type { LogcatEntry } from '@/features/logcat-types';
 import {
   LEVEL_WEIGHT,
   buildRawCrashDump,

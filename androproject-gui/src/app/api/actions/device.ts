@@ -50,7 +50,7 @@ export async function stopAdbServer() {
 }
 
 export async function getAdbStatus() {
-  const devices = await adb.exec('devices -l', 5000);
+  const devices = await adb.exec(['devices', '-l'], 5000);
   if (!devices.ok) {
     return NextResponse.json({ success: false, serverRunning: false, devices: [] });
   }

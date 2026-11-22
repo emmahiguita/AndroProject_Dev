@@ -13,8 +13,13 @@ echo.
 set DEST_DIR=C:\AndroProject
 
 echo  [1/5] Verificando directorio de instalacion...
-taskkill /F /IM adb.exe >nul 2>&1
-taskkill /F /IM AndroProject.exe >nul 2>&1
+if exist "%DEST_DIR%\Dashboard\next-standalone\server.js" (
+    powershell -NoProfile -NonInteractive -Command "$ErrorActionPreference='Stop'; $dashboard=Join-Path $env:DEST_DIR 'Dashboard'; $owned=@((Join-Path $env:DEST_DIR 'adb.exe'),(Join-Path $env:DEST_DIR 'AndroProject.exe'),(Join-Path $dashboard 'ANDRO-IOS.exe'),(Join-Path $dashboard 'AndroProject.exe')); $server=[regex]::Escape((Join-Path $dashboard 'next-standalone\server.js'))+'(?:\s|\x22|$)'; Get-CimInstance Win32_Process | Where-Object { $_.ExecutablePath -in $owned -or ($_.Name -eq 'node.exe' -and $_.CommandLine -match $server) } | ForEach-Object { Stop-Process -Id $_.ProcessId -ErrorAction SilentlyContinue }"
+    if errorlevel 1 (
+        echo        ERROR: No se pudo preparar el cierre de la instalacion anterior.
+        exit /b 1
+    )
+)
 if exist "%DEST_DIR%" (
     echo        ^> Actualizando instalacion existente...
 ) else (
@@ -24,10 +29,9 @@ if exist "%DEST_DIR%" (
 
 echo.
 echo  [2/5] Extrayendo archivos de la aplicacion...
-powershell -NoProfile -Command "Expand-Archive -Path '%~dp0AndroProject_data.zip' -DestinationPath 'C:\AndroProject' -Force"
+powershell -NoProfile -NonInteractive -Command "$ErrorActionPreference='Stop'; Expand-Archive -LiteralPath '%~dp0AndroProject_data.zip' -DestinationPath $env:DEST_DIR -Force"
 if errorlevel 1 (
     echo        ERROR: No se pudo extraer los archivos.
-    pause
     exit /b 1
 )
 echo        ^> Archivos extraidos correctamente.

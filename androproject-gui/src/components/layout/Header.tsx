@@ -61,43 +61,32 @@ export const Header: React.FC<HeaderProps> = ({
   const isConnected = currentDevice?.state === 'device';
   const isIos = currentDevice?.platform === 'ios' || currentDevice?.serial.startsWith('airplay-');
 
-  const btnNeutral = isDark
-    ? 'bg-zinc-900 hover:bg-zinc-800 text-zinc-200 border-zinc-800'
-    : 'bg-slate-100 hover:bg-slate-200 text-slate-800 border-slate-300';
-  const btnActive = isDark
-    ? 'bg-zinc-100 hover:bg-white text-zinc-950 border-zinc-100'
-    : 'bg-slate-900 hover:bg-slate-800 text-white border-slate-900';
-  const iconBtn = `h-9 w-9 shrink-0 flex items-center justify-center rounded-lg border transition-colors ${
-    isDark
-      ? 'bg-zinc-900 border-zinc-800 text-zinc-300 hover:text-zinc-100 hover:bg-zinc-800'
-      : 'bg-white border-slate-200 text-slate-700 hover:text-slate-950 hover:bg-slate-100'
-  }`;
+  const btnNeutral = 'border-border-control bg-surface-card text-text-primary hover:bg-surface-overlay';
+  const btnActive = 'border-border-selected bg-surface-selected text-text-selected hover:bg-surface-overlay';
+  const iconBtn = `grid size-9 shrink-0 place-items-center rounded-md border transition-colors ${btnNeutral}`;
 
   const statusLabel = !currentDevice
     ? 'Desconectado'
-    : isIos
-      ? 'AirPlay 60 FPS'
-      : isConnected
-        ? (currentDevice.connectionType === 'Wi-Fi' ? 'Wi-Fi Activo' : 'USB Activo')
-        : currentDevice.state || 'Sin conexión';
+    : isConnected
+      ? isIos ? 'AirPlay activo' : currentDevice.connectionType === 'Wi-Fi' ? 'Wi-Fi activo' : 'USB activo'
+      : currentDevice.state === 'unauthorized' ? 'Sin autorizar' : 'Sin conexión';
 
   return (
-    <header className={`h-14 w-full min-w-0 shrink-0 flex items-center gap-2 px-3 z-20 border-b ${
-      isDark ? 'bg-zinc-950 border-zinc-800' : 'bg-white border-slate-200'
-    }`}>
+    <header className="relative z-20 flex w-full min-w-0 shrink-0 flex-wrap items-center justify-between gap-2 border-b border-border bg-surface-chrome px-3 py-2.5">
+      <div className="flex min-w-0 max-w-full flex-wrap items-center gap-2">
       {/* Menú lateral */}
-      <button type="button" onClick={onToggleSidebar} aria-label={sidebarOpen ? 'Contraer menú lateral' : 'Expandir menú lateral'} title={sidebarOpen ? 'Contraer menú' : 'Expandir menú'} className={iconBtn}>
+      <button type="button" onClick={onToggleSidebar} aria-controls="studio-sidebar" aria-expanded={sidebarOpen} aria-label={sidebarOpen ? 'Contraer menú lateral' : 'Expandir menú lateral'} title={sidebarOpen ? 'Contraer menú' : 'Expandir menú'} className={iconBtn}>
         <Menu size={16} />
       </button>
 
       {/* Selector de dispositivo */}
-      <div className={`h-9 flex items-center gap-2 rounded-lg px-2.5 min-w-[140px] flex-1 sm:flex-initial sm:w-48 md:w-56 max-w-[240px] border overflow-hidden ${isDark ? 'bg-zinc-900 border-zinc-800' : 'bg-slate-50 border-slate-300'}`}>
-        <Smartphone size={15} className={`shrink-0 ${isConnected ? 'text-emerald-500' : (isDark ? 'text-zinc-400' : 'text-slate-500')}`} />
-        <select value={selectedSerial} onChange={(e) => onSelectSerial(e.target.value)} aria-label="Seleccionar dispositivo Android / iOS" className={`h-full py-0 bg-transparent text-xs font-semibold leading-none focus:outline-none cursor-pointer w-full min-w-0 truncate ${isDark ? 'text-zinc-100' : 'text-slate-900'}`}>
+      <div className="flex h-9 w-44 max-w-full items-center gap-2 rounded-md border border-border-control bg-surface-card px-2.5 text-text-primary sm:w-48">
+        <Smartphone size={16} className={`shrink-0 ${isConnected ? 'text-semantic-success' : 'text-text-tertiary'}`} />
+        <select value={currentDevice?.serial ?? ''} disabled={devices.length === 0} onChange={(e) => onSelectSerial(e.target.value)} aria-label="Seleccionar dispositivo Android / iOS" className="h-7 w-full min-w-0 truncate bg-transparent text-xs font-semibold">
           {devices.length === 0 ? <option value="">Sin dispositivos</option> : devices.map((dev) => {
             const ios = dev.platform === 'ios' || dev.serial.startsWith('airplay-');
             return (
-              <option key={dev.serial} value={dev.serial} className={isDark ? 'bg-zinc-900 text-zinc-100' : 'bg-white text-slate-900'}>
+              <option key={dev.serial} value={dev.serial} className="bg-surface-card text-text-primary">
                 {ios ? (dev.model || 'iPhone (AirPlay)') : (dev.model || dev.serial)}
               </option>
             );
@@ -107,28 +96,28 @@ export const Header: React.FC<HeaderProps> = ({
 
       {/* Botón Transmitiendo / Transmitir */}
       {isConnected && onToggleTransmit && (
-        <button type="button" onClick={onToggleTransmit} title={isTransmitting ? 'Detener transmisión' : 'Iniciar transmisión en vivo'} className={`h-9 shrink-0 flex items-center gap-2 px-3 rounded-lg border text-xs font-semibold transition-colors ${isTransmitting ? btnActive : btnNeutral}`}>
-          <span className={`w-2 h-2 rounded-full shrink-0 ${isTransmitting ? 'bg-emerald-500' : (isDark ? 'bg-zinc-500' : 'bg-slate-400')}`} />
-          <span className="hidden md:inline">{isTransmitting ? 'Transmitiendo' : 'Transmitir'}</span>
+        <button type="button" onClick={onToggleTransmit} aria-label={isTransmitting ? 'Detener transmisión' : 'Iniciar transmisión en vivo'} title={isTransmitting ? 'Detener transmisión' : 'Iniciar transmisión en vivo'} className={`flex h-9 shrink-0 items-center gap-2 rounded-md border px-2.5 text-xs font-semibold transition-colors ${isTransmitting ? btnActive : btnNeutral}`}>
+          <span className={`size-2 shrink-0 rounded-full ${isTransmitting ? 'bg-semantic-success' : 'bg-text-tertiary'}`} />
+          <span>{isTransmitting ? 'Transmitiendo' : 'Transmitir'}</span>
         </button>
       )}
 
       {/* Tarjeta de estado al lado de Transmitiendo — misma altura h-9, icono 14px, texto legible */}
-      <div className={`hidden lg:flex h-9 shrink-0 items-center gap-2 px-3 rounded-lg border text-xs font-medium ${isDark ? 'bg-zinc-900 border-zinc-800 text-zinc-200' : 'bg-slate-50 border-slate-300 text-slate-800'}`} title={`Estado actual: ${statusLabel}`}>
-        <span className={`w-2 h-2 rounded-full shrink-0 ${isConnected ? 'bg-emerald-500' : 'bg-zinc-500'}`} />
-        {currentDevice?.connectionType === 'Wi-Fi' ? <Wifi size={14} className="shrink-0 opacity-75" /> : <Usb size={14} className="shrink-0 opacity-75" />}
+      <div className="flex h-9 shrink-0 items-center gap-2 rounded-md border border-border bg-surface-base px-2.5 text-xs font-medium text-text-secondary" title={`Estado actual: ${statusLabel}`}>
+        {currentDevice?.connectionType === 'Wi-Fi' ? <Wifi size={15} className={isConnected ? 'text-semantic-success' : undefined} /> : <Usb size={15} className={isConnected ? 'text-semantic-success' : undefined} />}
         <span className="whitespace-nowrap">{statusLabel}</span>
       </div>
+      </div>
 
-      <div className="flex-1 min-w-0" />
+      <div className="flex min-w-0 flex-wrap items-center gap-2">
 
       {/* Proyección */}
-      <button type="button" onClick={onNavigateProjection} aria-label="Abrir proyección en vivo" title="Abrir proyección en vivo" className={projectionActive ? `h-9 w-9 shrink-0 flex items-center justify-center rounded-lg border transition-colors ${btnActive}` : iconBtn}>
+      <button type="button" onClick={onNavigateProjection} aria-label="Abrir proyección en vivo" title="Abrir proyección en vivo" className={projectionActive ? `grid size-9 shrink-0 place-items-center rounded-md border transition-colors ${btnActive}` : iconBtn}>
         <PanelRightOpen size={15} />
       </button>
 
       {/* Wi-Fi */}
-      <button type="button" onClick={onOpenConnectModal} aria-label="Conectar dispositivo vía IP Wi-Fi" title="Conectar vía IP Wi-Fi" className={`h-9 px-2.5 shrink-0 whitespace-nowrap hidden sm:flex items-center gap-1.5 rounded-lg border text-xs font-semibold transition-colors ${btnNeutral}`}>
+      <button type="button" onClick={onOpenConnectModal} aria-label="Conectar dispositivo vía IP Wi-Fi" title="Conectar vía IP Wi-Fi" className={`flex h-9 shrink-0 items-center gap-1.5 rounded-md border px-2.5 text-xs font-semibold transition-colors ${btnNeutral}`}>
         <Wifi size={15} className="shrink-0" />
         <span className="hidden lg:inline">Wi-Fi</span>
       </button>
@@ -154,22 +143,23 @@ export const Header: React.FC<HeaderProps> = ({
           suppressHydrationWarning
           onClick={() => onToggleRescue(currentDevice)}
           aria-label="Alternar Rescate Permanente para el móvil actual"
+          aria-pressed={rescueConfig.enabled}
           title={
             rescueConfig.enabled
               ? `Rescate ACTIVO (${rescueConfig.targetModel || 'Auto'}) · ${rescueMsg || 'Sincronización permanente'} — Click para desactivar`
               : `Activar Rescate Permanente en PC${currentDevice?.model ? ` para ${currentDevice.model}` : ''}`
           }
-          className={`h-9 px-2.5 shrink-0 whitespace-nowrap hidden sm:flex items-center gap-1.5 rounded-lg border text-xs font-semibold transition-colors ${
+          className={`flex h-9 shrink-0 items-center gap-1.5 rounded-md border px-2.5 text-xs font-semibold transition-colors ${
             rescueConfig.enabled ? btnActive : btnNeutral
           }`}
         >
-          <Zap size={15} className={`shrink-0 ${rescueConfig.enabled ? 'text-emerald-500' : ''}`} />
+          <Zap size={15} className={`shrink-0 ${rescueConfig.enabled ? 'text-semantic-success' : ''}`} />
           <span className="hidden xl:inline">{rescueConfig.enabled ? 'Rescate ON' : 'Rescate'}</span>
         </button>
       )}
 
       {/* Radar */}
-      <button type="button" onClick={onScanRadar} disabled={isScanning} aria-label="Escanear red" title="Escanear red local" className={`h-9 px-2.5 flex items-center gap-1.5 rounded-lg border text-xs font-semibold transition-colors ${btnNeutral}`}>
+      <button type="button" onClick={onScanRadar} disabled={isScanning} aria-busy={isScanning} aria-label="Escanear red" title="Escanear red local" className={`flex h-9 items-center gap-1.5 rounded-md border px-2.5 text-xs font-semibold transition-colors disabled:opacity-65 ${btnNeutral}`}>
         <Radio size={15} className={isScanning ? 'animate-spin' : ''} />
         <span className="hidden lg:inline">{isScanning ? 'Escaneando' : 'Radar'}</span>
       </button>
@@ -183,6 +173,7 @@ export const Header: React.FC<HeaderProps> = ({
       <button type="button" onClick={toggleTheme} aria-label={isDark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'} title={isDark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'} className={iconBtn}>
         {isDark ? <Sun size={15} /> : <Moon size={15} />}
       </button>
+      </div>
     </header>
   );
 };

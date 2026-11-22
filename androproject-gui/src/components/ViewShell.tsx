@@ -1,6 +1,5 @@
 'use client';
 
-import { useAppStore } from '@/stores';
 import type { NavSection } from '@/features/types';
 
 
@@ -19,10 +18,10 @@ interface ViewShellProps {
  * Each view sets its navId; the shell handles active/inactive transitions.
  */
 export function ViewShell({ children, fill }: ViewShellProps) {
-  const fillClass = fill ? 'h-full flex-1 flex flex-col min-h-0' : '';
+  const fillClass = fill ? 'flex h-full min-h-0 flex-1 flex-col overflow-hidden' : '';
  
    return (
-     <div className={`w-full min-w-0 max-w-full overflow-hidden transition-all duration-200 opacity-100 translate-y-0 relative z-0 ${fillClass}`}>
+     <div className={`relative w-full min-w-0 max-w-full ${fillClass}`}>
        {children}
      </div>
    );

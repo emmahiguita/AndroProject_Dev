@@ -11,10 +11,9 @@
 import React from 'react';
 import {
   LayoutDashboard, Smartphone, FolderOpen, Zap, ShieldCheck,
-  Terminal, Wrench, Settings, ChevronLeft, ChevronRight, Sparkles,
+  Terminal, Wrench, Settings, ChevronLeft, ChevronRight,
   MonitorPlay,
 } from 'lucide-react';
-import { useAppTheme } from '../ThemeProvider';
 import { NavSection } from '../../features/types';
 
 interface SidebarProps {
@@ -24,7 +23,7 @@ interface SidebarProps {
   onToggle?: () => void;
 }
 
-type NavItemDef = { id: NavSection; label: string; icon: React.ReactNode; badge?: boolean };
+type NavItemDef = { id: NavSection; label: string; icon: React.ReactNode };
 
 const groups: { label: string; items: NavItemDef[] }[] = [
   {
@@ -55,40 +54,37 @@ const groups: { label: string; items: NavItemDef[] }[] = [
   {
     label: 'SISTEMA',
     items: [
-      { id: 'config',    label: 'Ajustes', icon: <Settings size={16} />, badge: true },
+      { id: 'config',    label: 'Ajustes', icon: <Settings size={16} /> },
     ],
   },
 ];
 
 export const Sidebar: React.FC<SidebarProps> = ({ activeNav, onSelectNav, collapsed, onToggle }) => {
-  const { isDark } = useAppTheme();
-  const w = collapsed ? 'w-14' : 'w-56';
+  const w = collapsed ? 'w-16' : 'w-56';
 
   return (
-    <aside className={`${w} h-full shrink-0 flex flex-col justify-between border-r z-30 transition-all duration-200 overflow-hidden ${
-      isDark ? 'bg-zinc-950 border-zinc-800/80' : 'bg-white border-slate-200'
-    }`}>
+    <aside id="studio-sidebar" className={`${w} z-30 flex h-full shrink-0 flex-col overflow-hidden border-r border-border bg-surface-chrome`}>
       {/* Top section with scrollable nav */}
-      <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar py-3">
+      <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar py-4">
         {/* Logo row */}
-        <div className={`flex items-center px-3 mb-5 ${collapsed ? 'justify-center' : 'gap-2.5'}`}>
-          <div className="w-8 h-8 rounded-lg overflow-hidden border border-zinc-800 shrink-0 bg-zinc-900 flex items-center justify-center ring-1 ring-white/[0.04] hover:scale-105 transition-transform">
-            <img src="/logo.png" alt="ANDRO-IOS Logo" className="w-full h-full object-cover" />
+        <div className={`flex items-center px-3 mb-5 ${collapsed ? 'justify-center' : 'gap-3'}`}>
+          <div className="size-10 rounded-lg overflow-hidden border border-border shrink-0 bg-zinc-900">
+            <img src="/logo.png" alt={collapsed ? 'ANDRO-IOS' : ''} className="w-full h-full object-cover" />
           </div>
           {!collapsed && (
             <div className="min-w-0">
-              <h1 className={`text-xs font-bold tracking-wider ${isDark ? 'text-zinc-100' : 'text-slate-900'}`}>ANDRO-IOS</h1>
-              <p className={`text-[10px] font-medium tracking-wider uppercase ${isDark ? 'text-zinc-400' : 'text-slate-600'}`}>Studio</p>
+              <p className="text-sm font-bold text-text-primary">ANDRO-IOS</p>
+              <p className="text-2xs font-medium text-text-secondary">Studio</p>
             </div>
           )}
         </div>
 
         {/* Nav groups */}
-        <nav className="space-y-3 px-2">
+        <nav aria-label="Secciones del estudio" className="space-y-4 px-2.5">
           {groups.map((group) => (
             <div key={group.label}>
               {!collapsed && (
-                <p className={`text-[9px] font-semibold uppercase tracking-[0.12em] px-3 mb-1.5 ${isDark ? 'text-zinc-500' : 'text-slate-600'}`}>
+                <p className="mb-1 px-2.5 text-2xs font-semibold tracking-wide text-text-tertiary">
                   {group.label}
                 </p>
               )}
@@ -97,30 +93,22 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeNav, onSelectNav, collap
                   const active = activeNav === item.id;
                   return (
                     <button
-                      key={`${group.label}-${item.label}`}
+                      key={item.id}
+                      type="button"
                       onClick={() => onSelectNav(item.id)}
+                      aria-current={active ? 'page' : undefined}
+                      aria-label={collapsed ? item.label : undefined}
                       title={collapsed ? item.label : undefined}
-                      className={`w-full flex items-center rounded-lg font-medium transition-colors ${
-                        collapsed ? 'justify-center px-0 py-2' : 'gap-2.5 px-3 py-1.5'
+                      className={`flex min-h-10 w-full items-center rounded-md border text-left text-sm transition-colors ${
+                        collapsed ? 'justify-center' : 'gap-2.5 px-2.5'
                       } ${
                         active
-                          ? isDark
-                            ? 'bg-zinc-800/90 text-zinc-100 border border-zinc-700/60 shadow-sm'
-                            : 'bg-slate-200/80 text-slate-950 font-semibold'
-                          : isDark
-                            ? 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/60 border border-transparent'
-                            : 'text-slate-700 hover:text-slate-950 hover:bg-slate-100'
+                          ? 'border-border-selected bg-surface-selected font-semibold text-text-selected'
+                          : 'border-transparent font-medium text-text-secondary hover:bg-surface-overlay hover:text-text-primary'
                       }`}
                     >
-                      <span className={`shrink-0 ${active ? (isDark ? 'text-zinc-100' : 'text-slate-950') : (isDark ? 'text-zinc-400' : 'text-slate-600')}`}>
-                        {item.icon}
-                      </span>
-                      {!collapsed && (
-                        <span className="truncate text-xs">{item.label}</span>
-                      )}
-                      {!collapsed && item.badge && (
-                        <span className="ml-auto w-1.5 h-1.5 rounded-full bg-rose-500 shrink-0" />
-                      )}
+                      <span aria-hidden="true" className="shrink-0">{item.icon}</span>
+                      {!collapsed && <span>{item.label}</span>}
                     </button>
                   );
                 })}
@@ -131,47 +119,20 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeNav, onSelectNav, collap
       </div>
 
       {/* Bottom section */}
-      <div className={`shrink-0 px-2 pb-3 pt-2 space-y-2 border-t ${isDark ? 'border-zinc-800/80' : 'border-slate-200'}`}>
-        {/* Collapse button */}
-        {onToggle && (
+      {onToggle && (
+        <div className="shrink-0 border-t border-border p-2.5">
           <button
+            type="button"
             onClick={onToggle}
             aria-label={collapsed ? 'Expandir menú lateral' : 'Colapsar menú lateral'}
             title={collapsed ? 'Expandir menú lateral' : 'Colapsar menú lateral'}
-            className={`w-full flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-[10px] font-medium transition-colors ${
-              isDark ? 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/60' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-            }`}
+            className="flex min-h-9 w-full items-center justify-center gap-2 rounded-md text-xs font-medium text-text-secondary transition-colors hover:bg-surface-overlay hover:text-text-primary"
           >
-            {collapsed ? <ChevronRight size={12} /> : <ChevronLeft size={12} />}
+            {collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
             {!collapsed && <span>Colapsar</span>}
           </button>
-        )}
-
-        {/* Pro card */}
-        {!collapsed && (
-          <div className={`rounded-xl border p-3 ${
-            isDark ? 'bg-zinc-900/40 border-zinc-800/80' : 'bg-slate-50 border-slate-200'
-          }`}>
-            <div className="flex items-center gap-1.5 mb-1">
-              <Sparkles size={12} className={isDark ? 'text-zinc-400' : 'text-slate-700'} />
-              <span className={`text-[11px] font-semibold ${isDark ? 'text-zinc-200' : 'text-slate-900'}`}>Dexterand Studio</span>
-            </div>
-            <p className={`text-[10px] leading-relaxed mb-2.5 ${isDark ? 'text-zinc-400' : 'text-slate-600'}`}>
-              Control integral y diagnóstico forense móvil.
-            </p>
-            <button
-              onClick={() => onSelectNav('config')}
-              className={`w-full py-1.5 rounded-lg border text-xs font-medium transition-colors cursor-pointer ${
-                isDark
-                  ? 'bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border-zinc-700/60'
-                  : 'bg-slate-900 hover:bg-slate-800 text-white border-slate-900'
-              }`}
-            >
-              Ajustes del sistema
-            </button>
-          </div>
-        )}
-      </div>
+        </div>
+      )}
     </aside>
   );
 };

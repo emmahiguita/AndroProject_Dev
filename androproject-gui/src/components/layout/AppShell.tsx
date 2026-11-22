@@ -14,7 +14,6 @@ import { Sidebar } from './Sidebar';
 import { WirelessConnectModal } from './WirelessConnectModal';
 import { AutoDetectionToast } from './AutoDetectionToast';
 import { useStreamTracker } from './useStreamTracker';
-import { useAppTheme } from '../ThemeProvider';
 import { useRescueSync } from '../../hooks/useRescueSync';
 import type { DeviceInfo, SystemLogs, NavSection } from '@/features/types';
 import type { RegisteredDevice } from '../../hooks/useAdbConnection';
@@ -49,12 +48,12 @@ export const AppShell: React.FC<AppShellProps> = ({
   adbServerRunning = false, onToggleAdb, isAdbConnecting = false,
   registeredDevices = [], onRegisterDevice, onUnregisterDevice, onToggleAutoConnect,
 }) => {
-  const { isDark } = useAppTheme();
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [desktopSidebarOpen, setDesktopSidebarOpen] = useState(true);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [connectModal, setConnectModal] = useState(false);
   const [viewportMedium, setViewportMedium] = useState(true);
   const [detectedToast, setDetectedToast] = useState<DeviceInfo | null>(null);
-  const prevSerialsRef = useRef<string>('');
+  const prevSerialsRef = useRef(new Set<string>());
   const mainRef = useRef<HTMLElement>(null);
 
   const rescueSync = useRescueSync(devices, onRefresh);
@@ -64,11 +63,9 @@ export const AppShell: React.FC<AppShellProps> = ({
 
   useEffect(() => {
     const activeDevs = devices.filter((d) => d.state === 'device');
-    const currentSerials = activeDevs.map((d) => d.serial).join(',');
-    if (activeDevs.length > 0 && currentSerials !== prevSerialsRef.current) {
-      const newlyAdded = activeDevs.find((d) => !prevSerialsRef.current.includes(d.serial)) || activeDevs[0];
-      setDetectedToast(newlyAdded);
-    }
+    const currentSerials = new Set(activeDevs.map((d) => d.serial));
+    const newlyAdded = activeDevs.find((d) => !prevSerialsRef.current.has(d.serial));
+    setDetectedToast((visible) => newlyAdded ?? (visible && currentSerials.has(visible.serial) ? visible : null));
     prevSerialsRef.current = currentSerials;
   }, [devices]);
 
@@ -77,7 +74,7 @@ export const AppShell: React.FC<AppShellProps> = ({
     onSelectSerial(detectedToast.serial);
     setDetectedToast(null);
     onNavigate('projection');
-    addLog(`Proyección activada para ${detectedToast.model}`, 'success');
+    addLog(`Vista de proyección abierta para ${detectedToast.model}`, 'info');
   };
 
   useEffect(() => { if (mainRef.current) mainRef.current.scrollTop = 0; }, [activeNav]);
@@ -87,18 +84,28 @@ export const AppShell: React.FC<AppShellProps> = ({
     window.addEventListener('resize', check);
     return () => window.removeEventListener('resize', check);
   }, []);
-  useEffect(() => { if (!viewportMedium) setSidebarOpen(false); }, [viewportMedium]);
+  useEffect(() => {
+    if (viewportMedium || !mobileSidebarOpen) return;
+    const dismiss = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setMobileSidebarOpen(false);
+    };
+    window.addEventListener('keydown', dismiss);
+    return () => window.removeEventListener('keydown', dismiss);
+  }, [viewportMedium, mobileSidebarOpen]);
+
+  const sidebarOpen = viewportMedium ? desktopSidebarOpen : mobileSidebarOpen;
+  const toggleSidebar = viewportMedium ? setDesktopSidebarOpen : setMobileSidebarOpen;
 
   return (
-    <div suppressHydrationWarning className={`fixed inset-0 flex overflow-hidden ${isDark ? 'bg-zinc-950 text-zinc-100' : 'bg-slate-50 text-slate-900'}`}>
+    <div className="fixed inset-0 flex overflow-hidden bg-surface-root text-text-primary">
       {viewportMedium ? (
-        <Sidebar activeNav={activeNav} onSelectNav={onNavigate} collapsed={!sidebarOpen} onToggle={() => setSidebarOpen((p) => !p)} />
+        <Sidebar activeNav={activeNav} onSelectNav={onNavigate} collapsed={!desktopSidebarOpen} onToggle={() => setDesktopSidebarOpen((p) => !p)} />
       ) : (
-        sidebarOpen && (
+        mobileSidebarOpen && (
           <div className="fixed inset-0 z-50 flex">
-            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setSidebarOpen(false)} />
+            <div className="absolute inset-0 bg-black/60" onClick={() => setMobileSidebarOpen(false)} />
             <div className="relative z-10 h-full shadow-2xl">
-              <Sidebar activeNav={activeNav} onSelectNav={(n) => { onNavigate(n); setSidebarOpen(false); }} />
+              <Sidebar activeNav={activeNav} onSelectNav={(n) => { onNavigate(n); setMobileSidebarOpen(false); }} onToggle={() => setMobileSidebarOpen(false)} />
             </div>
           </div>
         )
@@ -113,7 +120,7 @@ export const AppShell: React.FC<AppShellProps> = ({
           onOpenConnectModal={() => setConnectModal(true)}
           isScanning={isScanning}
           onRefresh={onRefresh}
-          onToggleSidebar={() => setSidebarOpen((p) => !p)}
+          onToggleSidebar={() => toggleSidebar((p) => !p)}
           sidebarOpen={sidebarOpen}
           projectionActive={activeNav === 'projection'}
           onNavigateProjection={() => onNavigate('projection')}
@@ -145,8 +152,8 @@ export const AppShell: React.FC<AppShellProps> = ({
           className={`relative flex-1 min-h-0 min-w-0 overflow-x-hidden ${
             activeNav === 'projection'
               ? 'overflow-hidden p-0 flex flex-col'
-              : 'overflow-y-auto custom-scrollbar p-2 md:p-3'
-          } ${isDark ? '' : 'bg-white'}`}
+              : 'overflow-y-auto custom-scrollbar p-3 md:p-5'
+          }`}
         >
           {children}
         </main>

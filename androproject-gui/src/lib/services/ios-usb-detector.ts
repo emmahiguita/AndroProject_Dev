@@ -8,11 +8,11 @@
 //           lógica mantiene `/api/device/route.ts` limpio y bajo 200 líneas (SRP).
 // ============================================================================
 
-import { exec } from 'child_process';
+import { execFile } from 'child_process';
 import { promisify } from 'util';
 import type { DeviceInfo } from '@/features/types';
 
-const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
 
 interface UsbmuxEntry {
   DeviceName?: string;
@@ -32,7 +32,7 @@ export async function detectIosUsbDevices(): Promise<DeviceInfo[]> {
   lastIosScanTs = now;
 
   try {
-    const { stdout } = await execAsync('python -m pymobiledevice3 usbmux list', {
+    const { stdout } = await execFileAsync('python', ['-m', 'pymobiledevice3', 'usbmux', 'list'], {
       windowsHide: true,
       timeout: 3000,
     });
@@ -61,7 +61,7 @@ export async function detectIosUsbDevices(): Promise<DeviceInfo[]> {
   }
 
   try {
-    const { stdout } = await execAsync('pnputil /enum-devices /connected /class USBDevice', {
+    const { stdout } = await execFileAsync('pnputil.exe', ['/enum-devices', '/connected', '/class', 'USBDevice'], {
       windowsHide: true,
       timeout: 2000,
     });

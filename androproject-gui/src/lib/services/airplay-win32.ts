@@ -8,13 +8,13 @@
 // POR QUÉ: Desacoplar Win32/GDI de `airplay-engine.ts` (SRP, < 200 líneas).
 // ============================================================================
 
-import { spawn, exec } from 'child_process';
+import { spawn, execFile } from 'child_process';
 import { promisify } from 'util';
 import os from 'os';
 import path from 'path';
 import fs from 'fs';
 
-const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
 
 export function resolveAirPlayDir(): string {
   const androHome = process.env.ANDROPROJECT_HOME || 'C:\\AndroProject';
@@ -63,7 +63,7 @@ export function spawnAirPlayProcess(airplayDir: string) {
 
 export async function findRunningAirPlayPid(): Promise<number | null> {
   try {
-    const { stdout } = await execAsync('tasklist /FI "IMAGENAME eq AirPlayServer.exe" /FO CSV /NH', { windowsHide: true, timeout: 2500 });
+    const { stdout } = await execFileAsync('tasklist.exe', ['/FI', 'IMAGENAME eq AirPlayServer.exe', '/FO', 'CSV', '/NH'], { windowsHide: true, timeout: 2500 });
     const match = stdout.match(/"AirPlayServer\.exe","(\d+)"/i);
     return match?.[1] ? parseInt(match[1], 10) : null;
   } catch { return null; }
@@ -83,7 +83,7 @@ export function syncAirPlaySettingsIni(airplayDir: string, serverName: string, p
 
 export async function ensureBonjourDaemon(airplayDir: string): Promise<void> {
   try {
-    const { stdout } = await execAsync('tasklist /FI "IMAGENAME eq mDNSResponder.exe" /FO CSV /NH', { windowsHide: true, timeout: 2000 });
+    const { stdout } = await execFileAsync('tasklist.exe', ['/FI', 'IMAGENAME eq mDNSResponder.exe', '/FO', 'CSV', '/NH'], { windowsHide: true, timeout: 2000 });
     if (!stdout.toLowerCase().includes('mdnsresponder.exe')) {
       const mdnsExe = path.join(airplayDir, 'mDNSResponder.exe');
       if (fs.existsSync(mdnsExe)) spawn(mdnsExe, [], { cwd: airplayDir, detached: true, stdio: 'ignore', windowsHide: true }).unref();
@@ -111,7 +111,7 @@ public class AirWinFocus {
 }, [IntPtr]::Zero) | Out-Null`;
   try {
     const enc = Buffer.from(ps, 'utf16le').toString('base64');
-    await execAsync(`powershell.exe -NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -EncodedCommand ${enc}`, { windowsHide: true, timeout: 4000 });
+    await execFileAsync('powershell.exe', ['-NoProfile', '-WindowStyle', 'Hidden', '-ExecutionPolicy', 'Bypass', '-EncodedCommand', enc], { windowsHide: true, timeout: 4000 });
     return true;
   } catch { return false; }
 }
@@ -155,7 +155,7 @@ if ($target -ne [IntPtr]::Zero) {
   }
 }`;
   const enc = Buffer.from(ps, 'utf16le').toString('base64');
-  const { stdout } = await execAsync(`powershell.exe -NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -EncodedCommand ${enc}`, {
+  const { stdout } = await execFileAsync('powershell.exe', ['-NoProfile', '-WindowStyle', 'Hidden', '-ExecutionPolicy', 'Bypass', '-EncodedCommand', enc], {
     windowsHide: true, timeout: 3000, maxBuffer: 10 * 1024 * 1024,
   });
   const b64 = stdout.trim();

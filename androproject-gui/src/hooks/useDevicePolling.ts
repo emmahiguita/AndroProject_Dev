@@ -33,7 +33,6 @@ export function useDevicePolling(): UseDevicePollingResult {
   const storeSetActiveSerial = useAppStore((s) => s.setActiveSerial);
   const storeSetDevicesList = useAppStore((s) => s.setDevicesList);
   const selectedRef = useRef(selectedSerial);
-  useEffect(() => { selectedRef.current = selectedSerial; }, [selectedSerial]);
   const prevDeviceStrRef = useRef<string>('');
   const prevListStrRef = useRef<string>('');
   const inFlightRef = useRef<boolean>(false);
@@ -42,8 +41,9 @@ export function useDevicePolling(): UseDevicePollingResult {
     if (inFlightRef.current) return;
     inFlightRef.current = true;
     try {
-      const url = selectedRef.current
-        ? `/api/device?serial=${encodeURIComponent(selectedRef.current)}`
+      const requestedSerial = selectedRef.current;
+      const url = requestedSerial
+        ? `/api/device?serial=${encodeURIComponent(requestedSerial)}`
         : '/api/device';
       const res = await fetch(url, { cache: 'no-store' });
       if (!res.ok) return;
@@ -51,7 +51,7 @@ export function useDevicePolling(): UseDevicePollingResult {
 
       // Device list (for selector + MultiScreenGrid via Zustand)
       const devList: DeviceInfo[] = data.devices || [];
-      const listStr = JSON.stringify(devList.map((d) => `${d.serial}:${d.state}:${d.platform || ''}`));
+      const listStr = JSON.stringify(devList.map(({ serial, state, platform, model, connectionType }) => [serial, state, platform, model, connectionType]));
       if (listStr !== prevListStrRef.current) {
         prevListStrRef.current = listStr;
         setDevices(devList);
@@ -64,6 +64,8 @@ export function useDevicePolling(): UseDevicePollingResult {
           }))
         );
       }
+
+      if (requestedSerial !== selectedRef.current) return;
 
       // Full active device data (CPU, RAM, storage, battery, temp)
       const activeDevice: DeviceInfo | null = data.activeDevice || null;
@@ -87,6 +89,7 @@ export function useDevicePolling(): UseDevicePollingResult {
           active = devList[0].serial;
         }
 
+        selectedRef.current = active;
         setSelectedSerial(active);
         storeSetActiveSerial(active);
 
@@ -102,6 +105,9 @@ export function useDevicePolling(): UseDevicePollingResult {
           storeSetDevice(fullDevice);
         }
       } else {
+        selectedRef.current = '';
+        prevDeviceStrRef.current = '';
+        setSelectedSerial('');
         setDevice(null);
         storeSetDevice(null);
         storeSetActiveSerial(null);
@@ -138,6 +144,8 @@ export function useDevicePolling(): UseDevicePollingResult {
 
   // Sync store when user manually changes serial
   const handleSelectSerial = useCallback((s: string) => {
+    selectedRef.current = s;
+    prevDeviceStrRef.current = '';
     setSelectedSerial(s);
     storeSetActiveSerial(s);
     const found = devices.find((d) => d.serial === s) || null;

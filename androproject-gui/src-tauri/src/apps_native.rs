@@ -109,6 +109,65 @@ pub fn rust_list_packages_fast(serial: String) -> Result<Vec<NativeAppInfo>, Str
     Ok(apps)
 }
 
+/// Verifica si la salida de ADB contiene un error conocido de ejecución.
+fn has_adb_error(out: &str) -> bool {
+    let lower = out.to_ascii_lowercase();
+    lower.contains("failure")
+        || lower.contains("exception")
+        || lower.contains("error:")
+        || lower.contains("no activities found")
+        || lower.contains("monkey aborted")
+}
+
+/// Lanza una app vía actividad LAUNCHER explícita, con respaldo a `monkey` y ficha de Ajustes.
+fn launch_package_native(serial: &str, pkg: &str) -> Result<String, String> {
+    let prefix = format!("{}/", pkg);
+    if let Ok(resolved) = run_adb_args(
+        serial,
+        &["shell", "cmd", "package", "resolve-activity", "--brief", "-c", "android.intent.category.LAUNCHER", pkg],
+    ) {
+        if let Some(comp) = resolved
+            .lines()
+            .rev()
+            .map(str::trim)
+            .find(|l| l.starts_with(&prefix) && !l.contains(char::is_whitespace))
+        {
+            if let Ok(start_out) = run_adb_args(serial, &["shell", "am", "start", "-n", comp]) {
+                if !has_adb_error(&start_out) {
+                    return Ok(format!("Aplicación {} abierta en el dispositivo.", pkg));
+                }
+            }
+        }
+    }
+
+    if let Ok(monkey_out) = run_adb_args(
+        serial,
+        &["shell", "monkey", "-p", pkg, "-c", "android.intent.category.LAUNCHER", "1"],
+    ) {
+        if !has_adb_error(&monkey_out) {
+            return Ok(format!("Aplicación {} abierta en el dispositivo.", pkg));
+        }
+    }
+
+    if let Ok(dis) = run_adb_args(serial, &["shell", "pm", "list", "packages", "-d", pkg]) {
+        if dis.lines().any(|l| l.trim() == format!("package:{}", pkg)) {
+            return Err(format!("La aplicación {} está deshabilitada. Habilítala primero para abrirla.", pkg));
+        }
+    }
+
+    let pkg_uri = format!("package:{}", pkg);
+    if let Ok(settings_out) = run_adb_args(
+        serial,
+        &["shell", "am", "start", "-a", "android.settings.APPLICATION_DETAILS_SETTINGS", "-d", &pkg_uri],
+    ) {
+        if !has_adb_error(&settings_out) {
+            return Ok(format!("{} no tiene pantalla de inicio (servicio en segundo plano). Se abrió su ficha en Ajustes.", pkg));
+        }
+    }
+
+    Err(format!("{} no tiene actividad de inicio (es un servicio o módulo en segundo plano).", pkg))
+}
+
 /// Ejecuta una acción administrativa segura sobre un paquete Android desde Rust.
 #[tauri::command]
 pub fn rust_app_action_fast(
@@ -120,13 +179,15 @@ pub fn rust_app_action_fast(
         return Err("Nombre de paquete inválido".into());
     }
     let pkg = package_name.trim();
+    if action.trim() == "launch" {
+        return launch_package_native(&serial, pkg);
+    }
     let args: Vec<&str> = match action.trim() {
         "uninstall" => vec!["shell", "pm", "uninstall", "--user", "0", pkg],
         "disable" => vec!["shell", "pm", "disable-user", "--user", "0", pkg],
         "enable" => vec!["shell", "pm", "enable", pkg],
         "force_stop" => vec!["shell", "am", "force-stop", pkg],
         "clear_data" => vec!["shell", "pm", "clear", pkg],
-        "launch" => vec!["shell", "monkey", "-p", pkg, "-c", "android.intent.category.LAUNCHER", "1"],
         _ => return Err("Acción no soportada".into()),
     };
     run_adb_args(&serial, &args)

@@ -9,7 +9,7 @@
 //           y sus vistas por debajo de 200 líneas (SRP / DRY).
 // ============================================================================
 
-import type { LogcatEntry } from '@/app/api/logcat/route';
+import type { LogcatEntry } from '@/features/logcat-types';
 import type { StructuredCrash } from '@/hooks/useLogcatStream';
 
 export type DeduplicatedLogEntry = LogcatEntry & { repeatCount: number };

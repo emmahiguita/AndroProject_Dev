@@ -4,6 +4,7 @@
  * Improvement: Uses serial from request body directly, no extra ADB call.
  */
 import { ADB, FASTBOOT } from '@/lib/config';
+import { adb } from '@/lib/services/adb-executor';
 
 export interface ActionContext {
   targetSerial: string | undefined;
@@ -21,14 +22,10 @@ export async function buildContext(body: { serial?: string; ip?: string }): Prom
 
   // Fallback: only if no serial provided, query ADB for first device
   if (!serial) {
-    const { exec } = require('child_process');
-    const { promisify } = require('util');
-    const execAsyncOrig = promisify(exec);
-    const execAsync = async (command: string, options: any = {}) => execAsyncOrig(command, { ...options, windowsHide: true });
-    try {
-      const { stdout } = await execAsync(`"${ADB}" devices`, { timeout: 3000 });
-      serial = stdout.split('\n').slice(1).find((l: string) => l.includes('\tdevice'))?.split(/\s+/)[0];
-    } catch {}
+    const devices = await adb.exec(['devices'], 3000);
+    if (devices.ok) {
+      serial = devices.out.split('\n').slice(1).find((line) => line.includes('\tdevice'))?.split(/\s+/)[0];
+    }
   }
 
   const adbTarget = serial ? `"${ADB}" -s ${serial}` : `"${ADB}"`;

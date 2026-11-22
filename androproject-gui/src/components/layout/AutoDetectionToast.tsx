@@ -9,6 +9,7 @@
 
 import React from 'react';
 import { MonitorPlay, X } from 'lucide-react';
+import { Button } from '@/components/ui/Button';
 import type { DeviceInfo } from '@/features/types';
 
 interface AutoDetectionToastProps {
@@ -25,30 +26,17 @@ export const AutoDetectionToast: React.FC<AutoDetectionToastProps> = ({
   if (!device) return null;
 
   return (
-    <div className="fixed bottom-4 right-4 z-40 flex items-center gap-3 px-3.5 py-2.5 rounded-xl bg-zinc-900 border border-zinc-700 text-zinc-100 shadow-2xl animate-in fade-in slide-in-from-bottom-2 duration-200 max-w-[calc(100vw-24px)]">
-      <div className="w-2.5 h-2.5 rounded-full bg-zinc-100 shrink-0" />
-      <div className="text-xs">
-        <p className="font-bold text-zinc-100">Dispositivo detectado</p>
-        <p className="text-[11px] text-zinc-300">
+    <div className="fixed bottom-4 right-4 z-40 flex max-w-[calc(100vw-2rem)] flex-wrap items-center gap-2 rounded-lg border border-border-control bg-surface-card px-3 py-2.5 shadow-lg">
+      <div className="min-w-0 flex-1 text-xs" role="status">
+        <p className="font-bold text-text-primary">Dispositivo detectado</p>
+        <p className="break-words text-text-secondary">
           {device.model} ({device.connectionType})
         </p>
       </div>
-      <button
-        type="button"
-        onClick={onConfirm}
-        className="px-3 py-1 rounded-lg bg-zinc-100 hover:bg-white text-zinc-950 text-xs font-bold transition-all flex items-center gap-1 shadow-sm shrink-0 cursor-pointer"
-      >
-        <MonitorPlay size={12} />
-        <span>Transmitir Ahora (60 FPS)</span>
-      </button>
-      <button
-        type="button"
-        onClick={onClose}
-        className="p-1 text-zinc-400 hover:text-zinc-100 transition-colors cursor-pointer"
-        title="Cerrar notificación"
-      >
-        <X size={13} />
-      </button>
+      <Button size="sm" onClick={onConfirm} icon={<MonitorPlay size={16} />}>Abrir proyección</Button>
+      <Button variant="ghost" size="sm" className="px-2" onClick={onClose} aria-label="Cerrar notificación" title="Cerrar notificación">
+        <X size={16} />
+      </Button>
     </div>
   );
 };

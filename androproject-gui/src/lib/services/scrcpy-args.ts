@@ -88,7 +88,6 @@ export function buildVisionNanoArgs(options: VisionNanoOptions): string[] {
     '--max-size', maxSize,
     `--max-fps=${maxFps}`,
     `--video-buffer=${videoBuffer}`,
-    '--render-driver=direct3d11',
     '--window-width=380',
     '--window-height=820',
     `--window-x=${wx}`,

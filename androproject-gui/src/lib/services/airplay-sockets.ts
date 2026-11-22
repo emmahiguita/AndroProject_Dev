@@ -7,15 +7,15 @@
 // POR QUÉ: Separar inspección de sockets de `airplay-engine.ts` (SRP, < 200L).
 // ============================================================================
 
-import { exec } from 'child_process';
+import { execFile } from 'child_process';
 import { promisify } from 'util';
 
-const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
 
 export async function detectAirPlaySocketIps(): Promise<Set<string>> {
   const activeIps = new Set<string>();
   try {
-    const { stdout } = await execAsync('netstat -ano -p TCP', { windowsHide: true, timeout: 2000 });
+    const { stdout } = await execFileAsync('netstat.exe', ['-ano', '-p', 'TCP'], { windowsHide: true, timeout: 2000 });
     for (const line of stdout.split(/\r?\n/)) {
       if (!line.includes('ESTABLISHED')) continue;
       if (!line.includes(':7001') && !line.includes(':7100') && !line.includes(':5001')) continue;

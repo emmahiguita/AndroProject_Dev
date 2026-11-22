@@ -65,7 +65,7 @@ export class ProjectionCoordinator implements IProjectionCoordinator {
    */
   private resolvePlatform(device: DeviceInfo, options?: ProjectionLaunchOptions): string {
     if (options?.platform) return options.platform.toLowerCase();
-    if (device.platform === 'ios' || device.serial?.startsWith('airplay-')) return 'ios';
+    if (device.platform === 'ios' || /^(airplay|apple)-/.test(device.serial)) return 'ios';
     return 'android';
   }
 
@@ -95,11 +95,14 @@ export class ProjectionCoordinator implements IProjectionCoordinator {
       stayAwake: options.stayAwake,
       alwaysOnTop: options.alwaysOnTop,
       borderless: options.borderless,
+      videoBuffer: options.videoBuffer,
+      noAudio: options.noAudio,
       videoSource: options.videoSource,
       windowTitle: options.airplayOptions?.serverName || device.model,
     };
 
     const res = await transport.start(sessionConfig);
+    if (!res.success || !res.alive) return res;
     const displayNum = typeof sessionConfig.displayId === 'number' ? sessionConfig.displayId : 0;
     const sessionId = createSessionId(device.serial, displayNum, options.videoSource || 'display');
     this.sessions.set(device.serial, {
@@ -123,11 +126,12 @@ export class ProjectionCoordinator implements IProjectionCoordinator {
   public async stop(device: DeviceInfo): Promise<boolean> {
     const platform = this.resolvePlatform(device);
     const transport = this.getTransport(platform);
-    this.sessions.delete(device.serial);
     if (!transport) return false;
 
     console.log(`[ProjectionCoordinator] Stopping ${transport.protocol} transport for ${device.serial} (${platform})`);
-    return await transport.stop(device.serial);
+    const stopped = await transport.stop(device.serial);
+    if (!(await transport.isAlive(device.serial))) this.sessions.delete(device.serial);
+    return stopped;
   }
 
   /**

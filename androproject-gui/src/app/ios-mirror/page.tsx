@@ -12,6 +12,8 @@
 'use client';
 
 import React, { useEffect, useState, useCallback, useRef } from 'react';
+import { Camera, ExternalLink, RefreshCw } from 'lucide-react';
+import { Button } from '@/components/ui/Button';
 import { useAirPlayServer } from '@/hooks/useAirPlayServer';
 import './ios-mirror.css';
 
@@ -56,12 +58,16 @@ export default function IOSMirrorPage() {
   const handleFocusNative = async () => {
     notify('Abriendo ventana nativa AirPlay...');
     try {
-      await fetch('/api/airplay', {
+      const res = await fetch('/api/airplay', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'open_native_window' }),
       });
-    } catch {}
+      const result = await res.json();
+      if (!res.ok || !result.success) notify(result.error || 'No se pudo abrir la ventana de AirPlay.');
+    } catch {
+      notify('Error de conexión con AirPlay.');
+    }
   };
 
   const handleScreenshot = async () => {
@@ -82,69 +88,27 @@ export default function IOSMirrorPage() {
   const serverReady = status.running;
 
   return (
-    <main className="deviceStage" style={{ flexDirection: 'column', gap: '12px' }}>
-      <header style={{
-        display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap',
-        padding: '8px 14px', borderRadius: '14px', background: 'rgba(24,24,27,0.9)',
-        border: '1px solid rgba(63,63,70,0.7)', color: '#f4f4f5', fontSize: '12px', zIndex: 30,
-      }}>
-        <a href="/?nav=projection" style={{ color: '#a1a1aa', textDecoration: 'none', fontWeight: 600, marginRight: '4px' }}>
-          ← Estudio
+    <main className="deviceStage">
+      <header className="z-30 flex w-full max-w-4xl shrink-0 flex-wrap items-center gap-2 rounded-lg border border-border bg-surface-card p-3 shadow-sm">
+        <a href="/?nav=projection" className="inline-flex min-h-9 items-center rounded-md border border-border-control px-3 text-xs font-semibold hover:bg-surface-overlay">
+          Volver al estudio
         </a>
-        <span style={{ fontFamily: 'monospace', fontSize: '11px', color: serverReady ? '#34d399' : '#fbbf24' }}>
-          {status.serverName} ({status.port}) · {serverReady ? 'ACTIVO' : 'DETENIDO'}
+        <h1 className="text-base font-bold">Espejo AirPlay</h1>
+        <span className={`mr-auto text-xs font-semibold ${serverReady ? 'text-semantic-success' : 'text-text-secondary'}`} role="status" title={`${status.serverName} (${status.port})`}>
+          {serverReady ? 'Receptor activo' : 'Receptor detenido'}
         </span>
-        <button
-          type="button"
-          onClick={toggleServer}
-          disabled={loading}
-          style={{
-            padding: '4px 10px', borderRadius: '8px', border: '1px solid #3f3f46',
-            background: serverReady ? '#27272a' : '#f4f4f5', color: serverReady ? '#fda4af' : '#09090b',
-            fontWeight: 600, fontSize: '11px', cursor: 'pointer',
-          }}
-        >
-          {loading ? '...' : serverReady ? 'Detener AirPlay' : 'Iniciar AirPlay'}
-        </button>
-        <button
-          type="button"
-          onClick={handleScreenshot}
-          style={{
-            padding: '4px 10px', borderRadius: '8px', border: '1px solid #3f3f46',
-            background: '#27272a', color: '#e4e4e7', fontWeight: 600, fontSize: '11px', cursor: 'pointer',
-          }}
-        >
-          Captura HD
-        </button>
-        <button
-          type="button"
-          onClick={handleFocusNative}
-          style={{
-            padding: '4px 10px', borderRadius: '8px', border: '1px solid #3f3f46',
-            background: '#27272a', color: '#e4e4e7', fontWeight: 600, fontSize: '11px', cursor: 'pointer',
-          }}
-        >
-          Ventana Libre
-        </button>
-        <button
-          type="button"
-          onClick={refresh}
-          style={{
-            padding: '4px 8px', borderRadius: '8px', border: '1px solid #3f3f46',
-            background: '#18181b', color: '#a1a1aa', fontSize: '11px', cursor: 'pointer',
-          }}
-          title="Actualizar estado AirPlay"
-        >
-          ↻
-        </button>
+        <Button size="sm" variant={serverReady ? 'secondary' : 'primary'} onClick={toggleServer} loading={loading}>
+          {serverReady ? 'Detener AirPlay' : 'Iniciar AirPlay'}
+        </Button>
+        <Button size="sm" variant="secondary" onClick={handleScreenshot} disabled={!serverReady} icon={<Camera size={15} />}>Captura HD</Button>
+        <Button size="sm" variant="secondary" onClick={handleFocusNative} icon={<ExternalLink size={15} />}>Ventana libre</Button>
+        <Button size="sm" variant="secondary" onClick={refresh} aria-label="Actualizar estado de AirPlay" title="Actualizar estado de AirPlay" className="px-2">
+          <RefreshCw size={16} />
+        </Button>
       </header>
 
       {(toastMsg || error) && (
-        <div style={{
-          padding: '4px 12px', borderRadius: '8px', background: '#18181b',
-          border: '1px solid #3f3f46', color: error ? '#f87171' : '#34d399',
-          fontSize: '11px', fontFamily: 'monospace',
-        }}>
+        <div role={error ? 'alert' : 'status'} className={`max-w-4xl rounded-md border border-border bg-surface-card px-3 py-2 text-sm ${error ? 'text-semantic-danger' : 'text-text-secondary'}`}>
           {toastMsg || error}
         </div>
       )}

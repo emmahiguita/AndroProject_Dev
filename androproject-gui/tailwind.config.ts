@@ -18,6 +18,9 @@ const config: Config = {
           base: "var(--surface-base)",
           raised: "var(--surface-raised)",
           overlay: "var(--surface-overlay)",
+          card: "var(--surface-card)",
+          chrome: "var(--surface-chrome)",
+          selected: "var(--surface-selected)",
         },
         brand: {
           DEFAULT: "var(--brand)",
@@ -29,6 +32,8 @@ const config: Config = {
           DEFAULT: "var(--border-default)",
           strong: "var(--border-strong)",
           accent: "var(--border-accent)",
+          control: "var(--control-border)",
+          selected: "var(--border-selected)",
         },
         text: {
           primary: "var(--text-primary)",
@@ -36,6 +41,7 @@ const config: Config = {
           tertiary: "var(--text-tertiary)",
           disabled: "var(--text-disabled)",
           accent: "var(--text-accent)",
+          selected: "var(--text-selected)",
         },
         semantic: {
           success: "var(--success)",

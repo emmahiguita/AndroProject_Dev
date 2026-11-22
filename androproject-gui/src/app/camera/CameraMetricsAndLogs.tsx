@@ -24,14 +24,14 @@ export function CameraMetricsGrid({ metrics }: { metrics: CameraMetrics }) {
   ];
 
   return (
-    <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 grid grid-cols-3 gap-3 shadow-xl">
+    <div className="grid grid-cols-2 gap-4 rounded-lg border border-border bg-surface-card p-4 shadow-sm sm:grid-cols-3">
       {items.map(({ label, value, unit }) => (
         <div key={label} className="flex flex-col items-center gap-1">
-          <span className="text-[11px] text-zinc-300 uppercase font-bold tracking-wider">{label}</span>
-          <span className="text-lg font-bold text-zinc-100 tabular-nums">
+          <span className="text-xs font-semibold text-text-secondary">{label}</span>
+          <span className="text-lg font-bold text-text-primary tabular-nums">
             {typeof value === 'number' ? value : value || '--'}
           </span>
-          {unit && <span className="text-[10px] text-zinc-400">{unit}</span>}
+          {unit && <span className="text-[10px] text-text-tertiary">{unit}</span>}
         </div>
       ))}
     </div>
@@ -40,22 +40,22 @@ export function CameraMetricsGrid({ metrics }: { metrics: CameraMetrics }) {
 
 export function CameraReconnectingBanner() {
   return (
-    <div className="bg-zinc-900 border border-zinc-700 rounded-xl p-3 flex items-center gap-3">
-      <RefreshCw size={16} className="text-zinc-300 animate-spin" />
-      <span className="text-xs text-zinc-100 font-semibold">Reconectando automáticamente...</span>
+    <div className="flex items-center gap-3 rounded-md border border-border bg-surface-card p-3">
+      <RefreshCw size={16} className="text-semantic-warning animate-spin" />
+      <span className="text-xs text-text-primary font-semibold">Reconectando automáticamente...</span>
     </div>
   );
 }
 
 export function CameraActivityLogs({ logs }: { logs: string[] }) {
   return (
-    <div className="flex-1 bg-zinc-900 border border-zinc-800 rounded-2xl p-4 flex flex-col gap-2 min-h-[120px] max-h-[220px] overflow-y-auto">
-      <span className="text-[11px] font-bold text-zinc-300 uppercase tracking-wider">Actividad de conexión</span>
-      <div className="flex flex-col gap-1 text-[11px] font-mono text-zinc-200">
+    <div className="flex max-h-[220px] min-h-[120px] flex-1 flex-col gap-2 overflow-y-auto rounded-lg border border-border bg-surface-card p-4">
+      <span className="text-sm font-bold text-text-primary">Actividad de conexión</span>
+      <div className="flex flex-col gap-1 text-[11px] font-mono text-text-secondary">
         {logs.length === 0 ? (
-          <span className="text-zinc-400 italic">Sin actividad reciente.</span>
+          <span className="text-text-tertiary italic">Sin actividad reciente.</span>
         ) : (
-          logs.map((log, i) => <div key={i} className="text-zinc-200">{log}</div>)
+          logs.map((log, i) => <div key={i} className="text-text-secondary">{log}</div>)
         )}
       </div>
     </div>

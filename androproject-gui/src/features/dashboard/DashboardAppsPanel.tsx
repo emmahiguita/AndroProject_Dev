@@ -17,6 +17,8 @@ import {
   Search, Trash2, Play, ChevronRight, Loader2,
 } from 'lucide-react';
 import { RealAppIcon } from '@/components/ui/RealAppIcon';
+import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
 import { getAppColor, type AppsFilterDash } from './dashboard-helpers';
 import type { AppInfo, NavSection } from '../types';
 
@@ -29,28 +31,22 @@ interface DashboardAppsPanelProps {
 }
 
 /** Fila de acción rápida con icono, título, subtítulo y estado de carga. */
-function ActionRow({ dark, icon, title, sub, busy, onClick }: {
-  dark: boolean; icon: React.ReactNode; title: string; sub: string; busy?: boolean; onClick: () => void;
+function ActionRow({ icon, title, sub, busy, onClick }: {
+  icon: React.ReactNode; title: string; sub: string; busy?: boolean; onClick: () => void;
 }) {
   return (
     <button
-      type="button" disabled={busy} onClick={onClick}
-      className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-left transition-colors disabled:opacity-50 cursor-pointer ${dark ? 'hover:bg-zinc-900' : 'hover:bg-slate-100'}`}
+      type="button" disabled={busy} aria-busy={busy} onClick={onClick}
+      className="flex min-h-14 w-full items-center gap-3 rounded-md px-2.5 py-2 text-left transition-colors hover:bg-surface-overlay disabled:opacity-65"
     >
-      <span className={`shrink-0 ${dark ? 'text-zinc-400' : 'text-slate-600'}`}>{busy ? <Loader2 size={14} className="animate-spin" /> : icon}</span>
+      <span className="grid size-8 shrink-0 place-items-center rounded-md bg-surface-base text-text-secondary">{busy ? <Loader2 size={16} className="animate-spin" /> : icon}</span>
       <div className="flex-1 min-w-0">
-        <p className={`text-[11px] font-semibold ${dark ? 'text-zinc-100' : 'text-slate-900'}`}>{title}</p>
-        <p className={`text-[10px] ${dark ? 'text-zinc-400' : 'text-slate-600'}`}>{sub}</p>
+        <p className="text-sm font-semibold text-text-primary">{title}</p>
+        <p className="text-xs text-text-secondary">{sub}</p>
       </div>
-      <ChevronRight size={13} className={`shrink-0 ${dark ? 'text-zinc-500' : 'text-slate-500'}`} />
+      <ChevronRight size={16} className="shrink-0 text-text-tertiary" />
     </button>
   );
-}
-
-/** Abre una ruta auxiliar en nueva ventana o en la misma si el WebView bloquea popups. */
-function openSubRoute(path: string) {
-  const win = window.open(path, '_blank', 'noopener,noreferrer');
-  if (!win) window.location.assign(path);
 }
 
 /** Panel combinado de Acciones Rápidas + Mini-Gestor de Aplicaciones. */
@@ -62,7 +58,7 @@ export const DashboardAppsPanel: React.FC<DashboardAppsPanelProps> = ({
   const [busyKey, setBusyKey] = useState<string | null>(null);
   const [quickStatus, setQuickStatus] = useState<string | null>(null);
 
-  const cardCls = dark ? 'bg-zinc-950 border-zinc-800' : 'bg-white border-slate-200 shadow-sm';
+  const cardCls = 'min-w-0 rounded-lg border border-border bg-surface-card p-4 shadow-sm';
   const safeCount = appsList.filter((a) => a.safeToRemove).length;
 
   const chips: { key: AppsFilterDash; label: string; count: number }[] = [
@@ -104,49 +100,45 @@ export const DashboardAppsPanel: React.FC<DashboardAppsPanelProps> = ({
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+    <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
       {/* Columna 1: Acciones rápidas del sistema */}
-      <div className={`rounded-xl border p-3.5 flex flex-col justify-between ${cardCls}`}>
+      <div className={cardCls}>
         <div>
-          <h3 className={`text-xs font-bold mb-2 ${dark ? 'text-zinc-200' : 'text-slate-800'}`}>Acciones rápidas</h3>
-          <div className="space-y-0.5">
-            <ActionRow dark={dark} icon={<MonitorPlay size={14} />} title="Proyección en vivo" sub="Ver pantalla del dispositivo a 60 FPS" busy={busyKey === 'projection'} onClick={handleLiveProjection} />
-            <ActionRow dark={dark} icon={<Camera size={14} />} title="Cámara WebRTC 4K" sub="Transmitir y grabar cámara trasera (/camera)" onClick={() => openSubRoute('/camera')} />
-            <ActionRow dark={dark} icon={<Airplay size={14} />} title="Espejo Apple AirPlay 2" sub="Visor dedicado iPhone 60 FPS (/ios-mirror)" onClick={() => openSubRoute('/ios-mirror')} />
-            <ActionRow dark={dark} icon={<Wrench size={14} />} title="Herramientas del sistema" sub="Modo desarrollador, reinicios y diagnósticos" onClick={() => onNavigate('tools')} />
-            <ActionRow dark={dark} icon={<RefreshCw size={14} />} title="Reiniciar ADB" sub="Restablecer el servidor de conexión" busy={busyKey === 'restart_adb'} onClick={handleRestartAdb} />
-            <ActionRow dark={dark} icon={<Info size={14} />} title="Información del dispositivo" sub="Ver telemetría y detalles técnicos completos" onClick={onOpenDeviceInfo} />
+          <h2 className="mb-3 text-base font-bold text-text-primary">Acciones rápidas</h2>
+          <div className="divide-y divide-border-subtle">
+            <ActionRow icon={<MonitorPlay size={17} />} title="Proyección en vivo" sub="Ver pantalla del dispositivo a 60 FPS" busy={busyKey === 'projection'} onClick={handleLiveProjection} />
+            <ActionRow icon={<Camera size={17} />} title="Cámara WebRTC 4K" sub="Transmitir y grabar con la cámara trasera" onClick={() => window.location.assign('/camera')} />
+            <ActionRow icon={<Airplay size={17} />} title="Espejo Apple AirPlay 2" sub="Abrir el visor de iPhone" onClick={() => window.location.assign('/ios-mirror')} />
+            <ActionRow icon={<Wrench size={17} />} title="Herramientas del sistema" sub="Modo desarrollador, reinicios y diagnósticos" onClick={() => onNavigate('tools')} />
+            <ActionRow icon={<RefreshCw size={17} />} title="Reiniciar ADB" sub="Restablecer el servidor de conexión" busy={busyKey === 'restart_adb'} onClick={handleRestartAdb} />
+            <ActionRow icon={<Info size={17} />} title="Información del dispositivo" sub="Ver telemetría y detalles técnicos" onClick={onOpenDeviceInfo} />
           </div>
         </div>
         {quickStatus && (
-          <div className={`mt-2 rounded border px-2.5 py-1.5 text-[11px] font-mono ${dark ? 'bg-zinc-900 border-zinc-800 text-zinc-300' : 'bg-slate-50 border-slate-200 text-slate-700'}`}>
+          <div role="status" className="mt-3 break-words rounded-md border border-border bg-surface-base px-3 py-2 text-xs text-text-secondary">
             {quickStatus}
           </div>
         )}
       </div>
 
       {/* Columna 2: Mini-gestor de aplicaciones instaladas */}
-      <div className={`rounded-xl border p-3.5 ${cardCls}`}>
-        <div className="flex items-center justify-between mb-2">
-          <h3 className={`text-xs font-bold ${dark ? 'text-zinc-200' : 'text-slate-800'}`}>Aplicaciones {appsList.length > 0 && `(${appsList.length})`}</h3>
-          <button type="button" onClick={() => onNavigate('apps')} className={`text-[11px] font-semibold hover:underline cursor-pointer ${dark ? 'text-zinc-300' : 'text-slate-700'}`}>Ver todas</button>
+      <div className={cardCls}>
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+          <h2 className="text-base font-bold text-text-primary">Aplicaciones {appsList.length > 0 && `(${appsList.length})`}</h2>
+          <Button variant="secondary" size="sm" onClick={() => onNavigate('apps')}>Ver todas</Button>
         </div>
 
-        <div className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg mb-2 border ${dark ? 'bg-zinc-900 border-zinc-800' : 'bg-slate-50 border-slate-300'}`}>
-          <Search size={12} className={dark ? 'text-zinc-400' : 'text-slate-600'} />
-          <input
-            type="text" placeholder="Buscar aplicaciones o paquetes..." value={searchQuery} onChange={(e) => onSearchChange(e.target.value)}
-            className={`flex-1 bg-transparent text-xs outline-none ${dark ? 'text-zinc-100 placeholder:text-zinc-500' : 'text-slate-900 placeholder:text-slate-500'}`}
-          />
+        <div className="mb-3">
+          <Input hideLabel label="Buscar aplicaciones o paquetes" placeholder="Buscar por nombre o paquete" value={searchQuery} onChange={(e) => onSearchChange(e.target.value)} icon={<Search size={16} />} />
         </div>
 
         <div className="flex gap-1 mb-2 flex-wrap">
           {chips.map((chip) => (
             <button
-              key={chip.key} type="button" onClick={() => onFilterChange(chip.key)}
-              className={`px-2 py-0.5 rounded-md text-[10px] font-semibold border transition-colors cursor-pointer ${
-                activeFilter === chip.key ? (dark ? 'bg-zinc-100 text-zinc-950 border-zinc-100' : 'bg-slate-900 text-white border-slate-900')
-                                          : (dark ? 'bg-zinc-900 text-zinc-400 border-zinc-800 hover:bg-zinc-800' : 'bg-slate-100 text-slate-700 border-slate-300 hover:bg-slate-200')
+              key={chip.key} type="button" aria-pressed={activeFilter === chip.key} onClick={() => onFilterChange(chip.key)}
+              className={`min-h-8 rounded-md border px-2.5 text-xs font-semibold transition-colors hover:bg-surface-overlay ${
+                activeFilter === chip.key ? 'border-border-selected bg-surface-selected text-text-selected'
+                                          : 'border-border-control bg-surface-card text-text-secondary'
               }`}
             >
               {chip.label} {chip.count > 0 && <span className="opacity-80">({chip.count})</span>}
@@ -169,8 +161,8 @@ export const DashboardAppsPanel: React.FC<DashboardAppsPanelProps> = ({
                   </div>
                   <p className={`text-[11px] font-mono truncate ${dark ? 'text-zinc-400' : 'text-slate-600'}`}>{app.packageName}</p>
                 </div>
-                <button type="button" onClick={() => handleLaunchApp(app.packageName)} className={`shrink-0 p-1 rounded-md opacity-0 group-hover:opacity-100 transition-all cursor-pointer ${dark ? 'text-zinc-300 hover:bg-zinc-800' : 'text-slate-700 hover:bg-slate-200'}`} title="Abrir aplicación en el teléfono"><Play size={13} /></button>
-                <button type="button" onClick={() => onUninstall(app.packageName)} disabled={appActionLoading === app.packageName || app.criticalSystem} className={`shrink-0 p-1 rounded-md opacity-0 group-hover:opacity-100 transition-all cursor-pointer disabled:opacity-30 ${dark ? 'text-zinc-300 hover:bg-zinc-800' : 'text-slate-700 hover:bg-slate-200'}`} title="Desinstalar paquete"><Trash2 size={13} /></button>
+                <button type="button" onClick={() => handleLaunchApp(app.packageName)} className="grid size-8 shrink-0 place-items-center rounded-md text-text-secondary hover:bg-surface-overlay" aria-label={`Abrir ${app.name}`} title="Abrir aplicación en el teléfono"><Play size={15} /></button>
+                <button type="button" onClick={() => onUninstall(app.packageName)} disabled={appActionLoading === app.packageName || app.criticalSystem} className="grid size-8 shrink-0 place-items-center rounded-md text-semantic-danger hover:bg-surface-overlay disabled:opacity-45" aria-label={`Desinstalar ${app.name}`} title="Desinstalar paquete"><Trash2 size={15} /></button>
               </div>
             ))
           ) : (

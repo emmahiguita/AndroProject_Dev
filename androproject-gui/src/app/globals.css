@@ -22,8 +22,6 @@ body {
   font-family: var(--font-sans);
   margin: 0;
   overflow: hidden;
-  -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
 }
 
 *, *::before, *::after {
@@ -49,6 +47,25 @@ button {
 
 button:disabled {
   cursor: not-allowed;
+}
+
+/* Keep legacy compact labels readable until their views migrate to tokens. */
+:is(.text-\[9px\], .text-\[10px\], .text-\[11px\]) {
+  font-size: var(--text-2xs);
+}
+
+:is(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 /* Superficies limpias de estudio (adaptadas automáticamente a claro/oscuro) */

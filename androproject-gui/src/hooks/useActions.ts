@@ -96,10 +96,14 @@ export function useActions() {
         body: JSON.stringify({ action: 'list', serial }),
       });
       const d = await res.json();
+      if (useAppStore.getState().activeSerial !== serial) return;
       if (d.success && d.apps) { setAppsList(d.apps); addLog(`${d.apps.length} aplicaciones analizadas`); }
       else addLog(`Error: ${d.error}`);
-    } catch { addLog('Error al cargar aplicaciones'); }
-    finally { setAppsLoading(false); }
+    } catch {
+      if (useAppStore.getState().activeSerial === serial) addLog('Error al cargar aplicaciones');
+    } finally {
+      if (useAppStore.getState().activeSerial === serial) setAppsLoading(false);
+    }
   };
 
   const startPatching = async (targetPackage: string, setIsPatching: (v: boolean) => void, setPatchLogs: (l: string) => void) => {
@@ -123,7 +127,10 @@ export function useActions() {
     if (screenBusy) return;
     setScreenBusy(true);
     try {
-      if (isScreenStreaming) { await run('close_screen', 'Cerrando proyección', {}); setScreenStreaming(false); }
+      if (isScreenStreaming) {
+        const result = await run('close_screen', 'Cerrando proyección', {});
+        if (result.success) setScreenStreaming(false);
+      }
       else {
         const r = await run('open_screen', 'Abriendo proyección', { videoSource }, false);
         if (r.success) { setScreenStreaming(true); addLog('Proyección iniciada'); }

@@ -11,7 +11,7 @@
 
 import React, { useEffect, useRef } from 'react';
 import { Terminal, Play, Pause, Trash2, Download, Search, Smartphone, Copy, Check } from 'lucide-react';
-import type { LogcatEntry } from '@/app/api/logcat/route';
+import type { LogcatEntry } from '@/features/logcat-types';
 import type { LogLevel } from '@/hooks/useLogcatStream';
 import { LEVEL_COLORS, type DeduplicatedLogEntry } from './logcatHelpers';
 

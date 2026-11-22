@@ -14,7 +14,7 @@
 
 import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { useLogcatStream, type StructuredCrash } from '@/hooks/useLogcatStream';
-import type { LogcatEntry } from '@/app/api/logcat/route';
+import type { LogcatEntry } from '@/features/logcat-types';
 import {
   buildActiveAppDiagnosis,
   deduplicateLogs,

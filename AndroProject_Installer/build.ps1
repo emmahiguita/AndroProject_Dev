@@ -104,19 +104,25 @@ if (Test-Path "$GuiDir") {
     $TauriExe = Get-ChildItem -Path "$GuiDir\src-tauri\target\release" -Filter "*.exe" -File -ErrorAction SilentlyContinue |
         Where-Object { $_.Name -notmatch 'uninstall|setup' } | Select-Object -First 1
     if ($TauriExe) {
-        Write-Host "      > Copiando GUI compilada ($($TauriExe.Name)) y Next.js standalone..." -ForegroundColor Green
-        New-Item -ItemType Directory -Force -Path "$TempDir\Dashboard" | Out-Null
+        Write-Host "      > Copiando binario 100% Rust ($($TauriExe.Name)) y frontend estatico (www)..." -ForegroundColor Green
+        New-Item -ItemType Directory -Force -Path "$TempDir\Dashboard\www" | Out-Null
         Copy-Item $TauriExe.FullName "$TempDir\Dashboard\ANDRO-IOS.exe" -Force
-        Copy-Item $TauriExe.FullName "$TempDir\Dashboard\AndroProject.exe" -Force
-        if (Test-Path "$GuiDir\.next\standalone") {
-            $StandaloneDest = "$TempDir\Dashboard\next-standalone"
-            New-Item -ItemType Directory -Force -Path "$StandaloneDest\.next\static", "$StandaloneDest\public", "$StandaloneDest\node_modules\next\dist\compiled\next-server" | Out-Null
-            Copy-Item "$GuiDir\.next\standalone\*" "$StandaloneDest\" -Recurse -Force
-            if (Test-Path "$GuiDir\.next\static") { Copy-Item "$GuiDir\.next\static\*" "$StandaloneDest\.next\static\" -Recurse -Force }
-            if (Test-Path "$GuiDir\public") { Copy-Item "$GuiDir\public\*" "$StandaloneDest\public\" -Recurse -Force }
-            Copy-Item "$GuiDir\node_modules\next\dist\compiled\next-server\*.prod.js" "$StandaloneDest\node_modules\next\dist\compiled\next-server\" -Force -ErrorAction SilentlyContinue
-            $AirDir = "$StandaloneDest\bin\airplay"
-            if (Test-Path $AirDir) { Remove-Item "$AirDir\uxplay-windows*", "$AirDir\uxplay-bluetooth-beacon.exe", "$AirDir\*.zip", "$AirDir\*.bak" -Force -ErrorAction SilentlyContinue }
+        if (Test-Path "$GuiDir\out\index.html") {
+            Copy-Item "$GuiDir\out\*" "$TempDir\Dashboard\www\" -Recurse -Force
+        } else {
+            Write-Host "      ERROR: No se encontro la exportacion estatica en androproject-gui\out." -ForegroundColor Red
+            exit 1
+        }
+        $innerCert = if ($env:SIGN_CERT_PFX -and (Test-Path $env:SIGN_CERT_PFX)) {
+            New-Object System.Security.Cryptography.X509Certificates.X509Certificate2($env:SIGN_CERT_PFX, $env:SIGN_CERT_PASS)
+        } elseif ($env:SIGN_CERT_THUMBPRINT) {
+            Get-ChildItem "Cert:\CurrentUser\My\$($env:SIGN_CERT_THUMBPRINT)" -ErrorAction SilentlyContinue
+        } else { $null }
+        if ($innerCert) {
+            @("$TempDir\Dashboard\ANDRO-IOS.exe", "$TempDir\AndroProject.exe") | Where-Object { Test-Path $_ } | ForEach-Object {
+                Set-AuthenticodeSignature -FilePath $_ -Certificate $innerCert -HashAlgorithm SHA256 -TimestampServer "http://timestamp.digicert.com" | Out-Null
+            }
+            Write-Host "      > Binarios internos (ANDRO-IOS.exe y AndroProject.exe) firmados con Authenticode." -ForegroundColor Green
         }
     } else {
         Write-Host "      ERROR: No se encontro el binario Tauri compilado en src-tauri\target\release." -ForegroundColor Red
@@ -142,6 +148,7 @@ Write-Host "[4/5] Compilando Instalador_AndroProject.exe con IExpress..." -Foreg
 Start-Process -FilePath "iexpress.exe" -ArgumentList "/N /Q installer.sed" -Wait -NoNewWindow
 if (Test-Path "$OutputDir\Instalador_AndroProject.exe") {
     Copy-Item "$OutputDir\Instalador_AndroProject.exe" "$OutputDir\Instalador_ANDRO-IOS.exe" -Force
+    Remove-Item "$OutputDir\Instalador_AndroProject.exe" -Force -ErrorAction SilentlyContinue
     $TargetExe = "$OutputDir\Instalador_ANDRO-IOS.exe"
     & (Join-Path $InstallerDir 'Set-InstallerIcon.ps1') -InstallerPath $TargetExe -IconPath (Join-Path $GuiDir 'public/icon.ico')
     # Firma Authenticode oficial cuando existe certificado CA en variables de entorno

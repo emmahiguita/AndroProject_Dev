@@ -40,14 +40,14 @@ export function AppsView({ device: propDevice, addLog: propAddLog }: AppsViewPro
   const device = propDevice || s.device;
   const targetSerial = device?.serial || s.activeSerial;
   const isConnected = Boolean(device?.connected || (targetSerial && targetSerial !== 'Hardware Level'));
-  const [statusMessage, setStatusMessage] = useState<{ text: string; isError?: boolean } | null>(null);
+  const [statusMessage, setStatusMessage] = useState<{ text: string; isError?: boolean; serial: string | null } | null>(null);
   const loadedSerialRef = useRef<string | null>(null);
 
   const notify = useCallback((msg: string, isError = false) => {
-    setStatusMessage({ text: msg, isError });
+    setStatusMessage({ text: msg, isError, serial: targetSerial });
     if (propAddLog) propAddLog(msg, isError ? 'error' : 'info');
     else s.addLog(msg);
-  }, [propAddLog, s]);
+  }, [propAddLog, s, targetSerial]);
 
   const fetchApps = useCallback(async (forceRefresh = false) => {
     if (!targetSerial || targetSerial === 'Hardware Level') return;
@@ -59,12 +59,13 @@ export function AppsView({ device: propDevice, addLog: propAddLog }: AppsViewPro
         body: JSON.stringify({ action: 'list', serial: targetSerial, forceRefresh }),
       });
       const data = await res.json();
+      if (useAppStore.getState().activeSerial !== targetSerial) return;
       if (data.success && data.apps) { s.setAppsList(data.apps); loadedSerialRef.current = targetSerial; }
       else notify(`Error cargando apps: ${data.error || 'fallo ADB'}`, true);
     } catch (err: unknown) {
       notify(`Error de red cargando apps: ${getErrorMessage(err)}`, true);
     } finally {
-      s.setAppsLoading(false);
+      if (useAppStore.getState().activeSerial === targetSerial) s.setAppsLoading(false);
     }
   }, [targetSerial, s, notify]);
 
@@ -76,12 +77,18 @@ export function AppsView({ device: propDevice, addLog: propAddLog }: AppsViewPro
   }, [targetSerial]);
 
   const applyLocalMutation = useCallback((action: PkgAction, pkgName: string) => {
-    if (action === 'uninstall') s.setAppsList(s.appsList.filter((a) => a.packageName !== pkgName));
+    const state = useAppStore.getState();
+    if (state.activeSerial !== targetSerial) return;
+    if (action === 'uninstall') {
+      state.setAppsList(state.appsList.filter((a) => a.packageName !== pkgName));
+      const selected = new Set(state.selectedPackages);
+      if (selected.delete(pkgName)) state.setSelectedPackages(selected);
+    }
     else if (action === 'disable' || action === 'enable') {
       const nextDisabled = action === 'disable';
-      s.setAppsList(s.appsList.map((a) => (a.packageName === pkgName ? { ...a, isDisabled: nextDisabled } : a)));
+      state.setAppsList(state.appsList.map((a) => (a.packageName === pkgName ? { ...a, isDisabled: nextDisabled } : a)));
     }
-  }, [s]);
+  }, [targetSerial]);
 
   const filteredApps = useMemo(
     () => filterAndSortApps(s.appsList, s.appsSearch, s.appsFilter, s.appsSort),
@@ -89,7 +96,10 @@ export function AppsView({ device: propDevice, addLog: propAddLog }: AppsViewPro
   );
 
   const runPkgAction = async (action: PkgAction, pkgName: string) => {
-    const app = s.appsList.find((a) => a.packageName === pkgName);
+    const state = useAppStore.getState();
+    if (!targetSerial || state.activeSerial !== targetSerial || state.appActionLoading) return;
+    const app = state.appsList.find((a) => a.packageName === pkgName);
+    if (!app) return;
     if (app?.criticalSystem && (action === 'uninstall' || action === 'disable' || action === 'clear_data')) {
       notify(`Paquete crítico del sistema protegido: ${pkgName}`, true);
       return;
@@ -100,7 +110,8 @@ export function AppsView({ device: propDevice, addLog: propAddLog }: AppsViewPro
         const rustOut = await rustBridge.appActionFast(targetSerial, pkgName, action);
         if (rustOut !== null && !/Failure|Exception|Error:|No activities found/i.test(rustOut)) {
           applyLocalMutation(action, pkgName);
-          notify(`[Nativo] ${action} → ${pkgName} completado.`);
+          const cleanMsg = action === 'launch' && rustOut.trim() ? rustOut.trim() : `[Nativo] ${action} → ${pkgName} completado.`;
+          notify(cleanMsg);
           return;
         }
       }
@@ -115,7 +126,7 @@ export function AppsView({ device: propDevice, addLog: propAddLog }: AppsViewPro
     } catch (err: unknown) {
       notify(`Error de red: ${getErrorMessage(err)}`, true);
     } finally {
-      s.setAppActionLoading(null);
+      if (useAppStore.getState().activeSerial === targetSerial) s.setAppActionLoading(null);
     }
   };
 
@@ -137,7 +148,7 @@ export function AppsView({ device: propDevice, addLog: propAddLog }: AppsViewPro
     if (targets.length === 0) { notify('Los paquetes seleccionados son críticos del sistema y están protegidos.', true); return; }
     if ((action === 'uninstall' || action === 'disable') && !confirm(`¿Aplicar "${action}" a ${targets.length} aplicaciones seleccionadas?`)) return;
     for (const pkgName of targets) await runPkgAction(action, pkgName);
-    s.setSelectedPackages(new Set());
+    if (useAppStore.getState().activeSerial === targetSerial) s.setSelectedPackages(new Set());
   };
 
   const handleAuditThreats = () => {
@@ -150,14 +161,15 @@ export function AppsView({ device: propDevice, addLog: propAddLog }: AppsViewPro
     }
   };
 
-  const tabCls = (active: boolean) => `pb-2 text-sm font-semibold transition-colors ${active ? (dark ? 'text-zinc-100 border-b-2 border-zinc-100' : 'text-slate-900 border-b-2 border-slate-900') : (dark ? 'text-zinc-400 hover:text-zinc-200' : 'text-slate-500 hover:text-slate-800')}`;
+  const tabCls = 'min-h-10 rounded-md border border-transparent px-3 text-sm font-semibold text-text-secondary transition-colors hover:bg-surface-overlay aria-pressed:border-border-selected aria-pressed:bg-surface-selected aria-pressed:text-text-selected';
 
   return (
     <ViewShell navId="apps">
-      <div className={`flex items-center justify-between gap-4 border-b pb-2 ${dark ? 'border-zinc-800' : 'border-slate-200'}`}>
-        <div className="flex gap-6 overflow-x-auto">
-          <button type="button" onClick={() => s.setAppsSubTab('manager')} className={tabCls(s.appsSubTab === 'manager')}>Administrar Aplicaciones ({s.appsList.length})</button>
-          <button type="button" onClick={() => s.setAppsSubTab('installer')} className={tabCls(s.appsSubTab === 'installer')}>Instalar APK / IPA</button>
+      <div className="mx-auto max-w-[1600px] border-b border-border pb-3">
+        <h1 className="mb-3 text-2xl font-bold tracking-tight text-text-primary">Aplicaciones</h1>
+        <div className="flex flex-wrap gap-2" role="group" aria-label="Opciones de aplicaciones">
+          <button type="button" aria-pressed={s.appsSubTab === 'manager'} onClick={() => s.setAppsSubTab('manager')} className={tabCls}>Administrar aplicaciones ({s.appsList.length})</button>
+          <button type="button" aria-pressed={s.appsSubTab === 'installer'} onClick={() => s.setAppsSubTab('installer')} className={tabCls}>Instalar APK / IPA</button>
         </div>
       </div>
 
@@ -165,7 +177,7 @@ export function AppsView({ device: propDevice, addLog: propAddLog }: AppsViewPro
         <AppInstallerPanel dark={dark} addLog={(m) => notify(m)} activeSerial={targetSerial} connected={isConnected} onInstalled={() => fetchApps(true)} />
       ) : (
         <AppManagerPanel
-          dark={dark} connected={isConnected} serial={targetSerial || undefined} totalCount={s.appsList.length} statusMessage={statusMessage}
+          dark={dark} connected={isConnected} serial={targetSerial || undefined} totalCount={s.appsList.length} statusMessage={statusMessage?.serial === targetSerial ? statusMessage : null}
           appsSearch={s.appsSearch} setAppsSearch={s.setAppsSearch} appsFilter={s.appsFilter} setAppsFilter={(v) => (s.setAppsFilter as (x: unknown) => void)(v)}
           appsSort={s.appsSort} setAppsSort={s.setAppsSort} appsViewMode={s.appsViewMode} setAppsViewMode={(v) => (s.setAppsViewMode as (x: unknown) => void)(v)}
           appsLoading={s.appsLoading} fetchApps={() => fetchApps(true)} filteredApps={filteredApps}

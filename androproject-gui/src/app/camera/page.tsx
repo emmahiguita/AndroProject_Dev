@@ -11,6 +11,7 @@
 'use client';
 
 import { Camera, Video, Link2, Play, Square, RefreshCw, Image as ImageIcon } from 'lucide-react';
+import { Button } from '@/components/ui/Button';
 import { useCameraWebRtc } from './useCameraWebRtc';
 import { CameraActivityLogs, CameraMetricsGrid, CameraReconnectingBanner } from './CameraMetricsAndLogs';
 
@@ -22,16 +23,15 @@ export default function CameraTransmitter() {
   } = useCameraWebRtc();
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col font-sans p-4">
-      <header className="max-w-md mx-auto w-full py-4 flex items-center justify-between border-b border-zinc-800 mb-6 gap-2">
+    <div className="h-dvh overflow-y-auto bg-surface-root p-4 text-text-primary">
+      <header className="mx-auto mb-5 flex w-full max-w-3xl flex-wrap items-center justify-between gap-3 border-b border-border py-3">
         <div className="flex items-center gap-2.5 min-w-0">
-          <a href="/?nav=dashboard" className="px-2 py-1 rounded-lg bg-zinc-900 border border-zinc-800 text-[11px] font-semibold text-zinc-300 hover:text-zinc-100 shrink-0">← Estudio</a>
-          <div className="w-9 h-9 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-200 shrink-0">
+          <a href="/?nav=dashboard" className="inline-flex min-h-9 shrink-0 items-center rounded-md border border-border-control bg-surface-card px-3 text-xs font-semibold hover:bg-surface-overlay">← Estudio</a>
+          <div className="grid size-9 shrink-0 place-items-center rounded-md bg-surface-overlay text-text-secondary">
             <Camera size={18} />
           </div>
           <div className="min-w-0">
-            <h1 className="text-sm font-bold tracking-tight text-zinc-100 truncate">AndroProject Cámara</h1>
-            <p className="text-[10px] text-zinc-400 font-semibold uppercase tracking-wider">Transmisión WebRTC</p>
+            <h1 className="text-xl font-bold tracking-tight">Cámara WebRTC</h1>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -39,23 +39,23 @@ export default function CameraTransmitter() {
             type="button"
             onClick={() => void refreshHealth()}
             title="Comprobar Vision Backend (:8000)"
-            className="flex items-center gap-1.5 bg-zinc-900/90 hover:bg-zinc-800 rounded-full px-2.5 py-1 border border-zinc-800 text-[9px] font-mono text-zinc-300 cursor-pointer"
+            className="flex min-h-9 items-center gap-2 rounded-md border border-border-control bg-surface-card px-3 text-xs font-semibold hover:bg-surface-overlay"
           >
             <span className={`w-1.5 h-1.5 rounded-full ${backendHealth.online ? 'bg-emerald-500' : 'bg-zinc-500'}`} />
-            {backendHealth.online ? `Vision ${backendHealth.backend.toUpperCase()}` : 'Vision Offline'}
+            {backendHealth.online ? `Vision ${backendHealth.backend.toUpperCase()}` : 'Vision sin conexión'}
           </button>
-          <div className="flex items-center gap-1.5 bg-zinc-900/90 rounded-full px-2.5 py-1 border border-zinc-800">
+          <div className="flex min-h-9 items-center gap-2 rounded-md border border-border bg-surface-card px-3 text-text-secondary">
             <span className={`w-1.5 h-1.5 rounded-full ${active ? 'bg-emerald-500 animate-pulse' : reconnecting ? 'bg-amber-500 animate-pulse' : 'bg-zinc-600'}`} />
-            <span className="text-[9px] font-medium tracking-wide text-zinc-300">
+            <span className="text-xs font-medium">
               {active ? 'Transmitiendo' : reconnecting ? 'Reconectando...' : 'Inactivo'}
             </span>
           </div>
         </div>
       </header>
 
-      <main className="flex-1 max-w-md mx-auto w-full flex flex-col gap-5">
-        <div className="grid gap-4">
-          <section className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900/40 shadow-xl">
+      <main className="mx-auto flex w-full max-w-3xl flex-col gap-4">
+        <div className={`grid gap-4 ${stream ? 'sm:grid-cols-2' : ''}`}>
+          <section className="relative aspect-video w-full overflow-hidden rounded-lg border border-border bg-zinc-950 shadow-sm">
             <span className="absolute left-3 top-3 z-10 rounded-full border border-zinc-700 bg-zinc-900/80 px-2.5 py-1 text-[9px] font-semibold uppercase tracking-wider text-zinc-300 backdrop-blur">
               Vista local
             </span>
@@ -84,16 +84,16 @@ export default function CameraTransmitter() {
             ) : (
               <div className="flex h-full items-center justify-center p-6 text-center text-zinc-500">
                 <div>
-                  <Video size={44} className="mx-auto mb-3 opacity-20 text-zinc-400" />
+                  <Video size={36} className="mx-auto mb-3 text-zinc-400" />
                   <p className="text-xs font-semibold text-zinc-300">Cámara apagada</p>
-                  <p className="mt-1 text-[10px] text-zinc-500">Inicia la cámara para preparar la transmisión.</p>
+                  <p className="mt-1 text-xs text-zinc-400">Inicia la cámara para preparar la transmisión.</p>
                 </div>
               </div>
             )}
           </section>
 
           {stream && (
-            <section className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900/40 shadow-xl">
+            <section className="relative aspect-video w-full overflow-hidden rounded-lg border border-border bg-zinc-950 shadow-sm">
               <span className="absolute left-3 top-3 z-10 rounded-full border border-zinc-700 bg-zinc-900/80 px-2.5 py-1 text-[9px] font-semibold uppercase tracking-wider text-zinc-300 backdrop-blur">
                 Retorno del PC
               </span>
@@ -114,26 +114,26 @@ export default function CameraTransmitter() {
         {active && <CameraMetricsGrid metrics={metrics} />}
         {reconnecting && <CameraReconnectingBanner />}
 
-        <div className="bg-zinc-900/70 border border-zinc-800 rounded-2xl p-5 flex flex-col gap-3.5 shadow-xl">
-          <h2 className="text-xs font-bold text-zinc-300 uppercase tracking-wider flex items-center gap-2">
+        <div className="flex flex-col gap-3.5 rounded-lg border border-border bg-surface-card p-4 shadow-sm">
+          <h2 className="flex items-center gap-2 text-base font-bold">
             <Link2 size={14} /> Conexión
           </h2>
           <div className="flex flex-col gap-1.5">
-            <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Servidor de destino</label>
+            <label htmlFor="camera-server" className="text-xs font-semibold text-text-secondary">Servidor de destino</label>
             <input
-              type="text" value={serverUrl} onChange={(e) => setServerUrl(e.target.value)}
-              className="bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-xs text-zinc-200 font-mono focus:outline-none focus:border-zinc-500 transition-colors"
+              id="camera-server" type="text" value={serverUrl} onChange={(e) => setServerUrl(e.target.value)}
+              className="h-10 rounded-md border border-border-control bg-surface-base px-3 font-mono text-sm text-text-primary placeholder:text-text-tertiary"
               placeholder="http://<IP-DE-TU-PC>:8000/vision/offer"
             />
           </div>
 
           {cameras.length > 1 && (
             <div className="flex flex-col gap-1.5">
-              <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Dispositivo de cámara ({cameras.length})</label>
+              <label htmlFor="camera-source" className="text-xs font-semibold text-text-secondary">Dispositivo de cámara ({cameras.length})</label>
               <select
-                value={selectedDeviceId}
+                id="camera-source" value={selectedDeviceId}
                 onChange={(e) => void switchCamera(e.target.value)}
-                className="bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-zinc-200 font-mono focus:outline-none"
+                className="h-10 rounded-md border border-border-control bg-surface-base px-3 text-sm text-text-primary"
               >
                 <option value="">Automático ({facingMode === 'environment' ? 'Trasera' : 'Frontal'})</option>
                 {cameras.map((c, idx) => (
@@ -143,36 +143,25 @@ export default function CameraTransmitter() {
             </div>
           )}
 
-          <div className="flex gap-3">
+          <div className="flex flex-wrap gap-2">
             {!stream ? (
-              <button onClick={startCamera} className="flex-1 bg-zinc-100 hover:bg-zinc-200 active:scale-[0.98] text-zinc-900 py-3 rounded-xl font-semibold text-xs flex items-center justify-center gap-2 transition-all shadow-sm cursor-pointer">
-                <Play size={14} /> Iniciar cámara
-              </button>
+              <Button onClick={startCamera} icon={<Play size={16} />}>Iniciar cámara</Button>
             ) : (
               <>
-                <button onClick={stopCamera} className="flex-1 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 py-3 rounded-xl font-semibold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer">
-                  <Square size={14} /> Apagar
-                </button>
+                <Button variant="secondary" onClick={stopCamera} icon={<Square size={16} />}>Apagar cámara</Button>
                 {!active && !reconnecting && (
-                  <button onClick={startStream} className="flex-1 bg-zinc-100 hover:bg-zinc-200 active:scale-[0.98] text-zinc-900 py-3 rounded-xl font-semibold text-xs flex items-center justify-center gap-2 transition-all shadow-sm cursor-pointer">
-                    <Play size={14} /> Conectar
-                  </button>
+                  <Button onClick={startStream} icon={<Play size={16} />}>Conectar</Button>
                 )}
               </>
             )}
           </div>
           {stream && (
-            <button
+            <Button variant={isRecording ? 'danger' : 'secondary'} fullWidth
               onClick={isRecording ? stopRecording : startRecording}
-              className={`w-full py-3 rounded-xl font-semibold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer ${
-                isRecording
-                  ? 'bg-rose-950/70 hover:bg-rose-900/70 text-rose-300 border border-rose-700/70 animate-pulse'
-                  : 'bg-zinc-800/80 hover:bg-zinc-800 text-zinc-200 border border-zinc-700'
-              }`}
             >
               <span className={`w-2 h-2 rounded-full ${isRecording ? 'bg-rose-400' : 'bg-rose-500'}`} />
               {isRecording ? 'Detener grabación (Guardar WebM)' : 'Grabar video (WebM)'}
-            </button>
+            </Button>
           )}
         </div>
 

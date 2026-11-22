@@ -4,11 +4,11 @@
  */
 import fs from 'fs';
 import path from 'path';
-import { exec } from 'child_process';
+import { execFile } from 'child_process';
 import { promisify } from 'util';
 import { ANDROPROJECT_HOME } from './paths';
 
-const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
 
 // ── Lock file paths ─────────────────────────────────────────────
 export const getLockFile = (serial: string, displayId: number | string = 0, source: string = 'display'): string => {
@@ -45,20 +45,23 @@ export function deleteLock(lockFile: string): void {
 // ── Lock validation ─────────────────────────────────────────────
 export async function isLockAlive(lockFile: string, processPattern?: string): Promise<boolean> {
   const lock = readLock(lockFile);
-  if (!lock?.pid) return false;
+  if (!lock?.pid || !/^\d+$/.test(String(lock.pid)) || Number(lock.pid) <= 0) return false;
 
   try {
-    const { stdout } = await execAsync(`tasklist /FI "PID eq ${lock.pid}" /NH`, { windowsHide: true });
-    const output = stdout.toLowerCase();
-    if (!output.includes(String(lock.pid))) return false;
+    const { stdout } = await execFileAsync('tasklist.exe', ['/FI', `PID eq ${lock.pid}`, '/FO', 'CSV', '/NH'], { windowsHide: true, timeout: 3000 });
+    const row = stdout.split(/\r?\n/)
+      .map((line) => /^"([^"]+)","(\d+)"/.exec(line))
+      .find((entry) => entry?.[2] === String(lock.pid));
+    if (!row) return false;
+    const name = row[1].toLowerCase();
 
     const lockProcessName = typeof lock.processName === 'string' ? lock.processName : '';
     const expected = (processPattern || lockProcessName).trim().toLowerCase();
 
-    if (expected) return output.includes(expected);
+    if (expected) return processPattern ? name.includes(expected) : name === expected;
 
     // Legacy lock fallback: only accept processes known to belong to streaming.
-    return output.includes('scrcpy') || output.includes('androproject');
+    return name.includes('scrcpy') || name.includes('androproject');
   } catch {
     return false;
   }
@@ -75,11 +78,10 @@ export async function killLockedProcess(lockFile: string, processPattern?: strin
   }
 
   try {
-    await execAsync(`taskkill /F /PID ${lock.pid} /T`, { windowsHide: true });
+    await execFileAsync('taskkill.exe', ['/F', '/PID', String(lock.pid), '/T'], { windowsHide: true, timeout: 5000 });
     deleteLock(lockFile);
     return true;
   } catch {
-    deleteLock(lockFile);
     return false;
   }
 }

@@ -9,7 +9,7 @@
 //           `useLogcatStream.ts` por debajo de 200 líneas (SRP / DRY).
 // ============================================================================
 
-import type { LogcatEntry } from '@/app/api/logcat/route';
+import type { LogcatEntry } from '@/features/logcat-types';
 
 export type LogLevel = 'ALL' | 'V' | 'D' | 'I' | 'W' | 'E' | 'F';
 

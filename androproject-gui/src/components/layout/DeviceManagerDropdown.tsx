@@ -35,22 +35,28 @@ export function DeviceManagerDropdown({
 }: DeviceManagerDropdownProps) {
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     if (!open) return;
     const onOutside = (e: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) setOpen(false);
     };
+    const onEscape = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape' || !containerRef.current?.contains(document.activeElement)) return;
+      setOpen(false);
+      triggerRef.current?.focus();
+    };
     document.addEventListener('mousedown', onOutside);
-    return () => document.removeEventListener('mousedown', onOutside);
+    document.addEventListener('keydown', onEscape);
+    return () => {
+      document.removeEventListener('mousedown', onOutside);
+      document.removeEventListener('keydown', onEscape);
+    };
   }, [open]);
 
-  const activeCls = isDark
-    ? 'bg-zinc-800 text-zinc-100 border-zinc-700 hover:bg-zinc-700'
-    : 'bg-slate-900 text-white border-slate-900 hover:bg-slate-800';
-  const idleCls = isDark
-    ? 'bg-zinc-900 text-zinc-300 border-zinc-800 hover:bg-zinc-800 hover:text-zinc-100'
-    : 'bg-slate-100 text-slate-700 border-slate-300 hover:bg-slate-200 hover:text-slate-900';
+  const activeCls = 'border-border-selected bg-surface-selected text-text-selected hover:bg-surface-overlay';
+  const idleCls = 'border-border-control bg-surface-card text-text-primary hover:bg-surface-overlay';
 
   return (
     <div className="relative flex items-center shrink-0" ref={containerRef}>
@@ -58,6 +64,8 @@ export function DeviceManagerDropdown({
         type="button"
         onClick={onToggleAdb}
         disabled={isAdbConnecting}
+        aria-pressed={adbServerRunning}
+        aria-busy={isAdbConnecting}
         aria-label={adbServerRunning ? 'ADB activo — click para desactivar' : 'ADB inactivo — click para activar'}
         title={adbServerRunning ? 'ADB activo — click para desactivar' : 'ADB inactivo — click para activar'}
         className={`h-9 px-2.5 flex items-center gap-1.5 text-xs font-semibold rounded-l-lg border border-r-0 transition-colors ${
@@ -69,8 +77,11 @@ export function DeviceManagerDropdown({
       </button>
 
       <button
+        ref={triggerRef}
         type="button"
         onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        aria-controls="registered-devices"
         aria-label="Gestionar dispositivos registrados"
         title="Gestionar dispositivos registrados"
         className={`h-9 px-2 flex items-center justify-center rounded-r-lg border transition-colors ${
@@ -81,9 +92,7 @@ export function DeviceManagerDropdown({
       </button>
 
       {open && (
-        <div className={`absolute top-full right-0 mt-1.5 w-72 rounded-xl border shadow-xl z-50 ${
-          isDark ? 'bg-zinc-950 border-zinc-800 text-zinc-100' : 'bg-white border-slate-200 text-slate-900'
-        }`}>
+        <div id="registered-devices" className="absolute left-[-4.25rem] top-full z-50 mt-1.5 w-72 max-w-[calc(100vw-1.5rem)] rounded-lg border border-border-control bg-surface-card text-text-primary shadow-xl sm:left-auto sm:right-0">
           <div className={`flex items-center justify-between px-3 py-2.5 border-b ${isDark ? 'border-zinc-800' : 'border-slate-200'}`}>
             <span className="text-xs font-semibold">Dispositivos Registrados</span>
             <button type="button" onClick={() => setOpen(false)} aria-label="Cerrar" className={`p-1 rounded-md ${isDark ? 'text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'}`}>

@@ -27,6 +27,8 @@ export class ScrcpyStreamTransport implements IStreamTransport {
         stayAwake: config.stayAwake,
         alwaysOnTop: config.alwaysOnTop,
         borderless: config.borderless,
+        videoBuffer: config.videoBuffer,
+        noAudio: config.noAudio,
         videoSource: config.videoSource,
       });
 

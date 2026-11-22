@@ -27,14 +27,14 @@ export class DeviceDetector implements IDeviceDetector {
   private async getHardwareSerial(serial: string): Promise<string> {
     const cached = serialNoCache.get(serial);
     if (cached) return cached;
-    const res = await this.adb.execFor(serial, 'shell getprop ro.serialno', 2000);
+    const res = await this.adb.execFor(serial, ['shell', 'getprop', 'ro.serialno'], 2000);
     const hw = res.ok ? res.out.trim() : '';
     if (hw) serialNoCache.set(serial, hw);
     return hw || serial;
   }
 
   async detect(): Promise<DetectedDevice[]> {
-    const result = await this.adb.exec('devices -l', 5000);
+    const result = await this.adb.exec(['devices', '-l'], 5000);
     if (!result.ok) return [];
 
     const lines = result.out.trim().split('\n').slice(1);

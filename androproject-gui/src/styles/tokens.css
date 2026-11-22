@@ -9,6 +9,7 @@
    ============================================================================ */
 
 :root {
+  color-scheme: dark;
   /* ── Brand / Primary Action (Dark Mode) ── */
   --brand:            #27272a;
   --brand-light:      #3f3f46;
@@ -18,11 +19,19 @@
   --btn-primary-hov:  #ffffff;
 
   /* ── Surfaces (Dark Mode 2026 — Obsidian Graphite Depth) ── */
-  --surface-root:     #07080b;
-  --surface-base:     #0c0e13;
-  --surface-card:     #11131a;
-  --surface-raised:   #161922;
-  --surface-overlay:  #1f2430;
+  --surface-root:     #11151b;
+  --surface-base:     #151a22;
+  --surface-card:     #191f28;
+  --surface-raised:   #1f2631;
+  --surface-overlay:  #2a3442;
+  --surface-chrome:   #161c24;
+  --surface-selected: #25354a;
+  --text-selected:    #e7f0ff;
+  --border-selected:  #6488bd;
+  --control-border:   #7a8aa2;
+  --focus-ring:       #8ebaff;
+  --btn-danger-bg:   #b4232c;
+  --btn-danger-hov:  #95202a;
   --surface-track:    rgba(255, 255, 255, 0.09);
 
   /* ── Borders (Dark Mode 2026 Hairline) ── */
@@ -33,16 +42,16 @@
 
   /* ── Text (Dark Mode 2026 — WCAG AA/AAA) ── */
   --text-primary:     #f8fafc;
-  --text-secondary:   #b8c0cc;
-  --text-tertiary:    #8b95a5;
-  --text-disabled:    #5c6472;
+  --text-secondary:   #c6cfdb;
+  --text-tertiary:    #aab7ca;
+  --text-disabled:    #8995a7;
   --text-accent:      #ffffff;
 
   /* ── Semantic Statuses (Muted Studio Tones) ── */
-  --success:          #10b981;
-  --warning:          #d97706;
-  --danger:           #ef4444;
-  --info:             #3b82f6;
+  --success:          #70d5aa;
+  --warning:          #f0be76;
+  --danger:           #ff9b9c;
+  --info:             #8ebaff;
   --violet:           #71717a;
 
   /* ── Subtle Elevation Shadows (Tactile 2026 Top Highlight) ── */
@@ -77,12 +86,12 @@
   --radius-full: 9999px;
 
   /* ── Typography ── */
-  --font-sans:   var(--font-jakarta), var(--font-inter), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-sans:   'Segoe UI Variable Text', 'Segoe UI', system-ui, sans-serif;
   --font-mono:   'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
 
-  --text-3xs:    0.5rem;
-  --text-2xs:    0.625rem;
-  --text-xs:     0.75rem;
+  --text-3xs:    0.75rem;
+  --text-2xs:    0.75rem;
+  --text-xs:     0.8125rem;
   --text-sm:     0.875rem;
   --text-base:   1rem;
   --text-lg:     1.125rem;
@@ -119,6 +128,7 @@
 /* ── Light Theme: Crisp Studio Slate & Pure White Cards ── */
 :root.light,
 [data-theme="light"] {
+  color-scheme: light;
   --brand:            #0f172a;
   --brand-light:      #1e293b;
   --brand-muted:      #e2e8f0;
@@ -127,11 +137,19 @@
   --btn-primary-hov:  #1e293b;
 
   /* Soft cool-gray canvas so elevated white cards stand out cleanly */
-  --surface-root:     #f1f5f9;
-  --surface-base:     #e8edf3;
+  --surface-root:     #f5f7fa;
+  --surface-base:     #f3f6fa;
   --surface-card:     #ffffff;
   --surface-raised:   #ffffff;
-  --surface-overlay:  #e2e8f0;
+  --surface-overlay:  #e9eef5;
+  --surface-chrome:   #ffffff;
+  --surface-selected: #e6eef9;
+  --text-selected:    #19385d;
+  --border-selected:  #6486b3;
+  --control-border:   #6d7b90;
+  --focus-ring:       #255dab;
+  --btn-danger-bg:   #a9252c;
+  --btn-danger-hov:  #8b1c26;
   --surface-track:    rgba(15, 23, 42, 0.09);
 
   /* Crisp, visible slate borders */
@@ -144,13 +162,13 @@
   --text-primary:     #0f172a;
   --text-secondary:   #334155;
   --text-tertiary:    #475569;
-  --text-disabled:    #94a3b8;
+  --text-disabled:    #647087;
   --text-accent:      #020617;
 
   /* Deeper semantic colors for crisp legibility on light backgrounds */
-  --success:          #059669;
-  --warning:          #b45309;
-  --danger:           #dc2626;
+  --success:          #166548;
+  --warning:          #964608;
+  --danger:           #b4232c;
   --info:             #1d4ed8;
   --violet:           #475569;
 

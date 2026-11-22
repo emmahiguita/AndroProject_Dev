@@ -81,7 +81,7 @@ function QuickUtilButtons({
     dark ? 'bg-zinc-900 border-zinc-800 text-zinc-200 hover:bg-zinc-800' : 'bg-slate-100 border-slate-200 text-slate-700 hover:bg-slate-200'
   }`;
   return (
-    <div className="flex items-center gap-1">
+    <div className="flex flex-wrap items-center gap-1">
       <button type="button" onClick={onLaunch} disabled={disabled} title="Abrir aplicación en el teléfono" className={cls}>
         <Play size={11} /> <span>Abrir</span>
       </button>
@@ -117,8 +117,8 @@ export function AppCard(props: AppItemProps) {
       </div>
 
       <div className="min-w-0">
-        <p className={`text-xs font-semibold truncate ${dark ? 'text-zinc-100' : 'text-slate-900'}`} title={app.name}>{app.name || app.packageName}</p>
-        <p className={`text-[10px] font-mono truncate ${dark ? 'text-zinc-400' : 'text-slate-500'}`}>{app.packageName}</p>
+        <p className="truncate text-sm font-semibold text-text-primary" title={app.name}>{app.name || app.packageName}</p>
+        <p className="truncate font-mono text-2xs text-text-secondary" title={app.packageName}>{app.packageName}</p>
       </div>
 
       <AppBadges app={app} dark={dark} />
@@ -158,8 +158,8 @@ export function AppRow(props: AppItemProps) {
       <SelectBox dark={dark} selected={selected} onClick={onToggleSelect} />
       <RealAppIcon packageName={app.packageName} appName={app.name || app.packageName} serial={serial} fallbackColor={fallbackBg} sizeClass="w-9 h-9" />
       <div className="flex-1 min-w-0">
-        <p className={`text-xs font-semibold truncate ${dark ? 'text-zinc-100' : 'text-slate-900'}`}>{app.name || app.packageName}</p>
-        <p className={`text-[10px] font-mono truncate ${dark ? 'text-zinc-400' : 'text-slate-500'}`}>{app.packageName}</p>
+        <p className="truncate text-sm font-semibold text-text-primary" title={app.name}>{app.name || app.packageName}</p>
+        <p className="truncate font-mono text-2xs text-text-secondary" title={app.packageName}>{app.packageName}</p>
         <div className="mt-1"><AppBadges app={app} dark={dark} /></div>
       </div>
 

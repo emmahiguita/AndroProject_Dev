@@ -1,5 +1,6 @@
 // ── Device Slice — device detection, connectivity, screen keys ─────
 import type { StateCreator } from 'zustand';
+import type { AppStore } from './index';
 import type { DeviceData, DeviceListItem } from '@/features/types';
 
 export interface DeviceSlice {
@@ -43,7 +44,7 @@ export interface DeviceSlice {
   setScreenExpanded: (v: boolean) => void;
 }
 
-export const createDeviceSlice: StateCreator<DeviceSlice, [], [], DeviceSlice> = (set) => ({
+export const createDeviceSlice: StateCreator<AppStore, [], [], DeviceSlice> = (set) => ({
   device: null,
   loading: true,
   deviceIP: null,
@@ -84,6 +85,12 @@ export const createDeviceSlice: StateCreator<DeviceSlice, [], [], DeviceSlice> =
   setDeviceIP: (ip) => set({ deviceIP: ip }),
   setActiveSerial: (s) => set((state) => ({
     activeSerial: s,
+    ...(s !== state.activeSerial && {
+      appsList: [],
+      appsLoading: false,
+      appActionLoading: null,
+      selectedPackages: new Set<string>(),
+    }),
     activeSessions: s && !state.activeSessions.includes(s)
       ? [...state.activeSessions, s]
       : state.activeSessions,

@@ -20,6 +20,7 @@ import { useAppStore } from '@/stores';
 import { useTheme } from '@/hooks/useTheme';
 import { useActions } from '@/hooks/useActions';
 import { ViewShell } from '@/components/ViewShell';
+import { Button } from '@/components/ui/Button';
 import { computeDeviceTelemetry, type AppsFilterDash } from './dashboard/dashboard-helpers';
 import { TelemetryModal } from './dashboard/TelemetryModal';
 import { DashboardAppsPanel } from './dashboard/DashboardAppsPanel';
@@ -58,7 +59,9 @@ export function DashboardView({ device: propDevice, addLog: propAddLog, onNaviga
     try {
       const res = await fetch(`/api/device?serial=${encodeURIComponent(device.serial)}`, { cache: 'no-store' });
       const data = await res.json();
-      if (data.activeDevice) setStoreDevice(data.activeDevice);
+      if (data.activeDevice?.serial === device.serial && useAppStore.getState().activeSerial === device.serial) {
+        setStoreDevice(data.activeDevice);
+      }
     } catch { /* Silencioso ante desconexión momentánea */ }
   }, [device?.serial, setStoreDevice]);
 
@@ -120,29 +123,24 @@ export function DashboardView({ device: propDevice, addLog: propAddLog, onNaviga
     finally { setAppActionLoading(null); }
   };
 
-  const btnCls = `flex items-center gap-1.5 px-2.5 py-1 rounded border text-xs font-semibold transition-colors ${
-    dark ? 'bg-zinc-900 text-zinc-100 hover:bg-zinc-800 border-zinc-700' : 'bg-slate-100 text-slate-800 hover:bg-slate-200 border-slate-300'
-  }`;
-  const pillCls = `flex items-center gap-1.5 px-2.5 py-1 rounded border text-[11px] font-mono font-medium transition-colors shrink-0 ${
-    dark ? 'bg-zinc-900 border-zinc-800 text-zinc-200 hover:bg-zinc-800' : 'bg-white border-slate-300 text-slate-800 hover:bg-slate-100'
-  }`;
+  const pillCls = 'inline-flex min-h-9 shrink-0 items-center gap-2 rounded-md border border-border-control bg-surface-card px-2.5 text-xs font-semibold tabular-nums text-text-primary transition-colors hover:bg-surface-overlay';
 
   return (
     <ViewShell navId="dashboard">
-      <div className="space-y-3">
-        <div className="flex flex-wrap items-center justify-between gap-2">
+      <div className="mx-auto max-w-[1600px] space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h1 className={`text-base font-bold ${dark ? 'text-zinc-100' : 'text-slate-900'}`}>Panel principal</h1>
-            <p className={`text-xs ${dark ? 'text-zinc-400' : 'text-slate-600'}`}>Telemetría real del kernel Android y gestión rápida del sistema</p>
+            <h1 className="text-2xl font-bold tracking-tight text-text-primary">Panel principal</h1>
+            <p className="mt-1 text-sm text-text-secondary">Telemetría y controles del dispositivo</p>
           </div>
-          <div className="flex items-center gap-2">
-            <button type="button" onClick={() => nav('projection')} className={btnCls}><MonitorPlay size={13} /> Ver pantalla</button>
-            <button type="button" onClick={refreshLiveTelemetry} className={btnCls}><RefreshCw size={13} /> Actualizar</button>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button variant="secondary" icon={<RefreshCw size={16} />} onClick={refreshLiveTelemetry} disabled={!device?.serial}>Actualizar</Button>
+            <Button icon={<MonitorPlay size={16} />} onClick={() => nav('projection')}>Ver pantalla</Button>
           </div>
         </div>
 
         {device && (
-          <div className="flex items-center gap-1.5 overflow-x-auto custom-scrollbar py-0.5">
+          <div className="flex flex-wrap items-center gap-2 py-0.5">
             <button type="button" onClick={() => setShowMetricsSheet(true)} className={pillCls} title={telemetry.cpuSubDetail}><Cpu size={12} /> <span>CPU {telemetry.cpuPercent}%</span></button>
             <button type="button" onClick={() => setShowMetricsSheet(true)} className={pillCls} title={telemetry.ramSubDetail}><Activity size={12} /> <span>RAM {telemetry.ramPercent}% ({device.ramUsed || '--'})</span></button>
             <button type="button" onClick={() => setShowMetricsSheet(true)} className={pillCls} title={telemetry.tempSubDetail}><Thermometer size={12} /> <span>TEMP {telemetry.tempCelsius}°C</span></button>
