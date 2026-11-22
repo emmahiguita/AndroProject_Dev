@@ -50,33 +50,26 @@ export function ProjectionView({ device }: { device?: DeviceInfo | null }) {
     return base.filter((d) => !(d.serial.includes(':') && d.model && usbModels.has(d.model.trim().toLowerCase())));
   }, [devicesList, device]);
 
+  // Lista memoizada con `state` real para evitar falsos "Desconectado" y re-renders en MultiScreenGrid
+  const multiScreenDevices = useMemo(() => uniqueDevices.map((d) => {
+    const isIos = d.serial.startsWith('airplay-') || d.serial.startsWith('apple-');
+    return {
+      serial: d.serial, model: d.model || d.serial, platform: (isIos ? 'ios' : 'android') as 'ios' | 'android',
+      state: (d.state || 'device') as 'device', connected: true, connectionType: d.connectionType || (isIos ? 'Wi-Fi' : 'USB'),
+    };
+  }), [uniqueDevices]);
+
   // Activa automáticamente Multi-Pantalla cuando se detectan 2 o más móviles físicos
   const prevDevCountRef = useRef(0);
   useEffect(() => {
     const count = uniqueDevices.length;
-    if (count >= 2 && prevDevCountRef.current < 2) {
-      setMultiScreenEnabled(true);
-    } else if (count <= 1 && prevDevCountRef.current >= 2) {
-      setMultiScreenEnabled(false);
-    }
+    if (count >= 2 && prevDevCountRef.current < 2) setMultiScreenEnabled(true);
+    else if (count <= 1 && prevDevCountRef.current >= 2) setMultiScreenEnabled(false);
     prevDevCountRef.current = count;
   }, [uniqueDevices.length, setMultiScreenEnabled]);
 
-  if (!device) {
-    return (
-      <ViewShell navId="projection" fill>
-        <EmptyState dark={dark} onConnectAdb={projection.connectAdb} isConnecting={projection.isConnecting} />
-      </ViewShell>
-    );
-  }
-
-  if (isMobile) {
-    return (
-      <ViewShell navId="projection" fill>
-        <MobileProjection device={device} dark={dark} projection={projection} />
-      </ViewShell>
-    );
-  }
+  if (!device) return <ViewShell navId="projection" fill><EmptyState dark={dark} onConnectAdb={projection.connectAdb} isConnecting={projection.isConnecting} /></ViewShell>;
+  if (isMobile) return <ViewShell navId="projection" fill><MobileProjection device={device} dark={dark} projection={projection} /></ViewShell>;
 
   const handleProjectAll = () => {
     uniqueDevices.forEach((d) => {
@@ -106,10 +99,7 @@ export function ProjectionView({ device }: { device?: DeviceInfo | null }) {
         {multiScreenEnabled ? (
           <div className={`flex-1 min-h-0 rounded-xl border overflow-hidden ${dark ? 'border-zinc-800 bg-zinc-950' : 'border-slate-200 bg-slate-50'}`}>
             <MultiScreenGrid
-              devices={uniqueDevices.map((d) => {
-                const isIos = d.serial.startsWith('airplay-') || d.serial.startsWith('apple-');
-                return { serial: d.serial, model: d.model || d.serial, platform: isIos ? 'ios' : 'android', connected: true, connectionType: d.connectionType || (isIos ? 'Wi-Fi' : 'USB') };
-              })}
+              devices={multiScreenDevices}
               onToggleScrcpy={(s) => {
                 if (s && s !== device.serial) {
                   const isIos = s.startsWith('airplay-') || s.startsWith('apple-');

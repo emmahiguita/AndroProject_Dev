@@ -78,8 +78,8 @@ function startSession(serial: string): ActiveSession {
     '-s', serial, 'shell', `CLASSPATH=${REMOTE_JAR}`,
     'app_process', '/', 'com.genymobile.scrcpy.Server', '4.1',
     `scid=${scid}`, 'log_level=info', 'tunnel_forward=true', 'audio=false', 'control=true',
-    'cleanup=false', 'max_size=1080', 'max_fps=60', 'video_bit_rate=8000000',
-    'stay_awake=true', 'video_codec_options=i-frame-interval=2,repeat-previous-frame-after=100000',
+    'cleanup=false', 'max_size=1080', 'max_fps=60', 'video_bit_rate=6000000',
+    'stay_awake=true',
   ], { windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'] });
 
   let readyResolve!: () => void;
@@ -139,11 +139,11 @@ function startSession(serial: string): ActiveSession {
     const handleDisconnect = () => {
       connecting = false;
       if (gotDummy) destroySession(serial);
-      else if (!session.destroyed && retries < 30) { retries++; setTimeout(attemptConnect, 60); }
+      else if (!session.destroyed && retries < 60) { retries++; setTimeout(attemptConnect, 80); }
       else destroySession(serial);
     };
-    vSock.on('error', handleDisconnect);
-    vSock.on('close', handleDisconnect);
+    vSock.on('error', () => {});
+    vSock.once('close', handleDisconnect);
   };
 
   const onLog = (d: Buffer) => {
@@ -168,7 +168,7 @@ export async function getOrStartScrcpySession(serial: string): Promise<ActiveSes
   }
   if (!s || s.destroyed) s = startSession(serial);
   if (s.idleTimer) { clearTimeout(s.idleTimer); s.idleTimer = null; }
-  await Promise.race([s.readyPromise, new Promise((r) => setTimeout(r, 4500))]);
+  await Promise.race([s.readyPromise, new Promise((r) => setTimeout(r, 5500))]);
   return s;
 }
 
