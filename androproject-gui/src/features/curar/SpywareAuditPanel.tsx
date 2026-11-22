@@ -8,7 +8,7 @@
 // ============================================================================
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ShieldAlert, Radar, Trash2, CheckCircle2, Ban, Square } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -27,6 +27,13 @@ export const SpywareAuditPanel: React.FC<SpywareAuditPanelProps> = ({ serial, on
   const [findings, setFindings] = useState<SpywareFinding[] | null>(null);
   const [suspendedPkgs, setSuspendedPkgs] = useState<Set<string>>(new Set());
   const [meta, setMeta] = useState<{ scanned: number; accessCount: number; topPkg: string | null } | null>(null);
+
+  // Limpia resultados previos al cambiar de dispositivo para evitar falsos positivos cruzados
+  useEffect(() => {
+    setFindings(null);
+    setMeta(null);
+    setSuspendedPkgs(new Set());
+  }, [serial]);
 
   const runDeepScan = async () => {
     if (!serial) return;
@@ -126,7 +133,7 @@ export const SpywareAuditPanel: React.FC<SpywareAuditPanelProps> = ({ serial, on
 
       {findings !== null && findings.length === 0 && (
         <div className={`mt-4 p-3 rounded-xl border flex items-center gap-2 text-xs ${
-          dark ? 'bg-emerald-500/5 border-emerald-500/20 text-emerald-400' : 'bg-emerald-50 border-emerald-200 text-emerald-700'
+          dark ? 'bg-zinc-900/70 border-zinc-800 text-emerald-400' : 'bg-slate-50 border-slate-200 text-emerald-700'
         }`}>
           <CheckCircle2 size={15} />
           <span>No se detectaron combinaciones sospechosas de adware invasivo, spyware ni accesibilidad abusiva.</span>

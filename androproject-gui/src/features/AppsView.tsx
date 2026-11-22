@@ -95,14 +95,14 @@ export function AppsView({ device: propDevice, addLog: propAddLog }: AppsViewPro
   }, [s.appsList, s.appsSearch, s.appsFilter, s.appsSort]);
 
   /** Ejecuta una acción sobre un paquete usando Rust nativo si está en Tauri o API web. */
-  const runPkgAction = async (action: 'uninstall' | 'disable' | 'enable', pkgName: string) => {
+  const runPkgAction = async (action: 'uninstall' | 'disable' | 'enable', pkgName: string, refresh = true) => {
     s.setAppActionLoading(pkgName);
     try {
       if (rustBridge.isDesktop() && s.activeSerial && s.activeSerial !== 'Hardware Level') {
         const rustOut = await rustBridge.appActionFast(s.activeSerial, pkgName, action);
         if (rustOut !== null) {
           log(`[Rust] ${action} ${pkgName}: ${rustOut.trim() || 'OK'}`);
-          fetchApps();
+          if (refresh) fetchApps();
           return;
         }
       }
@@ -112,7 +112,7 @@ export function AppsView({ device: propDevice, addLog: propAddLog }: AppsViewPro
         body: JSON.stringify({ action, packageName: pkgName, serial: s.activeSerial }),
       });
       const data = await res.json();
-      if (data.success) { log(data.message); fetchApps(); }
+      if (data.success) { log(data.message); if (refresh) fetchApps(); }
       else log(`Error (${action}): ${data.error}`);
     } catch (err: unknown) {
       log(`Error de red: ${getErrorMessage(err)}`);
@@ -141,9 +141,15 @@ export function AppsView({ device: propDevice, addLog: propAddLog }: AppsViewPro
 
   const handleBulkUninstall = async () => {
     if (s.selectedPackages.size === 0) return;
-    if (!confirm(`¿Desinstalar ${s.selectedPackages.size} aplicaciones seleccionadas?`)) return;
+    const criticalSet = new Set(s.appsList.filter((a) => a.criticalSystem).map((a) => a.packageName));
+    const safeTargets = Array.from(s.selectedPackages).filter((p) => !criticalSet.has(p));
+    if (safeTargets.length === 0) {
+      log('Los paquetes seleccionados son críticos del sistema y están protegidos.');
+      return;
+    }
+    if (!confirm(`¿Desinstalar ${safeTargets.length} aplicaciones seleccionadas?`)) return;
     s.setAppsLoading(true);
-    for (const pkgName of Array.from(s.selectedPackages)) await runPkgAction('uninstall', pkgName);
+    for (const pkgName of safeTargets) await runPkgAction('uninstall', pkgName, false);
     s.setSelectedPackages(new Set());
     await fetchApps();
   };

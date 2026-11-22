@@ -12,6 +12,7 @@
 import { execFile } from 'child_process';
 import { promisify } from 'util';
 import { ADB } from '@/lib/config';
+import { getMalwareClassification } from '@/app/api/apps/_lib/app-catalog';
 
 const execFileAsync = promisify(execFile);
 
@@ -49,8 +50,9 @@ async function adbShell(serial: string, cmd: string): Promise<string> {
 function parseThirdPartyInstallers(raw: string): Map<string, string> {
   const map = new Map<string, string>();
   for (const line of raw.split('\n')) {
-    const m = line.trim().match(/^package:(\S+)\s+installer=(\S+)/);
-    if (m) map.set(m[1], m[2]);
+    // Soporta líneas con o sin campo `installer=` (común al instalar vía ADB o ROMs antiguos)
+    const m = line.trim().match(/^package:(\S+)(?:\s+installer=(\S+))?/);
+    if (m) map.set(m[1], m[2] || 'unknown');
   }
   return map;
 }
@@ -119,13 +121,15 @@ export async function scanDeviceForSpyware(serial: string): Promise<{
   for (const [pkg, installer] of installers.entries()) {
     const reasons: string[] = [];
     let score = 0;
-    const isSideload = installer === 'null' || !TRUSTED_INSTALLERS.has(installer);
+    const isSideload = installer === 'null' || installer === 'unknown' || !TRUSTED_INSTALLERS.has(installer);
     const hasAccess = accessPkgs.has(pkg);
     const isAdmin = adminRaw.includes(`${pkg}/`);
     const isHidden = launcherSet.size > 0 && !launcherSet.has(pkg);
     const ops = opsMap.get(pkg) ?? new Set<string>();
     const hasOverlay = ops.has('SYSTEM_ALERT_WINDOW');
+    const knownThreat = getMalwareClassification(pkg);
 
+    if (knownThreat) { score += 60; reasons.push(`Firma conocida: ${knownThreat.threatName}`); }
     if (hasAccess) { score += 50; reasons.push('Servicio de Accesibilidad activo (lectura de pantalla/teclas)'); }
     if (isAdmin) { score += 35; reasons.push('Administrador de dispositivo activo (impide desinstalar)'); }
     if (isHidden) { score += 25; reasons.push('App oculta (sin ícono visible en el launcher)'); }
