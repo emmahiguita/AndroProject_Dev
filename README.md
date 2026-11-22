@@ -13,12 +13,12 @@
 
 ---
 
-## Demos en Video (Primera Vista)
+## Demos en Vivo (Reproducción Automática en GitHub)
 
 | Recorrido Completo (Modo Oscuro 2026 + Modo Claro) | Transmisión Real Móvil (`scrcpy 4.1` en Vivo) |
 |---|---|
-| [![Ver Video Walkthrough](./docs/images/projection-mobile-live.png)](https://github.com/emmahiguita/AndroProject_Dev/raw/main/docs/images/androproject-walkthrough.mp4) | [![Ver Grabación Real Móvil](./docs/images/projection-mobile-light.png)](https://github.com/emmahiguita/AndroProject_Dev/raw/main/docs/images/mobile-transmission-record.mp4) |
-| [Descargar / Reproducir `androproject-walkthrough.mp4`](./docs/images/androproject-walkthrough.mp4) | [Descargar / Reproducir `mobile-transmission-record.mp4`](./docs/images/mobile-transmission-record.mp4) |
+| ![Recorrido Completo Modo Oscuro y Claro](./docs/images/androproject-walkthrough.gif) | ![Grabación Real de Transmisión Móvil](./docs/images/mobile-transmission-record.gif) |
+| [Descargar MP4 HD (`androproject-walkthrough.mp4`)](./docs/images/androproject-walkthrough.mp4) | [Descargar MP4 HD (`mobile-transmission-record.mp4`)](./docs/images/mobile-transmission-record.mp4) |
 
 ## Modo Oscuro 2026 vs Modo Claro
 
