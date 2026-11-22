@@ -133,5 +133,8 @@
   "131": "PermissionEntry",
   "132": "🎮 Modos de Uso",
   "133": "📱 Crear Accesos Directos en Android",
-  "134": "useMouseLight.ts"
+  "134": "useMouseLight.ts",
+  "135": "IAdbExecutor",
+  "136": "AdbExecutor",
+  "137": "Value"
 }

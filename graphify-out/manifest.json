@@ -1500,8 +1500,8 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/app/api/security-scan/route.ts": {
-    "mtime": 1795346771.8292623,
-    "ast_hash": "68b292ef5aa9c1bfbf483c3d8d921549",
+    "mtime": 1795347423.390151,
+    "ast_hash": "0c32104873adfd0173e6bae7ee1e2fd1",
     "semantic_hash": ""
   },
   "androproject-gui/src/features/curar/ScreenshotPanel.tsx": {
@@ -1510,8 +1510,8 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/features/curar/SpywareAuditPanel.tsx": {
-    "mtime": 1795346894.5976045,
-    "ast_hash": "351ed883a44a38b0e518318631093ad9",
+    "mtime": 1795347425.571222,
+    "ast_hash": "e4d5c0846491d9ab9dc21731b84c2704",
     "semantic_hash": ""
   },
   "androproject-gui/src/hooks/useMouseLight.ts": {
@@ -1520,8 +1520,8 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/lib/services/spyware-heuristic-scanner.ts": {
-    "mtime": 1795346769.5494733,
-    "ast_hash": "bf5d86ba8ca41754f175be729727d07b",
+    "mtime": 1795347401.6708426,
+    "ast_hash": "d73bafa00210af6bec2e6abb48476e24",
     "semantic_hash": ""
   },
   "androproject-gui/src/services/AdbCommandExecutor.ts": {
