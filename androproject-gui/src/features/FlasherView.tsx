@@ -10,7 +10,7 @@
 // ============================================================================
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useAppStore } from '@/stores';
 import { useTheme } from '@/hooks/useTheme';
 import { ViewShell } from '@/components/ViewShell';
@@ -43,11 +43,13 @@ export function FlasherView({ addLog: propAddLog }: FlasherViewProps = {}) {
 
   const [busyAction, setBusyAction] = useState<string | null>(null);
   const [cmdResult, setCmdResult] = useState<{ text: string; isError: boolean } | null>(null);
+  const refreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => { if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current); }, []);
 
   const log = useCallback(
     (msg: string, type: 'info' | 'success' | 'error' = 'info') => {
       if (propAddLog) propAddLog(msg, type);
-      else storeAddLog(msg, new Date().toLocaleTimeString(), type);
+      else storeAddLog(msg);
     },
     [propAddLog, storeAddLog],
   );
@@ -97,7 +99,8 @@ export function FlasherView({ addLog: propAddLog }: FlasherViewProps = {}) {
       setCmdResult({ text: msg, isError: !d.success });
       log(msg, d.success ? 'success' : 'error');
       if (action.startsWith('reboot_') || action.startsWith('fastboot_')) {
-        setTimeout(detectDeviceState, 2200);
+        if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current);
+        refreshTimerRef.current = setTimeout(detectDeviceState, 2200);
       }
     } catch {
       setCmdResult({ text: 'Error de comunicación con /api/flash.', isError: true });

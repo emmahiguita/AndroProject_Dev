@@ -81,16 +81,20 @@ export async function inspectFlashDeviceState(serial?: string | null): Promise<F
         'getprop ro.boot.vbmeta.device_state',
         'settings get global oem_unlock_allowed',
         'getprop ro.build.ab_update',
+        '(command -v su || command -v magisk) >/dev/null 2>&1 && echo ROOTED || echo NO_ROOT',
       ].join('; echo "---"; ');
       const { stdout } = await runFlashCmd(`${target} shell "${propCmd}"`, { timeout: 3500 });
       const parts = stdout.split('---').map((s) => s.trim());
+      const isAb = parts[6] === 'true';
+      const rawSlot = (parts[1] || '').replace(/^_/, '');
       deviceInfo.product = parts[0] || 'Android';
-      deviceInfo['current-slot'] = (parts[1] || '').replace(/^_/, '') || 'a';
-      deviceInfo.unlocked = parts[2] === '0' ? 'yes' : 'no';
+      deviceInfo['current-slot'] = rawSlot || (isAb ? 'a' : 'N/A (No A/B)');
+      deviceInfo.unlocked = parts[2] === '0' ? 'yes' : parts[2] === '1' ? 'no' : (parts[4] === 'unlocked' ? 'yes' : 'unknown');
       deviceInfo.verifiedboot = parts[3] || 'green';
       deviceInfo.vbmeta = parts[4] || 'locked';
       deviceInfo.oem_allowed = parts[5] === '1' ? 'Permitido' : 'Bloqueado';
-      deviceInfo.ab_device = parts[6] === 'true' ? 'A/B Dinámico' : 'Estándar';
+      deviceInfo.ab_device = isAb ? 'A/B Dinámico' : 'Estándar';
+      deviceInfo.root_status = parts[7] === 'ROOTED' ? 'Root Activo (su/Magisk)' : 'Sin Root';
     } catch { /* Propiedades parciales */ }
     return { state, deviceInfo };
   }

@@ -55,7 +55,7 @@ export function ProjectionView({ device }: { device?: DeviceInfo | null }) {
     const isIos = d.serial.startsWith('airplay-') || d.serial.startsWith('apple-');
     return {
       serial: d.serial, model: d.model || d.serial, platform: (isIos ? 'ios' : 'android') as 'ios' | 'android',
-      state: (d.state || 'device') as 'device', connected: true, connectionType: d.connectionType || (isIos ? 'Wi-Fi' : 'USB'),
+      state: (('state' in d && d.state) ? d.state : 'device') as 'device', connected: true, connectionType: d.connectionType || (isIos ? 'Wi-Fi' : 'USB'),
     };
   }), [uniqueDevices]);
 

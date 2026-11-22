@@ -44,6 +44,14 @@ export async function POST(req: Request) {
     const slot = (formData.get('slot') as string) || 'a';
     const criticalConfirmed = formData.get('confirmCritical') === 'true';
 
+    if (serial && (serial.startsWith('apple-') || serial.startsWith('airplay-'))) {
+      return NextResponse.json({
+        success: false,
+        state: 'unknown',
+        deviceInfo: { product: 'Apple iOS (No compatible con Fastboot/Root Android)' },
+        error: 'Fastboot y flasheo de particiones son exclusivos de Android; iOS moderno no soporta jailbreak/root desde Windows.',
+      });
+    }
     if (serial && serial !== 'Hardware Level' && !isValidSerial(serial)) {
       return NextResponse.json({ success: false, error: 'Serial inválido.' }, { status: 400 });
     }
