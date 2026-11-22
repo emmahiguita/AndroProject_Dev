@@ -55,8 +55,8 @@ const AIRPLAY_LOCK_NAME = 'airplay_receiver_server';
 
 function resolveAirPlayDir(): string {
   const candidates = [
-    path.join(process.cwd(), 'bin', 'airplay'),
-    path.join(process.cwd(), 'androproject-gui', 'bin', 'airplay'),
+    path.join(/*turbopackIgnore: true*/ process.cwd(), 'bin', 'airplay'),
+    path.join(/*turbopackIgnore: true*/ process.cwd(), 'androproject-gui', 'bin', 'airplay'),
     'c:\\Users\\emman\\Desktop\\Proyectos\\AndroProject_Dev\\androproject-gui\\bin\\airplay',
   ];
   for (const dir of candidates) {
@@ -286,12 +286,12 @@ public class AirWinFocus {
 
       // Check if AirPlayServer.exe is already running so we don't interrupt an active session
       let pid = await this.findRunningAirPlayPid();
-      const daemonCjs = path.join(airplayDir, 'daemon.cjs');
+      const daemonCjs = path.join(airplayDir, ['daemon', 'cjs'].join('.'));
 
       if (!pid && fs.existsSync(airplayExe)) {
         try {
           if (fs.existsSync(daemonCjs)) {
-            this.serverProcess = spawn('node', [daemonCjs], {
+            this.serverProcess = spawn('cmd.exe', ['/c', 'node', daemonCjs], {
               cwd: airplayDir,
               detached: true,
               stdio: 'ignore',
