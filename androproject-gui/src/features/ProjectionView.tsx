@@ -44,11 +44,13 @@ export function ProjectionView({ device }: { device?: DeviceInfo | null }) {
   const toggleMultiScreen = useAppStore((s) => s.toggleMultiScreen);
   const devicesList = useAppStore((s) => s.devicesList);
 
-  // Deduplicación de dispositivos físicos (si un teléfono está por USB y Wi-Fi a la vez, prioriza USB)
+  // Deduplicación de dispositivos físicos (prioriza USB frente a Wi-Fi IP/mDNS)
   const uniqueDevices = useMemo(() => {
     const base = devicesList.length > 0 ? devicesList : (device ? [device] : []);
-    const usbModels = new Set(base.filter((d) => !d.serial.includes(':') && d.model).map((d) => d.model!.trim().toLowerCase()));
-    return base.filter((d) => !(d.serial.includes(':') && d.model && usbModels.has(d.model.trim().toLowerCase())));
+    const isWifi = (s: string) => s.includes(':') || s.startsWith('adb-') || s.includes('_adb-tls-connect');
+    const usbModels = new Set(base.filter((d) => !isWifi(d.serial) && d.model).map((d) => d.model!.trim().toLowerCase()));
+    const seen = new Set<string>();
+    return base.filter((d) => !seen.has(d.serial) && !(isWifi(d.serial) && d.model && usbModels.has(d.model.trim().toLowerCase())) && Boolean(seen.add(d.serial)));
   }, [devicesList, device]);
 
   const multiScreenDevices = useMemo(() => uniqueDevices.map((d) => {
@@ -71,15 +73,8 @@ export function ProjectionView({ device }: { device?: DeviceInfo | null }) {
   const deviceSerial = device?.serial;
   const handleOpenPopout = useCallback(async () => {
     if (!deviceSerial) return;
-    if (rustBridge.isDesktop()) {
-      await rustBridge.openPopout(deviceSerial);
-      return;
-    }
-    window.open(
-      `/popout?serial=${encodeURIComponent(deviceSerial)}`,
-      `popout_${deviceSerial.replace(/[^a-zA-Z0-9]/g, '_')}`,
-      'width=420,height=860,left=80,top=80,resizable=yes,scrollbars=no,status=no',
-    );
+    if (rustBridge.isDesktop()) { await rustBridge.openPopout(deviceSerial); return; }
+    window.open(`/popout?serial=${encodeURIComponent(deviceSerial)}`, `popout_${deviceSerial.replace(/[^a-zA-Z0-9]/g, '_')}`, 'width=420,height=860,left=80,top=80,resizable=yes,scrollbars=no,status=no');
   }, [deviceSerial]);
 
   if (!device) return <ViewShell navId="projection" fill><EmptyState dark={dark} onConnectAdb={projection.connectAdb} isConnecting={projection.isConnecting} /></ViewShell>;

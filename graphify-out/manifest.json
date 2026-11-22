@@ -1,7 +1,7 @@
 {
   "AndroProject_Installer/build.ps1": {
-    "mtime": 1795367130.6188457,
-    "ast_hash": "f05dc11911c23726141884c3fd0dbb33",
+    "mtime": 1795369290.209475,
+    "ast_hash": "2511cdd5c127eb373997a4be3ecb589c",
     "semantic_hash": ""
   },
   "androproject-gui/eslint.config.mjs": {
@@ -155,7 +155,7 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/components/layout/Sidebar.tsx": {
-    "mtime": 1795368090.681021,
+    "mtime": 1795368173.8223934,
     "ast_hash": "67c6df30482eeb2681a573ba48f5a25f",
     "semantic_hash": ""
   },
@@ -190,7 +190,7 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/features/DashboardView.tsx": {
-    "mtime": 1795368141.6968012,
+    "mtime": 1795368173.8241346,
     "ast_hash": "3ca55efcc03b6b1e6695c3d295aa9d9c",
     "semantic_hash": ""
   },
@@ -450,8 +450,8 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/features/ProjectionView.tsx": {
-    "mtime": 1795367137.6318605,
-    "ast_hash": "c5ad057bd4a388d5aca9c11833e65aea",
+    "mtime": 1795371729.55974,
+    "ast_hash": "1b477b5b3f5ab5d485ff4d355205a3fd",
     "semantic_hash": ""
   },
   "androproject-gui/src/hooks/useDeviceStream.ts": {
@@ -500,8 +500,8 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/lib/services/device-detector.ts": {
-    "mtime": 1786417694.8242848,
-    "ast_hash": "76997e0012a8402fc1e84db5c3201dbb",
+    "mtime": 1795371683.6710105,
+    "ast_hash": "67eb3778872a7c4ec1cec246231d4d7e",
     "semantic_hash": ""
   },
   "androproject-gui/src/lib/services/device-info-fetcher.ts": {
@@ -675,17 +675,17 @@
     "semantic_hash": ""
   },
   "androproject-gui/src-tauri/gen/schemas/desktop-schema.json": {
-    "mtime": 1795367136.5151932,
+    "mtime": 1795369327.35264,
     "ast_hash": "85581d7ce59c6fe49f27cdcf6292810a",
     "semantic_hash": ""
   },
   "androproject-gui/src-tauri/gen/schemas/windows-schema.json": {
-    "mtime": 1795367136.6533403,
+    "mtime": 1795369327.3548286,
     "ast_hash": "85581d7ce59c6fe49f27cdcf6292810a",
     "semantic_hash": ""
   },
   "androproject-gui/src/components/projection/MobileProjection.tsx": {
-    "mtime": 1795368089.2749147,
+    "mtime": 1795368173.8235328,
     "ast_hash": "544e83577078d0904edfd45619860a99",
     "semantic_hash": ""
   },
@@ -1190,7 +1190,7 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/features/curar/ScreenshotPanel.tsx": {
-    "mtime": 1795368092.0743842,
+    "mtime": 1795368173.8260584,
     "ast_hash": "253df970e4587414a64ab0549f61ecf6",
     "semantic_hash": ""
   },
@@ -1205,8 +1205,8 @@
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1795367130.620403,
-    "ast_hash": "ec2449890975f46570207bc32636ccb4",
+    "mtime": 1795369290.211995,
+    "ast_hash": "f77ea7f5bf3b320518af8975ad17e8f3",
     "semantic_hash": ""
   },
   "docs/ARCHITECTURE_MAP.md": {
@@ -1727,6 +1727,16 @@
   "docs/images/mobile-transmission-record.mp4": {
     "mtime": 1795367137.845254,
     "ast_hash": "f7e402fd702426a7da7ba2717f96494b",
+    "semantic_hash": ""
+  },
+  "docs/images/androproject-walkthrough.gif": {
+    "mtime": 1795368792.0624967,
+    "ast_hash": "f75d404a0482e43c62c042c66423fb12",
+    "semantic_hash": ""
+  },
+  "docs/images/mobile-transmission-record.gif": {
+    "mtime": 1795368792.0686111,
+    "ast_hash": "e1a374c5b51b6e135e0f6d0482903905",
     "semantic_hash": ""
   }
 }
