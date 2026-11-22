@@ -810,8 +810,8 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/lib/services/airplay-engine.ts": {
-    "mtime": 1795350176.2819772,
-    "ast_hash": "765c5886c4a8a4ef43334297760ce5f6",
+    "mtime": 1795350665.1720426,
+    "ast_hash": "6c723de45f472f94b70a9e30d82cb513",
     "semantic_hash": ""
   },
   "androproject-gui/src/lib/services/projection-coordinator.ts": {
@@ -1572,6 +1572,21 @@
   "scripts/auto_clean_200.py": {
     "mtime": 1795350380.933053,
     "ast_hash": "70f90c1adc61f01cc934d01a3fb99908",
+    "semantic_hash": ""
+  },
+  "androproject-gui/src/lib/services/airplay-sockets.ts": {
+    "mtime": 1795350549.762659,
+    "ast_hash": "cb573619385f827f9e072a84f12740c5",
+    "semantic_hash": ""
+  },
+  "androproject-gui/src/lib/services/airplay-wda-touch.ts": {
+    "mtime": 1795350663.7505777,
+    "ast_hash": "cd8fc2efee3aa814484e69cb200bc3f2",
+    "semantic_hash": ""
+  },
+  "androproject-gui/src/lib/services/airplay-win32.ts": {
+    "mtime": 1795350623.3762236,
+    "ast_hash": "b343521641dc0820a186cf180bc53df9",
     "semantic_hash": ""
   }
 }
