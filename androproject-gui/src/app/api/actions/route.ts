@@ -52,6 +52,7 @@ const registry: Record<string, ActionHandler> = {
   connect_adb:              async (_ctx, body) => connectAdb(body),
   set_wifi_scan_interval:   (ctx, body) => network.setWifiScanInterval(ctx, body as { interval: number }),
   set_wifi_power_save:      (ctx, body) => network.setWifiPowerSave(ctx, body as { enabled: boolean }),
+  apply_rescue_hardening:   (ctx, body) => network.applyRescueHardening(ctx, body as { enabled?: boolean }),
   set_private_dns:          (ctx, body) => network.setPrivateDns(ctx, body as { mode: string; hostname?: string }),
   set_adguard_dns:          (ctx, body) => network.setAdguardDns(ctx, body as { profile: string }),
   dns_tunnel_setup:         (ctx, body) => network.dnsTunnelSetup(ctx, body as { domain: string; key: string }),
@@ -105,10 +106,13 @@ const registry: Record<string, ActionHandler> = {
   get_optimizer_settings: (ctx) => diagnostics.getOptimizerSettings(ctx),
   diagnose_screenshot:    (ctx) => diagnostics.diagnoseScreenshot(ctx),
 
-  // Optimizer
+  // Optimizer & Developer Mode
   optimize_ram:           async (ctx, _body) => optimizeRam(ctx),
   apply_perf_profile:     (ctx, body) => boost.applyPerformanceProfile(ctx, body as { profile: boost.PerfProfileId }),
   get_perf_status:        (ctx) => boost.getPerformanceStatus(ctx),
+  set_developer_mode:     (ctx, body) => boost.setDeveloperMode(ctx, body as { enabled: boolean; openSettings?: boolean }),
+  open_developer_settings:(ctx, body) => boost.openDeveloperSettings(ctx, body as { screen?: 'dev' | 'about' }),
+  set_developer_option:   (ctx, body) => boost.setDeveloperOption(ctx, body as { option: string; value: string | boolean }),
 };
 
 // ── Optimize RAM handler ─────────────────────────────────────────

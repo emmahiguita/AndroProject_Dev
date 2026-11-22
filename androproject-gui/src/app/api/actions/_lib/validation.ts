@@ -40,6 +40,7 @@ export const wifiScanIntervalSchema = z.object({
   interval: z.number().int().min(0).max(300000),
 });
 export const wifiPowerSaveSchema = z.object({ enabled: z.boolean() });
+export const rescueHardeningSchema = z.object({ enabled: z.boolean().optional() });
 export const privateDnsSchema = z.object({
   mode: z.enum(['off', 'automatic', 'hostname']),
   hostname: z.string().optional(),
@@ -98,6 +99,21 @@ export const shadeStyleSchema = z.object({
 export const perfProfileSchema = z.object({
   profile: z.enum(['balanced', 'fluid', 'gaming', 'restore']),
 });
+export const developerModeSchema = z.object({
+  enabled: z.boolean(),
+  openSettings: z.boolean().optional(),
+});
+export const openDeveloperSettingsSchema = z.object({
+  screen: z.enum(['dev', 'about']).optional(),
+});
+export const developerOptionSchema = z.object({
+  option: z.enum([
+    'stay_awake', 'show_touches', 'pointer_location', 'dont_keep_activities',
+    'debug_layout', 'disable_blur', 'disable_overlays', 'force_msaa',
+    'adb_wifi', 'gpu_renderer', 'cached_freezer',
+  ]),
+  value: z.union([z.string(), z.boolean()]),
+});
 
 // ── Per-action validation map ────────────────────────────────────────
 export const actionSchemas: Record<string, z.ZodType<unknown>> = {
@@ -111,6 +127,7 @@ export const actionSchemas: Record<string, z.ZodType<unknown>> = {
 
   set_wifi_scan_interval:    wifiScanIntervalSchema,
   set_wifi_power_save:       wifiPowerSaveSchema,
+  apply_rescue_hardening:    rescueHardeningSchema,
   set_private_dns:           privateDnsSchema,
   set_adguard_dns:           adguardDnsSchema,
   dns_tunnel_setup:          dnsTunnelSetupSchema,
@@ -131,6 +148,9 @@ export const actionSchemas: Record<string, z.ZodType<unknown>> = {
   set_bluetooth_absolute_volume: bluetoothAbsoluteVolumeSchema,
   set_shade_style:           shadeStyleSchema,
   apply_perf_profile:        perfProfileSchema,
+  set_developer_mode:        developerModeSchema,
+  open_developer_settings:   openDeveloperSettingsSchema,
+  set_developer_option:      developerOptionSchema,
 };
 
 /**

@@ -25,6 +25,10 @@ export interface SpywareFinding {
   score: number;
   installer: string;
   hasOverlay: boolean;
+  hasAccessibility?: boolean;
+  hasNotificationAccess?: boolean;
+  hasInstallPackages?: boolean;
+  isDeviceAdmin?: boolean;
   isHidden: boolean;
   reasons: string[];
 }
@@ -155,7 +159,20 @@ export async function scanDeviceForSpyware(serial: string): Promise<{
     if (score >= 40) {
       const severity: SpywareFinding['severity'] = score >= 75 ? 'critical' : score >= 55 ? 'high' : 'medium';
       const category: SpywareFinding['category'] = hasAccess || isAdmin || hasNotif ? 'trojan' : hasOverlay || isHidden ? 'adware' : 'spyware';
-      findings.push({ packageName: pkg, severity, category, score, installer, hasOverlay, isHidden, reasons });
+      findings.push({
+        packageName: pkg,
+        severity,
+        category,
+        score,
+        installer,
+        hasOverlay,
+        hasAccessibility: hasAccess,
+        hasNotificationAccess: hasNotif,
+        hasInstallPackages: ops.has('REQUEST_INSTALL_PACKAGES'),
+        isDeviceAdmin: isAdmin,
+        isHidden,
+        reasons,
+      });
     }
   }
 

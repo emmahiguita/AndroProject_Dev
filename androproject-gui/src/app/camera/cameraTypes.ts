@@ -55,5 +55,28 @@ export const INITIAL_METRICS: CameraMetrics = {
   latencyMs: 0,
 };
 
+export interface VisionBackendHealth {
+  online: boolean;
+  backend: 'cuda' | 'cpu' | 'offline';
+  activeConnections: number;
+}
+
 export const getCameraErrorMessage = (error: unknown) =>
   error instanceof Error ? error.message : String(error);
+
+/** Verifica si Vision Backend (:8000/health) está activo y si usa CUDA o CPU. */
+export async function checkVisionBackendHealth(serverUrl: string): Promise<VisionBackendHealth> {
+  try {
+    const u = new URL(serverUrl);
+    const res = await fetch(`${u.protocol}//${u.host}/health`, { signal: AbortSignal.timeout(2500), cache: 'no-store' });
+    if (!res.ok) return { online: false, backend: 'offline', activeConnections: 0 };
+    const data = await res.json();
+    return {
+      online: data.status === 'healthy',
+      backend: data.gpu?.cuda_available ? 'cuda' : 'cpu',
+      activeConnections: Number(data.webrtc?.active_connections || 0),
+    };
+  } catch {
+    return { online: false, backend: 'offline', activeConnections: 0 };
+  }
+}

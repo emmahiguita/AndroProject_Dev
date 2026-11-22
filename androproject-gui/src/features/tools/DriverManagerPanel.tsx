@@ -1,29 +1,33 @@
 // ============================================================================
 // ARCHIVO: DriverManagerPanel.tsx
 // QUÉ HACE: Panel de Windows DriverManager en Herramientas (diagnóstico USB
-//           PnPUtil, detección de errores CM_PROB, verificación `.cat` e
-//           instalación segura de paquetes `.inf` OEM).
+//           PnPUtil, detección de errores CM_PROB, verificación `.cat`,
+//           copia de Hardware/Instance IDs e instalación segura de `.inf` OEM).
 // CÓMO FUNCIONA: Consulta `/api/drivers` automáticamente al montar y despacha
 //           `verify_cat` o `install_inf` con estética neutra de alto contraste.
-// POR QUÉ: Eliminar iconos/textos coloridos (`text-sky-400`, `glow-card`) y
-//          garantizar legibilidad clara en modo claro y oscuro (< 200L, SRP).
+// POR QUÉ: Inyectar diagnóstico USB completo sin código huérfano (< 200L, SRP).
 // ============================================================================
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { Usb, ShieldCheck, AlertTriangle, RefreshCw, Download } from 'lucide-react';
+import { Usb, ShieldCheck, AlertTriangle, RefreshCw, Download, Copy, Check } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Badge } from '@/components/ui/Badge';
 import { useTheme } from '@/hooks/useTheme';
 import type { DriverScanReport } from '@/lib/services/driver-manager';
 
-export const DriverManagerPanel: React.FC = () => {
+interface DriverManagerPanelProps {
+  onLog?: (msg: string, type?: 'info' | 'success' | 'error') => void;
+}
+
+export const DriverManagerPanel: React.FC<DriverManagerPanelProps> = ({ onLog }) => {
   const { dark } = useTheme();
   const [loading, setLoading] = useState(false);
   const [report, setReport] = useState<DriverScanReport | null>(null);
   const [driverPath, setDriverPath] = useState('');
   const [statusMsg, setStatusMsg] = useState<{ text: string; ok: boolean } | null>(null);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const scanDrivers = useCallback(async () => {
     setLoading(true);
@@ -46,9 +50,7 @@ export const DriverManagerPanel: React.FC = () => {
     }
   }, []);
 
-  useEffect(() => {
-    scanDrivers();
-  }, [scanDrivers]);
+  useEffect(() => { void Promise.resolve().then(scanDrivers); }, [scanDrivers]);
 
   const runDriverAction = async (action: 'verify_cat' | 'install_inf') => {
     if (!driverPath.trim()) return;
@@ -61,13 +63,23 @@ export const DriverManagerPanel: React.FC = () => {
         body: JSON.stringify({ action, filePath: driverPath.trim() }),
       });
       const d = await r.json();
-      setStatusMsg({ text: d.message || d.error || 'Completado', ok: Boolean(d.success) });
-      if (action === 'install_inf' && d.success) scanDrivers();
+      const msg = d.message || d.error || 'Completado';
+      const ok = Boolean(d.success);
+      setStatusMsg({ text: msg, ok });
+      onLog?.(msg, ok ? 'success' : 'error');
+      if (action === 'install_inf' && ok) scanDrivers();
     } catch {
       setStatusMsg({ text: 'Error comunicando con /api/drivers', ok: false });
+      onLog?.('Error comunicando con /api/drivers', 'error');
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleCopyId = (id: string) => {
+    navigator.clipboard.writeText(id);
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 1500);
   };
 
   const cardCls = dark ? 'bg-zinc-950 border-zinc-800 text-zinc-100' : 'bg-white border-slate-200 text-slate-900 shadow-sm';
@@ -120,13 +132,18 @@ export const DriverManagerPanel: React.FC = () => {
             <Badge tone="neutral">USB Móvil: {report.mobileUsb.length}</Badge>
             <Badge tone="neutral">ADB: {report.adbDevices.length}</Badge>
             <Badge tone="neutral">Fastboot: {report.fastbootDevices.length}</Badge>
-            <Badge tone="neutral">Problemas USB Móvil: {report.mobileProblems.length}</Badge>
+            <Badge tone={report.mobileProblems.length > 0 ? 'danger' : 'neutral'}>Problemas USB Móvil: {report.mobileProblems.length}</Badge>
             {report.otherProblemsCount > 0 && <Badge tone="neutral">Otros PC: {report.otherProblemsCount}</Badge>}
           </div>
           {report.mobileUsb.map((u) => (
-            <div key={u.instanceId} className={`p-2.5 rounded-lg border font-mono text-[11px] ${rowCls}`}>
-              <div className="font-bold">{u.description || 'Dispositivo USB'} · <span className={mutedCls}>{u.driverInf || 'sin .inf'}</span></div>
-              <div className={`${mutedCls} truncate mt-0.5`}>{u.instanceId}</div>
+            <div key={u.instanceId} className={`p-2.5 rounded-lg border font-mono text-[11px] flex items-center justify-between gap-2 ${rowCls}`}>
+              <div className="min-w-0">
+                <div className="font-bold truncate">{u.description || 'Dispositivo USB'} · <span className={mutedCls}>{u.driverInf || 'sin .inf'}</span> · <span className={mutedCls}>{u.status || 'OK'}</span></div>
+                <div className={`${mutedCls} truncate mt-0.5`}>{u.instanceId} {u.hardwareId ? `· ${u.hardwareId}` : ''}</div>
+              </div>
+              <button type="button" onClick={() => handleCopyId(u.instanceId)} className="p-1 rounded hover:bg-zinc-800/40 shrink-0" title="Copiar Instance ID">
+                {copiedId === u.instanceId ? <Check size={12} /> : <Copy size={12} />}
+              </button>
             </div>
           ))}
           {report.mobileProblems.map((p) => (

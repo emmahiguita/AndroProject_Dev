@@ -149,7 +149,22 @@ export function DashboardView({ device: propDevice, onNavigate }: DashboardViewP
         )}
 
         <TelemetryModal open={showMetricsSheet} onClose={() => setShowMetricsSheet(false)} onRefresh={refreshLiveTelemetry} dark={dark} device={device} telemetry={telemetry} cpuHistory={cpuHistory} ramHistory={ramHistory} tempHistory={tempHistory} storHistory={storHistory} />
-        <DashboardAppsPanel dark={dark} serial={device?.serial} appsList={appsList} filteredApps={filteredDashApps} appsLoading={appsLoading} appActionLoading={appActionLoading} searchQuery={appsSearchDash} onSearchChange={setAppsSearchDash} activeFilter={appsFilterDash} onFilterChange={setAppsFilterDash} onUninstall={handleDashUninstall} onNavigate={nav} onRunAction={run} />
+        <DashboardAppsPanel
+          dark={dark}
+          serial={device?.serial}
+          appsList={appsList}
+          filteredApps={filteredDashApps}
+          appsLoading={appsLoading}
+          appActionLoading={appActionLoading}
+          searchQuery={appsSearchDash}
+          onSearchChange={setAppsSearchDash}
+          activeFilter={appsFilterDash}
+          onFilterChange={setAppsFilterDash}
+          onUninstall={handleDashUninstall}
+          onNavigate={nav}
+          onOpenDeviceInfo={() => { setShowMetricsSheet(true); refreshLiveTelemetry(); }}
+          onRunAction={run}
+        />
       </div>
     </ViewShell>
   );

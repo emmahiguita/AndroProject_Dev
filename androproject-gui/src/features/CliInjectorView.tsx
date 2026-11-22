@@ -45,7 +45,9 @@ const PRESETS: Record<InjectorMode, { label: string; value: string }[]> = {
 export function CliInjectorView({ device: propDevice }: { device?: DeviceInfo | null }) {
   const { dark } = useTheme();
   const storeDevice = useAppStore((s) => s.device);
+  const activeSerial = useAppStore((s) => s.activeSerial);
   const device = propDevice || storeDevice;
+  const targetSerial = activeSerial || device?.serial;
   const abortRef = useRef<AbortController | null>(null);
   const [mode, setMode] = useState<InjectorMode>('claude');
   const [model, setModel] = useState('llama3.2');
@@ -89,7 +91,7 @@ export function CliInjectorView({ device: propDevice }: { device?: DeviceInfo | 
       const res = await fetch('/api/ai-cli', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ mode, prompt: text, model, serial: device?.serial, deviceContext }),
+        body: JSON.stringify({ mode, prompt: text, model, serial: targetSerial, deviceContext }),
         signal: ctrl.signal,
       });
       const data = await res.json();
@@ -163,17 +165,18 @@ export function CliInjectorView({ device: propDevice }: { device?: DeviceInfo | 
             }`}
           />
 
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-2">
             <span className={`text-[11px] ${dark ? 'text-zinc-400' : 'text-slate-600'}`}>Presiona Ctrl + Enter para ejecutar</span>
-            <Button
-              variant="primary"
-              size="md"
-              icon={<Play size={13} />}
-              disabled={running || !prompt.trim()}
-              onClick={() => executePrompt(prompt)}
-            >
-              {running ? 'Ejecutando...' : 'Inyectar / Ejecutar'}
-            </Button>
+            <div className="flex items-center gap-2">
+              {running && (
+                <Button variant="secondary" size="md" onClick={() => abortRef.current?.abort()}>
+                  Cancelar
+                </Button>
+              )}
+              <Button variant="primary" size="md" icon={<Play size={13} />} disabled={running || !prompt.trim()} onClick={() => executePrompt(prompt)}>
+                {running ? 'Ejecutando...' : 'Inyectar / Ejecutar'}
+              </Button>
+            </div>
           </div>
         </div>
 

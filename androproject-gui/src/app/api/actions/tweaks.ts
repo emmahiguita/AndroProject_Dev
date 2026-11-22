@@ -1,3 +1,13 @@
+// ============================================================================
+// ARCHIVO: tweaks.ts
+// QUÉ HACE: Endpoints ADB para motor gráfico GPU (`setGpuTweak`, `getGpuStatus`),
+//           límite de procesos en segundo plano (`setBackgroundLimit`), códecs
+//           Bluetooth A2DP (`setBluetoothCodec`) y estilo del panel de sistema.
+// CÓMO FUNCIONA: Valida claves y valores contra listas blancas estrictas y
+//           ejecuta `adb shell settings put/delete global` sobre el dispositivo.
+// POR QUÉ: Aislar ajustes avanzados de desarrollador (< 200 líneas, SRP).
+// ============================================================================
+
 import { NextResponse } from 'next/server';
 import { safeExec } from './_lib/helpers';
 import { ActionContext } from './_lib/context';
@@ -31,8 +41,9 @@ export async function setGpuTweak(ctx: ActionContext, body: { key: string; value
 
 export async function getGpuStatus(ctx: ActionContext) {
   const info: Record<string, string> = {};
-  const r1 = await safeExec(`${ctx.adbTarget} shell dumpsys SurfaceFlinger | findstr GLES`);
-  info.gles = r1.ok ? (r1.out.trim() || 'desconocido') : 'error';
+  const r1 = await safeExec(`${ctx.adbTarget} shell dumpsys SurfaceFlinger`);
+  const glesLine = r1.ok ? r1.out.split('\n').find((l) => l.includes('GLES')) : '';
+  info.gles = glesLine ? glesLine.trim() : r1.ok ? 'desconocido' : 'error';
   return NextResponse.json({ success: true, info });
 }
 

@@ -165,3 +165,31 @@ export async function setAdguardDns(ctx: ActionContext, body: { profile: string 
 
 // ── DNS Tunneling (delegado a _lib/dns-tunnel.ts por SRP < 200L) ───
 export { dnsTunnelSetup, dnsTunnelStart, dnsTunnelStop, dnsTunnelStatus } from './_lib/dns-tunnel';
+
+// ── Universal Rescue Hardening (anti-suspensión para cualquier móvil) ──
+export async function applyRescueHardening(ctx: ActionContext, body: { enabled?: boolean }) {
+  if (!ctx.targetSerial) {
+    return NextResponse.json({ success: false, error: 'Se requiere dispositivo conectado' }, { status: 400 });
+  }
+  const enable = body.enabled !== false;
+  const cmds = enable
+    ? [
+        'settings put global adb_wifi_enabled 1',
+        'settings put global wifi_sleep_policy 2',
+        'settings put global stay_on_while_plugged_in 7',
+        'settings put system screen_off_timeout 2147483647',
+        'svc power stayon true',
+      ]
+    : [
+        'settings put global wifi_sleep_policy 0',
+        'settings put global stay_on_while_plugged_in 0',
+        'settings put system screen_off_timeout 60000',
+        'svc power stayon false',
+      ];
+  const results = await Promise.all(cmds.map((c) => safeExec(`${ctx.adbTarget} shell ${c}`, 3000)));
+  const ok = results.some((r) => r.ok);
+  return NextResponse.json({
+    success: ok,
+    message: enable ? 'Hardening anti-suspensión aplicado' : 'Políticas de energía restauradas',
+  });
+}

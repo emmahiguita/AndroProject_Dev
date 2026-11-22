@@ -69,10 +69,21 @@ async function readAndroidSettings(serial?: string | null): Promise<LiveAndroidS
   }
 }
 
+async function checkHttpOk(url: string): Promise<boolean> {
+  try {
+    const res = await fetch(url, { signal: AbortSignal.timeout(1000), cache: 'no-store' });
+    return res.ok;
+  } catch { return false; }
+}
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const serial = searchParams.get('serial');
-  const deviceSettings = await readAndroidSettings(serial);
+  const [deviceSettings, visionOk, airplayOk] = await Promise.all([
+    readAndroidSettings(serial),
+    checkHttpOk('http://127.0.0.1:8000/health'),
+    checkHttpOk('http://127.0.0.1:7001/info').catch(() => false),
+  ]);
 
   return NextResponse.json({
     success: true,
@@ -85,12 +96,15 @@ export async function GET(request: Request) {
     wifiPort: 5555,
     apiPort: 3000,
     streamingWsPort: 7001,
+    visionPort: 8000,
     version: 'v3.2.0-studio',
     verified: {
       adb: fs.existsSync(ADB),
       fastboot: fs.existsSync(FASTBOOT),
       scrcpy: fs.existsSync(ANDROPROJECT_BIN),
       scrcpyServer: fs.existsSync(SCRCPY_SERVER_PATH),
+      vision: visionOk,
+      airplay: airplayOk,
     },
     deviceSettings,
   });

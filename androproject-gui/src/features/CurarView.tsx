@@ -1,14 +1,17 @@
 // ============================================================================
 // ARCHIVO: CurarView.tsx
 // QUÉ HACE: Vista principal de Seguridad y Curación Android (escaneo heurístico
-//           de spyware por permisos/accesibilidad + firmas conocidas + capturas).
-// CÓMO FUNCIONA: Coordina `SpywareAuditPanel` y `ScreenshotPanel` en pestañas
-//           monocromas de alto contraste sin iconos ni textos coloridos.
-// POR QUÉ: Mantener la UI modular (< 200 líneas, SRP) y 100% legible.
+//           de spyware, Escudo DNS Anti-Adware AdGuard, firmas de malware y
+//           diagnóstico/parcheo de compatibilidad de capturas).
+// CÓMO FUNCIONA: Coordina `SpywareAuditPanel`, el escudo `set_adguard_dns`, el
+//           detector de firmas de `appsList` y `ScreenshotPanel`.
+// POR QUÉ: Unificar toda la lógica de seguridad y eliminar props/estados
+//          huérfanos manteniendo < 200 líneas (SRP).
 // ============================================================================
 'use client';
 
-import { Shield, ShieldAlert, AlertTriangle, Trash2 } from 'lucide-react';
+import React, { useState } from 'react';
+import { Shield, ShieldAlert, AlertTriangle, Trash2, Globe, Ban, Square } from 'lucide-react';
 import { useAppStore } from '@/stores';
 import { useTheme } from '@/hooks/useTheme';
 import { useActions } from '@/hooks/useActions';
@@ -19,16 +22,20 @@ import { Badge } from '@/components/ui/Badge';
 import { SpywareAuditPanel } from './curar/SpywareAuditPanel';
 import { ScreenshotPanel } from './curar/ScreenshotPanel';
 import type { DeviceInfo } from './types';
+import type { AdguardProfile } from '@/stores/optimizerSlice';
 
 interface CurarViewProps {
   device?: DeviceInfo | null;
   addLog?: (msg: string, type?: 'info' | 'success' | 'error') => void;
 }
 
-export function CurarView({ addLog: propAddLog }: CurarViewProps = {}) {
+export function CurarView({ device: propDevice, addLog: propAddLog }: CurarViewProps = {}) {
   const { dark } = useTheme();
   const curarSubTab = useAppStore((s) => s.curarSubTab);
   const setCurarSubTab = useAppStore((s) => s.setCurarSubTab);
+  const storeDevice = useAppStore((s) => s.device);
+  const activeSerial = useAppStore((s) => s.activeSerial);
+  const targetSerial = activeSerial || propDevice?.serial || storeDevice?.serial || null;
 
   const tab = (id: 'antivirus' | 'screenshot', icon: React.ReactNode, label: string) => (
     <button
@@ -48,74 +55,106 @@ export function CurarView({ addLog: propAddLog }: CurarViewProps = {}) {
     <ViewShell navId="curar">
       <div className="mx-auto w-full min-w-0 max-w-4xl">
         <div className={`custom-scrollbar flex gap-4 overflow-x-auto border-b ${dark ? 'border-zinc-800' : 'border-slate-200'} mb-3`}>
-          {tab('antivirus', <ShieldAlert size={13} />, 'Análisis de Seguridad')}
-          {tab('screenshot', <Shield size={13} />, 'Compatibilidad de Capturas')}
+          {tab('antivirus', <ShieldAlert size={13} />, 'Análisis de Seguridad y Anti-Adware')}
+          {tab('screenshot', <Shield size={13} />, 'Compatibilidad de Capturas (FLAG_SECURE)')}
         </div>
-        {curarSubTab === 'antivirus' ? <AntivirusPanel propAddLog={propAddLog} /> : <ScreenshotPanel />}
+        {curarSubTab === 'antivirus' ? (
+          <AntivirusPanel serial={targetSerial} propAddLog={propAddLog} />
+        ) : (
+          <ScreenshotPanel serial={targetSerial} />
+        )}
       </div>
     </ViewShell>
   );
 }
 
-function AntivirusPanel({ propAddLog }: { propAddLog?: (msg: string, type?: 'info' | 'success' | 'error') => void }) {
+function AntivirusPanel({ serial, propAddLog }: { serial: string | null; propAddLog?: (msg: string, type?: 'info' | 'success' | 'error') => void }) {
   const { dark } = useTheme();
   const appsList = useAppStore((s) => s.appsList);
   const appsLoading = useAppStore((s) => s.appsLoading);
-  const device = useAppStore((s) => s.device);
-  const activeSerial = useAppStore((s) => s.activeSerial);
+  const adguardProfile = useAppStore((s) => s.adguardProfile);
+  const setAdguardProfile = useAppStore((s) => s.setAdguardProfile);
   const storeAddLog = useAppStore((s) => s.addLog);
-  const addLog = (msg: string, type?: 'info' | 'success' | 'error') => {
-    if (propAddLog) propAddLog(msg, type);
-    else storeAddLog(msg);
-  };
-  const { fetchApps } = useActions();
-  const malwareApps = appsList.filter((app) => app.isMalware);
+  const [dnsBusy, setDnsBusy] = useState(false);
 
-  const handleRemove = async (pkg: string) => {
-    if (!confirm(`¿Desinstalar amenaza ${pkg}?`)) return;
+  const addLog = (msg: string, type?: 'info' | 'success' | 'error') => (propAddLog ? propAddLog(msg, type) : storeAddLog(msg));
+  const { fetchApps, run } = useActions();
+  const malwareApps = appsList.filter((app) => app.isMalware || app.hasOverlay || app.isHidden);
+
+  const handleApplyAdguard = async (profile: AdguardProfile) => {
+    if (!serial) return;
+    setDnsBusy(true);
+    try {
+      const res = await run('set_adguard_dns', `Configurando escudo AdGuard DNS (${profile})`, { profile, serial });
+      if (res.success) { setAdguardProfile(profile); addLog(`Escudo AdGuard DNS configurado en modo "${profile}".`, 'success'); }
+      else addLog(res.error || 'Error aplicando AdGuard DNS', 'error');
+    } finally { setDnsBusy(false); }
+  };
+
+  const handlePkgAction = async (pkg: string, action: 'uninstall' | 'disable' | 'force_stop') => {
+    if (action === 'uninstall' && !confirm(`¿Desinstalar amenaza ${pkg}?`)) return;
     try {
       const r = await fetch('/api/apps', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'uninstall', packageName: pkg, serial: activeSerial }),
+        body: JSON.stringify({ action, packageName: pkg, serial }),
       });
       const d = await r.json();
-      if (d.success) { addLog(`Amenaza ${pkg} eliminada.`, 'success'); fetchApps(); }
-      else addLog(`Error al eliminar: ${d.error}`, 'error');
-    } catch { addLog(`Error de red al eliminar ${pkg}`, 'error'); }
+      if (d.success) { addLog(`Acción ${action} aplicada sobre ${pkg}.`, 'success'); fetchApps(); }
+      else addLog(`Error (${action}): ${d.error}`, 'error');
+    } catch { addLog(`Error de red en ${pkg}`, 'error'); }
   };
 
-  const iconBoxCls = `w-10 h-10 rounded-xl border flex items-center justify-center shrink-0 ${
-    dark ? 'bg-zinc-900 border-zinc-800 text-zinc-200' : 'bg-slate-100 border-slate-200 text-slate-700'
-  }`;
+  const iconBoxCls = `w-10 h-10 rounded-xl border flex items-center justify-center shrink-0 ${dark ? 'bg-zinc-900 border-zinc-800 text-zinc-200' : 'bg-slate-100 border-slate-200 text-slate-700'}`;
   const mutedCls = dark ? 'text-zinc-400' : 'text-slate-600';
 
   return (
-    <div className="space-y-4">
-      <SpywareAuditPanel serial={activeSerial || device?.serial || null} onLog={addLog} />
+    <div className="space-y-3.5">
+      <SpywareAuditPanel key={serial || 'none'} serial={serial} onLog={addLog} />
+
+      <Card>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className={iconBoxCls}><Globe size={18} /></div>
+            <div>
+              <h2 className="text-sm font-bold">Escudo de Red Anti-Adware (AdGuard Private DNS)</h2>
+              <p className={`text-xs ${mutedCls}`}>Bloquea dominios de publicidad invasiva, popups y rastreadores a nivel sistema en Android 9+.</p>
+            </div>
+          </div>
+          <div className="flex flex-wrap items-center gap-1.5">
+            {([
+              { id: 'default', label: 'Bloquear Anuncios' },
+              { id: 'family', label: 'Escudo Familiar + Malware' },
+              { id: 'off', label: 'DNS Desactivado' },
+            ] as { id: AdguardProfile; label: string }[]).map((opt) => (
+              <Button key={opt.id} size="sm" variant={adguardProfile === opt.id ? 'primary' : 'secondary'} disabled={!serial || dnsBusy} onClick={() => handleApplyAdguard(opt.id)}>
+                {opt.label}
+              </Button>
+            ))}
+          </div>
+        </div>
+      </Card>
 
       <Card>
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className={iconBoxCls}><ShieldAlert size={18} /></div>
             <div>
-              <h2 className="text-sm font-bold">Indicadores conocidos de Malware / HiddenAds</h2>
-              <p className={`text-xs ${mutedCls}`}>Coteja paquetes instalados contra firmas conocidas de troyanos y adware.</p>
+              <h2 className="text-sm font-bold">Indicadores de Malware, HiddenAds y Paquetes Camuflados</h2>
+              <p className={`text-xs ${mutedCls}`}>Coteja los paquetes instalados contra firmas conocidas de troyanos, adware y apps sin icono.</p>
             </div>
           </div>
-          {appsList.length === 0 && (
-            <Button size="sm" variant="secondary" icon={<Shield size={13} />} onClick={fetchApps} disabled={appsLoading || !device?.connected}>
-              {appsLoading ? 'Cargando...' : 'Cargar apps'}
-            </Button>
-          )}
+          <Button size="sm" variant="secondary" icon={<Shield size={13} />} onClick={fetchApps} disabled={appsLoading || !serial}>
+            {appsLoading ? 'Analizando...' : appsList.length > 0 ? 'Reescanear catálogo' : 'Analizar catálogo'}
+          </Button>
         </div>
       </Card>
 
       {appsList.length > 0 && malwareApps.length === 0 && (
         <Card className="border-border text-center">
           <Shield size={22} className={`mx-auto mb-2 ${dark ? 'text-zinc-300' : 'text-slate-700'}`} />
-          <p className="font-bold text-xs">Sin coincidencias por nombre de paquete</p>
-          <p className={`text-xs ${mutedCls} mt-1`}>Usa el botón <strong>Escaneo profundo</strong> arriba para auditar permisos, Accesibilidad y apps ocultas.</p>
+          <p className="font-bold text-xs">Catálogo limpio ({appsList.length} paquetes verificados)</p>
+          <p className={`text-xs ${mutedCls} mt-1`}>No se hallaron firmas conocidas de troyanos ni apps ocultas de usuario.</p>
         </Card>
       )}
 
@@ -123,18 +162,20 @@ function AntivirusPanel({ propAddLog }: { propAddLog?: (msg: string, type?: 'inf
         <div className="space-y-2">
           {malwareApps.map((app, idx) => (
             <Card key={app.packageName ? `${app.packageName}-${idx}` : `malware-${idx}`}>
-              <div className="flex items-center justify-between gap-3">
+              <div className="flex flex-wrap items-center justify-between gap-3">
                 <div className="min-w-0">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <AlertTriangle size={14} className="shrink-0" />
                     <span className="font-bold text-xs truncate">{app.name}</span>
-                    <Badge tone="danger">{app.threatName || 'Sospechosa'}</Badge>
+                    <Badge tone="danger">{app.threatName || (app.isHidden ? 'App Oculta sin Icono' : 'Adware / Sospechosa')}</Badge>
                   </div>
                   <p className={`text-[11px] font-mono mt-0.5 ${mutedCls}`}>{app.packageName}</p>
                 </div>
-                <Button variant="danger" size="sm" icon={<Trash2 size={12} />} onClick={() => handleRemove(app.packageName)}>
-                  Desinstalar
-                </Button>
+                <div className="flex items-center gap-1.5">
+                  <Button variant="secondary" size="sm" icon={<Square size={12} />} onClick={() => handlePkgAction(app.packageName, 'force_stop')}>Detener</Button>
+                  <Button variant="secondary" size="sm" icon={<Ban size={12} />} onClick={() => handlePkgAction(app.packageName, 'disable')}>Deshabilitar</Button>
+                  <Button variant="danger" size="sm" icon={<Trash2 size={12} />} onClick={() => handlePkgAction(app.packageName, 'uninstall')}>Desinstalar</Button>
+                </div>
               </div>
             </Card>
           ))}

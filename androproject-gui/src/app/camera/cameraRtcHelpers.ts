@@ -1,12 +1,11 @@
 // ============================================================================
 // ARCHIVO: cameraRtcHelpers.ts
-// QUÉ HACE: Provee helpers puros de WebRTC para `/camera`: lectura de métricas,
-//           configuración de `RTCPeerConnection`, eventos ICE/track y SDP offer.
-// CÓMO FUNCIONA: Construye `RTCPeerConnection` con STUN/TURN, configura
-//           bitrates/prioridad, adjunta listeners de track/ICE con reintento
-//           y negocia SDP offer/answer con el servidor.
-// POR QUÉ: Separar señalización, eventos y métricas mantiene `useCameraWebRtc.ts`
-//           por debajo de 200 líneas (SRP / Clean Architecture).
+// QUÉ HACE: Helpers WebRTC para `/camera`: healthcheck de Vision Backend,
+//           lectura de métricas RTP, `RTCPeerConnection`, eventos ICE/track y
+//           negociación SDP con recolección ICE completa.
+// CÓMO FUNCIONA: Espera a `iceGatheringState === 'complete'` (máx 1.5s) antes
+//           de enviar el SDP Offer al endpoint FastAPI `/vision/offer`.
+// POR QUÉ: Garantizar conectividad ICE real y diagnóstico previo del backend (<200L).
 // ============================================================================
 
 import type { MutableRefObject } from 'react';
@@ -111,7 +110,6 @@ export function createConfiguredPeer(localStream: MediaStream): RTCPeerConnectio
   return pc;
 }
 
-/** Adjunta listeners de media remota y recuperación ICE sin fugas de timers. */
 export function attachPeerHandlers(deps: PeerHandlerDeps): void {
   const {
     pc, remoteStream, remoteStreamRef, remoteVideoRef, pcRef,
@@ -152,12 +150,28 @@ export function attachPeerHandlers(deps: PeerHandlerDeps): void {
   };
 }
 
+function waitForIceGathering(pc: RTCPeerConnection, timeoutMs = 1500): Promise<void> {
+  if (pc.iceGatheringState === 'complete') return Promise.resolve();
+  return new Promise((resolve) => {
+    const timer = setTimeout(() => { pc.removeEventListener('icegatheringstatechange', onState); resolve(); }, timeoutMs);
+    const onState = () => {
+      if (pc.iceGatheringState === 'complete') {
+        clearTimeout(timer);
+        pc.removeEventListener('icegatheringstatechange', onState);
+        resolve();
+      }
+    };
+    pc.addEventListener('icegatheringstatechange', onState);
+  });
+}
+
 export async function negotiateSdpOffer(pc: RTCPeerConnection, endpoint: URL): Promise<void> {
   const offer = await pc.createOffer({ offerToReceiveAudio: true, offerToReceiveVideo: true });
   await pc.setLocalDescription({
     type: offer.type,
     sdp: (offer.sdp ?? '').replace(/b=AS:\d+/g, 'b=AS:20000'),
   });
+  await waitForIceGathering(pc, 1500);
   const response = await fetch(endpoint, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

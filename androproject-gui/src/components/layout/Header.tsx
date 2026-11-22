@@ -43,7 +43,7 @@ interface HeaderProps {
   rescueConfig?: RescueSyncConfig;
   rescueStatus?: RescueSyncStatus;
   rescueMsg?: string;
-  onToggleRescue?: () => void;
+  onToggleRescue?: (device?: DeviceInfo) => void;
   isTransmitting?: boolean;
   onToggleTransmit?: () => void;
 }
@@ -147,20 +147,24 @@ export const Header: React.FC<HeaderProps> = ({
         onToggleAutoConnect={onToggleAutoConnect}
       />
 
-      {/* Rescate A30 */}
+      {/* Rescate Permanente Universal (cualquier móvil con táctil dañado) */}
       {onToggleRescue && rescueConfig && (
         <button
           type="button"
           suppressHydrationWarning
-          onClick={() => onToggleRescue()}
-          aria-label="Alternar Modo Rescate A30"
-          title={rescueConfig.enabled ? `Modo Rescate ACTIVO · ${rescueMsg || 'Sincronización permanente'}` : 'Activar sincronización permanente A30'}
+          onClick={() => onToggleRescue(currentDevice)}
+          aria-label="Alternar Rescate Permanente para el móvil actual"
+          title={
+            rescueConfig.enabled
+              ? `Rescate ACTIVO (${rescueConfig.targetModel || 'Auto'}) · ${rescueMsg || 'Sincronización permanente'} — Click para desactivar`
+              : `Activar Rescate Permanente en PC${currentDevice?.model ? ` para ${currentDevice.model}` : ''}`
+          }
           className={`h-9 px-2.5 shrink-0 whitespace-nowrap hidden sm:flex items-center gap-1.5 rounded-lg border text-xs font-semibold transition-colors ${
             rescueConfig.enabled ? btnActive : btnNeutral
           }`}
         >
-          <Zap size={15} className="shrink-0" />
-          <span className="hidden xl:inline">Rescate A30</span>
+          <Zap size={15} className={`shrink-0 ${rescueConfig.enabled ? 'text-emerald-500' : ''}`} />
+          <span className="hidden xl:inline">{rescueConfig.enabled ? 'Rescate ON' : 'Rescate'}</span>
         </button>
       )}
 

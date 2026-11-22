@@ -85,8 +85,8 @@ export function parseOptimizerParts(parts: string[]) {
     dpi: dpiMatch ? parseInt(dpiMatch[1], 10) : 420,
     gpuTweaks: {
       force_gpu: (gpuRenderer || '').trim() === 'skiavk',
-      disable_overlays: (gpuOverlays || '').trim() === 'true',
-      force_msaa: (gpuMsaa || '').trim() === '4',
+      disable_overlays: ['true', '1'].includes((gpuOverlays || '').trim()),
+      force_msaa: ['4', '1', 'true'].includes((gpuMsaa || '').trim()),
     },
     backgroundLimit: bgLimitVal,
     screenTimeout: (screenTimeoutRaw || '1800000').trim(),

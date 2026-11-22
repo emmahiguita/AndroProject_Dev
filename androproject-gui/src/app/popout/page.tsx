@@ -9,7 +9,7 @@
 // ============================================================================
 'use client';
 
-import React, { useState, useEffect, Suspense } from 'react';
+import React, { useState, useEffect, useRef, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import {
   Maximize2, Minimize2, Volume2, VolumeX, Send, Type,
@@ -36,27 +36,32 @@ function PopoutContent() {
   const [isMuted, setIsMuted] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [statusMsg, setStatusMsg] = useState<string | null>(null);
+  const msgTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const flashMsg = (msg: string) => { setStatusMsg(msg); setTimeout(() => setStatusMsg(null), 2500); };
-  const postAction = async (payload: Record<string, unknown>) => {
-    const res = await fetch('/api/actions', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ serial: device.serial, ...payload }),
-    });
-    return res.json();
+  useEffect(() => () => { if (msgTimerRef.current) clearTimeout(msgTimerRef.current); }, []);
+
+  const flashMsg = (msg: string) => {
+    setStatusMsg(msg);
+    if (msgTimerRef.current) clearTimeout(msgTimerRef.current);
+    msgTimerRef.current = setTimeout(() => setStatusMsg(null), 2500);
   };
+  const postAction = (payload: Record<string, unknown>) =>
+    fetch('/api/actions', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ serial: device.serial, ...payload }) }).then((r) => r.json());
 
   useEffect(() => {
-    const interval = setInterval(async () => {
+    let alive = true;
+    const poll = async () => {
       try {
         const res = await fetch('/api/device', { cache: 'no-store' });
-        if (!res.ok) return;
+        if (!res.ok || !alive) return;
         const devList: DeviceInfo[] = (await res.json()).devices || [];
         const found = devList.find((d) => (requestedSerial ? d.serial === requestedSerial : (isIos ? d.platform === 'ios' : d.platform !== 'ios')));
-        if (found) setDevice((prev) => ({ ...prev, ...found }));
+        if (found && alive) setDevice((prev) => ({ ...prev, ...found }));
       } catch {}
-    }, 3000);
-    return () => clearInterval(interval);
+    };
+    void poll();
+    const interval = setInterval(() => { void poll(); }, 3000);
+    return () => { alive = false; clearInterval(interval); };
   }, [requestedSerial, isIos]);
 
   const handleFullscreen = () => {
@@ -144,7 +149,7 @@ function PopoutContent() {
       </header>
 
       {statusMsg && (
-        <div className="bg-zinc-900 border-b border-zinc-800 px-3 py-1 text-[11px] text-center font-mono text-emerald-400 shrink-0">
+        <div className="bg-zinc-900 border-b border-zinc-800 px-3 py-1 text-[11px] text-center font-mono text-zinc-200 shrink-0">
           {statusMsg}
         </div>
       )}

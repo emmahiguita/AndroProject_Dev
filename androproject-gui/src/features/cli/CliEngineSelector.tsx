@@ -96,6 +96,9 @@ export const CliEngineSelector: React.FC<CliEngineSelectorProps> = ({
             DeepSeek: {discovery.clis.claude ? 'activo' : 'offline'}
           </span>
           <span className={`px-2 py-0.5 rounded border font-mono ${dark ? 'bg-zinc-900 border-zinc-800 text-zinc-300' : 'bg-slate-100 border-slate-200 text-slate-700'}`}>
+            Ollama: {discovery.ollamaOnline ? 'activo' : 'offline'}
+          </span>
+          <span className={`px-2 py-0.5 rounded border font-mono ${dark ? 'bg-zinc-900 border-zinc-800 text-zinc-300' : 'bg-slate-100 border-slate-200 text-slate-700'}`}>
             ADB: {discovery.clis.adb ? 'listo' : 'no detectado'}
           </span>
         </div>

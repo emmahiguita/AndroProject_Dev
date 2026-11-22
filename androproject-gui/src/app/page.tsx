@@ -38,7 +38,7 @@ function ActiveView({
     case 'flasher':    return <FlasherView device={device} addLog={addLog} />;
     case 'curar':      return <CurarView device={device} addLog={addLog} />;
     case 'archivos':   return <ArchivosView device={device} addLog={addLog} />;
-    case 'tools':      return <ToolsView device={device} />;
+    case 'tools':      return <ToolsView device={device} addLog={addLog} />;
     case 'cli':        return <CliInjectorView device={device} />;
     case 'optimizer':  return <OptimizerView device={device} addLog={addLog} />;
     case 'config':     return <ConfigView addLog={addLog} />;
@@ -58,7 +58,7 @@ export default function Page() {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
       const requestedNav = params.get('nav') as NavSection | null;
-      if (requestedNav && ['projection', 'dashboard', 'apps', 'flasher', 'curar', 'archivos', 'tools', 'optimizer', 'config'].includes(requestedNav)) {
+      if (requestedNav && ['projection', 'dashboard', 'apps', 'flasher', 'curar', 'archivos', 'tools', 'cli', 'optimizer', 'config'].includes(requestedNav)) {
         setActiveNav(requestedNav);
       }
     }

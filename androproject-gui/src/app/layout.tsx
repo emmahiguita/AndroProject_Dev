@@ -35,6 +35,24 @@ export default function RootLayout({
             __html: `
               (function() {
                 try {
+                  var isExtErr = function(val) {
+                    if (!val) return false;
+                    var s = typeof val === 'string' ? val : (val.stack || val.message || '');
+                    return String(s).indexOf('chrome-extension://') !== -1 || String(s).indexOf('moz-extension://') !== -1;
+                  };
+                  window.addEventListener('error', function(ev) {
+                    if (isExtErr(ev.filename) || isExtErr(ev.error)) {
+                      ev.stopImmediatePropagation();
+                      ev.preventDefault();
+                    }
+                  }, true);
+                  window.addEventListener('unhandledrejection', function(ev) {
+                    if (isExtErr(ev.reason)) {
+                      ev.stopImmediatePropagation();
+                      ev.preventDefault();
+                    }
+                  }, true);
+
                   var removeExtAttrs = function() {
                     var els = document.querySelectorAll('[bis_skin_checked]');
                     for (var i = 0; i < els.length; i++) {

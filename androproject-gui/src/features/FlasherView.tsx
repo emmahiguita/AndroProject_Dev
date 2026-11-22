@@ -1,12 +1,11 @@
 // ============================================================================
 // ARCHIVO: FlasherView.tsx
 // QUÉ HACE: Orquestador del módulo Flasheador (Bootloader, Particiones A/B,
-//           Fastboot .img y ADB Sideload .zip).
-// CÓMO FUNCIONA: Al montar o cambiar de dispositivo (`activeSerial`), consulta
-//           automáticamente `/api/flash` (`check_state`) para leer el modo real
-//           y las variables del bootloader (`ro.boot.*` o `fastboot getvar`).
-// POR QUÉ: Reemplazar el archivo monolítico de 447 líneas con arquitectura
-//           limpia, detección automática en vivo y < 200 líneas (SOLID).
+//           Estado Root, Fastboot .img, Boot temporal en RAM y ADB Sideload).
+// CÓMO FUNCIONA: Al montar o cambiar de dispositivo (`targetSerial`), consulta
+//           `/api/flash` (`check_state`) para leer modo real y propiedades del
+//           bootloader (`ro.boot.*` o `fastboot getvar`), y ejecuta flasheos.
+// POR QUÉ: Conectar `device` prop, `fastboot_boot` y `--disable-verity` (< 200L).
 // ============================================================================
 'use client';
 
@@ -24,75 +23,48 @@ interface FlasherViewProps {
   addLog?: (msg: string, type?: 'info' | 'success' | 'error') => void;
 }
 
-export function FlasherView({ addLog: propAddLog }: FlasherViewProps = {}) {
+export function FlasherView({ device: propDevice, addLog: propAddLog }: FlasherViewProps = {}) {
   const { dark } = useTheme();
-  const flashState = useAppStore((s) => s.flashState);
-  const setFlashState = useAppStore((s) => s.setFlashState);
-  const flashInfo = useAppStore((s) => s.flashInfo);
-  const setFlashInfo = useAppStore((s) => s.setFlashInfo);
-  const selectedPartition = useAppStore((s) => s.selectedPartition);
-  const setSelectedPartition = useAppStore((s) => s.setSelectedPartition);
-  const flashFile = useAppStore((s) => s.flashFile);
-  const setFlashFile = useAppStore((s) => s.setFlashFile);
-  const flashing = useAppStore((s) => s.flashing);
-  const setFlashing = useAppStore((s) => s.setFlashing);
-  const flashProgress = useAppStore((s) => s.flashProgress);
-  const setFlashProgress = useAppStore((s) => s.setFlashProgress);
-  const activeSerial = useAppStore((s) => s.activeSerial);
-  const storeAddLog = useAppStore((s) => s.addLog);
-
+  const s = useAppStore();
+  const targetSerial = s.activeSerial || propDevice?.serial || s.device?.serial || null;
   const [busyAction, setBusyAction] = useState<string | null>(null);
+  const [disableVerity, setDisableVerity] = useState(true);
   const [cmdResult, setCmdResult] = useState<{ text: string; isError: boolean } | null>(null);
   const refreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => () => { if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current); }, []);
 
   const log = useCallback(
-    (msg: string, type: 'info' | 'success' | 'error' = 'info') => {
-      if (propAddLog) propAddLog(msg, type);
-      else storeAddLog(msg);
-    },
-    [propAddLog, storeAddLog],
+    (msg: string, type: 'info' | 'success' | 'error' = 'info') => (propAddLog ? propAddLog(msg, type) : s.addLog(msg)),
+    [propAddLog, s],
   );
 
-  // Detección real automática del estado (ADB / Fastboot / Recovery) y variables de arranque
   const detectDeviceState = useCallback(async () => {
     setBusyAction('check_state');
     try {
       const fd = new FormData();
       fd.append('action', 'check_state');
-      if (activeSerial) fd.append('serial', activeSerial);
+      if (targetSerial) fd.append('serial', targetSerial);
       const r = await fetch('/api/flash', { method: 'POST', body: fd });
       const d = await r.json();
-      setFlashState(d.state || 'unknown');
-      setFlashInfo(d.deviceInfo || {});
-      log(`Estado Flasheador: ${d.state || 'unknown'} (${d.deviceInfo?.product || activeSerial || '--'})`);
-    } catch {
-      log('Error al consultar estado de Fastboot/ADB', 'error');
-    } finally {
-      setBusyAction(null);
-    }
-  }, [activeSerial, setFlashState, setFlashInfo, log]);
+      s.setFlashState(d.state || 'unknown');
+      s.setFlashInfo(d.deviceInfo || {});
+      log(`Estado Flasheador: ${d.state || 'unknown'} (${d.deviceInfo?.product || targetSerial || '--'})`);
+    } catch { log('Error al consultar estado de Fastboot/ADB', 'error'); }
+    finally { setBusyAction(null); }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [targetSerial]);
 
-  useEffect(() => {
-    detectDeviceState();
-  }, [detectDeviceState]);
+  useEffect(() => { void Promise.resolve().then(detectDeviceState); }, [detectDeviceState]);
 
-  // Ejecución genérica de acciones de Bootloader / Reinicio / OEM
-  const handleRunAction = async (
-    action: string,
-    confirmMsg?: string,
-    extra?: Record<string, string>,
-  ) => {
+  const handleRunAction = async (action: string, confirmMsg?: string, extra?: Record<string, string>) => {
     if (confirmMsg && !confirm(confirmMsg)) return;
     setBusyAction(action);
     setCmdResult(null);
     try {
       const fd = new FormData();
       fd.append('action', action);
-      if (activeSerial) fd.append('serial', activeSerial);
-      if (extra) {
-        for (const [k, v] of Object.entries(extra)) fd.append(k, v);
-      }
+      if (targetSerial) fd.append('serial', targetSerial);
+      if (extra) for (const [k, v] of Object.entries(extra)) fd.append(k, v);
       const r = await fetch('/api/flash', { method: 'POST', body: fd });
       const d = await r.json();
       const msg = d.message || d.info || d.error || 'Comando procesado.';
@@ -102,93 +74,93 @@ export function FlasherView({ addLog: propAddLog }: FlasherViewProps = {}) {
         if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current);
         refreshTimerRef.current = setTimeout(detectDeviceState, 2200);
       }
-    } catch {
-      setCmdResult({ text: 'Error de comunicación con /api/flash.', isError: true });
-    } finally {
-      setBusyAction(null);
-    }
+    } catch { setCmdResult({ text: 'Error de comunicación con /api/flash.', isError: true }); }
+    finally { setBusyAction(null); }
   };
 
-  // Ejecución de flasheo de partición (.img)
   const handleExecuteFlash = async () => {
-    if (!flashFile) return;
-    const partObj = PARTITIONS.find((p) => p.id === selectedPartition);
+    if (!s.flashFile) return;
+    const partObj = PARTITIONS.find((p) => p.id === s.selectedPartition);
     const isCritical = partObj?.critical === true;
-    if (!confirm(`¿Flashear "${flashFile.name}" en la partición "${selectedPartition}"?`)) return;
-    if (isCritical && !confirm(`ADVERTENCIA CRÍTICA: "${selectedPartition}" es una partición de bajo nivel. ¿Confirmas continuar?`)) return;
+    if (!confirm(`¿Flashear "${s.flashFile.name}" en la partición "${s.selectedPartition}"?`)) return;
+    if (isCritical && !confirm(`ADVERTENCIA CRÍTICA: "${s.selectedPartition}" es una partición de bajo nivel. ¿Confirmas continuar?`)) return;
 
-    setFlashing(true);
-    setFlashProgress(`Flasheando ${selectedPartition}...`);
+    s.setFlashing(true);
+    s.setFlashProgress(`Flasheando ${s.selectedPartition}...`);
     setCmdResult(null);
     try {
       const fd = new FormData();
       fd.append('action', 'flash');
-      fd.append('file', flashFile);
-      fd.append('partition', selectedPartition);
+      fd.append('file', s.flashFile);
+      fd.append('partition', s.selectedPartition);
       if (isCritical) fd.append('confirmCritical', 'true');
-      if (activeSerial) fd.append('serial', activeSerial);
+      if (disableVerity && s.selectedPartition.startsWith('vbmeta')) fd.append('disableVerity', 'true');
+      if (targetSerial) fd.append('serial', targetSerial);
       const r = await fetch('/api/flash', { method: 'POST', body: fd });
       const d = await r.json();
       const msg = d.message || d.error || 'Operación finalizada.';
       setCmdResult({ text: msg, isError: !d.success });
-      setFlashProgress(d.success ? 'Completado' : 'Error');
+      s.setFlashProgress(d.success ? 'Completado' : 'Error');
       log(msg, d.success ? 'success' : 'error');
-    } catch {
-      setCmdResult({ text: 'Error de red durante el flasheo.', isError: true });
-    } finally {
-      setFlashing(false);
-    }
+    } catch { setCmdResult({ text: 'Error de red durante el flasheo.', isError: true }); }
+    finally { s.setFlashing(false); }
   };
 
-  // Ejecución de ADB Sideload (.zip)
+  const handleExecuteBootTemp = async () => {
+    if (!s.flashFile) return;
+    if (!confirm(`¿Arrancar temporalmente "${s.flashFile.name}" en RAM (fastboot boot) sin flashear la partición?`)) return;
+    s.setFlashing(true);
+    s.setFlashProgress('Arrancando imagen en RAM...');
+    setCmdResult(null);
+    try {
+      const fd = new FormData();
+      fd.append('action', 'fastboot_boot');
+      fd.append('file', s.flashFile);
+      if (targetSerial) fd.append('serial', targetSerial);
+      const r = await fetch('/api/flash', { method: 'POST', body: fd });
+      const d = await r.json();
+      const msg = d.message || d.error || 'Boot temporal enviado.';
+      setCmdResult({ text: msg, isError: !d.success });
+      log(msg, d.success ? 'success' : 'error');
+    } catch { setCmdResult({ text: 'Error de red durante fastboot boot.', isError: true }); }
+    finally { s.setFlashing(false); }
+  };
+
   const handleExecuteSideload = async (file: File) => {
     if (!confirm(`¿Enviar "${file.name}" vía ADB Sideload?`)) return;
-    setFlashing(true);
-    setFlashProgress('Enviando ZIP por sideload...');
+    s.setFlashing(true);
+    s.setFlashProgress('Enviando ZIP por sideload...');
     setCmdResult(null);
     try {
       const fd = new FormData();
       fd.append('action', 'sideload');
       fd.append('file', file);
-      if (activeSerial) fd.append('serial', activeSerial);
+      if (targetSerial) fd.append('serial', targetSerial);
       const r = await fetch('/api/flash', { method: 'POST', body: fd });
       const d = await r.json();
       const msg = d.message || d.error || 'Sideload finalizado.';
       setCmdResult({ text: msg, isError: !d.success });
       log(msg, d.success ? 'success' : 'error');
-    } catch {
-      setCmdResult({ text: 'Error de conexión durante ADB Sideload.', isError: true });
-    } finally {
-      setFlashing(false);
-    }
+    } catch { setCmdResult({ text: 'Error de conexión durante ADB Sideload.', isError: true }); }
+    finally { s.setFlashing(false); }
   };
 
   return (
     <ViewShell navId="flasher">
       <div className="mx-auto w-full max-w-4xl space-y-3">
         <FlasherBootloaderPanel
-          dark={dark}
-          flashState={flashState}
-          flashInfo={flashInfo}
-          busyAction={busyAction}
-          cmdResult={cmdResult}
-          onDetectState={detectDeviceState}
-          onRunAction={handleRunAction}
+          dark={dark} flashState={s.flashState} flashInfo={s.flashInfo}
+          busyAction={busyAction} cmdResult={cmdResult}
+          onDetectState={detectDeviceState} onRunAction={handleRunAction}
         />
 
         <FlasherImagePanel
-          dark={dark}
-          flashState={flashState}
-          selectedPartition={selectedPartition}
-          onSelectPartition={setSelectedPartition}
-          flashFile={flashFile}
-          onSelectFile={(f) => {
-            setFlashFile(f);
-            if (f) log(`Imagen cargada: ${f.name} (${(f.size / 1048576).toFixed(2)} MB)`);
-          }}
-          flashing={flashing}
-          flashProgress={flashProgress}
-          onExecuteFlash={handleExecuteFlash}
+          dark={dark} flashState={s.flashState} selectedPartition={s.selectedPartition}
+          onSelectPartition={s.setSelectedPartition} flashFile={s.flashFile}
+          onSelectFile={(f) => { s.setFlashFile(f); if (f) log(`Imagen cargada: ${f.name} (${(f.size / 1048576).toFixed(2)} MB)`); }}
+          flashing={s.flashing} flashProgress={s.flashProgress}
+          disableVerity={disableVerity} onToggleDisableVerity={setDisableVerity}
+          onExecuteFlash={handleExecuteFlash} onExecuteBootTemp={handleExecuteBootTemp}
           onExecuteSideload={handleExecuteSideload}
         />
       </div>

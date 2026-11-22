@@ -35,12 +35,10 @@ export function ConfigView({ addLog: propAddLog }: ConfigViewProps = {}) {
   const [verified, setVerified] = useState<Record<string, boolean>>({});
   const [deviceSettings, setDeviceSettings] = useState<LiveAndroidSettings | null>(null);
   const [busyAction, setBusyAction] = useState<string | null>(null);
+  const [statusBanner, setStatusBanner] = useState<{ text: string; ok: boolean } | null>(null);
 
   const log = useCallback(
-    (msg: string, type: 'info' | 'success' | 'error' = 'info') => {
-      if (propAddLog) propAddLog(msg, type);
-      else storeAddLog(msg);
-    },
+    (msg: string, type: 'info' | 'success' | 'error' = 'info') => (propAddLog ? propAddLog(msg, type) : storeAddLog(msg)),
     [propAddLog, storeAddLog],
   );
 
@@ -51,16 +49,9 @@ export function ConfigView({ addLog: propAddLog }: ConfigViewProps = {}) {
       const q = activeSerial ? `?serial=${encodeURIComponent(activeSerial)}` : '';
       const res = await fetch(`/api/config${q}`, { cache: 'no-store' });
       const data = await res.json();
-      if (data.success) {
-        useAppStore.setState({ configData: data });
-        setVerified(data.verified || {});
-        setDeviceSettings(data.deviceSettings || null);
-      }
-    } catch {
-      log('Error al leer la configuración del sistema.', 'error');
-    } finally {
-      setBusyAction(null);
-    }
+      if (data.success) { useAppStore.setState({ configData: data }); setVerified(data.verified || {}); setDeviceSettings(data.deviceSettings || null); }
+    } catch { log('Error al leer la configuración del sistema.', 'error'); }
+    finally { setBusyAction(null); }
   }, [activeSerial, log]);
 
   useEffect(() => { loadConfig(); }, [loadConfig]);
@@ -70,22 +61,20 @@ export function ConfigView({ addLog: propAddLog }: ConfigViewProps = {}) {
     setBusyAction(action);
     try {
       const res = await fetch('/api/config', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action, serial: activeSerial, value }),
       });
       const data = await res.json();
       if (data.success) {
         if (data.deviceSettings) setDeviceSettings(data.deviceSettings);
+        setStatusBanner({ text: data.message || `Ajuste aplicado (${action})`, ok: true });
         log(`Ajuste aplicado (${action})`, 'success');
       } else {
+        setStatusBanner({ text: data.error || 'Error aplicando ajuste', ok: false });
         log(data.error || 'Error aplicando ajuste', 'error');
       }
-    } catch {
-      log('Error de red al aplicar ajuste.', 'error');
-    } finally {
-      setBusyAction(null);
-    }
+    } catch { setStatusBanner({ text: 'Error de red al aplicar ajuste.', ok: false }); log('Error de red al aplicar ajuste.', 'error'); }
+    finally { setBusyAction(null); }
   };
 
   const cardCls = dark ? 'bg-zinc-950 border-zinc-800 text-zinc-100' : 'bg-white border-slate-300 text-slate-900 shadow-sm';
@@ -114,7 +103,13 @@ export function ConfigView({ addLog: propAddLog }: ConfigViewProps = {}) {
           </div>
         </div>
 
-        <DeviceSettingsPanel dark={dark} serial={activeSerial || undefined} model={(device as { marketName?: string } | null)?.marketName || device?.model} settings={deviceSettings} busyAction={busyAction} onApplySetting={handleApplySetting} />
+        {statusBanner && (
+          <div className={`rounded-lg border px-3 py-2 text-xs font-mono ${dark ? 'bg-zinc-900 border-zinc-800 text-zinc-200' : 'bg-slate-50 border-slate-200 text-slate-800'}`}>
+            {statusBanner.text}
+          </div>
+        )}
+
+        <DeviceSettingsPanel dark={dark} serial={activeSerial || device?.serial} model={(device as { marketName?: string } | null)?.marketName || device?.model} settings={deviceSettings} busyAction={busyAction} onApplySetting={handleApplySetting} />
 
         {/* Cuadrícula de 2 columnas: Binarios verificados + Red y Accesos */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
@@ -133,9 +128,10 @@ export function ConfigView({ addLog: propAddLog }: ConfigViewProps = {}) {
             <div className="space-y-2">
               <h3 className="text-xs font-bold uppercase tracking-wider flex items-center gap-1.5"><Wifi size={13} /> Red, Puertos y Servicios</h3>
               <div className="space-y-1">
-                <ConfigRow dark={dark} icon={<Wifi size={12} />} label="Puerto ADB Wi-Fi" value={String(configData.wifiPort || 5555)} ok />
-                <ConfigRow dark={dark} icon={<Globe size={12} />} label="Puerto Estudio Web (Next.js)" value="3000" ok />
-                <ConfigRow dark={dark} icon={<Radio size={12} />} label="Receptor AirPlay 2 Nativo" value="7001 (Bonjour Activo)" ok />
+                <ConfigRow dark={dark} icon={<Wifi size={12} />} label="Puerto ADB Wi-Fi" value={String(configData.wifiPort || 5555)} ok={verified.adb} />
+                <ConfigRow dark={dark} icon={<Globe size={12} />} label="Puerto Estudio Web (Next.js)" value={String(configData.apiPort || 3000)} ok />
+                <ConfigRow dark={dark} icon={<Camera size={12} />} label="Vision Backend (WebRTC / YOLO)" value="127.0.0.1:8000" ok={verified.vision} />
+                <ConfigRow dark={dark} icon={<Radio size={12} />} label="Receptor AirPlay 2 Nativo" value={verified.airplay ? '7001 (Activo)' : '7001 (En espera)'} ok={verified.airplay} />
               </div>
             </div>
 
