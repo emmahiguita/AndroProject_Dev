@@ -19,6 +19,7 @@ import { spawn, ChildProcess } from 'child_process';
 import net from 'net';
 import { ADB } from '@/lib/config';
 import { BinaryResolver } from '@/lib/services/binary-resolver';
+import { isIosStreamSerial, handleIosDeviceStream } from '@/lib/services/ios-stream-handler';
 
 // ─── MJPEG Frame Parser ──────────────────────────────────────────────────────
 
@@ -364,6 +365,15 @@ export async function GET(req: NextRequest) {
   const serial = searchParams.get('serial');
 
   if (!serial) return new Response('Missing serial', { status: 400 });
+
+  // Dispositivos iOS (AirPlay 2 / Apple USB): stream sin invocar ADB
+  if (isIosStreamSerial(serial)) {
+    return handleIosDeviceStream(
+      serial,
+      searchParams.get('mode'),
+      parseInt(searchParams.get('maxFps') ?? '30', 10),
+    );
+  }
 
   // Single screenshot request
   if (searchParams.get('mode') === 'screenshot') {

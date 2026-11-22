@@ -186,7 +186,7 @@ export async function inputText(ctx: ActionContext, body: { text: string }) {
     return NextResponse.json({ success: false, error: 'Serial de dispositivo requerido' }, { status: 400 });
   }
 
-  if (target.startsWith('airplay-')) {
+  if (target.startsWith('airplay-') || target.startsWith('apple-')) {
     const { airPlayReceiverEngine } = await import('@/lib/services/airplay-engine');
     const res = await airPlayReceiverEngine.injectText(text);
     return NextResponse.json(res);
@@ -222,7 +222,7 @@ export async function setClipboard(ctx: ActionContext, body: { text: string }) {
     return NextResponse.json({ success: false, error: 'Serial de dispositivo requerido' }, { status: 400 });
   }
 
-  if (target.startsWith('airplay-')) {
+  if (target.startsWith('airplay-') || target.startsWith('apple-')) {
     const { airPlayReceiverEngine } = await import('@/lib/services/airplay-engine');
     const res = await airPlayReceiverEngine.injectText(text);
     return NextResponse.json(res);
@@ -282,7 +282,7 @@ export async function inputTap(ctx: ActionContext, body: { x: number; y: number 
   }
 
   const target = ctx.targetSerial || '';
-  if (target.startsWith('airplay-')) {
+  if (target.startsWith('airplay-') || target.startsWith('apple-')) {
     const { airPlayReceiverEngine } = await import('@/lib/services/airplay-engine');
     const res = await airPlayReceiverEngine.injectTap(Math.round(x), Math.round(y));
     return NextResponse.json(res);
@@ -306,7 +306,7 @@ export async function inputSwipe(
 
   const duration = Math.max(20, Math.min(5000, Math.round(Number(body.duration ?? 120))));
   const target = ctx.targetSerial || '';
-  if (target.startsWith('airplay-')) {
+  if (target.startsWith('airplay-') || target.startsWith('apple-')) {
     const { airPlayReceiverEngine } = await import('@/lib/services/airplay-engine');
     const res = await airPlayReceiverEngine.injectSwipe(Math.round(x1), Math.round(y1), Math.round(x2), Math.round(y2), duration);
     return NextResponse.json(res);
