@@ -183,8 +183,8 @@ export const TurboBoostPanel: React.FC<TurboBoostPanelProps> = ({ device, addLog
 
       {/* Confirmación de ajustes reales aplicados */}
       {appliedList.length > 0 && (
-        <div className="p-2 rounded-lg border border-border bg-surface-base flex items-start gap-2 text-[10px] text-text-secondary">
-          <CheckCircle2 size={13} className="shrink-0 mt-0.5 text-emerald-500" />
+        <div className="p-2.5 rounded-lg border border-border bg-surface-base flex items-start gap-2 text-xs text-text-secondary">
+          <CheckCircle2 size={14} className="shrink-0 mt-0.5 text-text-primary" />
           <p className="leading-relaxed">
             <strong className="text-text-primary">Aplicado:</strong> {appliedList.join(' · ')}
           </p>

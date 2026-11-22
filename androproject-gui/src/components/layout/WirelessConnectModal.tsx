@@ -1,3 +1,10 @@
+// ============================================================================
+// ARCHIVO: WirelessConnectModal.tsx
+// QUÉ HACE: Modal para conectar dispositivos Android vía Wi-Fi ADB (IP:5555).
+// CÓMO FUNCIONA: Despacha `connect_adb` a `/api/actions` con tipografía de
+//           alto contraste y bordes limpios sin `glow-card` ni opacidades bajas.
+// POR QUÉ: Garantizar legibilidad 100% clara en los campos y etiquetas (< 200L).
+// ============================================================================
 'use client';
 
 import React, { useState } from 'react';
@@ -10,10 +17,6 @@ interface WirelessConnectModalProps {
   addLog: (msg: string, type?: 'info' | 'success' | 'error') => void;
 }
 
-/**
- * Modal para conectar un dispositivo Android vía Wi-Fi ADB.
- * Desacoplado de page.tsx — recibe callbacks para logging y refresh.
- */
 export const WirelessConnectModal: React.FC<WirelessConnectModalProps> = ({
   open, onClose, onConnected, addLog,
 }) => {
@@ -53,56 +56,60 @@ export const WirelessConnectModal: React.FC<WirelessConnectModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-4">
-      <div className="glow-card rounded-2xl p-6 w-full max-w-md bg-zinc-900 border border-zinc-800 shadow-2xl space-y-5 animate-in fade-in zoom-in duration-200">
-        {/* Header */}
+      <div className="rounded-2xl p-6 w-full max-w-md bg-zinc-950 border border-zinc-800 shadow-2xl space-y-5 animate-in fade-in zoom-in duration-200">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 text-white font-bold text-base">
+          <div className="flex items-center gap-2 text-zinc-100 font-bold text-base">
             <Wifi size={18} className="text-zinc-300" />
             <span>Conectar Dispositivo Wi-Fi</span>
           </div>
-          <button onClick={onClose} className="p-1 rounded-lg text-white/40 hover:text-white hover:bg-white/10">
+          <button type="button" onClick={onClose} className="p-1 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800">
             <X size={16} />
           </button>
         </div>
 
-        <p className="text-xs text-white/50">
+        <p className="text-xs text-zinc-300">
           Ingresa la IP local de tu Android con Depuración Inalámbrica activa.
         </p>
 
-        {/* Fields */}
         <div className="space-y-3">
           <div>
-            <label className="text-[10px] uppercase font-bold text-white/40 mb-1 block">Dirección IP</label>
+            <label className="text-[11px] uppercase font-bold text-zinc-300 mb-1 block">Dirección IP</label>
             <input
               type="text"
               placeholder="192.168.0.x"
               value={ip}
               onChange={(e) => setIp(e.target.value)}
               onKeyDown={(e) => { if (e.key === 'Enter') handleConnect(); }}
-              className="w-full bg-white/[0.04] border border-white/10 rounded-xl px-3.5 py-2 text-xs text-white placeholder:text-white/20 focus:outline-none focus:border-zinc-500"
+              className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3.5 py-2 text-xs text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:border-zinc-400"
               autoFocus
             />
           </div>
           <div>
-            <label className="text-[10px] uppercase font-bold text-white/40 mb-1 block">Puerto ADB</label>
+            <label className="text-[11px] uppercase font-bold text-zinc-300 mb-1 block">Puerto ADB</label>
             <input
               type="text"
               placeholder="5555"
               value={port}
               onChange={(e) => setPort(e.target.value)}
-              className="w-full bg-white/[0.04] border border-white/10 rounded-xl px-3.5 py-2 text-xs text-white placeholder:text-white/20 focus:outline-none focus:border-zinc-500"
+              className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3.5 py-2 text-xs text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:border-zinc-400"
             />
           </div>
         </div>
 
-        {/* Actions */}
         <div className="flex justify-end gap-2.5 pt-2">
-          <button onClick={onClose}
-            className="px-4 py-2 rounded-xl bg-white/[0.05] hover:bg-white/10 text-white/70 text-xs font-semibold">
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-4 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-200 text-xs font-semibold"
+          >
             Cancelar
           </button>
-          <button onClick={handleConnect} disabled={connecting || !ip.trim()}
-            className="px-5 py-2 rounded-xl bg-zinc-100 hover:bg-zinc-200 text-zinc-900 text-xs font-bold transition-all disabled:opacity-50">
+          <button
+            type="button"
+            onClick={handleConnect}
+            disabled={connecting || !ip.trim()}
+            className="px-5 py-2 rounded-xl bg-zinc-100 hover:bg-white text-zinc-950 text-xs font-bold transition-all disabled:opacity-50"
+          >
             {connecting ? 'Conectando...' : 'Establecer Conexión'}
           </button>
         </div>

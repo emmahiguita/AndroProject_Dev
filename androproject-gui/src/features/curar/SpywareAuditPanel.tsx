@@ -3,8 +3,8 @@
 // QUÉ HACE: Panel de auditoría heurística de publicidad invasora (adware),
 //           spyware y troyanos por comportamiento real, con corte inmediato.
 // CÓMO FUNCIONA: Consulta `/api/security-scan` (GET) y permite revocar overlay
-//           flotante, detener el proceso o desinstalar el paquete en 1 clic.
-// POR QUÉ: Detectar y frenar anuncios invasivos y spyware camuflado (< 200L).
+//           flotante, detener el proceso, congelar o desinstalar en 1 clic.
+// POR QUÉ: Detectar y frenar anuncios invasivos con diseño neutro legible (< 200L).
 // ============================================================================
 'use client';
 
@@ -22,13 +22,12 @@ interface SpywareAuditPanelProps {
 }
 
 export const SpywareAuditPanel: React.FC<SpywareAuditPanelProps> = ({ serial, onLog }) => {
-  const { dark, t } = useTheme();
+  const { dark } = useTheme();
   const [scanning, setScanning] = useState(false);
   const [findings, setFindings] = useState<SpywareFinding[] | null>(null);
   const [suspendedPkgs, setSuspendedPkgs] = useState<Set<string>>(new Set());
   const [meta, setMeta] = useState<{ scanned: number; accessCount: number; topPkg: string | null } | null>(null);
 
-  // Limpia resultados previos al cambiar de dispositivo para evitar falsos positivos cruzados
   useEffect(() => {
     setFindings(null);
     setMeta(null);
@@ -104,16 +103,18 @@ export const SpywareAuditPanel: React.FC<SpywareAuditPanelProps> = ({ serial, on
     }
   };
 
+  const mutedCls = dark ? 'text-zinc-400' : 'text-slate-600';
+
   return (
     <Card>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-400">
-            <Radar size={20} />
+          <div className={`w-10 h-10 rounded-xl border flex items-center justify-center shrink-0 ${dark ? 'bg-zinc-900 border-zinc-800 text-zinc-200' : 'bg-slate-100 border-slate-200 text-slate-700'}`}>
+            <Radar size={18} />
           </div>
           <div>
             <h3 className="text-sm font-bold">Auditoría heurística: Adware Invasivo, Spyware &amp; Virus</h3>
-            <p className={`text-[11px] ${t.textMuted}`}>
+            <p className={`text-xs ${mutedCls}`}>
               Detecta apps ocultas sin ícono, overlays publicitarios, Accesibilidad activa, sideload y permisos sensibles.
             </p>
           </div>
@@ -124,7 +125,7 @@ export const SpywareAuditPanel: React.FC<SpywareAuditPanelProps> = ({ serial, on
       </div>
 
       {meta && (
-        <div className={`mt-3 text-[11px] flex flex-wrap gap-4 ${t.textMuted}`}>
+        <div className={`mt-3 text-xs flex flex-wrap gap-4 ${mutedCls}`}>
           <span>Apps de terceros: <strong>{meta.scanned}</strong></span>
           <span>Accesibilidad activa: <strong>{meta.accessCount}</strong></span>
           {meta.topPkg && <span>Ventana actual: <strong className="font-mono">{meta.topPkg}</strong></span>}
@@ -133,7 +134,7 @@ export const SpywareAuditPanel: React.FC<SpywareAuditPanelProps> = ({ serial, on
 
       {findings !== null && findings.length === 0 && (
         <div className={`mt-4 p-3 rounded-xl border flex items-center gap-2 text-xs ${
-          dark ? 'bg-zinc-900/70 border-zinc-800 text-emerald-400' : 'bg-slate-50 border-slate-200 text-emerald-700'
+          dark ? 'bg-zinc-900 border-zinc-800 text-zinc-200' : 'bg-slate-50 border-slate-200 text-slate-800'
         }`}>
           <CheckCircle2 size={15} />
           <span>No se detectaron combinaciones sospechosas de adware invasivo, spyware ni accesibilidad abusiva.</span>
@@ -152,7 +153,7 @@ export const SpywareAuditPanel: React.FC<SpywareAuditPanelProps> = ({ serial, on
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex items-center gap-2 flex-wrap min-w-0">
                   <span className="font-mono text-xs font-bold truncate">{f.packageName}</span>
-                  <Badge tone={f.severity === 'critical' ? 'danger' : 'warning'}>
+                  <Badge tone="neutral">
                     {f.category.toUpperCase()} · {f.severity.toUpperCase()} · {f.score} pts
                   </Badge>
                 </div>
@@ -178,7 +179,7 @@ export const SpywareAuditPanel: React.FC<SpywareAuditPanelProps> = ({ serial, on
                   </Button>
                 </div>
               </div>
-              <ul className={`text-[11px] space-y-0.5 ${t.textMuted}`}>
+              <ul className={`text-xs space-y-0.5 ${mutedCls}`}>
                 {f.reasons.map((r) => <li key={r}>• {r}</li>)}
               </ul>
             </div>

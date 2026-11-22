@@ -86,6 +86,7 @@ export type QuickActionItem = {
 export type AppInfo = {
   packageName: string;
   name: string;
+  apkPath?: string;
   size: number;
   date: number;
   isSystem?: boolean;

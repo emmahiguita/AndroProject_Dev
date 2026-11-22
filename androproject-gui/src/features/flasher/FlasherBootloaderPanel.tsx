@@ -82,29 +82,29 @@ export const FlasherBootloaderPanel: React.FC<FlasherBootloaderPanelProps> = ({
           <span className="text-xs font-mono font-bold">{stateLabel}</span>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-6 gap-2 pt-1.5 border-t border-zinc-800/40 text-[10px] font-mono">
+        <div className="grid grid-cols-2 sm:grid-cols-6 gap-2 pt-1.5 border-t border-zinc-800/40 text-[11px] font-mono">
           <div>
-            <span className="opacity-60 block text-[8px] uppercase">Producto</span>
+            <span className={`block text-[10px] uppercase ${dark ? 'text-zinc-400' : 'text-slate-600'}`}>Producto</span>
             <strong className="truncate block">{flashInfo.product || '--'}</strong>
           </div>
           <div>
-            <span className="opacity-60 block text-[8px] uppercase">Serial</span>
+            <span className={`block text-[10px] uppercase ${dark ? 'text-zinc-400' : 'text-slate-600'}`}>Serial</span>
             <strong className="truncate block">{flashInfo.serialno || '--'}</strong>
           </div>
           <div>
-            <span className="opacity-60 block text-[8px] uppercase">Slot Activo</span>
+            <span className={`block text-[10px] uppercase ${dark ? 'text-zinc-400' : 'text-slate-600'}`}>Slot Activo</span>
             <strong className="truncate block uppercase">{flashInfo['current-slot'] || '--'}</strong>
           </div>
           <div>
-            <span className="opacity-60 block text-[8px] uppercase">Bootloader</span>
+            <span className={`block text-[10px] uppercase ${dark ? 'text-zinc-400' : 'text-slate-600'}`}>Bootloader</span>
             <strong className="truncate block">{flashInfo.unlocked === 'yes' ? 'Desbloqueado' : flashInfo.unlocked === 'no' ? 'Bloqueado' : '--'}</strong>
           </div>
           <div>
-            <span className="opacity-60 block text-[8px] uppercase">OEM Unlock</span>
+            <span className={`block text-[10px] uppercase ${dark ? 'text-zinc-400' : 'text-slate-600'}`}>OEM Unlock</span>
             <strong className="truncate block">{flashInfo.oem_allowed || '--'}</strong>
           </div>
           <div>
-            <span className="opacity-60 block text-[8px] uppercase">VBMeta / AVB</span>
+            <span className={`block text-[10px] uppercase ${dark ? 'text-zinc-400' : 'text-slate-600'}`}>VBMeta / AVB</span>
             <strong className="truncate block">{flashInfo.vbmeta || flashInfo.verifiedboot || '--'}</strong>
           </div>
         </div>

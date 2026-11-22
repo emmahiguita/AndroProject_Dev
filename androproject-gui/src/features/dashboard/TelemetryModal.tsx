@@ -162,13 +162,13 @@ export const TelemetryModal: React.FC<TelemetryModalProps> = ({
             <MetricGaugeCard dark={dark} icon={<Database size={12} />} label="Almacenamiento" value={`${telemetry.storagePercent}%`} percent={telemetry.storagePercent} status={telemetry.storStatus} subDetail={telemetry.storSubDetail} level={telemetry.storLevel} history={storHistory} />
           </div>
 
-          <div className={`grid grid-cols-3 sm:grid-cols-6 gap-1.5 p-2 rounded border text-[10px] font-mono ${dark ? 'bg-zinc-900/60 border-zinc-800 text-zinc-300' : 'bg-slate-50 border-slate-200 text-slate-700'}`}>
-            <div><span className="opacity-60 block text-[8px] uppercase">Modelo</span><strong className="truncate block">{(device as { marketName?: string } | null)?.marketName || device?.model || '--'}</strong></div>
-            <div><span className="opacity-60 block text-[8px] uppercase">Serial</span><strong className="truncate block">{device?.serial || '--'}</strong></div>
-            <div><span className="opacity-60 block text-[8px] uppercase">Android</span><strong className="truncate block">{device?.androidVersion || '--'} ({device?.connectionType || 'USB'})</strong></div>
-            <div><span className="opacity-60 block text-[8px] uppercase">Pantalla</span><strong className="truncate block">{device?.resolution || '--'}</strong></div>
-            <div><span className="opacity-60 block text-[8px] uppercase">Uptime</span><strong className="truncate block">{device?.uptimeHours || '--'}</strong></div>
-            <div><span className="opacity-60 block text-[8px] uppercase">Batería</span><strong className="truncate block">{device?.battery !== undefined ? `${device.battery}% ${device.isCharging ? '⚡' : ''}` : '--'}</strong></div>
+          <div className={`grid grid-cols-3 sm:grid-cols-6 gap-1.5 p-2 rounded border text-[11px] font-mono ${dark ? 'bg-zinc-900/60 border-zinc-800 text-zinc-200' : 'bg-slate-50 border-slate-200 text-slate-800'}`}>
+            <div><span className="block text-[10px] uppercase text-zinc-400">Modelo</span><strong className="truncate block">{(device as { marketName?: string } | null)?.marketName || device?.model || '--'}</strong></div>
+            <div><span className="block text-[10px] uppercase text-zinc-400">Serial</span><strong className="truncate block">{device?.serial || '--'}</strong></div>
+            <div><span className="block text-[10px] uppercase text-zinc-400">Android</span><strong className="truncate block">{device?.androidVersion || '--'} ({device?.connectionType || 'USB'})</strong></div>
+            <div><span className="block text-[10px] uppercase text-zinc-400">Pantalla</span><strong className="truncate block">{device?.resolution || '--'}</strong></div>
+            <div><span className="block text-[10px] uppercase text-zinc-400">Uptime</span><strong className="truncate block">{device?.uptimeHours || '--'}</strong></div>
+            <div><span className="block text-[10px] uppercase text-zinc-400">Batería</span><strong className="truncate block">{device?.battery !== undefined ? `${device.battery}% ${device.isCharging ? '⚡' : ''}` : '--'}</strong></div>
           </div>
         </div>
 

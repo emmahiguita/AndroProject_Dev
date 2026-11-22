@@ -163,20 +163,20 @@ function ConfigRow({ icon, label, value, dark, ok }: { icon: ReactNode; label: s
       <span className={`shrink-0 ${dark ? 'text-zinc-400' : 'text-slate-500'}`}>{icon}</span>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-1.5">
-          <span className={`text-[10px] font-semibold ${dark ? 'text-zinc-300' : 'text-slate-700'}`}>{label}</span>
+          <span className={`text-[11px] font-semibold ${dark ? 'text-zinc-200' : 'text-slate-800'}`}>{label}</span>
           {ok !== undefined && (
-            <span className={`text-[8px] font-mono px-1 rounded ${ok ? 'bg-emerald-500/15 text-emerald-500' : 'bg-amber-500/15 text-amber-500'}`}>{ok ? 'OK' : 'WARN'}</span>
+            <span className={`text-[10px] font-mono px-1.5 rounded border ${dark ? 'bg-zinc-900 border-zinc-700 text-zinc-200' : 'bg-slate-100 border-slate-300 text-slate-800'}`}>{ok ? 'OK' : 'WARN'}</span>
           )}
         </div>
-        <p className={`text-[10px] font-mono truncate ${dark ? 'text-zinc-400' : 'text-slate-500'}`} title={value}>{value}</p>
+        <p className={`text-[11px] font-mono truncate ${dark ? 'text-zinc-400' : 'text-slate-600'}`} title={value}>{value}</p>
       </div>
       <button
         type="button"
         onClick={() => { navigator.clipboard.writeText(value); setCopied(true); setTimeout(() => setCopied(false), 1500); }}
-        className={`p-1 rounded transition-colors ${dark ? 'hover:bg-zinc-800 text-zinc-400' : 'hover:bg-slate-200 text-slate-600'}`}
+        className={`p-1 rounded transition-colors ${dark ? 'hover:bg-zinc-800 text-zinc-300' : 'hover:bg-slate-200 text-slate-700'}`}
         title="Copiar valor"
       >
-        {copied ? <Check size={11} className="text-emerald-500" /> : <Copy size={11} />}
+        {copied ? <Check size={12} /> : <Copy size={12} />}
       </button>
     </div>
   );

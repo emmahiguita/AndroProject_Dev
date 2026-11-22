@@ -154,10 +154,10 @@ export const DashboardAppsPanel: React.FC<DashboardAppsPanelProps> = ({
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5">
                     <p className={`text-xs font-semibold truncate ${dark ? 'text-zinc-100' : 'text-slate-900'}`}>{app.name}</p>
-                    {app.safeToRemove && <span className="text-[9px] px-1 py-0.5 rounded bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-bold shrink-0">SEGURO</span>}
-                    {app.isSystem && !app.safeToRemove && <span className={`text-[9px] px-1 py-0.5 rounded font-bold shrink-0 ${dark ? 'bg-zinc-800 text-zinc-300' : 'bg-slate-200 text-slate-800'}`}>SYS</span>}
+                    {app.safeToRemove && <span className={`text-[10px] px-1.5 py-0.5 rounded border font-bold shrink-0 ${dark ? 'bg-zinc-900 border-zinc-700 text-zinc-200' : 'bg-slate-100 border-slate-300 text-slate-800'}`}>SEGURO</span>}
+                    {app.isSystem && !app.safeToRemove && <span className={`text-[10px] px-1.5 py-0.5 rounded font-bold shrink-0 ${dark ? 'bg-zinc-800 text-zinc-300' : 'bg-slate-200 text-slate-800'}`}>SYS</span>}
                   </div>
-                  <p className={`text-[10px] font-mono truncate ${dark ? 'text-zinc-400' : 'text-slate-600'}`}>{app.packageName}</p>
+                  <p className={`text-[11px] font-mono truncate ${dark ? 'text-zinc-400' : 'text-slate-600'}`}>{app.packageName}</p>
                 </div>
                 <button
                   type="button"
@@ -166,7 +166,7 @@ export const DashboardAppsPanel: React.FC<DashboardAppsPanelProps> = ({
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ action: 'launch', packageName: app.packageName, serial }),
                   })}
-                  className="shrink-0 p-1 rounded-md opacity-0 group-hover:opacity-100 text-emerald-500 hover:bg-emerald-500/10 transition-all cursor-pointer"
+                  className={`shrink-0 p-1 rounded-md opacity-0 group-hover:opacity-100 transition-all cursor-pointer ${dark ? 'text-zinc-300 hover:bg-zinc-800' : 'text-slate-700 hover:bg-slate-200'}`}
                   title="Abrir aplicación en el teléfono"
                 >
                   <Play size={13} />
@@ -175,7 +175,7 @@ export const DashboardAppsPanel: React.FC<DashboardAppsPanelProps> = ({
                   type="button"
                   onClick={() => onUninstall(app.packageName)}
                   disabled={appActionLoading === app.packageName || app.criticalSystem}
-                  className="shrink-0 p-1 rounded-md opacity-0 group-hover:opacity-100 text-red-600 hover:bg-red-500/10 transition-all cursor-pointer disabled:opacity-30"
+                  className={`shrink-0 p-1 rounded-md opacity-0 group-hover:opacity-100 transition-all cursor-pointer disabled:opacity-30 ${dark ? 'text-zinc-300 hover:bg-zinc-800' : 'text-slate-700 hover:bg-slate-200'}`}
                   title="Desinstalar paquete"
                 >
                   <Trash2 size={13} />
@@ -189,9 +189,9 @@ export const DashboardAppsPanel: React.FC<DashboardAppsPanelProps> = ({
           )}
         </div>
 
-        <p className={`text-[10px] mt-2 pt-2 border-t ${dark ? 'text-zinc-400 border-zinc-800' : 'text-slate-600 border-slate-200'}`}>
+        <p className={`text-[11px] mt-2 pt-2 border-t ${dark ? 'text-zinc-400 border-zinc-800' : 'text-slate-600 border-slate-200'}`}>
           Mostrando {filteredApps.length} de {appsList.length} aplicaciones
-          {safeCount > 0 && <span className="text-emerald-500 ml-1">· {safeCount} seguras para quitar</span>}
+          {safeCount > 0 && <span className="ml-1 font-semibold">· {safeCount} seguras para quitar</span>}
         </p>
       </div>
     </div>

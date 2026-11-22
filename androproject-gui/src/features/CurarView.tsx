@@ -2,9 +2,9 @@
 // ARCHIVO: CurarView.tsx
 // QUÉ HACE: Vista principal de Seguridad y Curación Android (escaneo heurístico
 //           de spyware por permisos/accesibilidad + firmas conocidas + capturas).
-// CÓMO FUNCIONA: Coordina `SpywareAuditPanel` (endpoint `/api/security-scan`)
-//           y `ScreenshotPanel` en pestañas limpias sin saturar el módulo.
-// POR QUÉ: Mantener la UI modular (< 200 líneas, SRP) con detección real.
+// CÓMO FUNCIONA: Coordina `SpywareAuditPanel` y `ScreenshotPanel` en pestañas
+//           monocromas de alto contraste sin iconos ni textos coloridos.
+// POR QUÉ: Mantener la UI modular (< 200 líneas, SRP) y 100% legible.
 // ============================================================================
 'use client';
 
@@ -32,11 +32,12 @@ export function CurarView({ addLog: propAddLog }: CurarViewProps = {}) {
 
   const tab = (id: 'antivirus' | 'screenshot', icon: React.ReactNode, label: string) => (
     <button
+      type="button"
       onClick={() => setCurarSubTab(id)}
-      className={`pb-2 px-3 font-bold text-[11px] border-b-2 transition-all flex items-center gap-1.5 ${
+      className={`pb-2 px-3 font-bold text-xs border-b-2 transition-all flex items-center gap-1.5 cursor-pointer ${
         curarSubTab === id
-          ? 'border-brand text-brand-light'
-          : `border-transparent ${dark ? 'text-text-secondary hover:text-text-primary' : 'text-slate-600 hover:text-slate-900'}`
+          ? dark ? 'border-zinc-100 text-zinc-100' : 'border-slate-900 text-slate-900'
+          : `border-transparent ${dark ? 'text-zinc-400 hover:text-zinc-200' : 'text-slate-600 hover:text-slate-900'}`
       }`}
     >
       {icon} {label}
@@ -46,9 +47,9 @@ export function CurarView({ addLog: propAddLog }: CurarViewProps = {}) {
   return (
     <ViewShell navId="curar">
       <div className="mx-auto w-full min-w-0 max-w-4xl">
-        <div className={`custom-scrollbar flex gap-4 overflow-x-auto border-b ${dark ? 'border-white/10' : 'border-slate-200'} mb-3`}>
-          {tab('antivirus', <ShieldAlert size={12} />, 'Análisis')}
-          {tab('screenshot', <Shield size={12} />, 'Capturas')}
+        <div className={`custom-scrollbar flex gap-4 overflow-x-auto border-b ${dark ? 'border-zinc-800' : 'border-slate-200'} mb-3`}>
+          {tab('antivirus', <ShieldAlert size={13} />, 'Análisis de Seguridad')}
+          {tab('screenshot', <Shield size={13} />, 'Compatibilidad de Capturas')}
         </div>
         {curarSubTab === 'antivirus' ? <AntivirusPanel propAddLog={propAddLog} /> : <ScreenshotPanel />}
       </div>
@@ -57,7 +58,7 @@ export function CurarView({ addLog: propAddLog }: CurarViewProps = {}) {
 }
 
 function AntivirusPanel({ propAddLog }: { propAddLog?: (msg: string, type?: 'info' | 'success' | 'error') => void }) {
-  const { t, dark } = useTheme();
+  const { dark } = useTheme();
   const appsList = useAppStore((s) => s.appsList);
   const appsLoading = useAppStore((s) => s.appsLoading);
   const device = useAppStore((s) => s.device);
@@ -84,6 +85,11 @@ function AntivirusPanel({ propAddLog }: { propAddLog?: (msg: string, type?: 'inf
     } catch { addLog(`Error de red al eliminar ${pkg}`, 'error'); }
   };
 
+  const iconBoxCls = `w-10 h-10 rounded-xl border flex items-center justify-center shrink-0 ${
+    dark ? 'bg-zinc-900 border-zinc-800 text-zinc-200' : 'bg-slate-100 border-slate-200 text-slate-700'
+  }`;
+  const mutedCls = dark ? 'text-zinc-400' : 'text-slate-600';
+
   return (
     <div className="space-y-4">
       <SpywareAuditPanel serial={activeSerial || device?.serial || null} onLog={addLog} />
@@ -91,16 +97,14 @@ function AntivirusPanel({ propAddLog }: { propAddLog?: (msg: string, type?: 'inf
       <Card>
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-semantic-danger/10 flex items-center justify-center text-red-400">
-              <ShieldAlert size={20} />
-            </div>
+            <div className={iconBoxCls}><ShieldAlert size={18} /></div>
             <div>
               <h2 className="text-sm font-bold">Indicadores conocidos de Malware / HiddenAds</h2>
-              <p className={`text-[11px] ${t.textMuted}`}>Coteja paquetes instalados contra firmas conocidas de troyanos y adware.</p>
+              <p className={`text-xs ${mutedCls}`}>Coteja paquetes instalados contra firmas conocidas de troyanos y adware.</p>
             </div>
           </div>
           {appsList.length === 0 && (
-            <Button size="sm" icon={<Shield size={13} />} onClick={fetchApps} disabled={appsLoading || !device?.connected}>
+            <Button size="sm" variant="secondary" icon={<Shield size={13} />} onClick={fetchApps} disabled={appsLoading || !device?.connected}>
               {appsLoading ? 'Cargando...' : 'Cargar apps'}
             </Button>
           )}
@@ -109,9 +113,9 @@ function AntivirusPanel({ propAddLog }: { propAddLog?: (msg: string, type?: 'inf
 
       {appsList.length > 0 && malwareApps.length === 0 && (
         <Card className="border-border text-center">
-          <Shield size={24} className="mx-auto mb-2 text-emerald-400" />
-          <p className="font-bold text-emerald-400 text-xs">Sin coincidencias por nombre de paquete</p>
-          <p className={`text-[11px] ${t.textSub} mt-1`}>Usa el botón <strong>Escaneo profundo</strong> arriba para auditar permisos, Accesibilidad y apps ocultas.</p>
+          <Shield size={22} className={`mx-auto mb-2 ${dark ? 'text-zinc-300' : 'text-slate-700'}`} />
+          <p className="font-bold text-xs">Sin coincidencias por nombre de paquete</p>
+          <p className={`text-xs ${mutedCls} mt-1`}>Usa el botón <strong>Escaneo profundo</strong> arriba para auditar permisos, Accesibilidad y apps ocultas.</p>
         </Card>
       )}
 
@@ -122,11 +126,11 @@ function AntivirusPanel({ propAddLog }: { propAddLog?: (msg: string, type?: 'inf
               <div className="flex items-center justify-between gap-3">
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
-                    <AlertTriangle size={14} className="text-red-400 shrink-0" />
+                    <AlertTriangle size={14} className="shrink-0" />
                     <span className="font-bold text-xs truncate">{app.name}</span>
-                    <Badge tone={app.threatSeverity === 'critical' ? 'danger' : 'warning'}>{app.threatName || 'Sospechosa'}</Badge>
+                    <Badge tone="danger">{app.threatName || 'Sospechosa'}</Badge>
                   </div>
-                  <p className={`text-[10px] font-mono mt-0.5 ${dark ? 'text-white/50' : 'text-slate-500'}`}>{app.packageName}</p>
+                  <p className={`text-[11px] font-mono mt-0.5 ${mutedCls}`}>{app.packageName}</p>
                 </div>
                 <Button variant="danger" size="sm" icon={<Trash2 size={12} />} onClick={() => handleRemove(app.packageName)}>
                   Desinstalar

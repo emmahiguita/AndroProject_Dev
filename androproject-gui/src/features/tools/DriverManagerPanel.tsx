@@ -3,9 +3,10 @@
 // QUÉ HACE: Panel de Windows DriverManager en Herramientas (diagnóstico USB
 //           PnPUtil, detección de errores CM_PROB, verificación `.cat` e
 //           instalación segura de paquetes `.inf` OEM).
-// CÓMO FUNCIONA: Consulta `/api/drivers` (GET) y despacha `verify_cat` o
-//           `install_inf` (POST) con retroalimentación clara y verificable.
-// POR QUÉ: Separar la gestión de drivers Windows del Flasheador (< 200L, SRP).
+// CÓMO FUNCIONA: Consulta `/api/drivers` automáticamente al montar y despacha
+//           `verify_cat` o `install_inf` con estética neutra de alto contraste.
+// POR QUÉ: Eliminar iconos/textos coloridos (`text-sky-400`, `glow-card`) y
+//          garantizar legibilidad clara en modo claro y oscuro (< 200L, SRP).
 // ============================================================================
 'use client';
 
@@ -18,7 +19,7 @@ import { useTheme } from '@/hooks/useTheme';
 import type { DriverScanReport } from '@/lib/services/driver-manager';
 
 export const DriverManagerPanel: React.FC = () => {
-  const { dark, t } = useTheme();
+  const { dark } = useTheme();
   const [loading, setLoading] = useState(false);
   const [report, setReport] = useState<DriverScanReport | null>(null);
   const [driverPath, setDriverPath] = useState('');
@@ -69,19 +70,23 @@ export const DriverManagerPanel: React.FC = () => {
     }
   };
 
+  const cardCls = dark ? 'bg-zinc-950 border-zinc-800 text-zinc-100' : 'bg-white border-slate-200 text-slate-900 shadow-sm';
+  const rowCls = dark ? 'bg-zinc-900 border-zinc-800 text-zinc-200' : 'bg-slate-50 border-slate-200 text-slate-800';
+  const mutedCls = dark ? 'text-zinc-400' : 'text-slate-600';
+
   return (
-    <div className={`${dark ? 'glow-card' : `${t.panel} border ${t.border} shadow-sm`} rounded-xl p-3.5 space-y-3`}>
+    <div className={`rounded-xl border p-3.5 space-y-3 ${cardCls}`}>
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="flex items-center gap-2">
-          <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${dark ? 'bg-sky-500/10 text-sky-400' : 'bg-sky-100 text-sky-600'}`}>
+        <div className="flex items-center gap-2.5">
+          <div className={`w-8 h-8 rounded-lg border flex items-center justify-center shrink-0 ${dark ? 'bg-zinc-900 border-zinc-800 text-zinc-200' : 'bg-slate-100 border-slate-200 text-slate-700'}`}>
             <Usb size={14} />
           </div>
           <div>
-            <h2 className={`text-xs font-bold ${t.text}`}>DriverManager USB Windows (PnPUtil)</h2>
-            <p className={`text-[10px] ${t.textMuted}`}>Diagnostica VID/PID, errores USB, firma `.cat` e instala `.inf` OEM sin romper MTP/ADB.</p>
+            <h2 className="text-xs font-bold">DriverManager USB Windows (PnPUtil)</h2>
+            <p className={`text-[11px] ${mutedCls}`}>Diagnostica VID/PID, errores USB, firma `.cat` e instala `.inf` OEM sin romper MTP/ADB.</p>
           </div>
         </div>
-        <Button size="sm" icon={<RefreshCw size={12} className={loading ? 'animate-spin' : ''} />} onClick={scanDrivers} disabled={loading}>
+        <Button size="sm" variant="secondary" icon={<RefreshCw size={12} className={loading ? 'animate-spin' : ''} />} onClick={scanDrivers} disabled={loading}>
           Escanear USB
         </Button>
       </div>
@@ -104,40 +109,32 @@ export const DriverManagerPanel: React.FC = () => {
       </div>
 
       {statusMsg && (
-        <div className={`p-2 rounded-lg text-[11px] border ${
-          statusMsg.ok
-            ? dark ? 'bg-zinc-900/70 border-zinc-800 text-emerald-300' : 'bg-slate-50 border-slate-200 text-emerald-700'
-            : dark ? 'bg-zinc-900/70 border-zinc-800 text-red-300' : 'bg-slate-50 border-slate-200 text-red-700'
-        }`}>
+        <div className={`p-2.5 rounded-lg text-xs border font-mono ${rowCls}`}>
           {statusMsg.text}
         </div>
       )}
 
       {report && (
-        <div className="space-y-2 text-[11px]">
+        <div className="space-y-2 text-xs">
           <div className="flex flex-wrap gap-2">
-            <Badge tone="info">USB Móvil: {report.mobileUsb.length}</Badge>
+            <Badge tone="neutral">USB Móvil: {report.mobileUsb.length}</Badge>
             <Badge tone="neutral">ADB: {report.adbDevices.length}</Badge>
             <Badge tone="neutral">Fastboot: {report.fastbootDevices.length}</Badge>
-            <Badge tone={report.mobileProblems.length > 0 ? 'warning' : 'success'}>
-              Problemas USB Móvil: {report.mobileProblems.length}
-            </Badge>
-            {report.otherProblemsCount > 0 && (
-              <Badge tone="neutral">Otros PC: {report.otherProblemsCount}</Badge>
-            )}
+            <Badge tone="neutral">Problemas USB Móvil: {report.mobileProblems.length}</Badge>
+            {report.otherProblemsCount > 0 && <Badge tone="neutral">Otros PC: {report.otherProblemsCount}</Badge>}
           </div>
           {report.mobileUsb.map((u) => (
-            <div key={u.instanceId} className={`p-2 rounded-lg border font-mono text-[10px] ${dark ? 'bg-zinc-900/70 border-zinc-800' : 'bg-slate-50 border-slate-200'}`}>
-              <div className="font-bold">{u.description || 'Dispositivo USB'} · <span className="text-sky-400">{u.driverInf || 'sin .inf'}</span></div>
-              <div className="opacity-70 truncate">{u.instanceId}</div>
+            <div key={u.instanceId} className={`p-2.5 rounded-lg border font-mono text-[11px] ${rowCls}`}>
+              <div className="font-bold">{u.description || 'Dispositivo USB'} · <span className={mutedCls}>{u.driverInf || 'sin .inf'}</span></div>
+              <div className={`${mutedCls} truncate mt-0.5`}>{u.instanceId}</div>
             </div>
           ))}
           {report.mobileProblems.map((p) => (
-            <div key={p.instanceId} className={`p-2 rounded-lg border text-[10px] flex items-start gap-2 ${dark ? 'bg-zinc-900/70 border-zinc-800 text-amber-300' : 'bg-slate-50 border-slate-200 text-amber-800'}`}>
-              <AlertTriangle size={13} className="shrink-0 mt-0.5" />
+            <div key={p.instanceId} className={`p-2.5 rounded-lg border text-[11px] flex items-start gap-2 ${rowCls}`}>
+              <AlertTriangle size={14} className="shrink-0 mt-0.5" />
               <div className="min-w-0">
                 <div className="font-bold">{p.description} ({p.driverInf || 'sin driver'})</div>
-                <div className="font-mono opacity-80 truncate">{p.problemCode || p.status} · {p.instanceId}</div>
+                <div className={`font-mono ${mutedCls} truncate mt-0.5`}>{p.problemCode || p.status} · {p.instanceId}</div>
               </div>
             </div>
           ))}

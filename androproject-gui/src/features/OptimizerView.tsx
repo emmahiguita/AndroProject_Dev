@@ -1,3 +1,11 @@
+// ============================================================================
+// ARCHIVO: OptimizerView.tsx
+// QUÉ HACE: Vista del Optimizador de Sistema, liberación de RAM/caché por ADB
+//           y panel de perfiles Turbo (Modo Desarrollador, GPU y refresco).
+// CÓMO FUNCIONA: Despacha `optimize_ram` a `/api/actions` y delega perfiles
+//           avanzados a `TurboBoostPanel` con iconografía monocroma legible.
+// POR QUÉ: Eliminar iconos coloridos (`text-brand-light`) y textos diminutos (< 200L).
+// ============================================================================
 'use client';
 
 import React, { useState } from 'react';
@@ -40,13 +48,11 @@ export const OptimizerView: React.FC<OptimizerViewProps> = ({ device, addLog }) 
 
       const data = await res.json();
       if (!res.ok || !data.success) {
-        // No fabricar éxito cuando el backend falla
         setOptimizationComplete(false);
         addLog(`Error al optimizar: ${data.error || 'HTTP ' + res.status}`, 'error');
         return;
       }
 
-      // freedMB opcional: si el backend no lo reporta, no inventar un número
       const freed = typeof data.freedMB === 'number' ? data.freedMB : null;
       setFreedMemoryMB(freed);
       setOptimizationComplete(true);
@@ -68,12 +74,11 @@ export const OptimizerView: React.FC<OptimizerViewProps> = ({ device, addLog }) 
   return (
     <ViewShell navId="optimizer">
       <div className="max-w-4xl mx-auto space-y-2.5">
-        {/* Banner */}
         <Card padding="md" className="relative overflow-hidden">
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
             <div className="space-y-1">
               <h2 className="text-sm font-bold">Acelerador de Sistema y Memoria RAM</h2>
-              <p className="text-[10px] text-text-secondary max-w-lg">
+              <p className="text-xs text-text-secondary max-w-lg">
                 Cierra procesos en segundo plano, borra cachés y optimiza el rendimiento.
               </p>
             </div>
@@ -90,24 +95,23 @@ export const OptimizerView: React.FC<OptimizerViewProps> = ({ device, addLog }) 
           </div>
         </Card>
 
-        {/* Status */}
         {isOptimizing && (
           <Card padding="sm" className="flex items-center gap-2">
-            <RefreshCw size={14} className="text-brand-light animate-spin shrink-0" />
-            <p className="text-[10px] font-medium text-text-primary">
+            <RefreshCw size={14} className="text-text-secondary animate-spin shrink-0" />
+            <p className="text-xs font-medium text-text-primary">
               Ejecutando en {device?.serial || 'dispositivo'}...
             </p>
           </Card>
         )}
         {optimizationComplete && (
-          <Card padding="sm" className="border-border-accent bg-brand/5">
+          <Card padding="sm">
             <div className="flex items-center gap-3">
-              <CheckCircle2 size={24} className="text-brand-light shrink-0" />
+              <CheckCircle2 size={20} className="text-text-primary shrink-0" />
               <div>
-                <h3 className="text-[11px] font-bold text-text-primary">¡Optimizado con éxito!</h3>
-                <p className="text-[10px] text-text-secondary mt-0.5">
+                <h3 className="text-xs font-bold text-text-primary">¡Optimizado con éxito!</h3>
+                <p className="text-xs text-text-secondary mt-0.5">
                   {freedMemoryMB !== null ? (
-                    <>Liberados <strong className="text-brand-light font-mono">{freedMemoryMB} MB</strong> de RAM.</>
+                    <>Liberados <strong className="text-text-primary font-mono">{freedMemoryMB} MB</strong> de RAM.</>
                   ) : (
                     'Procesos detenidos y caché liberada.'
                   )}
@@ -117,17 +121,16 @@ export const OptimizerView: React.FC<OptimizerViewProps> = ({ device, addLog }) 
           </Card>
         )}
 
-        {/* Device facts */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
           <Card padding="sm">
             <div className="flex items-center justify-between text-text-secondary">
-              <span className="text-[9px] font-semibold uppercase tracking-wider">Memoria RAM</span>
-              <Cpu size={14} className="text-brand-light" />
+              <span className="text-[11px] font-semibold uppercase tracking-wider">Memoria RAM</span>
+              <Cpu size={14} className="text-text-secondary" />
             </div>
             <p className="text-base font-bold font-mono text-text-primary mt-1">
               {device?.ram || '--'}
             </p>
-            <p className="text-[10px] text-text-secondary">
+            <p className="text-xs text-text-secondary">
               {device?.ramUsagePercent != null
                 ? `${device.ramUsagePercent}% en uso`
                 : device ? 'RAM total' : 'No detectado'}
@@ -136,29 +139,28 @@ export const OptimizerView: React.FC<OptimizerViewProps> = ({ device, addLog }) 
 
           <Card padding="sm">
             <div className="flex items-center justify-between text-text-secondary">
-              <span className="text-[9px] font-semibold uppercase tracking-wider">Almacenamiento</span>
-              <HardDrive size={14} className="text-brand-light" />
+              <span className="text-[11px] font-semibold uppercase tracking-wider">Almacenamiento</span>
+              <HardDrive size={14} className="text-text-secondary" />
             </div>
             <p className="text-base font-bold font-mono text-text-primary mt-1">
               {device?.storage || '--'}
             </p>
-            <p className="text-[10px] text-text-secondary">
+            <p className="text-xs text-text-secondary">
               {device?.storageFreeGB != null
                 ? `${device.storageFreeGB} GB libres`
                 : device ? 'Capacidad total' : '--'}
             </p>
           </Card>
 
-          {/* FIX: reemplazado componente muerto por CPU % real */}
           <Card padding="sm">
             <div className="flex items-center justify-between text-text-secondary">
-              <span className="text-[9px] font-semibold uppercase tracking-wider">CPU</span>
-              <RefreshCw size={14} className="text-brand-light" />
+              <span className="text-[11px] font-semibold uppercase tracking-wider">CPU</span>
+              <RefreshCw size={14} className="text-text-secondary" />
             </div>
             <p className="text-base font-bold font-mono text-text-primary mt-1">
               {device?.cpuUsagePercent != null ? `${device.cpuUsagePercent}%` : '--'}
             </p>
-            <p className="text-[10px] text-text-secondary">
+            <p className="text-xs text-text-secondary">
               {device ? 'Uso de procesador' : '--'}
             </p>
           </Card>
@@ -166,10 +168,9 @@ export const OptimizerView: React.FC<OptimizerViewProps> = ({ device, addLog }) 
 
         <TurboBoostPanel device={device} addLog={addLog} />
 
-        <p className="text-[9px] text-text-tertiary flex items-center gap-1">
-          <Sparkles size={10} /> Lectura y optimización en tiempo real mediante comandos ADB nativos.
+        <p className="text-[11px] text-text-secondary flex items-center gap-1">
+          <Sparkles size={11} /> Lectura y optimización en tiempo real mediante comandos ADB nativos.
         </p>
-
       </div>
     </ViewShell>
   );

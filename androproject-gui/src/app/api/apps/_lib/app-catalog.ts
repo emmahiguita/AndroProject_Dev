@@ -2,11 +2,13 @@
 // ARCHIVO: app-catalog.ts
 // QUÉ HACE: Diccionarios y clasificadores puros de paquetes Android (nombre
 //           amigable, bloatware OEM, firmas de malware/spyware/adware y
-//           evaluación heurística de amenazas por comportamiento).
+//           evaluación heurística de amenazas y apps ocultas).
 // CÓMO FUNCIONA: Cruza firmas de troyanos/spyware/adware con señales reales de
-//           ADB (app oculta sin launcher, permiso de overlay publicitario,
-//           servicio de Accesibilidad, Device Admin e instalador sideload).
-// POR QUÉ: Detectar tanto virus conocidos como adware/spyware camuflado (< 170L).
+//           ADB (app oculta sin icono en launcher, proceso oculto en RAM,
+//           lectura de notificaciones, overlay publicitario, Accesibilidad,
+//           Device Admin e instalador externo sideload).
+// POR QUÉ: Garantizar que ninguna app oculta, adware o spyware pase
+//          desapercibida en el módulo Aplicaciones (< 180 líneas, SRP).
 // ============================================================================
 
 const BLOATWARE_PACKAGES = new Set([
@@ -84,6 +86,8 @@ const MALWARE_SIGNATURES: Array<{ key: string; name: string; severity: 'medium' 
 
 const ADWARE_KEYWORDS_RE = /(?:clean(?:er)?master|supercleaner|junkclean|phonebooster|rambooster|batterybooster|fastcharger|coolermaster|viruscleaner|antivirusfree|luckywheel|cashreward|freemoney|popad|adpush)/i;
 const TRUSTED_USER_PREFIXES = ['com.google.', 'com.android.', 'com.whatsapp', 'com.instagram.', 'com.facebook.', 'com.spotify.', 'com.netflix.', 'org.telegram.', 'com.microsoft.', 'com.Truecaller', 'com.nequi.', 'com.davivienda.', 'com.bancolombia.', 'sinet.startup.inDriver', 'com.deepseek.'];
+// Plugins legítimos sin icono (bibliotecas de sistema/tricorder/codecs) que no deben dar falso positivo
+const LEGIT_HEADLESS_RE = /(?:\.overlay|\.rro|auto_generated|trichromelibrary|webview|tts|gboard|inputmethod|speechservices|ar\.core|play\.games| PrintService|MidiService)/i;
 
 const APP_NAME_DICT: Record<string, string> = {
   'com.android.chrome': 'Google Chrome', 'com.google.android.youtube': 'YouTube', 'com.whatsapp': 'WhatsApp',
@@ -129,6 +133,8 @@ const matchesSetOrWildcard = (set: Set<string>, pkg: string): boolean => {
 export const isBloatwarePackage = (pkg: string, isSystem: boolean): boolean =>
   isSystem && (BLOATWARE_PACKAGES.has(pkg) || BLOAT_PREFIXES.some((p) => pkg.startsWith(p)));
 
+export const isLegitHeadlessPackage = (pkg: string): boolean => LEGIT_HEADLESS_RE.test(pkg);
+
 export function getMalwareClassification(pkg: string) {
   const cleanPkg = pkg.toLowerCase();
   const hit = MALWARE_SIGNATURES.find((sig) => cleanPkg.includes(sig.key));
@@ -140,15 +146,19 @@ export function getMalwareClassification(pkg: string) {
 export function evaluateHeuristicThreat(params: {
   pkg: string; isSystem: boolean; isHidden: boolean; hasOverlay: boolean;
   hasAccessibility: boolean; isDeviceAdmin: boolean; isSideloaded: boolean;
+  hasNotificationAccess?: boolean; isRunningInBg?: boolean;
 }): { isMalware: boolean; threatName: string; severity: 'medium' | 'high' | 'critical' } | null {
-  const { pkg, isSystem, isHidden, hasOverlay, hasAccessibility, isDeviceAdmin, isSideloaded } = params;
+  const { pkg, isSystem, isHidden, hasOverlay, hasAccessibility, isDeviceAdmin, isSideloaded, hasNotificationAccess, isRunningInBg } = params;
   const known = getMalwareClassification(pkg);
   if (known) return known;
-  if (isSystem || TRUSTED_USER_PREFIXES.some((p) => pkg.startsWith(p))) return null;
+  if (isSystem || TRUSTED_USER_PREFIXES.some((p) => pkg.startsWith(p)) || isLegitHeadlessPackage(pkg)) return null;
   if (hasAccessibility && (isSideloaded || isHidden)) return { isMalware: true, threatName: 'Spyware / Troyano con Accesibilidad Activa', severity: 'critical' };
   if (isDeviceAdmin && (isSideloaded || isHidden)) return { isMalware: true, threatName: 'Persistencia Device Admin Sospechosa', severity: 'critical' };
+  if (isHidden && hasNotificationAccess) return { isMalware: true, threatName: 'Spyware Oculto con Lectura de Notificaciones', severity: 'critical' };
   if (isHidden && hasOverlay) return { isMalware: true, threatName: 'Adware Oculto con Overlay (Popups de Publicidad)', severity: 'high' };
+  if (isHidden && isRunningInBg) return { isMalware: true, threatName: 'App Oculta Activa en RAM (Sin Icono en Launcher)', severity: 'high' };
   if (isHidden && isSideloaded) return { isMalware: true, threatName: 'APK Oculto sin Icono (Instalación Externa)', severity: 'high' };
+  if (isHidden) return { isMalware: true, threatName: 'App de Usuario Oculta (Sin Icono en Launcher)', severity: 'medium' };
   if (hasOverlay && isSideloaded) return { isMalware: true, threatName: 'Adware / Overlay Publicitario (APK Externo)', severity: 'medium' };
   return null;
 }
