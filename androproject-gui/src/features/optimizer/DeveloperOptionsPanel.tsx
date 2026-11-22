@@ -66,7 +66,7 @@ export const DeveloperOptionsPanel: React.FC<DeveloperOptionsPanelProps> = ({ se
   };
 
   const chipCls = (active: boolean) =>
-    `px-2 py-1 rounded border text-[11px] font-mono font-semibold transition-colors cursor-pointer disabled:opacity-50 ${
+    `px-2 py-1 rounded border text-[11px] font-mono font-semibold transition-colors cursor-pointer disabled:opacity-65 ${
       active ? (dark ? 'bg-zinc-100 text-zinc-950 border-zinc-100' : 'bg-slate-900 text-white border-slate-900')
              : (dark ? 'bg-zinc-900 text-zinc-300 border-zinc-700 hover:bg-zinc-800' : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-100')
     }`;

@@ -53,21 +53,28 @@ export function AppManagerPanel(props: AppManagerPanelProps) {
     handleAppUninstall, handleAppEnable, handleAppDisable,
   } = props;
 
-  const [visibleCount, setVisibleCount] = useState(INITIAL_BATCH);
+  const filterKey = `${appsSearch}|${appsFilter}|${appsSort}|${appsViewMode}`;
+  const [visibleState, setVisibleState] = useState({ key: filterKey, count: INITIAL_BATCH });
+  const visibleCount = visibleState.key === filterKey ? visibleState.count : INITIAL_BATCH;
   const sentinelRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => { setVisibleCount(INITIAL_BATCH); }, [appsSearch, appsFilter, appsSort, appsViewMode]);
 
   useEffect(() => {
     const el = sentinelRef.current;
     if (!el || visibleCount >= filteredApps.length) return;
     const obs = new IntersectionObserver(
-      (entries) => { if (entries[0]?.isIntersecting) setVisibleCount((c) => Math.min(filteredApps.length, c + STEP_BATCH)); },
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
+          setVisibleState((prev) => ({
+            key: filterKey,
+            count: Math.min(filteredApps.length, (prev.key === filterKey ? prev.count : INITIAL_BATCH) + STEP_BATCH),
+          }));
+        }
+      },
       { rootMargin: '320px' },
     );
     obs.observe(el);
     return () => obs.disconnect();
-  }, [visibleCount, filteredApps.length]);
+  }, [visibleCount, filteredApps.length, filterKey]);
 
   if (!connected && totalCount === 0) {
     return (
@@ -131,7 +138,11 @@ export function AppManagerPanel(props: AppManagerPanelProps) {
       </div>
 
       {statusMessage && (
-        <div className={`rounded-xl border px-3.5 py-2.5 text-xs flex items-center gap-2 ${dark ? 'bg-zinc-900 border-zinc-800' : 'bg-white border-slate-200'} ${statusMessage.isError ? 'text-red-400' : 'text-emerald-400'}`}>
+        <div className={`rounded-xl border px-3.5 py-2.5 text-xs flex items-center gap-2 ${dark ? 'bg-zinc-900 border-zinc-800' : 'bg-white border-slate-200'} ${
+          dark
+            ? (statusMessage.isError ? 'text-red-400' : 'text-emerald-400')
+            : (statusMessage.isError ? 'text-red-700' : 'text-emerald-700')
+        }`}>
           {statusMessage.isError ? <AlertCircle size={14} className="shrink-0" /> : <CheckCircle2 size={14} className="shrink-0" />}
           <span className="font-mono break-all">{statusMessage.text}</span>
         </div>
@@ -161,7 +172,7 @@ export function AppManagerPanel(props: AppManagerPanelProps) {
           </div>
           {visibleCount < filteredApps.length && (
             <div ref={sentinelRef} className="flex items-center justify-center py-4">
-              <Button variant="secondary" size="sm" onClick={() => setVisibleCount(filteredApps.length)}>Mostrando {visibleCount} de {filteredApps.length} · Ver todas</Button>
+              <Button variant="secondary" size="sm" onClick={() => setVisibleState({ key: filterKey, count: filteredApps.length })}>Mostrando {visibleCount} de {filteredApps.length} · Ver todas</Button>
             </div>
           )}
         </>

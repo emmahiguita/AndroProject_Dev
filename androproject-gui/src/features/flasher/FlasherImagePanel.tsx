@@ -107,7 +107,7 @@ export const FlasherImagePanel: React.FC<FlasherImagePanelProps> = ({
         <div className="flex gap-2">
           <button
             type="button" disabled={!flashFile || flashState !== 'fastboot' || flashing} onClick={onExecuteFlash}
-            className={`flex-1 py-2 px-3 rounded border text-xs font-bold flex items-center justify-center gap-2 transition-colors disabled:opacity-40 cursor-pointer ${
+            className={`flex-1 py-2 px-3 rounded border text-xs font-bold flex items-center justify-center gap-2 transition-colors disabled:opacity-65 cursor-pointer ${
               dark ? 'bg-zinc-100 text-zinc-950 border-zinc-100 hover:bg-white' : 'bg-slate-900 text-white border-slate-900 hover:bg-slate-800'
             }`}
           >
@@ -119,7 +119,7 @@ export const FlasherImagePanel: React.FC<FlasherImagePanelProps> = ({
             <button
               type="button" disabled={!flashFile || flashState !== 'fastboot' || flashing} onClick={onExecuteBootTemp}
               title="Arrancar imagen temporalmente en RAM (fastboot boot)"
-              className={`py-2 px-3 rounded border text-xs font-bold flex items-center justify-center gap-1.5 transition-colors disabled:opacity-40 cursor-pointer ${
+              className={`py-2 px-3 rounded border text-xs font-bold flex items-center justify-center gap-1.5 transition-colors disabled:opacity-65 cursor-pointer ${
                 dark ? 'bg-zinc-900 text-zinc-100 border-zinc-700 hover:bg-zinc-800' : 'bg-slate-100 text-slate-900 border-slate-300 hover:bg-slate-200'
               }`}
             >

@@ -18,8 +18,9 @@ const plusJakartaSans = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Dexterand — Control Android",
-  description: "Control, transmisión y mantenimiento profesional de dispositivos Android",
+  title: "ANDROIS — Control Android & iOS Studio",
+  description: "Control, transmisión, diagnóstico y mantenimiento profesional de dispositivos Android e iOS",
+  icons: { icon: "/favicon.png", apple: "/icon.png" },
 };
 
 export default function RootLayout({

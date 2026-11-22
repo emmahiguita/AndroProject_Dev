@@ -109,6 +109,11 @@
   "107": "WebCodecsCanvas.tsx",
   "108": "windows-schema.json",
   "109": "PermissionEntry",
+  "110": "launch_native_ios_projector.ps1",
+  "111": "optimize_phone.ps1",
+  "112": "phone_status.ps1",
+  "113": "start.ps1",
+  "114": "stop.ps1",
   "115": "route.ts",
   "117": "getLockFile",
   "118": "IAdbExecutor",
@@ -117,10 +122,6 @@
   "122": "detectAirPlaySocketIps",
   "125": "Identifier",
   "126": "Value",
-  "128": "useSystemLogs.ts",
   "130": "dashboard-components.tsx",
-  "131": "PermissionEntry",
-  "132": "🎮 Modos de Uso",
-  "133": "📱 Crear Accesos Directos en Android",
   "137": "Value"
 }

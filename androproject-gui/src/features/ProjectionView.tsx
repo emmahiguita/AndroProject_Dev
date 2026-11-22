@@ -68,18 +68,19 @@ export function ProjectionView({ device }: { device?: DeviceInfo | null }) {
     prevDevCountRef.current = count;
   }, [uniqueDevices.length, setMultiScreenEnabled]);
 
+  const deviceSerial = device?.serial;
   const handleOpenPopout = useCallback(async () => {
-    if (!device?.serial) return;
+    if (!deviceSerial) return;
     if (rustBridge.isDesktop()) {
-      await rustBridge.openPopout(device.serial);
+      await rustBridge.openPopout(deviceSerial);
       return;
     }
     window.open(
-      `/popout?serial=${encodeURIComponent(device.serial)}`,
-      `popout_${device.serial.replace(/[^a-zA-Z0-9]/g, '_')}`,
+      `/popout?serial=${encodeURIComponent(deviceSerial)}`,
+      `popout_${deviceSerial.replace(/[^a-zA-Z0-9]/g, '_')}`,
       'width=420,height=860,left=80,top=80,resizable=yes,scrollbars=no,status=no',
     );
-  }, [device?.serial]);
+  }, [deviceSerial]);
 
   if (!device) return <ViewShell navId="projection" fill><EmptyState dark={dark} onConnectAdb={projection.connectAdb} isConnecting={projection.isConnecting} /></ViewShell>;
   if (isMobile) return <ViewShell navId="projection" fill><MobileProjection device={device} dark={dark} projection={projection} /></ViewShell>;
@@ -145,11 +146,13 @@ export function ProjectionView({ device }: { device?: DeviceInfo | null }) {
             )}
 
             <div className="flex flex-col min-h-0 overflow-hidden" style={{ width: frameMinimized ? '100%' : `${(1 - ratio) * 100}%`, minWidth: 0 }}>
-              <div className="flex items-center p-1.5 border-b border-zinc-800 bg-zinc-950/80 gap-1 shrink-0">
+              <div className={`flex items-center p-1.5 border-b gap-1 shrink-0 ${dark ? 'border-zinc-800 bg-zinc-950/80' : 'border-slate-200 bg-slate-100/90'}`}>
                 <button
                   type="button" onClick={() => setActiveTab('studio')}
                   className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                    activeTab === 'studio' ? 'bg-zinc-800 text-zinc-100 border border-zinc-700' : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50'
+                    activeTab === 'studio'
+                      ? (dark ? 'bg-zinc-800 text-zinc-100 border border-zinc-700' : 'bg-white text-slate-900 border border-slate-300 shadow-xs')
+                      : (dark ? 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50' : 'text-slate-600 hover:text-slate-900 hover:bg-white/70')
                   }`}
                 >
                   <Sliders size={13} /> <span>Estudio &amp; Control</span>
@@ -157,7 +160,9 @@ export function ProjectionView({ device }: { device?: DeviceInfo | null }) {
                 <button
                   type="button" onClick={() => setActiveTab('logcat')}
                   className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                    activeTab === 'logcat' ? 'bg-zinc-800 text-zinc-100 border border-zinc-700' : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50'
+                    activeTab === 'logcat'
+                      ? (dark ? 'bg-zinc-800 text-zinc-100 border border-zinc-700' : 'bg-white text-slate-900 border border-slate-300 shadow-xs')
+                      : (dark ? 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50' : 'text-slate-600 hover:text-slate-900 hover:bg-white/70')
                   }`}
                 >
                   <Terminal size={13} /> <span>Logcat &amp; Crashes</span>

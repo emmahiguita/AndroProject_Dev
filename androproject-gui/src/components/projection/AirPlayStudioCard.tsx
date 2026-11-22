@@ -29,7 +29,7 @@ interface AirPlayStudioCardProps {
   onMouseControl?: () => Promise<void> | void;
   onScreenshotClick: () => void;
   onPasteClipboard: () => void;
-  run: (action: string, desc: string, extraBody?: Record<string, unknown>, logResult?: boolean) => Promise<any>;
+  run: (action: string, desc: string, extraBody?: Record<string, unknown>, logResult?: boolean) => Promise<unknown>;
   showToast: (msg: string, isError?: boolean) => void;
 }
 
@@ -77,29 +77,29 @@ export const AirPlayStudioCard: React.FC<AirPlayStudioCardProps> = ({
     <div className={`rounded-xl border p-3.5 ${cardStyle} space-y-3`}>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-md bg-zinc-800 flex items-center justify-center text-zinc-200">
+          <div className={`w-6 h-6 rounded-md flex items-center justify-center ${dark ? 'bg-zinc-800 text-zinc-200' : 'bg-slate-200 text-slate-800'}`}>
             <Airplay size={14} />
           </div>
           <div>
             <h3 className={`text-xs font-semibold ${dark ? 'text-zinc-100' : 'text-slate-900'}`}>
               Receptor Apple AirPlay 2
             </h3>
-            <p className="text-[10px] text-emerald-400">Video H.264 60 FPS • Audio en Celular</p>
+            <p className={`text-[10px] ${dark ? 'text-emerald-400' : 'text-emerald-700'}`}>Video H.264 60 FPS • Audio en Celular</p>
           </div>
         </div>
-        <span className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-zinc-800 border border-zinc-700 text-[10px] font-medium text-zinc-300">
+        <span className={`flex items-center gap-1 px-2 py-0.5 rounded-md border text-[10px] font-medium ${dark ? 'bg-zinc-800 border-zinc-700 text-zinc-300' : 'bg-slate-100 border-slate-300 text-slate-800'}`}>
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> 60 FPS
         </span>
       </div>
 
-      <div className="p-2.5 rounded-lg bg-zinc-950/60 border border-zinc-800/80 space-y-2">
+      <div className={`p-2.5 rounded-lg border space-y-2 ${dark ? 'bg-zinc-950/60 border-zinc-800/80' : 'bg-slate-50 border-slate-200'}`}>
         <div className="flex items-center justify-between text-[11px]">
-          <span className="text-zinc-400 font-normal">Nombre en Red:</span>
-          <span className="font-medium text-zinc-200 font-mono">{airplayStatus.serverName} (:{airplayStatus.port})</span>
+          <span className={dark ? 'text-zinc-400 font-normal' : 'text-slate-600 font-normal'}>Nombre en Red:</span>
+          <span className={`font-medium font-mono ${dark ? 'text-zinc-200' : 'text-slate-900'}`}>{airplayStatus.serverName} (:{airplayStatus.port})</span>
         </div>
         <div className="flex items-center justify-between text-[11px]">
-          <span className="text-zinc-400 font-normal">Estado Receptor:</span>
-          <span className={`font-medium font-mono ${airplayStatus.running ? 'text-emerald-400' : 'text-amber-400'}`}>
+          <span className={dark ? 'text-zinc-400 font-normal' : 'text-slate-600 font-normal'}>Estado Receptor:</span>
+          <span className={`font-medium font-mono ${airplayStatus.running ? (dark ? 'text-emerald-400' : 'text-emerald-700') : (dark ? 'text-amber-400' : 'text-amber-700')}`}>
             {airplayStatus.running ? 'Activo · Bonjour ON' : 'En espera'}
           </span>
         </div>
@@ -113,9 +113,11 @@ export const AirPlayStudioCard: React.FC<AirPlayStudioCardProps> = ({
             showToast(airplayStatus.running ? 'Deteniendo receptor AirPlay...' : 'Iniciando receptor AirPlay...');
             await toggleServer();
           }}
-          className="flex items-center justify-center gap-1 py-2 px-2 rounded-lg text-xs font-medium transition-colors bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 cursor-pointer"
+          className={`flex items-center justify-center gap-1 py-2 px-2 rounded-lg text-xs font-medium transition-colors border cursor-pointer ${
+            dark ? 'bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border-zinc-700' : 'bg-slate-100 hover:bg-slate-200 text-slate-900 border-slate-300'
+          }`}
         >
-          <Power size={12} className={airplayStatus.running ? 'text-emerald-400' : 'text-zinc-400'} />
+          <Power size={12} className={airplayStatus.running ? (dark ? 'text-emerald-400' : 'text-emerald-600') : (dark ? 'text-zinc-400' : 'text-slate-600')} />
           <span>{airplayStatus.running ? 'Activo' : 'Iniciar'}</span>
         </button>
 
@@ -126,7 +128,9 @@ export const AirPlayStudioCard: React.FC<AirPlayStudioCardProps> = ({
             const data = await postJson('/api/airplay', { action: 'open_native_window' }, 'Error al abrir ventana');
             if (data) showToast('Ventana flotante abierta');
           }}
-          className="flex items-center justify-center gap-1 py-2 px-2 rounded-lg text-xs font-medium transition-colors bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 cursor-pointer"
+          className={`flex items-center justify-center gap-1 py-2 px-2 rounded-lg text-xs font-medium transition-colors border cursor-pointer ${
+            dark ? 'bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border-zinc-700' : 'bg-slate-100 hover:bg-slate-200 text-slate-900 border-slate-300'
+          }`}
         >
           <Maximize2 size={12} /><span>Libre</span>
         </button>
@@ -136,11 +140,11 @@ export const AirPlayStudioCard: React.FC<AirPlayStudioCardProps> = ({
           onClick={handleToggleMouse}
           className={`flex items-center justify-center gap-1 py-2 px-2 rounded-lg text-xs font-medium transition-colors border cursor-pointer ${
             mouseControlActive
-              ? 'bg-zinc-100 border-zinc-100 text-zinc-950 hover:bg-white'
-              : 'bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border-zinc-700'
+              ? (dark ? 'bg-zinc-100 border-zinc-100 text-zinc-950 hover:bg-white' : 'bg-slate-900 border-slate-900 text-white hover:bg-slate-800')
+              : (dark ? 'bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border-zinc-700' : 'bg-slate-100 hover:bg-slate-200 text-slate-900 border-slate-300')
           }`}
         >
-          <Sparkles size={12} className={mouseControlActive ? 'text-emerald-600' : 'text-zinc-400'} />
+          <Sparkles size={12} className={mouseControlActive ? 'text-emerald-500' : (dark ? 'text-zinc-400' : 'text-slate-600')} />
           <span>{mouseControlActive ? 'Ratón ON' : 'Ratón'}</span>
         </button>
       </div>

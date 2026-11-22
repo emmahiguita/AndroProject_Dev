@@ -70,7 +70,7 @@ export function Button({
       className={cn(
         'inline-flex select-none items-center justify-center whitespace-nowrap rounded-md font-medium',
         'transition-colors duration-150 ease-out active:scale-[0.98]',
-        'disabled:pointer-events-none disabled:opacity-50',
+        'disabled:pointer-events-none disabled:opacity-65',
         variantClasses[variant],
         sizeClasses[size],
         fullWidth && 'w-full',

@@ -47,21 +47,21 @@ export class FeatureErrorBoundary extends Component<Props, State> {
       if (this.props.fallback) return this.props.fallback;
 
       return (
-        <div className="flex flex-col items-center justify-center rounded-xl border border-zinc-800 bg-zinc-900/60 p-8 text-center">
-          <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-zinc-800 text-red-400">
+        <div className="flex flex-col items-center justify-center rounded-xl border border-border-default bg-surface-raised p-8 text-center">
+          <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-surface-overlay text-red-500">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <circle cx="12" cy="12" r="10" />
               <line x1="12" y1="8" x2="12" y2="12" />
               <line x1="12" y1="16" x2="12.01" y2="16" />
             </svg>
           </div>
-          <h3 className="text-sm font-bold text-red-400">Error en esta sección</h3>
-          <p className="mt-1 max-w-sm text-xs text-zinc-400">
+          <h3 className="text-sm font-bold text-red-600 dark:text-red-400">Error en esta sección</h3>
+          <p className="mt-1 max-w-sm text-xs text-text-secondary">
             {this.state.error?.message || 'Ocurrió un error inesperado.'}
           </p>
           <button
             onClick={this.handleReset}
-            className="mt-4 rounded-lg border border-zinc-700 bg-zinc-800 px-4 py-2 text-xs font-medium text-zinc-100 transition-colors hover:bg-zinc-700"
+            className="mt-4 rounded-lg border border-border-default bg-surface-overlay px-4 py-2 text-xs font-medium text-text-primary transition-colors hover:bg-surface-base"
           >
             Reintentar
           </button>

@@ -42,7 +42,7 @@ export function ToggleRow({
             {label}
           </span>
           {description && (
-            <span className={`text-[10px] block leading-tight ${dark ? 'text-zinc-500' : 'text-slate-400'}`}>
+            <span className={`text-[10px] block leading-tight ${dark ? 'text-zinc-500' : 'text-slate-600'}`}>
               {description}
             </span>
           )}
@@ -53,7 +53,7 @@ export function ToggleRow({
         checked={checked}
         disabled={disabled}
         onChange={(e) => onChange(e.target.checked)}
-        className="w-3.5 h-3.5 rounded accent-zinc-200 cursor-pointer"
+        className={`w-3.5 h-3.5 rounded cursor-pointer ${dark ? 'accent-zinc-200' : 'accent-slate-900'}`}
       />
     </label>
   );

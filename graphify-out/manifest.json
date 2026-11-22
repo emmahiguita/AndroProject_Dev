@@ -4,16 +4,6 @@
     "ast_hash": "6dbb3e6c46fc7311070f51f1d7b1f658",
     "semantic_hash": "6dbb3e6c46fc7311070f51f1d7b1f658"
   },
-  "INSTALL-OPPO-DIRECTO.sh": {
-    "mtime": 1785376975.4112887,
-    "ast_hash": "ff492a5309b518c8138b31abfd97a250",
-    "semantic_hash": "ff492a5309b518c8138b31abfd97a250"
-  },
-  "andro.ps1": {
-    "mtime": 1786422015.5915225,
-    "ast_hash": "c4184af553a81ae74fd5e6509747d134",
-    "semantic_hash": ""
-  },
   "androproject-gui/eslint.config.mjs": {
     "mtime": 1785811723.096413,
     "ast_hash": "63ddade3e11087d26cb33ab68e4203ad",
@@ -145,8 +135,8 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/app/layout.tsx": {
-    "mtime": 1795362590.6130695,
-    "ast_hash": "9a165331efe6cf7301916c1ae74c7e0f",
+    "mtime": 1795363423.8785093,
+    "ast_hash": "548a743f1de0e3165096735082ad9517",
     "semantic_hash": ""
   },
   "androproject-gui/src/app/page.tsx": {
@@ -165,13 +155,13 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/components/layout/Sidebar.tsx": {
-    "mtime": 1795309428.7992418,
-    "ast_hash": "cf09a78d621c85eff5afd40e2709ce4f",
+    "mtime": 1795363422.3949924,
+    "ast_hash": "554942fac4f8da13f155b8bd247d3c9f",
     "semantic_hash": ""
   },
   "androproject-gui/src/components/ui/FeatureErrorBoundary.tsx": {
-    "mtime": 1795353815.4313254,
-    "ast_hash": "076fa4676ecb2c74e2fc688a555815d5",
+    "mtime": 1795365928.4572854,
+    "ast_hash": "f906222c0b90dce912414e6c23350dd2",
     "semantic_hash": ""
   },
   "androproject-gui/src/components/ui/dashboard-components.tsx": {
@@ -284,65 +274,10 @@
     "ast_hash": "ee17fd1c97c735e9f3564e3f5251f125",
     "semantic_hash": "ee17fd1c97c735e9f3564e3f5251f125"
   },
-  "auto-install-kali-complete.sh": {
-    "mtime": 1785376590.3283818,
-    "ast_hash": "45fda831ea9e0ac9827868802976cd6c",
-    "semantic_hash": "45fda831ea9e0ac9827868802976cd6c"
-  },
-  "check-mobile.sh": {
-    "mtime": 1786422002.9277134,
-    "ast_hash": "35378fd3f99f7f87cbc0f3b8df9485ca",
-    "semantic_hash": ""
-  },
-  "connect_phone.ps1": {
-    "mtime": 1785034415.8555567,
-    "ast_hash": "292e46c1a811983d99b2d75350c070b2",
-    "semantic_hash": "292e46c1a811983d99b2d75350c070b2"
-  },
-  "create-shortcuts.sh": {
-    "mtime": 1785376568.92486,
-    "ast_hash": "e0ca74c44517ebc64f5a04d1fb1fa855",
-    "semantic_hash": "e0ca74c44517ebc64f5a04d1fb1fa855"
-  },
-  "create_shortcut.ps1": {
-    "mtime": 1795356166.7409515,
-    "ast_hash": "cb3a62182400c8ff6b1a91f4069a8ec3",
-    "semantic_hash": ""
-  },
-  "hashcat.ps1": {
-    "mtime": 1785034439.5255508,
-    "ast_hash": "0c2dfc0bc6dcbc888864113bafaa4f63",
-    "semantic_hash": "0c2dfc0bc6dcbc888864113bafaa4f63"
-  },
-  "install-kali-desktop-auto.sh": {
-    "mtime": 1785376552.9578695,
-    "ast_hash": "78942c1acc2cf932f9b3573104070eec",
-    "semantic_hash": "78942c1acc2cf932f9b3573104070eec"
-  },
   "opencode.json": {
     "mtime": 1783391335.8399725,
     "ast_hash": "695ab2bf6b723d270054fbcce0ff5247",
     "semantic_hash": "695ab2bf6b723d270054fbcce0ff5247"
-  },
-  "optimize_phone.ps1": {
-    "mtime": 1785034417.431954,
-    "ast_hash": "66c60ac571ea22f77b90cc811c9362e7",
-    "semantic_hash": "66c60ac571ea22f77b90cc811c9362e7"
-  },
-  "payload.ps1": {
-    "mtime": 1785034446.4417818,
-    "ast_hash": "cabe3f0be02729d009445eabe7b8bff7",
-    "semantic_hash": "cabe3f0be02729d009445eabe7b8bff7"
-  },
-  "phone_status.ps1": {
-    "mtime": 1785034416.6040971,
-    "ast_hash": "063e5c1f8ce197846f44852233e65d59",
-    "semantic_hash": "063e5c1f8ce197846f44852233e65d59"
-  },
-  "scan.ps1": {
-    "mtime": 1785034429.1011043,
-    "ast_hash": "b978c042f6169e8556e845024b0ecee1",
-    "semantic_hash": "b978c042f6169e8556e845024b0ecee1"
   },
   "scripts/fix-screenshot.ps1": {
     "mtime": 1786128781.126818,
@@ -353,36 +288,6 @@
     "mtime": 1785292498.133286,
     "ast_hash": "af3b1dccc198a9f1bcdb4a3bf7118131",
     "semantic_hash": "af3b1dccc198a9f1bcdb4a3bf7118131"
-  },
-  "setup-vnc-password.sh": {
-    "mtime": 1785376557.5221202,
-    "ast_hash": "165170af4b1ac723653428d1585df4ee",
-    "semantic_hash": "165170af4b1ac723653428d1585df4ee"
-  },
-  "start-desktop.sh": {
-    "mtime": 1785376593.4616053,
-    "ast_hash": "5e02f14f90c3f2d2acaa6ead64d96b30",
-    "semantic_hash": "5e02f14f90c3f2d2acaa6ead64d96b30"
-  },
-  "start-kali-vnc.sh": {
-    "mtime": 1785376562.870345,
-    "ast_hash": "70f6a2758ac2e1a86648d45497ea0596",
-    "semantic_hash": "70f6a2758ac2e1a86648d45497ea0596"
-  },
-  "start.ps1": {
-    "mtime": 1795354561.113682,
-    "ast_hash": "c6e13ec19aca3b5829e781b89a2631f3",
-    "semantic_hash": ""
-  },
-  "stop.ps1": {
-    "mtime": 1785800748.570047,
-    "ast_hash": "bce0d1633f8810c5ef95762a88f0a68a",
-    "semantic_hash": "bce0d1633f8810c5ef95762a88f0a68a"
-  },
-  "transfer-to-phone.sh": {
-    "mtime": 1785376782.643267,
-    "ast_hash": "2056781a099c8f83addd2d601e79c3ba",
-    "semantic_hash": "2056781a099c8f83addd2d601e79c3ba"
   },
   "vision-backend/api/__init__.py": {
     "mtime": 1783377945.7141044,
@@ -474,36 +379,6 @@
     "ast_hash": "a1100402dba7a230119a72496f6424d7",
     "semantic_hash": ""
   },
-  "debloat-driver-manifest.json": {
-    "mtime": 1786183634.4202802,
-    "ast_hash": "05a0ff14eea4165d7e31e4bcb3186fec",
-    "semantic_hash": ""
-  },
-  "debloat-driver.ps1": {
-    "mtime": 1786183881.3102336,
-    "ast_hash": "fc695ed33e3d8b3bfdbe333908ddc2cd",
-    "semantic_hash": ""
-  },
-  "debloat-manifest.json": {
-    "mtime": 1786178815.4187152,
-    "ast_hash": "6fb6db3a1c6ea5c62ca4ccd2f2fc834e",
-    "semantic_hash": ""
-  },
-  "debloat.ps1": {
-    "mtime": 1786178790.1886277,
-    "ast_hash": "a4d4a87604e83d1d4ad20f041fcc0b3e",
-    "semantic_hash": ""
-  },
-  "samsung-adb.ps1": {
-    "mtime": 1787879850.3065653,
-    "ast_hash": "cfd1a6bfa6ed22a303e8145b79e3d4a9",
-    "semantic_hash": ""
-  },
-  "samsung-watchdog.ps1": {
-    "mtime": 1795309428.9883952,
-    "ast_hash": "e289efee15c20252f0893b0f5623a0b7",
-    "semantic_hash": ""
-  },
   "AGENTS.md": {
     "mtime": 1786159793.7381394,
     "ast_hash": "21ceb6533048be51308e69e7b74a35cf",
@@ -514,24 +389,9 @@
     "ast_hash": "4c8c33b76f498c05298651f7c5a10824",
     "semantic_hash": ""
   },
-  "COMANDO-OPPO.txt": {
-    "mtime": 1785376980.369345,
-    "ast_hash": "7ae2ae05eed87cfe160c7d101177b7bb",
-    "semantic_hash": ""
-  },
-  "DESCARGAR-DESDE-OPPO.md": {
-    "mtime": 1785376873.362837,
-    "ast_hash": "c3860fbc687e0546bc1488d156394f8f",
-    "semantic_hash": ""
-  },
   "INSTRUCCIONES-USO.md": {
     "mtime": 1785376611.355547,
     "ast_hash": "3fe130f05e014f07ba9ab7f46c56e09a",
-    "semantic_hash": ""
-  },
-  "README-KALI-TERMUX.md": {
-    "mtime": 1785376575.5978928,
-    "ast_hash": "8c3b383f0ed5410f133e30c0c713fdf8",
     "semantic_hash": ""
   },
   "androproject-gui/README.md": {
@@ -565,8 +425,8 @@
     "semantic_hash": ""
   },
   "androproject-gui/public/icon.png": {
-    "mtime": 1795309435.1530638,
-    "ast_hash": "93ca32a536da1698ea979f183679af29",
+    "mtime": 1795363421.0626104,
+    "ast_hash": "01f5c3b7a4c57747aecd4e9d822c4710",
     "semantic_hash": ""
   },
   "androproject-gui/public/next.svg": {
@@ -604,19 +464,14 @@
     "ast_hash": "ea5bd5d872502c185d3dd48ae89d733b",
     "semantic_hash": ""
   },
-  "screen.png": {
-    "mtime": 1783392191.3954194,
-    "ast_hash": "7a4b8a8ea8bbe183a926e71cf0fef499",
-    "semantic_hash": ""
-  },
   "androproject-gui/src/components/ui/Badge.tsx": {
     "mtime": 1795360146.562857,
     "ast_hash": "4bf65d514f14b5fe4d48da8c362ee8bc",
     "semantic_hash": ""
   },
   "androproject-gui/src/components/ui/Button.tsx": {
-    "mtime": 1795309428.812563,
-    "ast_hash": "19306cc354001ee3f1d1137962512338",
+    "mtime": 1795365951.267286,
+    "ast_hash": "5eace16f042d05d9f136b2a077f16609",
     "semantic_hash": ""
   },
   "androproject-gui/src/components/ui/Card.tsx": {
@@ -640,8 +495,8 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/features/ProjectionView.tsx": {
-    "mtime": 1795358069.3210604,
-    "ast_hash": "1d23bde665457bf28dba2cd71e1b409c",
+    "mtime": 1795366062.1838658,
+    "ast_hash": "1caecc9cceabc9c13af928d5ef6cab13",
     "semantic_hash": ""
   },
   "androproject-gui/src/hooks/useDeviceStream.ts": {
@@ -714,16 +569,6 @@
     "ast_hash": "c92ee4c95e1c602fb1c2742ec96be503",
     "semantic_hash": ""
   },
-  "create_desktop_shortcut.ps1": {
-    "mtime": 1795309428.8765645,
-    "ast_hash": "7f9f12995b581f3317f564f6b2abfb48",
-    "semantic_hash": ""
-  },
-  "launch_a30.ps1": {
-    "mtime": 1795309428.97894,
-    "ast_hash": "d19f94bae267d775138368793fb6678b",
-    "semantic_hash": ""
-  },
   "androproject-gui/scripts/stream-diagnostic.mjs": {
     "mtime": 1787972969.290964,
     "ast_hash": "fe126ccf49b7bb5568cb1d5329d2b347",
@@ -745,13 +590,13 @@
     "semantic_hash": ""
   },
   "androproject-gui/public/logo.png": {
-    "mtime": 1788022650.174346,
-    "ast_hash": "3fe305e6ac34b56a1937690445b2a9c7",
+    "mtime": 1795363420.979799,
+    "ast_hash": "01f5c3b7a4c57747aecd4e9d822c4710",
     "semantic_hash": ""
   },
   "androproject-gui/public/favicon.png": {
-    "mtime": 1788022650.174346,
-    "ast_hash": "3fe305e6ac34b56a1937690445b2a9c7",
+    "mtime": 1795363421.0948322,
+    "ast_hash": "eb5360599cc266799dedfa9be779ed29",
     "semantic_hash": ""
   },
   "androproject-gui/src/app/icon.png": {
@@ -829,11 +674,6 @@
     "ast_hash": "1e97a29f208a67db9d95d7d2b528bbfa",
     "semantic_hash": ""
   },
-  "launch_ios_projection.ps1": {
-    "mtime": 1795309428.9795346,
-    "ast_hash": "39be3f21af14450342161b918534cce7",
-    "semantic_hash": ""
-  },
   "androproject-gui/src/app/popout/page.tsx": {
     "mtime": 1795363116.947199,
     "ast_hash": "f1b34207612014237ee9259beb6a4912",
@@ -842,11 +682,6 @@
   "androproject-gui/src/app/ios-mirror/page.tsx": {
     "mtime": 1795358685.8790805,
     "ast_hash": "14b166b18bb44421137a6d88479b4256",
-    "semantic_hash": ""
-  },
-  "launch_native_ios_projector.ps1": {
-    "mtime": 1795309428.9807487,
-    "ast_hash": "867c086c7e5acbaabd2f833e625c760d",
     "semantic_hash": ""
   },
   "scratch/run_airplay_server.ps1": {
@@ -862,11 +697,6 @@
   "package.json": {
     "mtime": 1795309428.9844308,
     "ast_hash": "1fae02a53cfd4f2bda3f05e5332e4b26",
-    "semantic_hash": ""
-  },
-  "create_ios_desktop_shortcut.ps1": {
-    "mtime": 1795309428.8776648,
-    "ast_hash": "9446b1accc28a45776a5977e446dc753",
     "semantic_hash": ""
   },
   "scratch/bonjour_broadcaster.js": {
@@ -890,8 +720,8 @@
     "semantic_hash": ""
   },
   "androproject-gui/src-tauri/tauri.conf.json": {
-    "mtime": 1795309435.1871164,
-    "ast_hash": "b8fdcccde14afdf85e93b432633f5962",
+    "mtime": 1795363425.5193603,
+    "ast_hash": "624a1095f1b5f1fdd40b95a093da57ec",
     "semantic_hash": ""
   },
   "androproject-gui/src/app/api/logcat/route.ts": {
@@ -1204,11 +1034,6 @@
     "ast_hash": "de0e76a352f42cf6db622eb41bb7234e",
     "semantic_hash": ""
   },
-  "install_ios_projector.ps1": {
-    "mtime": 1795309428.977303,
-    "ast_hash": "6eb6dd1d4ddd7665225520118063b648",
-    "semantic_hash": ""
-  },
   "androproject-gui/src/core/index.ts": {
     "mtime": 1795309428.8185835,
     "ast_hash": "f96d8f498113bacf92e17d8fd78a9716",
@@ -1325,8 +1150,8 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/features/apps/AppManagerPanel.tsx": {
-    "mtime": 1795359780.2537615,
-    "ast_hash": "ef17c8075b268e46b6fc99feb6be6b11",
+    "mtime": 1795366081.325526,
+    "ast_hash": "19dc4115a588b7f0778ee69051d69bd4",
     "semantic_hash": ""
   },
   "androproject-gui/src/features/apps/app-formatters.ts": {
@@ -1390,8 +1215,8 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/features/flasher/FlasherImagePanel.tsx": {
-    "mtime": 1795361424.4193957,
-    "ast_hash": "f5a654950a5949f8391d7afbc15724f1",
+    "mtime": 1795365973.4443333,
+    "ast_hash": "e44b7825c75066ac652260f6a3835587",
     "semantic_hash": ""
   },
   "androproject-gui/src/features/flasher/flasher-partitions.ts": {
@@ -1485,8 +1310,8 @@
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1795311827.353379,
-    "ast_hash": "de2fc3a93669b76fc8f32a351932d69b",
+    "mtime": 1795366019.4924583,
+    "ast_hash": "cb7cf122c273f0e562a6d49bea850753",
     "semantic_hash": ""
   },
   "docs/ARCHITECTURE_MAP.md": {
@@ -1500,8 +1325,8 @@
     "semantic_hash": ""
   },
   "docs/images/flasher-root.png": {
-    "mtime": 1795311745.0595715,
-    "ast_hash": "ca0fa7a6c8b1fcc6a45d861041e59f8a",
+    "mtime": 1795363806.3693137,
+    "ast_hash": "b0465fb969dc5785b3009056f680e841",
     "semantic_hash": ""
   },
   "docs/images/multiscreen-live.png": {
@@ -1550,23 +1375,23 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/components/projection/AirPlayStudioCard.tsx": {
-    "mtime": 1795358694.2153292,
-    "ast_hash": "119a4f671eb6eb70b6add2786931fede",
+    "mtime": 1795366060.8804545,
+    "ast_hash": "588435d5b669b44935599f554e80fa3f",
     "semantic_hash": ""
   },
   "androproject-gui/src/components/projection/DeviceInfoPrimitives.tsx": {
-    "mtime": 1795353878.559977,
-    "ast_hash": "50b3d9c7ef3d8708cf045336ed42bd08",
+    "mtime": 1795365925.8431761,
+    "ast_hash": "8f4b13df0efe35d36b50f2e907298920",
     "semantic_hash": ""
   },
   "androproject-gui/src/components/projection/ProjectionToolsCard.tsx": {
-    "mtime": 1795357967.9327943,
-    "ast_hash": "53e219fc0009e22a4308d3f0eef58369",
+    "mtime": 1795365953.8989444,
+    "ast_hash": "8c13427c49c8735b42353ad234fed578",
     "semantic_hash": ""
   },
   "androproject-gui/src/components/projection/VisionNanoStudioCard.tsx": {
-    "mtime": 1795357965.5769227,
-    "ast_hash": "a30dfbc8a33cf53da1db0147a2f05980",
+    "mtime": 1795365964.97134,
+    "ast_hash": "3c7a881de6e9d69cda5f16315909a264",
     "semantic_hash": ""
   },
   "androproject-gui/src/hooks/useProjectionActions.ts": {
@@ -1725,18 +1550,13 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/features/optimizer/DeveloperOptionsPanel.tsx": {
-    "mtime": 1795361919.500919,
-    "ast_hash": "13464098672fea0b9c5605a54be57d54",
+    "mtime": 1795365952.8580232,
+    "ast_hash": "7fdc5c8e8d0f232586f3bedfddd04ca0",
     "semantic_hash": ""
   },
   "androproject-gui/src/features/optimizer/OptimizerNetworkAudioPanel.tsx": {
     "mtime": 1795361060.1460161,
     "ast_hash": "95afd8ec37dfcf247372b07450f6f6c0",
-    "semantic_hash": ""
-  },
-  "rescue-mobile.ps1": {
-    "mtime": 1795361512.610026,
-    "ast_hash": "7fe4ffff43a9b8394a7e679bf9d3759f",
     "semantic_hash": ""
   },
   "androproject-gui/src/app/camera/useVisionHealth.ts": {
@@ -1747,6 +1567,271 @@
   "androproject-gui/src/features/archivos/DeviceFileBrowser.tsx": {
     "mtime": 1795362930.032798,
     "ast_hash": "3af8633b511bc087176d647793cebc7b",
+    "semantic_hash": ""
+  },
+  "scripts/kali/INSTALL-OPPO-DIRECTO.sh": {
+    "mtime": 1785376975.4112887,
+    "ast_hash": "ff492a5309b518c8138b31abfd97a250",
+    "semantic_hash": ""
+  },
+  "scripts/kali/auto-install-kali-complete.sh": {
+    "mtime": 1785376590.3283818,
+    "ast_hash": "45fda831ea9e0ac9827868802976cd6c",
+    "semantic_hash": ""
+  },
+  "scripts/kali/check-mobile.sh": {
+    "mtime": 1786422002.9277134,
+    "ast_hash": "35378fd3f99f7f87cbc0f3b8df9485ca",
+    "semantic_hash": ""
+  },
+  "scripts/kali/create-shortcuts.sh": {
+    "mtime": 1785376568.92486,
+    "ast_hash": "e0ca74c44517ebc64f5a04d1fb1fa855",
+    "semantic_hash": ""
+  },
+  "scripts/kali/hashcat.ps1": {
+    "mtime": 1785034439.5255508,
+    "ast_hash": "0c2dfc0bc6dcbc888864113bafaa4f63",
+    "semantic_hash": ""
+  },
+  "scripts/kali/install-kali-desktop-auto.sh": {
+    "mtime": 1785376552.9578695,
+    "ast_hash": "78942c1acc2cf932f9b3573104070eec",
+    "semantic_hash": ""
+  },
+  "scripts/kali/payload.ps1": {
+    "mtime": 1785034446.4417818,
+    "ast_hash": "cabe3f0be02729d009445eabe7b8bff7",
+    "semantic_hash": ""
+  },
+  "scripts/kali/scan.ps1": {
+    "mtime": 1785034429.1011043,
+    "ast_hash": "b978c042f6169e8556e845024b0ecee1",
+    "semantic_hash": ""
+  },
+  "scripts/kali/setup-vnc-password.sh": {
+    "mtime": 1785376557.5221202,
+    "ast_hash": "165170af4b1ac723653428d1585df4ee",
+    "semantic_hash": ""
+  },
+  "scripts/kali/start-desktop.sh": {
+    "mtime": 1785376593.4616053,
+    "ast_hash": "5e02f14f90c3f2d2acaa6ead64d96b30",
+    "semantic_hash": ""
+  },
+  "scripts/kali/start-kali-vnc.sh": {
+    "mtime": 1785376562.870345,
+    "ast_hash": "70f6a2758ac2e1a86648d45497ea0596",
+    "semantic_hash": ""
+  },
+  "scripts/kali/transfer-to-phone.sh": {
+    "mtime": 1785376782.643267,
+    "ast_hash": "2056781a099c8f83addd2d601e79c3ba",
+    "semantic_hash": ""
+  },
+  "scripts/legacy-windows/andro.ps1": {
+    "mtime": 1786422015.5915225,
+    "ast_hash": "c4184af553a81ae74fd5e6509747d134",
+    "semantic_hash": ""
+  },
+  "scripts/legacy-windows/connect_phone.ps1": {
+    "mtime": 1785034415.8555567,
+    "ast_hash": "292e46c1a811983d99b2d75350c070b2",
+    "semantic_hash": ""
+  },
+  "scripts/legacy-windows/create_desktop_shortcut.ps1": {
+    "mtime": 1795309428.8765645,
+    "ast_hash": "7f9f12995b581f3317f564f6b2abfb48",
+    "semantic_hash": ""
+  },
+  "scripts/legacy-windows/create_ios_desktop_shortcut.ps1": {
+    "mtime": 1795309428.8776648,
+    "ast_hash": "9446b1accc28a45776a5977e446dc753",
+    "semantic_hash": ""
+  },
+  "scripts/legacy-windows/create_shortcut.ps1": {
+    "mtime": 1795356166.7409515,
+    "ast_hash": "cb3a62182400c8ff6b1a91f4069a8ec3",
+    "semantic_hash": ""
+  },
+  "scripts/legacy-windows/debloat-driver-manifest.json": {
+    "mtime": 1786183634.4202802,
+    "ast_hash": "05a0ff14eea4165d7e31e4bcb3186fec",
+    "semantic_hash": ""
+  },
+  "scripts/legacy-windows/debloat-driver.ps1": {
+    "mtime": 1786183881.3102336,
+    "ast_hash": "fc695ed33e3d8b3bfdbe333908ddc2cd",
+    "semantic_hash": ""
+  },
+  "scripts/legacy-windows/debloat-manifest.json": {
+    "mtime": 1786178815.4187152,
+    "ast_hash": "6fb6db3a1c6ea5c62ca4ccd2f2fc834e",
+    "semantic_hash": ""
+  },
+  "scripts/legacy-windows/debloat.ps1": {
+    "mtime": 1786178790.1886277,
+    "ast_hash": "a4d4a87604e83d1d4ad20f041fcc0b3e",
+    "semantic_hash": ""
+  },
+  "scripts/legacy-windows/install_ios_projector.ps1": {
+    "mtime": 1795309428.977303,
+    "ast_hash": "6eb6dd1d4ddd7665225520118063b648",
+    "semantic_hash": ""
+  },
+  "scripts/legacy-windows/launch_a30.ps1": {
+    "mtime": 1795309428.97894,
+    "ast_hash": "d19f94bae267d775138368793fb6678b",
+    "semantic_hash": ""
+  },
+  "scripts/legacy-windows/launch_ios_projection.ps1": {
+    "mtime": 1795309428.9795346,
+    "ast_hash": "39be3f21af14450342161b918534cce7",
+    "semantic_hash": ""
+  },
+  "scripts/legacy-windows/launch_native_ios_projector.ps1": {
+    "mtime": 1795309428.9807487,
+    "ast_hash": "867c086c7e5acbaabd2f833e625c760d",
+    "semantic_hash": ""
+  },
+  "scripts/legacy-windows/optimize_phone.ps1": {
+    "mtime": 1785034417.431954,
+    "ast_hash": "66c60ac571ea22f77b90cc811c9362e7",
+    "semantic_hash": ""
+  },
+  "scripts/legacy-windows/phone_status.ps1": {
+    "mtime": 1785034416.6040971,
+    "ast_hash": "063e5c1f8ce197846f44852233e65d59",
+    "semantic_hash": ""
+  },
+  "scripts/legacy-windows/rescue-mobile.ps1": {
+    "mtime": 1795361512.610026,
+    "ast_hash": "7fe4ffff43a9b8394a7e679bf9d3759f",
+    "semantic_hash": ""
+  },
+  "scripts/legacy-windows/samsung-adb.ps1": {
+    "mtime": 1787879850.3065653,
+    "ast_hash": "cfd1a6bfa6ed22a303e8145b79e3d4a9",
+    "semantic_hash": ""
+  },
+  "scripts/legacy-windows/samsung-watchdog.ps1": {
+    "mtime": 1795309428.9883952,
+    "ast_hash": "e289efee15c20252f0893b0f5623a0b7",
+    "semantic_hash": ""
+  },
+  "scripts/legacy-windows/start.ps1": {
+    "mtime": 1795354561.113682,
+    "ast_hash": "c6e13ec19aca3b5829e781b89a2631f3",
+    "semantic_hash": ""
+  },
+  "scripts/legacy-windows/stop.ps1": {
+    "mtime": 1785800748.570047,
+    "ast_hash": "bce0d1633f8810c5ef95762a88f0a68a",
+    "semantic_hash": ""
+  },
+  "scripts/kali/COMANDO-OPPO.txt": {
+    "mtime": 1785376980.369345,
+    "ast_hash": "7ae2ae05eed87cfe160c7d101177b7bb",
+    "semantic_hash": ""
+  },
+  "scripts/kali/DESCARGAR-DESDE-OPPO.md": {
+    "mtime": 1785376873.362837,
+    "ast_hash": "c3860fbc687e0546bc1488d156394f8f",
+    "semantic_hash": ""
+  },
+  "scripts/kali/README-KALI-TERMUX.md": {
+    "mtime": 1785376575.5978928,
+    "ast_hash": "8c3b383f0ed5410f133e30c0c713fdf8",
+    "semantic_hash": ""
+  },
+  "docs/images/apps-installer-light.png": {
+    "mtime": 1795365260.5519795,
+    "ast_hash": "f6acc10243e7b1f18a4c4f6094ba2a7f",
+    "semantic_hash": ""
+  },
+  "docs/images/apps-installer-live.png": {
+    "mtime": 1795365192.8232121,
+    "ast_hash": "15bb34baae0e5bf168f0586f08f2375e",
+    "semantic_hash": ""
+  },
+  "docs/images/apps-manager-light.png": {
+    "mtime": 1795366175.0367174,
+    "ast_hash": "fb91cf175dfdcc25f754d90ff5411ffd",
+    "semantic_hash": ""
+  },
+  "docs/images/apps-manager-live.png": {
+    "mtime": 1795365191.8628418,
+    "ast_hash": "f10d7ed43681eb2462bd54f5673486ce",
+    "semantic_hash": ""
+  },
+  "docs/images/camera-webrtc.png": {
+    "mtime": 1795363369.0299284,
+    "ast_hash": "09d168c4dba5de8dae004984d720e382",
+    "semantic_hash": ""
+  },
+  "docs/images/flasher-root-light.png": {
+    "mtime": 1795366155.500309,
+    "ast_hash": "04b23138e49d406661537902afc8b691",
+    "semantic_hash": ""
+  },
+  "docs/images/optimizer-developer-light.png": {
+    "mtime": 1795366153.3944201,
+    "ast_hash": "5a7b6e021a981d4a09f3b1581ddc7643",
+    "semantic_hash": ""
+  },
+  "docs/images/optimizer-developer-mode.png": {
+    "mtime": 1795363791.7819333,
+    "ast_hash": "688d886431e0fe1cc40c96e3d0f0dfa5",
+    "semantic_hash": ""
+  },
+  "docs/images/optimizer-turbo-light.png": {
+    "mtime": 1795365348.6422057,
+    "ast_hash": "16b5e2d039994a58e2fc19db481c75f0",
+    "semantic_hash": ""
+  },
+  "docs/images/optimizer-turbo.png": {
+    "mtime": 1795363789.795504,
+    "ast_hash": "5ed6da2b37364b5fbafbb36532d4bc5d",
+    "semantic_hash": ""
+  },
+  "docs/images/projection-mobile-light.png": {
+    "mtime": 1795366146.351213,
+    "ast_hash": "7d8548004760f2392e3355ecc796a716",
+    "semantic_hash": ""
+  },
+  "docs/images/projection-mobile-live.png": {
+    "mtime": 1795363787.3918426,
+    "ast_hash": "643c952349dbccea4d143f3a79c032e6",
+    "semantic_hash": ""
+  },
+  "docs/images/security-audit-light.png": {
+    "mtime": 1795365357.0009198,
+    "ast_hash": "e84ad36bc39f7cfe0953913ba833c455",
+    "semantic_hash": ""
+  },
+  "docs/images/security-audit.png": {
+    "mtime": 1795363798.8893745,
+    "ast_hash": "d3752ef09d0c601b718a8261fab575a6",
+    "semantic_hash": ""
+  },
+  "docs/images/tools-drivers-light.png": {
+    "mtime": 1795365361.7789598,
+    "ast_hash": "17439b5a8db907e191dd14549cf26201",
+    "semantic_hash": ""
+  },
+  "docs/images/tools-drivers.png": {
+    "mtime": 1795363803.536103,
+    "ast_hash": "7521babe5ec858593b7ef81c14a5adb8",
+    "semantic_hash": ""
+  },
+  "docs/images/androproject-walkthrough.mp4": {
+    "mtime": 1795366201.4326718,
+    "ast_hash": "ff78dc3bff86c578b7c8ba18013b35c5",
+    "semantic_hash": ""
+  },
+  "docs/images/mobile-transmission-record.mp4": {
+    "mtime": 1795363947.5364423,
+    "ast_hash": "f7e402fd702426a7da7ba2717f96494b",
     "semantic_hash": ""
   }
 }

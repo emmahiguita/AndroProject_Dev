@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "AndroProject",
-  "version": "2.1.0",
-  "identifier": "com.androproject.desktop",
+  "productName": "ANDROIS",
+  "version": "3.2.0",
+  "identifier": "com.androis.desktop",
   "build": {
     "frontendDist": "../out",
     "devUrl": "http://localhost:3000",
@@ -12,7 +12,7 @@
     "withGlobalTauri": true,
     "windows": [
       {
-        "title": "AndroProject v2.1.0 — Native Studio",
+        "title": "ANDROIS v3.2.0 — Native Studio",
         "width": 1360,
         "height": 860,
         "minWidth": 900,

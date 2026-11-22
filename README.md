@@ -65,4 +65,10 @@ flowchart LR
 
 - [Mapa Técnico Detallado](./docs/ARCHITECTURE_MAP.md)
 - [Instrucciones de Uso](./INSTRUCCIONES-USO.md)
-- [Integración Kali / Termux](./README-KALI-TERMUX.md)
+- [Integración Kali / Termux](./scripts/kali/README-KALI-TERMUX.md)
+- [Instalador Oficial Windows](./AndroProject_Installer/README.md)
+
+## Demos en Video (Transmisión Móvil & Suite Dark/Light)
+
+- [Grabación Real de Transmisión Móvil (scrcpy 4.1)](./docs/images/mobile-transmission-record.mp4)
+- [Recorrido Completo Modo Oscuro y Modo Claro](./docs/images/androproject-walkthrough.mp4)

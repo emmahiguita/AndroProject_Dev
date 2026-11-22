@@ -50,13 +50,15 @@ export const VisionNanoStudioCard: React.FC<VisionNanoStudioCardProps> = ({
     <div className={`rounded-xl border p-3.5 ${cardStyle} space-y-3`}>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Sparkles size={14} className="text-zinc-400" />
+          <Sparkles size={14} className={dark ? 'text-zinc-400' : 'text-slate-600'} />
           <h3 className={`text-xs font-semibold ${dark ? 'text-zinc-100' : 'text-slate-900'}`}>
             VisionNano Studio (Direct3D11 60 FPS)
           </h3>
         </div>
         {scrcpyActive && (
-          <span className="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-zinc-800 border border-zinc-700 text-[10px] font-medium text-emerald-400 shrink-0">
+          <span className={`flex items-center gap-1.5 px-2 py-0.5 rounded-md border text-[10px] font-medium shrink-0 ${
+            dark ? 'bg-zinc-800 border-zinc-700 text-emerald-400' : 'bg-emerald-50 border-emerald-200 text-emerald-700'
+          }`}>
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Activo
           </span>
         )}
@@ -67,10 +69,10 @@ export const VisionNanoStudioCard: React.FC<VisionNanoStudioCardProps> = ({
           type="button"
           onClick={() => onToggleScrcpy()}
           disabled={isBusy}
-          className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-semibold transition-colors shadow-sm cursor-pointer disabled:opacity-50 ${
+          className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-semibold transition-colors shadow-sm cursor-pointer disabled:opacity-60 ${
             scrcpyActive
-              ? 'bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700'
-              : 'bg-zinc-100 hover:bg-white text-zinc-950 font-semibold'
+              ? (dark ? 'bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700' : 'bg-slate-200 hover:bg-slate-300 text-slate-900 border border-slate-300')
+              : (dark ? 'bg-zinc-100 hover:bg-white text-zinc-950 font-semibold' : 'bg-slate-900 hover:bg-slate-800 text-white font-semibold')
           }`}
         >
           {scrcpyActive ? <Square size={12} fill="currentColor" /> : <Play size={12} fill="currentColor" />}
@@ -83,7 +85,9 @@ export const VisionNanoStudioCard: React.FC<VisionNanoStudioCardProps> = ({
             onClick={() => onRestartScrcpy(scrcpyOptions)}
             disabled={isBusy}
             title="Aplicar nuevos ajustes reiniciando VisionNano 60 FPS"
-            className="px-3 py-2 rounded-lg text-xs font-semibold border border-zinc-700 bg-zinc-900 hover:bg-zinc-800 text-zinc-100 flex items-center gap-1.5 transition-colors cursor-pointer disabled:opacity-50"
+            className={`px-3 py-2 rounded-lg text-xs font-semibold border flex items-center gap-1.5 transition-colors cursor-pointer disabled:opacity-60 ${
+              dark ? 'border-zinc-700 bg-zinc-900 hover:bg-zinc-800 text-zinc-100' : 'border-slate-300 bg-white hover:bg-slate-100 text-slate-900'
+            }`}
           >
             <RefreshCw size={12} className={isBusy ? 'animate-spin' : ''} />
             <span>Aplicar</span>

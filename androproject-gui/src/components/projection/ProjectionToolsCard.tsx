@@ -80,13 +80,15 @@ export const ProjectionToolsCard: React.FC<ProjectionToolsCardProps> = ({
       <div className={`rounded-xl border p-3.5 ${cardStyle} space-y-2`}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Video size={14} className={isRecording ? 'text-rose-400 animate-pulse' : 'text-zinc-400'} />
+            <Video size={14} className={isRecording ? 'text-rose-500 animate-pulse' : (dark ? 'text-zinc-400' : 'text-slate-600')} />
             <h3 className={`text-xs font-semibold ${dark ? 'text-zinc-100' : 'text-slate-900'}`}>
               Grabador de Pantalla MP4
             </h3>
           </div>
           {isRecording && (
-            <span className="font-mono text-[10px] text-rose-400 font-medium px-2 py-0.5 rounded-md bg-zinc-900 border border-zinc-700">
+            <span className={`font-mono text-[10px] font-medium px-2 py-0.5 rounded-md border ${
+              dark ? 'text-rose-400 bg-zinc-900 border-zinc-700' : 'text-rose-700 bg-rose-50 border-rose-200'
+            }`}>
               REC {formatTime(recordingSeconds)}
             </span>
           )}
@@ -96,18 +98,18 @@ export const ProjectionToolsCard: React.FC<ProjectionToolsCardProps> = ({
           type="button"
           onClick={handleRecordClick}
           disabled={isBusy}
-          className={`w-full flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-semibold transition-colors cursor-pointer disabled:opacity-50 ${
+          className={`w-full flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-semibold transition-colors cursor-pointer disabled:opacity-60 ${
             isRecording
-              ? 'bg-zinc-900 border border-zinc-700 text-rose-300 hover:bg-zinc-800'
-              : 'bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700'
+              ? (dark ? 'bg-zinc-900 border border-zinc-700 text-rose-300 hover:bg-zinc-800' : 'bg-rose-50 border border-rose-300 text-rose-700 hover:bg-rose-100')
+              : (dark ? 'bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700' : 'bg-slate-100 hover:bg-slate-200 text-slate-900 border border-slate-300')
           }`}
         >
-          {isRecording ? <Square size={12} fill="currentColor" /> : <Circle size={12} fill="currentColor" className="text-rose-400" />}
+          {isRecording ? <Square size={12} fill="currentColor" /> : <Circle size={12} fill="currentColor" className="text-rose-500" />}
           <span>{isRecording ? `Detener Grabación (${formatTime(recordingSeconds)})` : 'Grabar Pantalla (MP4)'}</span>
         </button>
 
         {lastRecordedPath && !isRecording && (
-          <p className="text-[10px] font-mono text-emerald-400 truncate" title={lastRecordedPath}>
+          <p className={`text-[10px] font-mono truncate ${dark ? 'text-emerald-400' : 'text-emerald-700'}`} title={lastRecordedPath}>
             Guardado: {lastRecordedPath.split(/[\\/]/).pop()}
           </p>
         )}
