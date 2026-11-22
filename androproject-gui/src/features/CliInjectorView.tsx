@@ -9,9 +9,10 @@
 // ============================================================================
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Play } from 'lucide-react';
 import { useTheme } from '@/hooks/useTheme';
+import { useAppStore } from '@/stores';
 import { ViewShell } from '@/components/ViewShell';
 import { Button } from '@/components/ui/Button';
 import { CliEngineSelector, type InjectorMode, type DiscoveryState } from './cli/CliEngineSelector';
@@ -41,8 +42,11 @@ const PRESETS: Record<InjectorMode, { label: string; value: string }[]> = {
   ],
 };
 
-export function CliInjectorView({ device }: { device?: DeviceInfo | null }) {
+export function CliInjectorView({ device: propDevice }: { device?: DeviceInfo | null }) {
   const { dark } = useTheme();
+  const storeDevice = useAppStore((s) => s.device);
+  const device = propDevice || storeDevice;
+  const abortRef = useRef<AbortController | null>(null);
   const [mode, setMode] = useState<InjectorMode>('claude');
   const [model, setModel] = useState('llama3.2');
   const [prompt, setPrompt] = useState('');
@@ -64,11 +68,17 @@ export function CliInjectorView({ device }: { device?: DeviceInfo | null }) {
     } catch {}
   }, []);
 
-  useEffect(() => { refreshDiscovery(); }, [refreshDiscovery]);
+  useEffect(() => {
+    refreshDiscovery();
+    return () => { abortRef.current?.abort(); };
+  }, [refreshDiscovery]);
 
   const executePrompt = async (textToSend: string) => {
     const text = textToSend.trim();
     if (!text || running) return;
+    abortRef.current?.abort();
+    const ctrl = new AbortController();
+    abortRef.current = ctrl;
     setRunning(true);
     setError(null);
     try {
@@ -80,6 +90,7 @@ export function CliInjectorView({ device }: { device?: DeviceInfo | null }) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ mode, prompt: text, model, serial: device?.serial, deviceContext }),
+        signal: ctrl.signal,
       });
       const data = await res.json();
       if (data.success) {
@@ -102,15 +113,9 @@ export function CliInjectorView({ device }: { device?: DeviceInfo | null }) {
     <ViewShell navId="cli">
       <div className="mx-auto w-full max-w-4xl space-y-4">
         <CliEngineSelector
-          mode={mode}
-          onSelectMode={setMode}
-          model={model}
-          onSelectModel={setModel}
-          includeDevice={includeDevice}
-          onToggleIncludeDevice={setIncludeDevice}
-          discovery={discovery}
-          onRefreshDiscovery={refreshDiscovery}
-          dark={dark}
+          mode={mode} onSelectMode={setMode} model={model} onSelectModel={setModel}
+          includeDevice={includeDevice} onToggleIncludeDevice={setIncludeDevice}
+          discovery={discovery} onRefreshDiscovery={refreshDiscovery} dark={dark}
         />
 
         {/* Formulario de entrada y presets */}

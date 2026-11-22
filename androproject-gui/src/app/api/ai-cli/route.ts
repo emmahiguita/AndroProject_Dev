@@ -25,6 +25,12 @@ const CLAUDE_EXE = path.join(NPM_DIR, 'node_modules', '@anthropic-ai', 'claude-c
 const GEMINI_JS = path.join(NPM_DIR, 'node_modules', '@google', 'gemini-cli', 'bundle', 'gemini.js');
 const OLLAMA_EXE = path.join(process.env.LOCALAPPDATA || '', 'Programs', 'Ollama', 'ollama.exe');
 
+function isLocalReq(req: Request): boolean {
+  const host = req.headers.get('host') || '';
+  const origin = req.headers.get('origin') || '';
+  return /^(localhost|127\.0\.0\.1)(:\d+)?$/i.test(host) && (!origin || /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(origin));
+}
+
 async function checkBin(bin: string, args: string[]): Promise<boolean> {
   try {
     await execFileAsync(bin, args, { timeout: 2500, windowsHide: true });
@@ -56,14 +62,18 @@ export async function GET() {
     fs.existsSync(GEMINI_JS) ? Promise.resolve(true) : checkBin('gemini', ['--version']),
   ]);
 
+  const ollamaBin = fs.existsSync(OLLAMA_EXE);
   return NextResponse.json({
     success: true,
-    ollama: { online: ollamaOnline, host: OLLAMA_BASE, models, binary: fs.existsSync(OLLAMA_EXE) },
-    clis: { claude: claudeOk, adb: adbOk, python: pythonOk, gemini: geminiOk, ollama: true },
+    ollama: { online: ollamaOnline, host: OLLAMA_BASE, models, binary: ollamaBin },
+    clis: { claude: claudeOk, adb: adbOk, python: pythonOk, gemini: geminiOk, ollama: ollamaOnline || ollamaBin },
   });
 }
 
 export async function POST(req: Request) {
+  if (!isLocalReq(req)) {
+    return NextResponse.json({ success: false, error: 'Acceso CLI restringido a localhost.' }, { status: 403 });
+  }
   try {
     const body = (await req.json()) as {
       mode?: 'claude' | 'ollama' | 'adb' | 'cli';
@@ -102,6 +112,7 @@ export async function POST(req: Request) {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ model, prompt: fullPrompt, stream: false }),
+          signal: AbortSignal.timeout(25000),
         });
         if (res.ok) {
           const data = (await res.json()) as { response?: string };
@@ -118,8 +129,11 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: true, output, suggestions, meta: { provider: 'claude-fallback' } });
     }
 
-    // 3. Ejecución directa en ADB Shell
+    // 3. Ejecución directa en ADB Shell (solo Android)
     if (mode === 'adb') {
+      if (body.serial && (body.serial.startsWith('apple-') || body.serial.startsWith('airplay-'))) {
+        return NextResponse.json({ success: false, error: 'ADB Shell no aplica a dispositivos iOS.' }, { status: 400 });
+      }
       if (SHELL_META_RE.test(prompt)) {
         return NextResponse.json({ success: false, error: 'Metacaracteres de shell no permitidos.' }, { status: 400 });
       }
