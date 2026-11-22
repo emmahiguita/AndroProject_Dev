@@ -3,6 +3,8 @@
 #  Uso: Doble clic en build.ps1 o ejecutar desde PowerShell
 # =============================================================
 
+param([switch]$SkipTauriBuild)
+
 $ErrorActionPreference = "Stop"
 $InstallerDir = $PSScriptRoot
 $GuiDir       = Join-Path $InstallerDir "..\androproject-gui"
@@ -72,10 +74,12 @@ Write-Host "      > Archivos, logo e icono oficial copiados correctamente." -For
 Write-Host ""
 Write-Host "[3/5] Compilando Dashboard (Tauri + Next.js)..." -ForegroundColor Yellow
 if (Test-Path "$GuiDir") {
-    Push-Location $GuiDir
-    Write-Host "      > Ejecutando npm run tauri:build en $GuiDir..." -ForegroundColor Cyan
-    npm run tauri:build
-    Pop-Location
+    if (-not $SkipTauriBuild) {
+        Push-Location $GuiDir
+        Write-Host "      > Ejecutando npm run tauri:build en $GuiDir..." -ForegroundColor Cyan
+        npm run tauri:build
+        Pop-Location
+    }
     $TauriExe = Get-ChildItem -Path "$GuiDir\src-tauri\target\release" -Filter "*.exe" -File -ErrorAction SilentlyContinue |
         Where-Object { $_.Name -notmatch 'uninstall|setup' } | Select-Object -First 1
     if ($TauriExe) {
@@ -105,8 +109,9 @@ Write-Host ""
 Write-Host "[4/5] Compilando Instalador_AndroProject.exe con IExpress..." -ForegroundColor Yellow
 Start-Process -FilePath "iexpress.exe" -ArgumentList "/N /Q installer.sed" -Wait -NoNewWindow
 if (Test-Path "$OutputDir\Instalador_AndroProject.exe") {
-    $ExeSize = [math]::Round((Get-Item "$OutputDir\Instalador_AndroProject.exe").Length / 1MB, 2)
-    Write-Host "      > Instalador_AndroProject.exe creado ($ExeSize MB)" -ForegroundColor Green
+    Copy-Item "$OutputDir\Instalador_AndroProject.exe" "$OutputDir\Instalador_ANDRO-IOS.exe" -Force
+    $ExeSize = [math]::Round((Get-Item "$OutputDir\Instalador_ANDRO-IOS.exe").Length / 1MB, 2)
+    Write-Host "      > Instalador_ANDRO-IOS.exe creado ($ExeSize MB)" -ForegroundColor Green
 } else {
     Write-Host "      ERROR: No se genero el .exe. Revisa installer.sed" -ForegroundColor Red
     exit 1

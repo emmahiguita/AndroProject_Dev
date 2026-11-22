@@ -4,12 +4,16 @@
   <p><strong>Suite de Proyección 60 FPS, Multi-Pantalla Android/iOS, Telemetría en Vivo, Flasheador Fastboot y Auditoría de Apps</strong></p>
 
   <p>
-    <a href="./docs/ARCHITECTURE_MAP.md">Mapa de Arquitectura y Funciones</a> ·
-    <a href="./INSTRUCCIONES-USO.md">Guía de Uso</a> ·
-    <a href="./graphify-out/GRAPH_REPORT.md">Grafo de Conocimiento</a> ·
-    <a href="./AndroProject_Installer/README.md">Instalador Windows</a>
+    <a href="https://github.com/emmahiguita/AndroProject_Dev/releases/latest/download/Instalador_ANDRO-IOS.exe"><strong>Descargar Instalador Windows (.exe)</strong></a> ·
+    <a href="https://github.com/emmahiguita/AndroProject_Dev/releases/latest"><strong>Ver Releases</strong></a> ·
+    <a href="./AndroProject_Installer/README.md">Guía del Instalador</a> ·
+    <a href="./docs/ARCHITECTURE_MAP.md">Arquitectura</a>
   </p>
 </div>
+
+> **Instalación rápida en Windows (1 clic):**
+> 1. Descarga **[`Instalador_ANDRO-IOS.exe`](https://github.com/emmahiguita/AndroProject_Dev/releases/latest/download/Instalador_ANDRO-IOS.exe)** y ejecútalo (instala en `C:\AndroProject` y crea acceso directo en el Escritorio).
+> 2. O desde el repo clonado ejecuta `powershell -ExecutionPolicy Bypass -File .\AndroProject_Installer\build.ps1`.
 
 ---
 
