@@ -129,7 +129,7 @@ export function AppManagerPanel(props: AppManagerPanelProps) {
               {selectedPackages.size} seleccionadas
             </span>
             <Button variant="secondary" size="sm" onClick={() => toggleSelectAllFiltered(filteredApps)}>
-              {filteredApps.every((a) => selectedPackages.has(a.packageName)) ? 'Deseleccionar todas' : 'Seleccionar todas'}
+              {filteredApps.length > 0 && filteredApps.every((a) => selectedPackages.has(a.packageName)) ? 'Deseleccionar todas' : 'Seleccionar todas'}
             </Button>
             <Button variant="danger" size="sm" icon={<Trash2 size={11} />} onClick={handleBulkUninstall}>
               Desinstalar seleccionadas

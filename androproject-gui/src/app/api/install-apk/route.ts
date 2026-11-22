@@ -8,6 +8,7 @@ import { pipeline } from 'stream/promises';
 import { Readable } from 'stream';
 import { ADB, ANDROPROJECT_HOME } from '@/lib/config';
 import { installIpaBuffer } from '@/lib/services/ios-ipa-installer';
+import { isValidDeviceSerial } from '@/lib/security/input-sanitizer';
 
 const execFileAsync = promisify(execFile);
 const MAX_APK_SIZE = 500 * 1024 * 1024;
@@ -49,10 +50,13 @@ export async function POST(req: Request) {
       fs.createWriteStream(filePath),
     );
 
+    if (serial && serial !== 'Hardware Level' && !isValidDeviceSerial(serial)) {
+      return NextResponse.json({ success: false, error: 'Serial de dispositivo inválido.' }, { status: 400 });
+    }
     const targetArgs = serial && serial !== 'Hardware Level' ? ['-s', serial] : [];
     const { stdout, stderr } = await execFileAsync(
       ADB,
-      [...targetArgs, 'install', filePath],
+      [...targetArgs, 'install', '-r', filePath],
       { timeout: 300_000, windowsHide: true },
     );
     const output = `${stdout}\n${stderr}`;

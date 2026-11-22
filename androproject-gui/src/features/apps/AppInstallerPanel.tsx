@@ -71,7 +71,7 @@ export function AppInstallerPanel({
           <div>
             <h2 className="text-sm font-semibold">Instalar APK en el dispositivo</h2>
             <p className={`text-xs mt-0.5 ${dark ? 'text-zinc-400' : 'text-slate-600'}`}>
-              Selecciona archivos .apk, .xapk o .apkm desde tu PC para instalarlos vía ADB.
+              Selecciona archivos .apk (Android) o .ipa (iOS) desde tu PC para instalarlos.
             </p>
           </div>
         </div>
@@ -85,7 +85,7 @@ export function AppInstallerPanel({
         >
           <input
             type="file"
-            accept=".apk,.xapk,.apkm"
+            accept=".apk,.ipa"
             multiple
             disabled={!connected || installing}
             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10 disabled:cursor-not-allowed"
