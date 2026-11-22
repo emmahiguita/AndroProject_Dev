@@ -1,8 +1,8 @@
 {
   "AndroProject_Installer/build.ps1": {
-    "mtime": 1782236864.5415335,
-    "ast_hash": "6dbb3e6c46fc7311070f51f1d7b1f658",
-    "semantic_hash": "6dbb3e6c46fc7311070f51f1d7b1f658"
+    "mtime": 1795366547.281301,
+    "ast_hash": "f05dc11911c23726141884c3fd0dbb33",
+    "semantic_hash": ""
   },
   "androproject-gui/eslint.config.mjs": {
     "mtime": 1785811723.096413,
@@ -130,8 +130,8 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/app/error.tsx": {
-    "mtime": 1795353833.8505101,
-    "ast_hash": "1549eba65c97a3bda677879ba3506f80",
+    "mtime": 1795366693.859929,
+    "ast_hash": "fc3622dfd9d90ae593400f9da57f3352",
     "semantic_hash": ""
   },
   "androproject-gui/src/app/layout.tsx": {
@@ -1090,8 +1090,8 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/features/dashboard/TelemetryModal.tsx": {
-    "mtime": 1795360281.398836,
-    "ast_hash": "6ca80876656862a791834d4b20ec5acb",
+    "mtime": 1795366691.1496525,
+    "ast_hash": "5cf10812f5d4c21f051c595d025ff6fe",
     "semantic_hash": ""
   },
   "androproject-gui/src/features/dashboard/dashboard-helpers.ts": {
@@ -1235,8 +1235,8 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/features/tools/DriverManagerPanel.tsx": {
-    "mtime": 1795361922.6973367,
-    "ast_hash": "bc759f118db7c039619adaa1ae0e2ae9",
+    "mtime": 1795366692.5907001,
+    "ast_hash": "1863e24151dab845d2421446d8e94c34",
     "semantic_hash": ""
   },
   "androproject-gui/src/lib/services/driver-manager.ts": {
@@ -1695,8 +1695,8 @@
     "semantic_hash": ""
   },
   "docs/images/projection-mobile-live.png": {
-    "mtime": 1795363787.3918426,
-    "ast_hash": "643c952349dbccea4d143f3a79c032e6",
+    "mtime": 1795366758.0808878,
+    "ast_hash": "32b3c5a8d7668618a942c004dcb5a04c",
     "semantic_hash": ""
   },
   "docs/images/security-audit-light.png": {

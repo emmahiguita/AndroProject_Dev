@@ -58,6 +58,7 @@ button:disabled {
 .cosmic-rim {
   background: var(--surface-card);
   border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-sm);
   color: var(--text-primary);
 }
 

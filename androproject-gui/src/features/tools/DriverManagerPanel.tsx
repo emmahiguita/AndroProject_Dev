@@ -141,7 +141,7 @@ export const DriverManagerPanel: React.FC<DriverManagerPanelProps> = ({ onLog })
                 <div className="font-bold truncate">{u.description || 'Dispositivo USB'} · <span className={mutedCls}>{u.driverInf || 'sin .inf'}</span> · <span className={mutedCls}>{u.status || 'OK'}</span></div>
                 <div className={`${mutedCls} truncate mt-0.5`}>{u.instanceId} {u.hardwareId ? `· ${u.hardwareId}` : ''}</div>
               </div>
-              <button type="button" onClick={() => handleCopyId(u.instanceId)} className="p-1 rounded hover:bg-zinc-800/40 shrink-0" title="Copiar Instance ID">
+              <button type="button" onClick={() => handleCopyId(u.instanceId)} className={`p-1 rounded shrink-0 ${dark ? 'hover:bg-zinc-800/60 text-zinc-300' : 'hover:bg-slate-200 text-slate-700'}`} title="Copiar Instance ID">
                 {copiedId === u.instanceId ? <Check size={12} /> : <Copy size={12} />}
               </button>
             </div>
