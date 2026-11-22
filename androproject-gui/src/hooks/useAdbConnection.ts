@@ -1,129 +1,94 @@
+// ============================================================================
+// ARCHIVO: useAdbConnection.ts
+// QUÉ HACE: Hook React que gestiona el servidor ADB (start/stop/polling),
+//           registro persistente de dispositivos y reconexión automática Wi-Fi.
+// CÓMO FUNCIONA: Usa `hasLoadedRef` para no sobrescribir `localStorage` con `[]`
+//           al montar, pausa el polling en pestañas ocultas (Visibility API) y
+//           exige `serverRunning === true` antes de intentar reconexión Wi-Fi.
+// POR QUÉ: Corregir reconexiones fantasma con servidor detenido, fuga/sobrescritura
+//           en `localStorage` y mantener el hook bajo 200 líneas (SRP).
+// ============================================================================
+
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
+import {
+  loadRegisteredDevices,
+  saveRegisteredDevices,
+  postAdbAction,
+  type AdbDevice,
+  type AdbStatusResponse,
+  type RegisteredDevice,
+} from './adbStorage';
 
-/**
- * Registered device — persisted in localStorage so the app remembers
- * devices across sessions.
- */
-export interface RegisteredDevice {
-  serial: string;
-  model: string;
-  connectionType: 'USB' | 'Wi-Fi';
-  ip?: string;
-  port?: string;
-  lastSeen: number;
-  autoConnect: boolean;
-}
+export type { RegisteredDevice };
 
-interface AdbDevice {
-  serial: string;
-  state: string;
-  model: string;
-  connectionType: string;
-}
-
-interface AdbStatusResponse {
-  success: boolean;
-  serverRunning: boolean;
-  devices: AdbDevice[];
-  deviceCount: number;
-}
-
-const STORAGE_KEY = 'androproject_registered_devices';
 const POLL_INTERVAL = 5000;
 const RECONNECT_DELAY = 3000;
 
-function loadRegisteredDevices(): RegisteredDevice[] {
-  if (typeof window === 'undefined') return [];
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : [];
-  } catch {
-    return [];
-  }
-}
-
-function saveRegisteredDevices(devices: RegisteredDevice[]): void {
-  if (typeof window === 'undefined') return;
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(devices));
-  } catch { /* quota exceeded — ignore */ }
-}
-
-/**
- * useAdbConnection — manages ADB server lifecycle, device registration,
- * and persistent connections.
- *
- * Features:
- * - Toggle ADB server on/off
- * - Auto-detect registered devices when server starts
- * - Persist device list across sessions
- * - Auto-reconnect to previously connected devices
- * - Support for multiple simultaneous devices
- */
 export function useAdbConnection() {
   const [serverRunning, setServerRunning] = useState(false);
   const [devices, setDevices] = useState<AdbDevice[]>([]);
   const [registeredDevices, setRegisteredDevices] = useState<RegisteredDevice[]>([]);
   const [isConnecting, setIsConnecting] = useState(false);
   const [lastError, setLastError] = useState<string | null>(null);
-  const pollRef = useRef<NodeJS.Timeout | null>(null);
-  const reconnectRef = useRef<NodeJS.Timeout | null>(null);
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const reconnectRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const hasLoadedRef = useRef(false);
+  const isMountedRef = useRef(true);
 
-  // Load registered devices on mount
   useEffect(() => {
+    isMountedRef.current = true;
     setRegisteredDevices(loadRegisteredDevices());
+    hasLoadedRef.current = true;
+    return () => { isMountedRef.current = false; };
   }, []);
 
-  // Persist registered devices when they change
   useEffect(() => {
-    saveRegisteredDevices(registeredDevices);
+    if (hasLoadedRef.current) saveRegisteredDevices(registeredDevices);
   }, [registeredDevices]);
 
-  /** Fetch current ADB server status and connected devices */
   const fetchStatus = useCallback(async () => {
     try {
-      const res = await fetch('/api/actions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'get_adb_status' }),
-      });
-      const data: AdbStatusResponse = await res.json();
-      setServerRunning(data.serverRunning);
+      const data = await postAdbAction<AdbStatusResponse>('get_adb_status');
+      if (!isMountedRef.current) return data;
+      setServerRunning(Boolean(data.serverRunning));
       setDevices(data.devices || []);
       setLastError(null);
       return data;
     } catch {
-      setServerRunning(false);
-      setDevices([]);
+      if (isMountedRef.current) { setServerRunning(false); setDevices([]); }
       return null;
     }
   }, []);
 
-  /** Start ADB server */
+  const connectToIp = useCallback(async (ip: string, port: string = '5555') => {
+    setLastError(null);
+    try {
+      const data = await postAdbAction<{ success?: boolean; error?: string }>('connect_adb', { target: `${ip}:${port}` });
+      if (data.success) { await fetchStatus(); return true; }
+      setLastError(data.error || 'Error al conectar');
+      return false;
+    } catch {
+      setLastError('Error de conexión');
+      return false;
+    }
+  }, [fetchStatus]);
+
   const startServer = useCallback(async () => {
     setIsConnecting(true);
     setLastError(null);
     try {
-      const res = await fetch('/api/actions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'start_adb_server' }),
-      });
-      const data = await res.json();
+      const data = await postAdbAction<{ success?: boolean; message?: string }>('start_adb_server');
       if (data.success) {
         setServerRunning(true);
-        // After starting, wait a moment then detect devices
-        await new Promise(r => setTimeout(r, 1000));
+        await new Promise((r) => setTimeout(r, 1000));
         const status = await fetchStatus();
-
-        // Auto-connect to registered devices with Wi-Fi
         if (status?.devices) {
           const registered = loadRegisteredDevices();
           for (const dev of status.devices) {
-            const reg = registered.find(r => r.serial === dev.serial);
-            if (reg && reg.autoConnect && reg.connectionType === 'Wi-Fi' && reg.ip && reg.port) {
+            const reg = registered.find((r) => r.serial === dev.serial);
+            if (reg?.autoConnect && reg.connectionType === 'Wi-Fi' && reg.ip && reg.port) {
               await connectToIp(reg.ip, reg.port);
             }
           }
@@ -134,83 +99,30 @@ export function useAdbConnection() {
     } catch {
       setLastError('Error de conexión al iniciar ADB');
     } finally {
-      setIsConnecting(false);
+      if (isMountedRef.current) setIsConnecting(false);
     }
-  }, [fetchStatus]);
+  }, [fetchStatus, connectToIp]);
 
-  /** Stop ADB server */
   const stopServer = useCallback(async () => {
     try {
-      await fetch('/api/actions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'stop_adb_server' }),
-      });
+      await postAdbAction('stop_adb_server');
       setServerRunning(false);
       setDevices([]);
-    } catch {
-      // Ignore errors on stop
-    }
+    } catch { /* ignora errores al detener */ }
   }, []);
 
-  /** Toggle ADB server on/off */
   const toggleServer = useCallback(async () => {
-    if (serverRunning) {
-      await stopServer();
-    } else {
-      await startServer();
-    }
+    await (serverRunning ? stopServer() : startServer());
   }, [serverRunning, startServer, stopServer]);
 
-  /** Connect to a device via IP:port (Wi-Fi ADB) */
-  const connectToIp = useCallback(async (ip: string, port: string = '5555') => {
-    setLastError(null);
-    try {
-      const res = await fetch('/api/actions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'connect_adb', target: `${ip}:${port}` }),
-      });
-      const data = await res.json();
-      if (data.success) {
-        // Refresh device list
-        await fetchStatus();
-        return true;
-      } else {
-        setLastError(data.error || 'Error al conectar');
-        return false;
-      }
-    } catch {
-      setLastError('Error de conexión');
-      return false;
-    }
-  }, [fetchStatus]);
-
-  /** Disconnect a specific device */
   const disconnectDevice = useCallback(async (serial: string) => {
-    try {
-      await fetch('/api/actions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'disconnect_device', serial }),
-      });
-      await fetchStatus();
-    } catch { /* ignore */ }
+    try { await postAdbAction('disconnect_device', { serial }); await fetchStatus(); } catch {}
   }, [fetchStatus]);
 
-  /** Disconnect all Wi-Fi devices */
   const disconnectAll = useCallback(async () => {
-    try {
-      await fetch('/api/actions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'disconnect_device', all: true }),
-      });
-      await fetchStatus();
-    } catch { /* ignore */ }
+    try { await postAdbAction('disconnect_device', { all: true }); await fetchStatus(); } catch {}
   }, [fetchStatus]);
 
-  /** Register a device for persistence and auto-connect */
   const registerDevice = useCallback((serial: string, model: string, connectionType: 'USB' | 'Wi-Fi', ip?: string, port?: string) => {
     let targetIp = ip;
     let targetPort = port || '5555';
@@ -219,111 +131,60 @@ export function useAdbConnection() {
       targetIp = sIp;
       if (sPort) targetPort = sPort;
     }
-
-    setRegisteredDevices(prev => {
-      const existing = prev.find(d => d.serial === serial || (targetIp && d.ip === targetIp));
-      if (existing) {
-        return prev.map(d => (d.serial === serial || (targetIp && d.ip === targetIp)) ? {
-          ...d,
-          serial,
-          model: model || d.model,
-          connectionType,
-          ip: targetIp || d.ip,
-          port: targetPort || d.port,
-          lastSeen: Date.now(),
-        } : d);
+    setRegisteredDevices((prev) => {
+      const match = (d: RegisteredDevice) => d.serial === serial || (Boolean(targetIp) && d.ip === targetIp);
+      if (prev.some(match)) {
+        return prev.map((d) => match(d)
+          ? { ...d, serial, model: model || d.model, connectionType, ip: targetIp || d.ip, port: targetPort || d.port, lastSeen: Date.now() }
+          : d);
       }
-      return [...prev, {
-        serial,
-        model,
-        connectionType,
-        ip: targetIp,
-        port: targetPort,
-        lastSeen: Date.now(),
-        autoConnect: connectionType === 'Wi-Fi',
-      }];
+      return [...prev, { serial, model, connectionType, ip: targetIp, port: targetPort, lastSeen: Date.now(), autoConnect: connectionType === 'Wi-Fi' }];
     });
   }, []);
 
-  /** Unregister a device (stop remembering it) */
   const unregisterDevice = useCallback((serial: string) => {
-    setRegisteredDevices(prev => prev.filter(d => d.serial !== serial));
+    setRegisteredDevices((prev) => prev.filter((d) => d.serial !== serial));
   }, []);
 
-  /** Toggle auto-connect for a registered device */
   const toggleAutoConnect = useCallback((serial: string) => {
-    setRegisteredDevices(prev => prev.map(d =>
-      d.serial === serial ? { ...d, autoConnect: !d.autoConnect } : d
-    ));
+    setRegisteredDevices((prev) => prev.map((d) => (d.serial === serial ? { ...d, autoConnect: !d.autoConnect } : d)));
   }, []);
 
-  // Poll for device status when server is running
   useEffect(() => {
-    if (serverRunning) {
-      fetchStatus();
-      pollRef.current = setInterval(fetchStatus, POLL_INTERVAL);
-    } else {
-      if (pollRef.current) {
-        clearInterval(pollRef.current);
-        pollRef.current = null;
-      }
+    if (!serverRunning) {
+      if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null; }
+      return;
     }
-    return () => {
-      if (pollRef.current) clearInterval(pollRef.current);
+    const pollIfVisible = () => {
+      if (typeof document === 'undefined' || document.visibilityState !== 'hidden') fetchStatus();
     };
+    pollIfVisible();
+    pollRef.current = setInterval(pollIfVisible, POLL_INTERVAL);
+    return () => { if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null; } };
   }, [serverRunning, fetchStatus]);
 
-  // Auto-reconnect: each registered Wi-Fi device is evaluated independently
   useEffect(() => {
-    const activeSerials = new Set(devices.filter(d => d.state === 'device').map(d => d.serial));
-    const disconnectedWifiDevices = registeredDevices.filter(d => {
-      if (!d.autoConnect || d.connectionType !== 'Wi-Fi' || !d.ip) return false;
-      const directMatch = activeSerials.has(d.serial);
-      const ipPortMatch = activeSerials.has(`${d.ip}:${d.port || '5555'}`);
-      return !directMatch && !ipPortMatch;
-    });
-
-    if (disconnectedWifiDevices.length === 0) return;
+    if (!serverRunning) return;
+    const activeSerials = new Set(devices.filter((d) => d.state === 'device').map((d) => d.serial));
+    const disconnectedWifi = registeredDevices.filter((d) =>
+      d.autoConnect && d.connectionType === 'Wi-Fi' && Boolean(d.ip) &&
+      !activeSerials.has(d.serial) && !activeSerials.has(`${d.ip}:${d.port || '5555'}`),
+    );
+    if (disconnectedWifi.length === 0) return;
 
     reconnectRef.current = setTimeout(async () => {
-      for (const dev of disconnectedWifiDevices) {
-        if (dev.ip) {
-          await connectToIp(dev.ip, dev.port || '5555');
-        }
+      for (const dev of disconnectedWifi) {
+        if (dev.ip) await connectToIp(dev.ip, dev.port || '5555');
       }
     }, RECONNECT_DELAY);
-
-    return () => {
-      if (reconnectRef.current) clearTimeout(reconnectRef.current);
-    };
+    return () => { if (reconnectRef.current) { clearTimeout(reconnectRef.current); reconnectRef.current = null; } };
   }, [serverRunning, devices, registeredDevices, connectToIp]);
 
-
-  // Check initial ADB status on mount
-  useEffect(() => {
-    fetchStatus();
-  }, [fetchStatus]);
+  useEffect(() => { fetchStatus(); }, [fetchStatus]);
 
   return {
-    // State
-    serverRunning,
-    devices,
-    registeredDevices,
-    isConnecting,
-    lastError,
-
-    // Actions
-    startServer,
-    stopServer,
-    toggleServer,
-    connectToIp,
-    disconnectDevice,
-    disconnectAll,
-    fetchStatus,
-
-    // Device registration
-    registerDevice,
-    unregisterDevice,
-    toggleAutoConnect,
+    serverRunning, devices, registeredDevices, isConnecting, lastError,
+    startServer, stopServer, toggleServer, connectToIp, disconnectDevice,
+    disconnectAll, fetchStatus, registerDevice, unregisterDevice, toggleAutoConnect,
   };
 }
