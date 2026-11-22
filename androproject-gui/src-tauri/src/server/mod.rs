@@ -14,6 +14,7 @@ pub mod paths;
 pub mod scrcpy_api;
 pub mod scrcpy_hub;
 pub mod system_api;
+pub mod telemetry;
 
 use axum::{
     routing::{get, post},
