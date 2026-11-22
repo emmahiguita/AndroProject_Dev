@@ -3,6 +3,16 @@ import path from "path";
 
 const nextConfig: NextConfig = {
   output: "standalone",
+  outputFileTracingExcludes: {
+    '*': [
+      './dist/**',
+      './src-tauri/**',
+      './bin/airplay/*.zip',
+      './bin/airplay/*.bak',
+      './temp/**',
+      './.cache/**',
+    ],
+  },
   turbopack: {
     root: path.resolve(__dirname),
   },

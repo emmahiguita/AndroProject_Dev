@@ -33,11 +33,14 @@ export function useDevicePolling(): UseDevicePollingResult {
   const storeSetActiveSerial = useAppStore((s) => s.setActiveSerial);
   const storeSetDevicesList = useAppStore((s) => s.setDevicesList);
   const selectedRef = useRef(selectedSerial);
-  selectedRef.current = selectedSerial;
+  useEffect(() => { selectedRef.current = selectedSerial; }, [selectedSerial]);
   const prevDeviceStrRef = useRef<string>('');
   const prevListStrRef = useRef<string>('');
+  const inFlightRef = useRef<boolean>(false);
 
   const refresh = useCallback(async () => {
+    if (inFlightRef.current) return;
+    inFlightRef.current = true;
     try {
       const url = selectedRef.current
         ? `/api/device?serial=${encodeURIComponent(selectedRef.current)}`
@@ -104,12 +107,18 @@ export function useDevicePolling(): UseDevicePollingResult {
         storeSetActiveSerial(null);
       }
     } catch { /* offline */ }
+    finally { inFlightRef.current = false; }
   }, [storeSetDevice, storeSetActiveSerial, storeSetDevicesList]);
 
   useEffect(() => {
     refresh();
-    const interval = setInterval(refresh, POLL_INTERVAL);
-    return () => clearInterval(interval);
+    const pollIfVisible = () => { if (!document.hidden) void refresh(); };
+    const interval = setInterval(pollIfVisible, POLL_INTERVAL);
+    document.addEventListener('visibilitychange', pollIfVisible);
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener('visibilitychange', pollIfVisible);
+    };
   }, [refresh]);
 
   const scanRadar = useCallback(async () => {
