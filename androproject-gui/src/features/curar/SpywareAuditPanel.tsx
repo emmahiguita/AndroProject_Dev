@@ -53,7 +53,7 @@ export const SpywareAuditPanel: React.FC<SpywareAuditPanelProps> = ({ serial, on
     }
   };
 
-  const runRemediation = async (pkg: string, action: 'revoke_overlay' | 'force_stop') => {
+  const runRemediation = async (pkg: string, action: 'revoke_overlay' | 'force_stop' | 'suspend') => {
     if (!serial) return;
     try {
       const r = await fetch('/api/security-scan', {
@@ -149,6 +149,9 @@ export const SpywareAuditPanel: React.FC<SpywareAuditPanelProps> = ({ serial, on
                   )}
                   <Button variant="secondary" size="sm" icon={<Square size={12} />} onClick={() => runRemediation(f.packageName, 'force_stop')}>
                     Detener
+                  </Button>
+                  <Button variant="secondary" size="sm" icon={<Ban size={12} />} onClick={() => runRemediation(f.packageName, 'suspend')}>
+                    Congelar
                   </Button>
                   <Button variant="danger" size="sm" icon={<Trash2 size={12} />} onClick={() => handleUninstall(f.packageName)}>
                     Desinstalar

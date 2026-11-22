@@ -41,7 +41,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const { serial, packageName, action } = (await req.json()) as {
-      serial?: string; packageName?: string; action?: 'revoke_overlay' | 'force_stop' | 'disable';
+      serial?: string; packageName?: string; action?: 'revoke_overlay' | 'force_stop' | 'disable' | 'suspend' | 'unsuspend';
     };
     if (!serial || !isValidDeviceSerial(serial)) {
       return NextResponse.json({ success: false, error: 'Serial inválido.' }, { status: 400 });
@@ -52,7 +52,9 @@ export async function POST(req: NextRequest) {
       action === 'revoke_overlay' ? ['appops', 'set', pkg, 'SYSTEM_ALERT_WINDOW', 'ignore']
         : action === 'force_stop' ? ['am', 'force-stop', pkg]
           : action === 'disable' ? ['pm', 'disable-user', '--user', '0', pkg]
-            : null;
+            : action === 'suspend' ? ['pm', 'suspend', pkg]
+              : action === 'unsuspend' ? ['pm', 'unsuspend', pkg]
+                : null;
 
     if (!shellArgs) {
       return NextResponse.json({ success: false, error: 'Acción de remediación no soportada.' }, { status: 400 });
@@ -61,7 +63,9 @@ export async function POST(req: NextRequest) {
     await execFileAsync(ADB, ['-s', serial, 'shell', ...shellArgs], { timeout: 8000, windowsHide: true });
     const label = action === 'revoke_overlay' ? 'Overlay/anuncios bloqueados'
       : action === 'force_stop' ? 'Proceso detenido'
-        : 'Aplicación deshabilitada';
+        : action === 'suspend' ? 'App congelada sin perder datos (Hail)'
+          : action === 'unsuspend' ? 'App descongelada'
+            : 'Aplicación deshabilitada';
     return NextResponse.json({ success: true, message: `${label}: ${pkg}` });
   } catch (err: unknown) {
     return NextResponse.json({ success: false, error: err instanceof Error ? err.message : String(err) }, { status: 500 });

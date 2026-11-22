@@ -215,8 +215,8 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/features/ToolsView.tsx": {
-    "mtime": 1795309428.8203318,
-    "ast_hash": "3edc9f52a2da55a34d58df8951b1850c",
+    "mtime": 1795349369.4391453,
+    "ast_hash": "e92ee6361f8447d868321073162fe2a7",
     "semantic_hash": ""
   },
   "androproject-gui/src/features/types.ts": {
@@ -1500,8 +1500,8 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/app/api/security-scan/route.ts": {
-    "mtime": 1795347423.390151,
-    "ast_hash": "0c32104873adfd0173e6bae7ee1e2fd1",
+    "mtime": 1795349371.3186288,
+    "ast_hash": "a4589d8edec7e18a9a6de08264e14b6c",
     "semantic_hash": ""
   },
   "androproject-gui/src/features/curar/ScreenshotPanel.tsx": {
@@ -1510,8 +1510,8 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/features/curar/SpywareAuditPanel.tsx": {
-    "mtime": 1795347425.571222,
-    "ast_hash": "e4d5c0846491d9ab9dc21731b84c2704",
+    "mtime": 1795349374.7978454,
+    "ast_hash": "9c8ee9e1d9b0ac5a9597024e51815faf",
     "semantic_hash": ""
   },
   "androproject-gui/src/hooks/useMouseLight.ts": {
@@ -1552,6 +1552,21 @@
   "docs/images/multiscreen-live.png": {
     "mtime": 1795309428.8825493,
     "ast_hash": "feea1315ec994f04074535ec89dca201",
+    "semantic_hash": ""
+  },
+  "androproject-gui/src/app/api/drivers/route.ts": {
+    "mtime": 1795349336.396161,
+    "ast_hash": "5b2040ddcad76dffee30e1c112fae87a",
+    "semantic_hash": ""
+  },
+  "androproject-gui/src/features/tools/DriverManagerPanel.tsx": {
+    "mtime": 1795349353.3150673,
+    "ast_hash": "12f9657da03cd8e402817b4bc31ca9bc",
+    "semantic_hash": ""
+  },
+  "androproject-gui/src/lib/services/driver-manager.ts": {
+    "mtime": 1795349335.1821284,
+    "ast_hash": "547089e9206e85d249b0cd45bf933c99",
     "semantic_hash": ""
   }
 }

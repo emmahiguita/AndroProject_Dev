@@ -8,6 +8,7 @@ import { useAppStore } from '@/stores';
 import { useTheme } from '@/hooks/useTheme';
 import { useActions } from '@/hooks/useActions';
 import { ViewShell } from '@/components/ViewShell';
+import { DriverManagerPanel } from './tools/DriverManagerPanel';
 import { DeviceInfo } from './types';
 
 interface ToolsViewProps {
@@ -143,6 +144,9 @@ export function ToolsView({ device }: ToolsViewProps = {}) {
             </div>
           )}
         </div>
+
+        {/* ── Windows USB DriverManager (PnPUtil + .cat/.inf) ── */}
+        <DriverManagerPanel />
       </div>
     </ViewShell>
   );
