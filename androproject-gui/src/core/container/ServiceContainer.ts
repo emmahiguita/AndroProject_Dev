@@ -78,6 +78,7 @@ export class ServiceContainer {
 // Well-known Service Tokens
 export const TOKENS = {
   AdbExecutor: 'IAdbExecutor',
+  ScreenCapture: 'IScreenCapture',
   ScrcpyTransport: 'IScrcpyTransport',
   AirPlayEngine: 'IAirPlayEngine',
   AirPlayTransport: 'IAirPlayTransport',
@@ -98,6 +99,13 @@ function initializeDefaultBindings(c: ServiceContainer): void {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { adb } = require('@/lib/services/adb-executor');
     return adb;
+  });
+
+  // Screen Capture (3-tier resilient PNG capture)
+  c.registerSingleton(TOKENS.ScreenCapture, () => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { screenCapture } = require('@/lib/services/screen-capture');
+    return screenCapture;
   });
 
   // Scrcpy Transport

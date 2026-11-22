@@ -13,7 +13,7 @@
 
 import React from 'react';
 import {
-  MonitorPlay, Wrench, RefreshCw, Info,
+  MonitorPlay, Wrench, RefreshCw, Info, Camera, Airplay,
   Search, Trash2, Play, ChevronRight,
 } from 'lucide-react';
 import { RealAppIcon } from '@/components/ui/RealAppIcon';
@@ -87,6 +87,8 @@ export const DashboardAppsPanel: React.FC<DashboardAppsPanelProps> = ({
         <h3 className={`text-xs font-bold mb-2 ${dark ? 'text-zinc-200' : 'text-slate-800'}`}>Acciones rápidas</h3>
         <div className="space-y-0.5">
           <ActionRow dark={dark} icon={<MonitorPlay size={14} />} title="Proyección en vivo" sub="Ver pantalla del dispositivo a 60 FPS" onClick={() => onNavigate('projection')} />
+          <ActionRow dark={dark} icon={<Camera size={14} />} title="Cámara WebRTC 4K" sub="Transmitir y grabar cámara trasera (/camera)" onClick={() => window.open('/camera', '_blank', 'noopener,noreferrer')} />
+          <ActionRow dark={dark} icon={<Airplay size={14} />} title="Espejo Apple AirPlay 2" sub="Visor dedicado iPhone 60 FPS (/ios-mirror)" onClick={() => window.open('/ios-mirror', '_blank', 'noopener,noreferrer')} />
           <ActionRow dark={dark} icon={<Wrench size={14} />} title="Herramientas del sistema" sub="Reinicios y diagnósticos" onClick={() => onNavigate('tools')} />
           <ActionRow dark={dark} icon={<RefreshCw size={14} />} title="Reiniciar ADB" sub="Restablecer el servidor de conexión" onClick={() => onRunAction('restart_adb', 'Reiniciando ADB')} />
           <ActionRow dark={dark} icon={<Info size={14} />} title="Información del dispositivo" sub="Ver detalles técnicos completos" onClick={() => onNavigate('config')} />

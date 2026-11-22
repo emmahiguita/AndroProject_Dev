@@ -3,9 +3,10 @@
 // QUÉ HACE: Expone `POST /api/apps` para listar, abrir (`launch`), detener
 //           (`force_stop`), limpiar datos (`clear_data`), extraer APK a PC
 //           (`extract_apk`), habilitar, deshabilitar o desinstalar paquetes.
-// CÓMO FUNCIONA: Valida `serial` y `packageName`, protege paquetes críticos del
-//           sistema (`403`), ejecuta `adb` con timeout de 15s y verifica errores.
-// POR QUÉ: Proveer lógica real de administración de paquetes Android en < 160L.
+// CÓMO FUNCIONA: Evita ejecutar `adb devices` redundante cuando el frontend ya
+//           envía `serial`, usa la caché de 30s de `listDeviceApps` e invalida
+//           dicha caché automáticamente al modificar paquetes.
+// POR QUÉ: Acelerar drásticamente la respuesta del módulo Aplicaciones (< 165L).
 // ============================================================================
 
 import { NextResponse } from 'next/server';
@@ -16,7 +17,7 @@ import path from 'path';
 import { ADB, ANDROPROJECT_HOME } from '@/lib/config';
 import { assertValidPackageName, isValidDeviceSerial } from '@/lib/security/input-sanitizer';
 import { isCriticalSystem } from './_lib/app-catalog';
-import { listDeviceApps } from './_lib/app-list-builder';
+import { listDeviceApps, invalidateAppListCache } from './_lib/app-list-builder';
 
 const execAsyncOrig = promisify(exec);
 const execAsync = async (command: string, options: { timeout?: number; encoding?: BufferEncoding; maxBuffer?: number } = {}) => {
@@ -39,23 +40,25 @@ function checkAdbFailure(stdout: string, fallbackMsg: string): NextResponse | nu
 
 export async function POST(req: Request) {
   try {
-    const { action, packageName, serial } = await req.json();
+    const { action, packageName, serial, forceRefresh } = await req.json();
 
-    const { stdout: devicesOut } = await execAsync(`"${ADB}" devices`, { timeout: 5000 });
-    const detectedId = devicesOut.split('\n').slice(1).find((l: string) => l.includes('\tdevice'))?.split(/\s+/)[0];
-    const targetSerial = serial || detectedId;
+    let targetSerial = serial && serial !== 'Hardware Level' ? String(serial).trim() : '';
+    if (!targetSerial) {
+      const { stdout: devicesOut } = await execAsync(`"${ADB}" devices`, { timeout: 4000 });
+      targetSerial = devicesOut.split('\n').slice(1).find((l: string) => l.includes('\tdevice'))?.split(/\s+/)[0] || '';
+    }
 
     if (!targetSerial) {
       return NextResponse.json({ success: false, error: 'Dispositivo no detectado' }, { status: 400 });
     }
-    if (targetSerial !== 'Hardware Level' && !isValidDeviceSerial(targetSerial)) {
+    if (!isValidDeviceSerial(targetSerial)) {
       return NextResponse.json({ success: false, error: 'Serial de dispositivo inválido' }, { status: 400 });
     }
 
-    const adbTarget = targetSerial !== 'Hardware Level' ? `"${ADB}" -s ${targetSerial}` : `"${ADB}"`;
+    const adbTarget = `"${ADB}" -s ${targetSerial}`;
 
     if (action === 'list') {
-      const apps = await listDeviceApps(adbTarget, execAsync);
+      const apps = await listDeviceApps(adbTarget, execAsync, Boolean(forceRefresh));
       return NextResponse.json({ success: true, apps });
     }
 
@@ -122,6 +125,7 @@ export async function POST(req: Request) {
       const { stdout } = await execAsync(cmd);
       const fail = checkAdbFailure(stdout, `No se pudo desinstalar ${safePkg}`);
       if (fail) return fail;
+      invalidateAppListCache(adbTarget);
       return NextResponse.json({
         success: true,
         message: isSystem ? `App de fábrica ${safePkg} desinstalada para el usuario actual.` : `Aplicación ${safePkg} desinstalada.`,
@@ -135,6 +139,7 @@ export async function POST(req: Request) {
       const { stdout } = await execAsync(`${adbTarget} shell pm disable-user --user 0 ${safePkg}`);
       const fail = checkAdbFailure(stdout, `No se pudo deshabilitar ${safePkg}`);
       if (fail) return fail;
+      invalidateAppListCache(adbTarget);
       return NextResponse.json({ success: true, message: `Aplicación ${safePkg} deshabilitada.` });
     }
 
@@ -142,6 +147,7 @@ export async function POST(req: Request) {
       const { stdout } = await execAsync(`${adbTarget} shell pm enable ${safePkg}`);
       const fail = checkAdbFailure(stdout, `No se pudo habilitar ${safePkg}`);
       if (fail) return fail;
+      invalidateAppListCache(adbTarget);
       return NextResponse.json({ success: true, message: `Aplicación ${safePkg} habilitada.` });
     }
 

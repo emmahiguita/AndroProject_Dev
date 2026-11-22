@@ -1,29 +1,56 @@
 // ============================================================================
 // ARCHIVO: icon/route.ts
 // QUÉ HACE: Sirve iconos reales de aplicaciones Android vía GET /api/apps/icon.
-// CÓMO FUNCIONA: 1) Lee caché de disco (<2ms), 2) Extrae el icono real desde
-//           el APK del dispositivo vía ADB, 3) Fallback a Play Store si el
-//           dispositivo no está conectado o el APK solo trae XML vectorial.
-// POR QUÉ: Garantizar iconos reales rápidos, seguros y sin fuga de temporales.
+// CÓMO FUNCIONA:
+//   1. Lee caché positiva en memoria/disco (<1ms).
+//   2. Verifica caché negativa (`isKnownMissingIcon`) para responder 404 en <1ms.
+//   3. Omite paquetes internos de sistema/OEM (`com.android.`, `com.mediatek.`,
+//      `com.oplus.`, `.overlay`) que no tienen icono comercial en Play Store.
+//   4. Extrae del APK con semáforo de 3 pulls máx y guarda resultado o `.miss`.
+// POR QUÉ: Evitar que 300+ paquetes del sistema bloqueen la carga de iconos.
 // ============================================================================
 
 import { NextResponse } from 'next/server';
 import { assertValidPackageName, isValidDeviceSerial } from '@/lib/security/input-sanitizer';
 import {
   extractDeviceApkIcon,
+  isKnownMissingIcon,
+  markMissingIcon,
   readCachedIcon,
   saveCachedIcon,
 } from '@/lib/services/apk-icon-extractor';
 
 const playUrlCache = new Map<string, string>();
 
-/** Descarga imagen og:image desde Play Store como último fallback y la cachea. */
+const INTERNAL_SYS_PREFIXES = [
+  'android.',
+  'com.android.',
+  'com.mediatek.',
+  'com.qualcomm.',
+  'com.qti.',
+  'com.oplus.',
+  'com.coloros.',
+  'com.heytap.',
+  'com.sec.android.',
+  'com.samsung.android.overlay',
+  'com.google.android.overlay',
+  'com.google.mainline.',
+];
+
+function isInternalSystemPackage(pkg: string): boolean {
+  if (pkg === 'android' || pkg.includes('.overlay') || pkg.includes('auto_generated_rro')) return true;
+  return INTERNAL_SYS_PREFIXES.some((prefix) => pkg.startsWith(prefix));
+}
+
+/** Descarga imagen og:image desde Play Store solo para apps de usuario/comerciales. */
 async function fetchPlayStoreFallback(pkg: string): Promise<Response | null> {
+  if (isInternalSystemPackage(pkg)) return null;
+
   const cachedUrl = playUrlCache.get(pkg);
   if (cachedUrl) return NextResponse.redirect(cachedUrl);
 
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 3000);
+  const timer = setTimeout(() => controller.abort(), 2200);
   try {
     const res = await fetch(`https://play.google.com/store/apps/details?id=${encodeURIComponent(pkg)}`, {
       signal: controller.signal,
@@ -68,7 +95,7 @@ export async function GET(request: Request) {
     const pkg = assertValidPackageName(rawPkg);
     const serial = rawSerial && isValidDeviceSerial(rawSerial) ? rawSerial : null;
 
-    // 1. Caché local en disco (instantáneo)
+    // 1. Caché positiva en memoria/disco (<1ms)
     const cached = await readCachedIcon(pkg);
     if (cached) {
       return new Response(new Uint8Array(cached.buffer), {
@@ -76,19 +103,33 @@ export async function GET(request: Request) {
       });
     }
 
-    // 2. Extracción real desde el APK instalado en el dispositivo ADB
-    const fromApk = await extractDeviceApkIcon(pkg, serial).catch(() => null);
-    if (fromApk) {
-      return new Response(new Uint8Array(fromApk.buffer), {
-        headers: { 'Content-Type': fromApk.contentType, 'Cache-Control': 'public, max-age=86400' },
+    // 2. Caché negativa (<1ms) — evita re-descargar APKs sin icono
+    if (await isKnownMissingIcon(pkg)) {
+      return new Response('Icon not found', {
+        status: 404,
+        headers: { 'Cache-Control': 'public, max-age=86400' },
       });
     }
 
-    // 3. Fallback a Google Play Store (para iconos adaptativos XML o sin USB)
+    // 3. Extracción desde APK instalado (solo si no es un overlay RRO puro)
+    if (!pkg.includes('.overlay') && !pkg.includes('auto_generated_rro')) {
+      const fromApk = await extractDeviceApkIcon(pkg, serial).catch(() => null);
+      if (fromApk) {
+        return new Response(new Uint8Array(fromApk.buffer), {
+          headers: { 'Content-Type': fromApk.contentType, 'Cache-Control': 'public, max-age=86400' },
+        });
+      }
+    }
+
+    // 4. Fallback a Play Store para apps comerciales
     const fallback = await fetchPlayStoreFallback(pkg);
     if (fallback) return fallback;
 
-    return new Response('Icon not found', { status: 404 });
+    await markMissingIcon(pkg);
+    return new Response('Icon not found', {
+      status: 404,
+      headers: { 'Cache-Control': 'public, max-age=86400' },
+    });
   } catch {
     return new Response('Invalid package', { status: 400 });
   }

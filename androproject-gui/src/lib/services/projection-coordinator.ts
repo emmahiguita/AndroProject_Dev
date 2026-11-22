@@ -9,6 +9,7 @@
  */
 
 import type { IStreamTransport, StreamSessionConfig, StreamSessionResult } from '@/core/domain/ports/IStreamTransport';
+import { createSessionId, type DeviceSession } from '@/core/domain/entities/DeviceSession';
 import { scrcpyTransport, ScrcpyStreamTransport } from '@/core/transports/ScrcpyStreamTransport';
 import { airPlayTransport, AirPlayStreamTransport } from '@/core/transports/AirPlayStreamTransport';
 import type { DeviceInfo, AirPlayServerStatus } from '@/features/types';
@@ -26,10 +27,12 @@ export interface IProjectionCoordinator {
   start(device: DeviceInfo, options?: ProjectionLaunchOptions): Promise<StreamSessionResult | VisionNanoResult | AirPlayServerStatus>;
   stop(device: DeviceInfo): Promise<boolean>;
   isAlive(device: DeviceInfo): Promise<boolean>;
+  getActiveSessions(): DeviceSession[];
 }
 
 export class ProjectionCoordinator implements IProjectionCoordinator {
   private readonly transports = new Map<string, IStreamTransport>();
+  private readonly sessions = new Map<string, DeviceSession>();
 
   constructor(customTransports?: Record<string, IStreamTransport>) {
     // Register default transports (DIP / OCP)
@@ -96,7 +99,22 @@ export class ProjectionCoordinator implements IProjectionCoordinator {
       windowTitle: options.airplayOptions?.serverName || device.model,
     };
 
-    return await transport.start(sessionConfig);
+    const res = await transport.start(sessionConfig);
+    const displayNum = typeof sessionConfig.displayId === 'number' ? sessionConfig.displayId : 0;
+    const sessionId = createSessionId(device.serial, displayNum, options.videoSource || 'display');
+    this.sessions.set(device.serial, {
+      sessionId,
+      serial: device.serial,
+      displayId: displayNum,
+      model: device.model || device.serial,
+      platform: platform === 'ios' ? 'ios' : 'android',
+      isStreaming: true,
+      fps: Number(options.maxFps) || 60,
+      mode: platform === 'ios' ? 'airplay' : 'scrcpy',
+      startedAt: Date.now(),
+      pid: 'pid' in res && typeof res.pid === 'number' ? res.pid : undefined,
+    });
+    return res;
   }
 
   /**
@@ -105,7 +123,7 @@ export class ProjectionCoordinator implements IProjectionCoordinator {
   public async stop(device: DeviceInfo): Promise<boolean> {
     const platform = this.resolvePlatform(device);
     const transport = this.getTransport(platform);
-
+    this.sessions.delete(device.serial);
     if (!transport) return false;
 
     console.log(`[ProjectionCoordinator] Stopping ${transport.protocol} transport for ${device.serial} (${platform})`);
@@ -120,8 +138,13 @@ export class ProjectionCoordinator implements IProjectionCoordinator {
     const transport = this.getTransport(platform);
 
     if (!transport) return false;
+    const alive = await transport.isAlive(device.serial);
+    if (!alive) this.sessions.delete(device.serial);
+    return alive;
+  }
 
-    return await transport.isAlive(device.serial);
+  public getActiveSessions(): DeviceSession[] {
+    return Array.from(this.sessions.values());
   }
 }
 

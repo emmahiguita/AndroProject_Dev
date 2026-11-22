@@ -2,7 +2,7 @@
  * Screen Capture — Captures device screenshots.
  * SOLID: SRP (only captures screenshots), DIP (depends on IAdbExecutor).
  */
-import { IAdbExecutor } from './adb-executor';
+import { IAdbExecutor, adb as defaultAdb } from './adb-executor';
 
 export interface CaptureResult {
   ok: boolean;
@@ -71,3 +71,5 @@ export class ScreenCapture implements IScreenCapture {
     return { ok: false, data: null, error: 'Invalid PNG from file method' };
   }
 }
+
+export const screenCapture = new ScreenCapture(defaultAdb);

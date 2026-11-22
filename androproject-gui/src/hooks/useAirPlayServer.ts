@@ -36,7 +36,10 @@ export function useAirPlayServer() {
 
   useEffect(() => {
     fetchStatus();
-    const interval = setInterval(fetchStatus, 8000);
+    const interval = setInterval(() => {
+      if (typeof document !== 'undefined' && document.visibilityState === 'hidden') return;
+      fetchStatus();
+    }, 8000);
     return () => clearInterval(interval);
   }, [fetchStatus]);
 

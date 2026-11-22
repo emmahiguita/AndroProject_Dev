@@ -14,8 +14,9 @@
 import React, { useState } from 'react';
 import {
   Airplay, Maximize2, Sparkles, VolumeX, Home, Lock,
-  Volume2, Camera, ClipboardPaste, Zap, Sliders,
+  Volume2, Camera, ClipboardPaste, Zap, Sliders, ExternalLink, Power,
 } from 'lucide-react';
+import { useAirPlayServer } from '@/hooks/useAirPlayServer';
 import type { ScrcpyOptions } from '@/hooks/useProjection';
 import { ToggleRow, ToolButton } from './DeviceInfoPrimitives';
 
@@ -37,6 +38,7 @@ export const AirPlayStudioCard: React.FC<AirPlayStudioCardProps> = ({
   onMouseControl, onScreenshotClick, onPasteClipboard, run, showToast,
 }) => {
   const [mouseControlActive, setMouseControlActive] = useState(false);
+  const { status: airplayStatus, loading: airplayLoading, toggleServer } = useAirPlayServer();
 
   const postJson = async (url: string, payload: Record<string, unknown>, fallbackErr: string) => {
     try {
@@ -93,19 +95,30 @@ export const AirPlayStudioCard: React.FC<AirPlayStudioCardProps> = ({
       <div className="p-2.5 rounded-lg bg-zinc-950/60 border border-zinc-800/80 space-y-2">
         <div className="flex items-center justify-between text-[11px]">
           <span className="text-zinc-400 font-normal">Nombre en Red:</span>
-          <span className="font-medium text-zinc-200 font-mono">AndroProject [PC]</span>
+          <span className="font-medium text-zinc-200 font-mono">{airplayStatus.serverName} (:{airplayStatus.port})</span>
         </div>
         <div className="flex items-center justify-between text-[11px]">
-          <span className="text-zinc-400 font-normal">Salida de Audio:</span>
-          <span className="font-medium text-emerald-400 font-mono">Altavoz del Celular (--no-audio)</span>
-        </div>
-        <div className="flex items-center justify-between text-[11px]">
-          <span className="text-zinc-400 font-normal">Velocidad de Cuadros:</span>
-          <span className="font-medium text-zinc-200 font-mono">60 FPS (Direct3D11)</span>
+          <span className="text-zinc-400 font-normal">Estado Receptor:</span>
+          <span className={`font-medium font-mono ${airplayStatus.running ? 'text-emerald-400' : 'text-amber-400'}`}>
+            {airplayStatus.running ? 'Activo · Bonjour ON' : 'En espera'}
+          </span>
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-3 gap-1.5">
+        <button
+          type="button"
+          disabled={airplayLoading}
+          onClick={async () => {
+            showToast(airplayStatus.running ? 'Deteniendo receptor AirPlay...' : 'Iniciando receptor AirPlay...');
+            await toggleServer();
+          }}
+          className="flex items-center justify-center gap-1 py-2 px-2 rounded-lg text-xs font-medium transition-colors bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 cursor-pointer"
+        >
+          <Power size={12} className={airplayStatus.running ? 'text-emerald-400' : 'text-zinc-400'} />
+          <span>{airplayStatus.running ? 'Activo' : 'Iniciar'}</span>
+        </button>
+
         <button
           type="button"
           onClick={async () => {
@@ -113,22 +126,22 @@ export const AirPlayStudioCard: React.FC<AirPlayStudioCardProps> = ({
             const data = await postJson('/api/airplay', { action: 'open_native_window' }, 'Error al abrir ventana');
             if (data) showToast('Ventana flotante abierta');
           }}
-          className="flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-lg text-xs font-medium transition-colors bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 cursor-pointer"
+          className="flex items-center justify-center gap-1 py-2 px-2 rounded-lg text-xs font-medium transition-colors bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 cursor-pointer"
         >
-          <Maximize2 size={13} /><span>Ventana Libre</span>
+          <Maximize2 size={12} /><span>Libre</span>
         </button>
 
         <button
           type="button"
           onClick={handleToggleMouse}
-          className={`flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-lg text-xs font-medium transition-colors border cursor-pointer ${
+          className={`flex items-center justify-center gap-1 py-2 px-2 rounded-lg text-xs font-medium transition-colors border cursor-pointer ${
             mouseControlActive
               ? 'bg-zinc-100 border-zinc-100 text-zinc-950 hover:bg-white'
               : 'bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border-zinc-700'
           }`}
         >
-          <Sparkles size={13} className={mouseControlActive ? 'text-emerald-600' : 'text-zinc-400'} />
-          <span>{mouseControlActive ? 'Ratón Activo' : 'Control Ratón'}</span>
+          <Sparkles size={12} className={mouseControlActive ? 'text-emerald-600' : 'text-zinc-400'} />
+          <span>{mouseControlActive ? 'Ratón ON' : 'Ratón'}</span>
         </button>
       </div>
 
@@ -173,6 +186,8 @@ export const AirPlayStudioCard: React.FC<AirPlayStudioCardProps> = ({
               const data = await postJson('/api/ios', { action: 'open_bluetooth_settings' }, 'Error abriendo Bluetooth');
               if (data) showToast(data.message || 'Ajustes Bluetooth abiertos');
             }} />
+          <ToolButton dark={dark} icon={<ExternalLink size={13} className="text-zinc-400" />} label="Espejo iOS (/ios-mirror)"
+            onClick={() => { window.open('/ios-mirror', '_blank', 'noopener,noreferrer'); }} />
         </div>
       </div>
     </div>

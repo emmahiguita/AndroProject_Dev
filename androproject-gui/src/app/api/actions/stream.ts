@@ -3,10 +3,10 @@
 // QUÉ HACE: Endpoints de transmisión de pantalla (open_screen, check_screen,
 //           stop_screen), capturas PNG (screenshot) y re-exportación de
 //           grabación MP4 desde stream-recorder.ts.
-// CÓMO FUNCIONA: Enruta la proyección al ProjectionCoordinator (Android scrcpy
-//           o iOS AirPlay 2) y captura PNGs desde AirPlay o adb screencap.
-// POR QUÉ: Mantener las rutas de streaming y captura separadas de la lógica
-//           de grabación conserva cada archivo por debajo de 200 líneas.
+// CÓMO FUNCIONA: Resuelve `IProjectionCoordinator` e `IScreenCapture` mediante
+//           el contenedor IoC (`ServiceContainer`), capturando PNGs en 3 niveles
+//           (`exec-out`, `/sdcard`, `/data/local/tmp`) o desde AirPlay 2.
+// POR QUÉ: Conectar `ServiceContainer` y `ScreenCapture` bajo DIP/SRP (< 200L).
 // ============================================================================
 
 import { NextResponse } from 'next/server';
@@ -14,9 +14,10 @@ import path from 'path';
 import fs from 'fs';
 import { ActionContext } from './_lib/context';
 import { SCREENSHOTS_DIR } from '@/lib/config';
-import { projectionCoordinator } from '@/lib/services/projection-coordinator';
+import { container, TOKENS } from '@/core/container/ServiceContainer';
+import type { IProjectionCoordinator } from '@/lib/services/projection-coordinator';
+import type { IScreenCapture } from '@/lib/services/screen-capture';
 import type { DeviceInfo } from '@/features/types';
-import { adb } from '@/lib/services/adb-executor';
 import { airPlayReceiverEngine } from '@/lib/services/airplay-engine';
 
 export { startRecord, stopRecord, checkRecord } from './_lib/stream-recorder';
@@ -50,7 +51,8 @@ export async function openScreen(ctx: ActionContext, body: {
     connected: true,
   };
 
-  const result = await projectionCoordinator.start(device, {
+  const coordinator = container.resolve<IProjectionCoordinator>(TOKENS.ProjectionCoordinator);
+  const result = await coordinator.start(device, {
     serial: targetSerial,
     displayId: body.displayId,
     maxSize: body.maxSize,
@@ -85,13 +87,14 @@ export async function checkOrStopScreen(ctx: ActionContext, action: 'check_scree
     connected: true,
   };
 
+  const coordinator = container.resolve<IProjectionCoordinator>(TOKENS.ProjectionCoordinator);
   if (action === 'check_screen') {
-    const alive = await projectionCoordinator.isAlive(device);
-    return NextResponse.json({ success: true, alive });
+    const alive = await coordinator.isAlive(device);
+    return NextResponse.json({ success: true, alive, sessions: coordinator.getActiveSessions() });
   }
 
   if (action === 'stop_screen') {
-    const stopped = await projectionCoordinator.stop(device);
+    const stopped = await coordinator.stop(device);
     return NextResponse.json({
       success: true,
       alive: false,
@@ -102,7 +105,7 @@ export async function checkOrStopScreen(ctx: ActionContext, action: 'check_scree
   return NextResponse.json({ success: false, error: 'Acción no válida' }, { status: 400 });
 }
 
-/** Captura una imagen PNG de alta resolución (AirPlay frame o ADB screencap). */
+/** Captura una imagen PNG de alta resolución (AirPlay frame o 3-tier ADB ScreenCapture). */
 export async function screenshot(ctx: ActionContext) {
   if (!fs.existsSync(SCREENSHOTS_DIR)) fs.mkdirSync(SCREENSHOTS_DIR, { recursive: true });
 
@@ -131,39 +134,20 @@ export async function screenshot(ctx: ActionContext) {
     return NextResponse.json({ success: false, error: 'No hay un dispositivo conectado' }, { status: 400 });
   }
 
-  // Método primario: binario directo por exec-out sin escribir en el almacenamiento interno
-  const res = await adb.execOut(serial, 'exec-out screencap -p');
-  if (res.ok && res.stdout.length > MIN_SCREENSHOT_SIZE && res.stdout[0] === 0x89 && res.stdout[1] === 0x50) {
-    fs.writeFileSync(localPath, res.stdout);
+  const captureSvc = container.resolve<IScreenCapture>(TOKENS.ScreenCapture);
+  const captured = await captureSvc.capture(serial);
+  if (captured.ok && captured.data && captured.data.byteLength >= MIN_SCREENSHOT_SIZE) {
+    fs.writeFileSync(localPath, captured.data);
     return NextResponse.json({
       success: true,
       message: `Captura guardada en Capturas\\screenshot_${timestamp}.png`,
       path: localPath,
-      size: res.stdout.length,
+      size: captured.data.byteLength,
     });
-  }
-
-  // Método respaldo: capturar en /sdcard y extraer por adb pull
-  const devicePath = `/sdcard/screenshot_${timestamp}.png`;
-  await adb.shell(serial, `screencap -p "${devicePath}"`);
-  await adb.execFor(serial, `pull "${devicePath}" "${localPath}"`);
-  await adb.shell(serial, `rm -f "${devicePath}"`);
-
-  if (fs.existsSync(localPath)) {
-    const stat = fs.statSync(localPath);
-    if (stat.size >= MIN_SCREENSHOT_SIZE) {
-      return NextResponse.json({
-        success: true,
-        message: `Captura guardada en Capturas\\screenshot_${timestamp}.png`,
-        path: localPath,
-        size: stat.size,
-      });
-    }
-    try { fs.unlinkSync(localPath); } catch {}
   }
 
   return NextResponse.json({
     success: false,
-    error: 'No se pudo capturar la pantalla. Verifica que el dispositivo esté desbloqueado.',
+    error: captured.error || 'No se pudo capturar la pantalla. Verifica que el dispositivo esté desbloqueado.',
   }, { status: 422 });
 }
