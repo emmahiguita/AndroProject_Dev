@@ -128,8 +128,8 @@ export const Header: React.FC<HeaderProps> = ({
       </button>
 
       {/* Wi-Fi */}
-      <button type="button" onClick={onOpenConnectModal} aria-label="Conectar dispositivo vía IP Wi-Fi" title="Conectar vía IP Wi-Fi" className={`h-9 px-2.5 hidden sm:flex items-center gap-1.5 rounded-lg border text-xs font-semibold transition-colors ${btnNeutral}`}>
-        <Wifi size={15} />
+      <button type="button" onClick={onOpenConnectModal} aria-label="Conectar dispositivo vía IP Wi-Fi" title="Conectar vía IP Wi-Fi" className={`h-9 px-2.5 shrink-0 whitespace-nowrap hidden sm:flex items-center gap-1.5 rounded-lg border text-xs font-semibold transition-colors ${btnNeutral}`}>
+        <Wifi size={15} className="shrink-0" />
         <span className="hidden lg:inline">Wi-Fi</span>
       </button>
 
@@ -155,11 +155,11 @@ export const Header: React.FC<HeaderProps> = ({
           onClick={() => onToggleRescue()}
           aria-label="Alternar Modo Rescate A30"
           title={rescueConfig.enabled ? `Modo Rescate ACTIVO · ${rescueMsg || 'Sincronización permanente'}` : 'Activar sincronización permanente A30'}
-          className={`h-9 px-2.5 hidden sm:flex items-center gap-1.5 rounded-lg border text-xs font-semibold transition-colors ${
+          className={`h-9 px-2.5 shrink-0 whitespace-nowrap hidden sm:flex items-center gap-1.5 rounded-lg border text-xs font-semibold transition-colors ${
             rescueConfig.enabled ? btnActive : btnNeutral
           }`}
         >
-          <Zap size={15} />
+          <Zap size={15} className="shrink-0" />
           <span className="hidden xl:inline">Rescate A30</span>
         </button>
       )}
