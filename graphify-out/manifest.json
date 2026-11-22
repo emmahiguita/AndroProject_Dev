@@ -155,8 +155,8 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/components/layout/Sidebar.tsx": {
-    "mtime": 1795367910.5038927,
-    "ast_hash": "90bf336c8283e8e8c8f798707737b5e0",
+    "mtime": 1795368090.681021,
+    "ast_hash": "67c6df30482eeb2681a573ba48f5a25f",
     "semantic_hash": ""
   },
   "androproject-gui/src/components/ui/FeatureErrorBoundary.tsx": {
@@ -190,8 +190,8 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/features/DashboardView.tsx": {
-    "mtime": 1795367137.6260939,
-    "ast_hash": "51a84c9d0e96a83e2fe8a4de8f6b587d",
+    "mtime": 1795368141.6968012,
+    "ast_hash": "3ca55efcc03b6b1e6695c3d295aa9d9c",
     "semantic_hash": ""
   },
   "androproject-gui/src/features/FlasherView.tsx": {
@@ -685,8 +685,8 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/components/projection/MobileProjection.tsx": {
-    "mtime": 1795367137.5654745,
-    "ast_hash": "5420a75e6848886d1b9d1320c513a6db",
+    "mtime": 1795368089.2749147,
+    "ast_hash": "544e83577078d0904edfd45619860a99",
     "semantic_hash": ""
   },
   "androproject-gui/src-tauri/icons/128x128.png": {
@@ -1190,8 +1190,8 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/features/curar/ScreenshotPanel.tsx": {
-    "mtime": 1795367910.5049875,
-    "ast_hash": "df37b5c062de0b4aa7649398fc9a5941",
+    "mtime": 1795368092.0743842,
+    "ast_hash": "253df970e4587414a64ab0549f61ecf6",
     "semantic_hash": ""
   },
   "androproject-gui/src/features/curar/SpywareAuditPanel.tsx": {

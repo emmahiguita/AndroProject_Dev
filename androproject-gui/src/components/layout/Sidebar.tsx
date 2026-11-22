@@ -1,3 +1,11 @@
+// ============================================================================
+// ARCHIVO: Sidebar.tsx
+// QUÉ HACE: Barra lateral de navegación principal de ANDRO-IOS Studio con
+//           grupos semánticos, estado activo y modo colapsable.
+// CÓMO FUNCIONA: Lee el tema desde `useAppTheme()` y delega el cambio de
+//           sección a `onSelectNav` manteniendo accesible cada ruta.
+// POR QUÉ: Separar la navegación del contenedor `AppShell` (SRP, < 200L).
+// ============================================================================
 'use client';
 
 import React from 'react';

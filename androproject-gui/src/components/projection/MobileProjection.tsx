@@ -49,9 +49,10 @@ export function MobileProjection({ device, dark, projection }: MobileProjectionP
           )}
           <button
             type="button"
+            aria-label={projection.fullscreen ? 'Salir de pantalla completa' : 'Pantalla completa'}
             onClick={projection.toggleFullscreen}
-            className={`p-1.5 rounded-lg transition-all ${
-              dark ? 'bg-white/5 text-white/50 hover:bg-white/10' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
+            className={`p-1.5 rounded-lg transition-all cursor-pointer ${
+              dark ? 'bg-zinc-800 text-zinc-200 hover:bg-zinc-700' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
             }`}
           >
             {projection.fullscreen ? <Minimize size={14} /> : <Maximize size={14} />}
@@ -59,7 +60,8 @@ export function MobileProjection({ device, dark, projection }: MobileProjectionP
         </div>
       </div>
 
-      <div className="flex-1 flex items-center justify-center bg-black min-h-0">
+      {/* Contenedor flexible con overflow-hidden para adaptarse sin recortes en modo horizontal */}
+      <div className="flex-1 flex items-center justify-center bg-black min-h-0 min-w-0 overflow-hidden">
         <DeviceFrame
           device={device}
           expanded={true}

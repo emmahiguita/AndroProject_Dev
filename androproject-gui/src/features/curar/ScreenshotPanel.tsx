@@ -47,6 +47,7 @@ export const ScreenshotPanel: React.FC<{ serial?: string | null }> = ({ serial: 
   const [lastCaptureMsg, setLastCaptureMsg] = useState<string | null>(null);
   const [diagResult, setDiagResult] = useState<ScreenshotDiagResult | null>(null);
 
+  /** Dispara la captura PNG real en el dispositivo vía `/api/actions` (`screenshot`). */
   const handleCaptureNow = async () => {
     if (!isConnected) return;
     setCapturing(true);

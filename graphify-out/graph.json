@@ -1230,7 +1230,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "androproject_gui_src_tauri_gen_schemas_windows_schema",
-      "community": 121,
+      "community": 11,
       "norm_label": "windows-schema.json"
     },
     {
@@ -1240,7 +1240,7 @@
       "source_location": "L2",
       "_origin": "ast",
       "id": "androproject_gui_src_tauri_gen_schemas_windows_schema_schema",
-      "community": 121,
+      "community": 11,
       "norm_label": "$schema"
     },
     {
@@ -1250,7 +1250,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "androproject_gui_src_tauri_gen_schemas_windows_schema_title",
-      "community": 121,
+      "community": 11,
       "norm_label": "title"
     },
     {
@@ -1260,7 +1260,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "androproject_gui_src_tauri_gen_schemas_windows_schema_description",
-      "community": 121,
+      "community": 11,
       "norm_label": "description"
     },
     {
@@ -1270,7 +1270,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "androproject_gui_src_tauri_gen_schemas_windows_schema_anyof",
-      "community": 121,
+      "community": 11,
       "norm_label": "anyof"
     },
     {
@@ -1810,7 +1810,7 @@
       "source_location": "L2197",
       "_origin": "ast",
       "id": "androproject_gui_src_tauri_gen_schemas_windows_schema_definitions_value",
-      "community": 11,
+      "community": 121,
       "norm_label": "value"
     },
     {
@@ -1820,7 +1820,7 @@
       "source_location": "L2198",
       "_origin": "ast",
       "id": "androproject_gui_src_tauri_gen_schemas_windows_schema_value_description",
-      "community": 11,
+      "community": 121,
       "norm_label": "description"
     },
     {
@@ -1830,7 +1830,7 @@
       "source_location": "L2199",
       "_origin": "ast",
       "id": "androproject_gui_src_tauri_gen_schemas_windows_schema_value_anyof",
-      "community": 11,
+      "community": 121,
       "norm_label": "anyof"
     },
     {
@@ -6580,7 +6580,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "androproject_gui_src_components_viewshell",
-      "community": 54,
+      "community": 29,
       "norm_label": "viewshell.tsx"
     },
     {
@@ -6600,7 +6600,7 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "androproject_gui_src_components_viewshell_viewshell",
-      "community": 54,
+      "community": 29,
       "norm_label": "viewshell()"
     },
     {
@@ -6847,7 +6847,7 @@
       "label": "SidebarProps",
       "file_type": "code",
       "source_file": "androproject-gui/src/components/layout/Sidebar.tsx",
-      "source_location": "L12",
+      "source_location": "L20",
       "_origin": "ast",
       "id": "androproject_gui_src_components_layout_sidebar_sidebarprops",
       "community": 101,
@@ -6857,7 +6857,7 @@
       "label": "NavItemDef",
       "file_type": "code",
       "source_file": "androproject-gui/src/components/layout/Sidebar.tsx",
-      "source_location": "L19",
+      "source_location": "L27",
       "_origin": "ast",
       "id": "androproject_gui_src_components_layout_sidebar_navitemdef",
       "community": 101,
@@ -6867,7 +6867,7 @@
       "label": "groups",
       "file_type": "code",
       "source_file": "androproject-gui/src/components/layout/Sidebar.tsx",
-      "source_location": "L21",
+      "source_location": "L29",
       "_origin": "ast",
       "id": "androproject_gui_src_components_layout_sidebar_groups",
       "community": 101,
@@ -6877,7 +6877,7 @@
       "label": "Sidebar()",
       "file_type": "code",
       "source_file": "androproject-gui/src/components/layout/Sidebar.tsx",
-      "source_location": "L55",
+      "source_location": "L63",
       "_origin": "ast",
       "id": "androproject_gui_src_components_layout_sidebar_sidebar",
       "community": 101,
@@ -7880,7 +7880,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "androproject_gui_src_components_ui_card",
-      "community": 49,
+      "community": 116,
       "norm_label": "card.tsx"
     },
     {
@@ -7890,7 +7890,7 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "androproject_gui_src_components_ui_card_cardpadding",
-      "community": 49,
+      "community": 116,
       "norm_label": "cardpadding"
     },
     {
@@ -7900,7 +7900,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "androproject_gui_src_components_ui_card_cardprops",
-      "community": 49,
+      "community": 116,
       "norm_label": "cardprops"
     },
     {
@@ -7910,7 +7910,7 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "androproject_gui_src_components_ui_card_paddingclasses",
-      "community": 49,
+      "community": 116,
       "norm_label": "paddingclasses"
     },
     {
@@ -7920,7 +7920,7 @@
       "source_location": "L30",
       "_origin": "ast",
       "id": "androproject_gui_src_components_ui_card_card",
-      "community": 49,
+      "community": 116,
       "norm_label": "card()"
     },
     {
@@ -8620,7 +8620,7 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "androproject_gui_src_features_archivosview_archivosview",
-      "community": 29,
+      "community": 49,
       "norm_label": "archivosview()"
     },
     {
@@ -8650,7 +8650,7 @@
       "source_location": "L45",
       "_origin": "ast",
       "id": "androproject_gui_src_features_cliinjectorview_cliinjectorview",
-      "community": 29,
+      "community": 54,
       "norm_label": "cliinjectorview()"
     },
     {
@@ -8660,7 +8660,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "androproject_gui_src_features_configview",
-      "community": 54,
+      "community": 29,
       "norm_label": "configview.tsx"
     },
     {
@@ -8670,7 +8670,7 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "androproject_gui_src_features_configview_configviewprops",
-      "community": 54,
+      "community": 29,
       "norm_label": "configviewprops"
     },
     {
@@ -8690,7 +8690,7 @@
       "source_location": "L155",
       "_origin": "ast",
       "id": "androproject_gui_src_features_configview_configrow",
-      "community": 54,
+      "community": 29,
       "norm_label": "configrow()"
     },
     {
@@ -8700,7 +8700,7 @@
       "source_location": "L181",
       "_origin": "ast",
       "id": "androproject_gui_src_features_configview_quicknavbtn",
-      "community": 54,
+      "community": 29,
       "norm_label": "quicknavbtn()"
     },
     {
@@ -8800,7 +8800,7 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "androproject_gui_src_features_flasherview_flasherview",
-      "community": 29,
+      "community": 94,
       "norm_label": "flasherview()"
     },
     {
@@ -8810,7 +8810,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "androproject_gui_src_features_optimizerview",
-      "community": 49,
+      "community": 116,
       "norm_label": "optimizerview.tsx"
     },
     {
@@ -9220,7 +9220,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "androproject_gui_src_features_config_devicesettingspanel",
-      "community": 54,
+      "community": 29,
       "norm_label": "devicesettingspanel.tsx"
     },
     {
@@ -9230,7 +9230,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "androproject_gui_src_features_config_devicesettingspanel_liveandroidsettings",
-      "community": 54,
+      "community": 29,
       "norm_label": "liveandroidsettings"
     },
     {
@@ -9240,7 +9240,7 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "androproject_gui_src_features_config_devicesettingspanel_devicesettingspanelprops",
-      "community": 54,
+      "community": 29,
       "norm_label": "devicesettingspanelprops"
     },
     {
@@ -9250,7 +9250,7 @@
       "source_location": "L33",
       "_origin": "ast",
       "id": "androproject_gui_src_features_config_devicesettingspanel_devicesettingspanel",
-      "community": 54,
+      "community": 29,
       "norm_label": "devicesettingspanel()"
     },
     {
@@ -9290,7 +9290,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "androproject_gui_src_features_curar_spywareauditpanel",
-      "community": 49,
+      "community": 116,
       "norm_label": "spywareauditpanel.tsx"
     },
     {
@@ -9300,7 +9300,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "androproject_gui_src_features_curar_spywareauditpanel_remediationkind",
-      "community": 49,
+      "community": 116,
       "norm_label": "remediationkind"
     },
     {
@@ -9310,7 +9310,7 @@
       "source_location": "L30",
       "_origin": "ast",
       "id": "androproject_gui_src_features_curar_spywareauditpanel_spywareauditpanelprops",
-      "community": 49,
+      "community": 116,
       "norm_label": "spywareauditpanelprops"
     },
     {
@@ -9320,7 +9320,7 @@
       "source_location": "L35",
       "_origin": "ast",
       "id": "androproject_gui_src_features_curar_spywareauditpanel_spywareauditpanel",
-      "community": 49,
+      "community": 116,
       "norm_label": "spywareauditpanel()"
     },
     {
@@ -9600,7 +9600,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "androproject_gui_src_features_optimizer_developeroptionspanel",
-      "community": 49,
+      "community": 116,
       "norm_label": "developeroptionspanel.tsx"
     },
     {
@@ -9610,7 +9610,7 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "androproject_gui_src_features_optimizer_developeroptionspanel_developeroptionspanelprops",
-      "community": 49,
+      "community": 116,
       "norm_label": "developeroptionspanelprops"
     },
     {
@@ -9620,7 +9620,7 @@
       "source_location": "L28",
       "_origin": "ast",
       "id": "androproject_gui_src_features_optimizer_developeroptionspanel_anim_values",
-      "community": 49,
+      "community": 116,
       "norm_label": "anim_values"
     },
     {
@@ -9630,7 +9630,7 @@
       "source_location": "L30",
       "_origin": "ast",
       "id": "androproject_gui_src_features_optimizer_developeroptionspanel_developeroptionspanel",
-      "community": 49,
+      "community": 116,
       "norm_label": "developeroptionspanel()"
     },
     {
@@ -9640,7 +9640,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "androproject_gui_src_features_optimizer_optimizernetworkaudiopanel",
-      "community": 49,
+      "community": 116,
       "norm_label": "optimizernetworkaudiopanel.tsx"
     },
     {
@@ -9650,7 +9650,7 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "androproject_gui_src_features_optimizer_optimizernetworkaudiopanel_optimizernetworkaudiopanelprops",
-      "community": 49,
+      "community": 116,
       "norm_label": "optimizernetworkaudiopanelprops"
     },
     {
@@ -9660,7 +9660,7 @@
       "source_location": "L27",
       "_origin": "ast",
       "id": "androproject_gui_src_features_optimizer_optimizernetworkaudiopanel_optimizernetworkaudiopanel",
-      "community": 49,
+      "community": 116,
       "norm_label": "optimizernetworkaudiopanel()"
     },
     {
@@ -9670,7 +9670,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "androproject_gui_src_features_optimizer_turboboostpanel",
-      "community": 49,
+      "community": 116,
       "norm_label": "turboboostpanel.tsx"
     },
     {
@@ -9680,7 +9680,7 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "androproject_gui_src_features_optimizer_turboboostpanel_perfprofileid",
-      "community": 49,
+      "community": 116,
       "norm_label": "perfprofileid"
     },
     {
@@ -9690,7 +9690,7 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "androproject_gui_src_features_optimizer_turboboostpanel_perfstatus",
-      "community": 49,
+      "community": 116,
       "norm_label": "perfstatus"
     },
     {
@@ -9700,7 +9700,7 @@
       "source_location": "L30",
       "_origin": "ast",
       "id": "androproject_gui_src_features_optimizer_turboboostpanel_turboboostpanelprops",
-      "community": 49,
+      "community": 116,
       "norm_label": "turboboostpanelprops"
     },
     {
@@ -9710,7 +9710,7 @@
       "source_location": "L36",
       "_origin": "ast",
       "id": "androproject_gui_src_features_optimizer_turboboostpanel_profiles",
-      "community": 49,
+      "community": 116,
       "norm_label": "profiles"
     },
     {
@@ -9720,7 +9720,7 @@
       "source_location": "L42",
       "_origin": "ast",
       "id": "androproject_gui_src_features_optimizer_turboboostpanel_turboboostpanel",
-      "community": 49,
+      "community": 116,
       "norm_label": "turboboostpanel()"
     },
     {
@@ -9800,7 +9800,7 @@
       "source_location": "L70",
       "_origin": "ast",
       "id": "androproject_gui_src_features_types_systemlogs",
-      "community": 81,
+      "community": 119,
       "norm_label": "systemlogs"
     },
     {
@@ -10530,7 +10530,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "androproject_gui_src_hooks_usesystemlogs",
-      "community": 81,
+      "community": 119,
       "norm_label": "usesystemlogs.ts"
     },
     {
@@ -10540,7 +10540,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "androproject_gui_src_hooks_usesystemlogs_systemlogtype",
-      "community": 81,
+      "community": 119,
       "norm_label": "systemlogtype"
     },
     {
@@ -10550,7 +10550,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "androproject_gui_src_hooks_usesystemlogs_usesystemlogsresult",
-      "community": 81,
+      "community": 119,
       "norm_label": "usesystemlogsresult"
     },
     {
@@ -10560,7 +10560,7 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "androproject_gui_src_hooks_usesystemlogs_createsystemlogentry",
-      "community": 81,
+      "community": 119,
       "norm_label": "createsystemlogentry()"
     },
     {
@@ -10570,7 +10570,7 @@
       "source_location": "L28",
       "_origin": "ast",
       "id": "androproject_gui_src_hooks_usesystemlogs_usesystemlogs",
-      "community": 81,
+      "community": 119,
       "norm_label": "usesystemlogs()"
     },
     {
@@ -10580,7 +10580,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "androproject_gui_src_hooks_usetheme",
-      "community": 49,
+      "community": 116,
       "norm_label": "usetheme.ts"
     },
     {
@@ -10590,7 +10590,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "androproject_gui_src_hooks_usetheme_themecolors",
-      "community": 49,
+      "community": 116,
       "norm_label": "themecolors"
     },
     {
@@ -10600,7 +10600,7 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "androproject_gui_src_hooks_usetheme_usetheme",
-      "community": 29,
+      "community": 116,
       "norm_label": "usetheme()"
     },
     {
@@ -30931,7 +30931,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/components/layout/Sidebar.tsx",
-      "source_location": "L9",
+      "source_location": "L17",
       "weight": 1.0,
       "source": "androproject_gui_src_components_layout_sidebar",
       "target": "androproject_gui_src_components_themeprovider",
@@ -31047,7 +31047,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/components/layout/Sidebar.tsx",
-      "source_location": "L9",
+      "source_location": "L17",
       "weight": 1.0,
       "source": "androproject_gui_src_components_layout_sidebar",
       "target": "androproject_gui_src_components_themeprovider_useapptheme",
@@ -31059,7 +31059,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "androproject-gui/src/components/layout/Sidebar.tsx",
-      "source_location": "L56",
+      "source_location": "L64",
       "weight": 1.0,
       "source": "androproject_gui_src_components_layout_sidebar_sidebar",
       "target": "androproject_gui_src_components_themeprovider_useapptheme"
@@ -32282,7 +32282,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/components/layout/Sidebar.tsx",
-      "source_location": "L21",
+      "source_location": "L29",
       "weight": 1.0,
       "source": "androproject_gui_src_components_layout_sidebar",
       "target": "androproject_gui_src_components_layout_sidebar_groups",
@@ -32292,7 +32292,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/components/layout/Sidebar.tsx",
-      "source_location": "L19",
+      "source_location": "L27",
       "weight": 1.0,
       "source": "androproject_gui_src_components_layout_sidebar",
       "target": "androproject_gui_src_components_layout_sidebar_navitemdef",
@@ -32302,7 +32302,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/components/layout/Sidebar.tsx",
-      "source_location": "L55",
+      "source_location": "L63",
       "weight": 1.0,
       "source": "androproject_gui_src_components_layout_sidebar",
       "target": "androproject_gui_src_components_layout_sidebar_sidebar",
@@ -32312,7 +32312,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/components/layout/Sidebar.tsx",
-      "source_location": "L12",
+      "source_location": "L20",
       "weight": 1.0,
       "source": "androproject_gui_src_components_layout_sidebar",
       "target": "androproject_gui_src_components_layout_sidebar_sidebarprops",
@@ -32323,7 +32323,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/components/layout/Sidebar.tsx",
-      "source_location": "L10",
+      "source_location": "L18",
       "weight": 1.0,
       "source": "androproject_gui_src_components_layout_sidebar",
       "target": "androproject_gui_src_features_types",
@@ -32334,7 +32334,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/components/layout/Sidebar.tsx",
-      "source_location": "L10",
+      "source_location": "L18",
       "weight": 1.0,
       "source": "androproject_gui_src_components_layout_sidebar",
       "target": "androproject_gui_src_features_types_navsection",
@@ -32345,7 +32345,7 @@
       "context": "field",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/src/components/layout/Sidebar.tsx",
-      "source_location": "L13",
+      "source_location": "L21",
       "weight": 1.0,
       "source": "androproject_gui_src_components_layout_sidebar_sidebarprops",
       "target": "androproject_gui_src_features_types_navsection",
@@ -38425,7 +38425,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "androproject-gui/src/features/DashboardView.tsx",
-      "source_location": "L44",
+      "source_location": "L46",
       "weight": 1.0,
       "source": "androproject_gui_src_features_dashboardview_dashboardview",
       "target": "androproject_gui_src_features_dashboard_dashboard_helpers_computedevicetelemetry"
@@ -38436,7 +38436,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "androproject-gui/src/features/DashboardView.tsx",
-      "source_location": "L41",
+      "source_location": "L42",
       "weight": 1.0,
       "source": "androproject_gui_src_features_dashboardview_dashboardview",
       "target": "androproject_gui_src_hooks_useactions_useactions"
@@ -53138,5 +53138,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "b620a6c59a380f4d8487e0cb7e6a2931b96c9900"
+  "built_at_commit": "f002f2ee6eada6b42149f62a4add944a575a9582"
 }

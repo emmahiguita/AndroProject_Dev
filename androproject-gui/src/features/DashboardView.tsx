@@ -31,14 +31,16 @@ interface DashboardViewProps {
   onNavigate?: (section: NavSection) => void;
 }
 
-export function DashboardView({ device: propDevice, onNavigate }: DashboardViewProps = {}) {
+export function DashboardView({ device: propDevice, addLog: propAddLog, onNavigate }: DashboardViewProps = {}) {
   const { dark } = useTheme();
   const storeDevice = useAppStore((s) => s.device);
   const setStoreDevice = useAppStore((s) => s.setDevice);
+  const storeAddLog = useAppStore((s) => s.addLog);
   const device = propDevice || storeDevice;
   const storeSetActiveNav = useAppStore((s) => s.setActiveNav);
   const nav = (section: NavSection) => (onNavigate || storeSetActiveNav)(section);
   const { run, fetchApps } = useActions();
+  const [dashMsg, setDashMsg] = useState<string | null>(null);
 
   // Cálculo puro y determinista de métricas operativas reales del kernel
   const telemetry = useMemo(() => computeDeviceTelemetry(device), [device]);
@@ -104,6 +106,7 @@ export function DashboardView({ device: propDevice, onNavigate }: DashboardViewP
   const handleDashUninstall = async (pkg: string) => {
     if (!confirm(`¿Desinstalar ${pkg}?`)) return;
     setAppActionLoading(pkg);
+    const logFn = (msg: string, t: 'info' | 'success' | 'error') => (propAddLog ? propAddLog(msg, t) : storeAddLog(msg));
     try {
       const res = await fetch('/api/apps', {
         method: 'POST',
@@ -111,9 +114,9 @@ export function DashboardView({ device: propDevice, onNavigate }: DashboardViewP
         body: JSON.stringify({ action: 'uninstall', packageName: pkg, serial: device?.serial }),
       });
       const d = await res.json();
-      if (d.success) fetchApps();
-      else alert(`Error: ${d.error}`);
-    } catch { alert('Error de red al desinstalar'); }
+      if (d.success) { setDashMsg(`Desinstalada: ${pkg}`); logFn(`Desinstalada: ${pkg}`, 'success'); fetchApps(); }
+      else { setDashMsg(`Error al desinstalar ${pkg}: ${d.error}`); logFn(`Error: ${d.error}`, 'error'); }
+    } catch { setDashMsg(`Error de red al desinstalar ${pkg}`); logFn(`Error de red al desinstalar ${pkg}`, 'error'); }
     finally { setAppActionLoading(null); }
   };
 
@@ -145,6 +148,12 @@ export function DashboardView({ device: propDevice, onNavigate }: DashboardViewP
             <button type="button" onClick={() => setShowMetricsSheet(true)} className={pillCls} title={telemetry.tempSubDetail}><Thermometer size={12} /> <span>TEMP {telemetry.tempCelsius}°C</span></button>
             <button type="button" onClick={() => setShowMetricsSheet(true)} className={pillCls} title={telemetry.storSubDetail}><Database size={12} /> <span>DISCO {telemetry.storagePercent}% ({telemetry.storageFreeGB}G libre)</span></button>
             <button type="button" onClick={() => setShowMetricsSheet(true)} className={pillCls} title="Abrir monitor completo"><BarChart3 size={12} /> <span>Monitor</span></button>
+          </div>
+        )}
+
+        {dashMsg && (
+          <div className={`rounded-lg border px-3 py-1.5 text-xs font-mono ${dark ? 'bg-zinc-900 border-zinc-800 text-zinc-200' : 'bg-slate-50 border-slate-200 text-slate-800'}`}>
+            {dashMsg}
           </div>
         )}
 

@@ -1,16 +1,16 @@
 # Graph Report - AndroProject_Dev  (2026-11-22)
 
 ## Corpus Check
-- 266 files · ~321,850 words
+- 266 files · ~322,014 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1735 nodes · 3383 edges · 125 communities (105 shown, 20 thin omitted)
+- 1735 nodes · 3383 edges · 127 communities (107 shown, 20 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 13 edges (avg confidence: 0.71)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `b620a6c5`
+- Built from commit: `f002f2ee`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -108,8 +108,10 @@
 - IAirPlayReceiverEngine
 - WebCodecsCanvas.tsx
 - route.ts
+- useTheme
 - getLockFile
 - IAdbExecutor
+- useSystemLogs.ts
 - ISessionManager
 - route.ts
 - detectAirPlaySocketIps
@@ -145,7 +147,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (125 total, 20 thin omitted)
+## Communities (127 total, 20 thin omitted)
 
 ### Community 0 - "types.ts"
 Cohesion: 0.11
@@ -188,8 +190,8 @@ Cohesion: 0.10
 Nodes (19): compilerOptions, allowJs, esModuleInterop, incremental, isolatedModules, jsx, lib, module (+11 more)
 
 ### Community 11 - "main.js"
-Cohesion: 0.15
-Nodes (13): definitions, Number, PermissionEntry, Target, Value, anyOf, description, anyOf (+5 more)
+Cohesion: 0.13
+Nodes (14): anyOf, definitions, Number, PermissionEntry, Target, description, anyOf, description (+6 more)
 
 ### Community 12 - "route.ts"
 Cohesion: 0.07
@@ -232,8 +234,8 @@ Cohesion: 0.15
 Nodes (13): Acceso Directo Manual, 🔄 Actualización, ⌨️ Comandos Rápidos (Aliases), 🤝 Contribuciones, 📱 Crear Accesos Directos en Android, Kali Linux en Termux - Instalación Automatizada, ⚖️ Licencia, ⚠️ Notas Importantes (+5 more)
 
 ### Community 29 - "install-kali-desktop-auto.sh"
-Cohesion: 0.18
-Nodes (20): react, Page(), MultiScreenGrid(), QuickAction(), QuickActionProps, ThemeProps, ArchivosView(), CliInjectorView() (+12 more)
+Cohesion: 0.12
+Nodes (21): react, Page(), MultiScreenGrid(), QuickAction(), QuickActionProps, ThemeProps, ViewShell(), DeviceSettingsPanel() (+13 more)
 
 ### Community 30 - "INSTALL-OPPO-DIRECTO.sh"
 Cohesion: 0.32
@@ -264,8 +266,8 @@ Cohesion: 0.24
 Nodes (12): AppShellProps, DeviceManagerDropdown(), DeviceManagerDropdownProps, HeaderProps, RegisteredDevice, DEFAULT_CONFIG, extractIp(), loadConfig() (+4 more)
 
 ### Community 49 - "route.ts"
-Cohesion: 0.08
-Nodes (40): Badge(), BadgeProps, BadgeSize, BadgeTone, sizeClasses, toneClasses, Button(), ButtonProps (+32 more)
+Cohesion: 0.11
+Nodes (23): Badge(), BadgeProps, BadgeSize, BadgeTone, sizeClasses, toneClasses, Button(), ButtonProps (+15 more)
 
 ### Community 51 - "detect.ts"
 Cohesion: 0.39
@@ -276,8 +278,8 @@ Cohesion: 0.29
 Nodes (6): AndroidProject 📱⚡, 🚀 Características Principales, ⚙️ Instalación (Entorno de Desarrollo), 🛡️ Seguridad y Arquitectura, 💻 Tecnologías Utilizadas, 📸 Vistazo al Dashboard
 
 ### Community 54 - "index.ts"
-Cohesion: 0.14
-Nodes (12): ViewShell(), CliEngineSelector(), CliEngineSelectorProps, DiscoveryState, InjectorMode, CliResponseViewer(), CliResponseViewerProps, PRESETS (+4 more)
+Cohesion: 0.25
+Nodes (8): CliEngineSelector(), CliEngineSelectorProps, DiscoveryState, InjectorMode, CliResponseViewer(), CliResponseViewerProps, CliInjectorView(), PRESETS
 
 ### Community 55 - "AndroProject - Instalador Oficial"
 Cohesion: 0.33
@@ -364,8 +366,8 @@ Cohesion: 0.20
 Nodes (10): $ref, description, items, type, uniqueItems, description, items, type (+2 more)
 
 ### Community 81 - "route.ts"
-Cohesion: 0.08
-Nodes (34): AnimScales, AppPackage, BluetoothInfo, DeviceData, DeviceListItem, DiagnosticsData, DiagnosticsStorage, GpuTweaks (+26 more)
+Cohesion: 0.10
+Nodes (29): AnimScales, AppPackage, BluetoothInfo, DeviceData, DeviceListItem, DiagnosticsData, DiagnosticsStorage, GpuTweaks (+21 more)
 
 ### Community 83 - "samsung-watchdog.ps1"
 Cohesion: 0.20
@@ -396,8 +398,8 @@ Cohesion: 0.18
 Nodes (13): RealAppIcon(), RealAppIconProps, APP_COLORS, AppsFilterDash, computeDeviceTelemetry(), DeviceTelemetrySummary, getAppColor(), parseTempNum() (+5 more)
 
 ### Community 94 - "useRescueSync.ts"
-Cohesion: 0.31
-Nodes (7): FlashPartitionSpec, PARTITIONS, FlasherBootloaderPanel(), FlasherBootloaderPanelProps, BOOTABLE_PARTITIONS, FlasherImagePanel(), FlasherImagePanelProps
+Cohesion: 0.29
+Nodes (8): FlashPartitionSpec, PARTITIONS, FlasherBootloaderPanel(), FlasherBootloaderPanelProps, BOOTABLE_PARTITIONS, FlasherImagePanel(), FlasherImagePanelProps, FlasherView()
 
 ### Community 95 - "config.ts"
 Cohesion: 0.54
@@ -439,6 +441,10 @@ Nodes (19): Ctrl, EOI, FrameBroadcaster, MjpegParser, PART_SEP, SOI, startScreen
 Cohesion: 0.20
 Nodes (9): 1. Vistas Reales Actualizadas (Hardware Físico), 2. Mapa de Flujo: Proyección Android 60 FPS + Multi-Pantalla, 3. Mapa de Flujo: Ecosistema iOS desde Windows, 4. Mapa de Flujo: Root, Bootloader y Seguridad de Apps (Android), 5. Grafo de Conocimiento del Repositorio, Flasheador Fastboot, Bootloader y Estado Root, Mapa de Arquitectura y Flujos — AndroProject, Multi-Pantalla en Vivo (`SM-A307G` + `CPH2557` a 60 FPS WebCodecs H.264) (+1 more)
 
+### Community 116 - "useTheme"
+Cohesion: 0.15
+Nodes (19): Card(), CardPadding, CardProps, paddingClasses, RemediationKind, SpywareAuditPanel(), SpywareAuditPanelProps, ANIM_VALUES (+11 more)
+
 ### Community 117 - "getLockFile"
 Cohesion: 0.18
 Nodes (8): 1. Proyección Multi-Pantalla Concurrente (60 FPS WebCodecs H.264), 2. Panel Principal y Telemetría en Tiempo Real, 3. Gestor de Arranque, Bootloader, Particiones Fastboot y Sideload, Capturas Reales Actualizadas, Demos en Video (Transmisión Móvil & Suite Dark/Light), Documentación Completa, Explicación de Funciones por Módulo, Mapa de Arquitectura y Flujos
@@ -447,13 +453,17 @@ Nodes (8): 1. Proyección Multi-Pantalla Concurrente (60 FPS WebCodecs H.264), 2
 Cohesion: 0.33
 Nodes (6): "Dependencias no instaladas", "Espacio insuficiente", "Kali no se inicia", "No se detectó Termux", "Sin interfaz gráfica", 🔧 Solución de Problemas
 
+### Community 119 - "useSystemLogs.ts"
+Cohesion: 0.47
+Nodes (5): SystemLogs, createSystemLogEntry(), SystemLogType, useSystemLogs(), UseSystemLogsResult
+
 ### Community 120 - "ISessionManager"
 Cohesion: 0.17
 Nodes (10): createSessionId(), DeviceSession, IStreamTransport, StreamSessionConfig, StreamSessionResult, AirPlayStreamTransport, airPlayTransport, ScrcpyStreamTransport (+2 more)
 
 ### Community 121 - "route.ts"
-Cohesion: 0.40
-Nodes (4): anyOf, description, $schema, title
+Cohesion: 0.67
+Nodes (3): Value, anyOf, description
 
 ### Community 122 - "detectAirPlaySocketIps"
 Cohesion: 0.50
@@ -483,7 +493,7 @@ Nodes (13): GET(), isLocalAuthorizedRequest(), POST(), CmdOutcome, DriverScanRep
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `DeviceInfo` connect `DeviceInfo` to `route.ts`, `useAdbConnection.ts`, `hashcat.ps1`, `types.ts`, `IVisionNanoEngine`, `andro.ps1`, `route.ts`, `DeviceInfo`, `route.ts`, `route.ts`, `paths.ts`, `index.ts`, `DeviceInfoFetcher`, `DashboardView.tsx`, `ISessionManager`, `install-kali-desktop-auto.sh`, `useRescueSync.ts`?**
+- **Why does `DeviceInfo` connect `DeviceInfo` to `route.ts`, `useAdbConnection.ts`, `hashcat.ps1`, `types.ts`, `IVisionNanoEngine`, `andro.ps1`, `route.ts`, `DeviceInfo`, `route.ts`, `route.ts`, `paths.ts`, `useTheme`, `index.ts`, `DeviceInfoFetcher`, `DashboardView.tsx`, `ISessionManager`, `install-kali-desktop-auto.sh`, `useRescueSync.ts`?**
   _High betweenness centrality (0.086) - this node is a cross-community bridge._
 - **Why does `react` connect `install-kali-desktop-auto.sh` to `Button.tsx`?**
   _High betweenness centrality (0.021) - this node is a cross-community bridge._
