@@ -1,16 +1,34 @@
 <div align="center">
-  <img src="./androproject-gui/public/logo.png" alt="AndroProject Logo" width="84" />
-  <h1>AndroProject</h1>
+  <img src="./androproject-gui/public/logo.png" alt="ANDRO-IOS Logo" width="84" />
+  <h1>ANDRO-IOS</h1>
   <p><strong>Suite de Proyección 60 FPS, Multi-Pantalla Android/iOS, Telemetría en Vivo, Flasheador Fastboot y Auditoría de Apps</strong></p>
 
   <p>
     <a href="./docs/ARCHITECTURE_MAP.md">Mapa de Arquitectura y Funciones</a> ·
     <a href="./INSTRUCCIONES-USO.md">Guía de Uso</a> ·
-    <a href="./graphify-out/GRAPH_REPORT.md">Grafo de Conocimiento</a>
+    <a href="./graphify-out/GRAPH_REPORT.md">Grafo de Conocimiento</a> ·
+    <a href="./AndroProject_Installer/README.md">Instalador Windows</a>
   </p>
 </div>
 
 ---
+
+## Demos en Video (Primera Vista)
+
+| Recorrido Completo (Modo Oscuro 2026 + Modo Claro) | Transmisión Real Móvil (`scrcpy 4.1` en Vivo) |
+|---|---|
+| [![Ver Video Walkthrough](./docs/images/projection-mobile-live.png)](https://github.com/emmahiguita/AndroProject_Dev/raw/main/docs/images/androproject-walkthrough.mp4) | [![Ver Grabación Real Móvil](./docs/images/projection-mobile-light.png)](https://github.com/emmahiguita/AndroProject_Dev/raw/main/docs/images/mobile-transmission-record.mp4) |
+| [Descargar / Reproducir `androproject-walkthrough.mp4`](./docs/images/androproject-walkthrough.mp4) | [Descargar / Reproducir `mobile-transmission-record.mp4`](./docs/images/mobile-transmission-record.mp4) |
+
+## Modo Oscuro 2026 vs Modo Claro
+
+| Módulo | Modo Oscuro 2026 | Modo Claro |
+|---|---|---|
+| **Aplicaciones (407 apps)** | ![Apps Dark](./docs/images/apps-manager-dark.png) | ![Apps Light](./docs/images/apps-manager-light.png) |
+| **Optimizador & Modo Desarrollador** | ![Optimizer Dark](./docs/images/optimizer-developer-dark.png) | ![Optimizer Light](./docs/images/optimizer-developer-light.png) |
+| **Seguridad & Capturas** | ![Security Dark](./docs/images/security-audit-dark.png) | ![Security Light](./docs/images/security-audit-light.png) |
+| **Herramientas & Drivers USB** | ![Tools Dark](./docs/images/tools-drivers-dark.png) | ![Tools Light](./docs/images/tools-drivers-light.png) |
+| **Flasheador & Bootloader** | ![Flasher Dark](./docs/images/flasher-root-dark.png) | ![Flasher Light](./docs/images/flasher-root-light.png) |
 
 ## Capturas Reales Actualizadas
 
