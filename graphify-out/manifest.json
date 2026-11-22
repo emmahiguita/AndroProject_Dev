@@ -135,7 +135,7 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/app/layout.tsx": {
-    "mtime": 1795367486.970311,
+    "mtime": 1795367910.5024838,
     "ast_hash": "f76ce20ca3e78bc6e866564103752f42",
     "semantic_hash": ""
   },
@@ -155,7 +155,7 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/components/layout/Sidebar.tsx": {
-    "mtime": 1795367485.8980663,
+    "mtime": 1795367910.5038927,
     "ast_hash": "90bf336c8283e8e8c8f798707737b5e0",
     "semantic_hash": ""
   },
@@ -445,7 +445,7 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/app/api/device-stream/route.ts": {
-    "mtime": 1795367687.7054236,
+    "mtime": 1795367910.5004723,
     "ast_hash": "af79f998dbfbb03168a37e8ca337f04e",
     "semantic_hash": ""
   },
@@ -615,12 +615,12 @@
     "semantic_hash": ""
   },
   "androproject-gui/src-tauri/tauri.conf.json": {
-    "mtime": 1795367488.6663628,
+    "mtime": 1795367910.4984696,
     "ast_hash": "fb3f823b846d8f562a4b270b18080474",
     "semantic_hash": ""
   },
   "androproject-gui/src/app/api/logcat/route.ts": {
-    "mtime": 1795367691.3723714,
+    "mtime": 1795367910.5014732,
     "ast_hash": "821196c5288d49dd50d39c281aefa12e",
     "semantic_hash": ""
   },
@@ -970,7 +970,7 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/lib/services/scrcpy-session-hub.ts": {
-    "mtime": 1795367751.9324298,
+    "mtime": 1795367910.5079894,
     "ast_hash": "b67d43888397b550624c0e636979e6e0",
     "semantic_hash": ""
   },
@@ -1165,7 +1165,7 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/lib/services/ios-stream-handler.ts": {
-    "mtime": 1795367686.4087334,
+    "mtime": 1795367910.5069852,
     "ast_hash": "a760f19a61482cdd9e51dd442c241e22",
     "semantic_hash": ""
   },
@@ -1190,7 +1190,7 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/features/curar/ScreenshotPanel.tsx": {
-    "mtime": 1795367530.575386,
+    "mtime": 1795367910.5049875,
     "ast_hash": "df37b5c062de0b4aa7649398fc9a5941",
     "semantic_hash": ""
   },
@@ -1235,7 +1235,7 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/features/tools/DriverManagerPanel.tsx": {
-    "mtime": 1795367721.5725267,
+    "mtime": 1795367910.505999,
     "ast_hash": "1a96cc3881a76cf6d2e2f56b740cb206",
     "semantic_hash": ""
   },
