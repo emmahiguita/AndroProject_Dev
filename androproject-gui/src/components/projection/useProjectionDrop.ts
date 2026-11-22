@@ -44,10 +44,11 @@ export function useProjectionDrop(serial: string) {
     if (!serial || e.dataTransfer.files.length === 0) return;
 
     const file = e.dataTransfer.files[0];
-    const isApk = file.name.toLowerCase().endsWith('.apk');
+    const lower = file.name.toLowerCase();
+    const isPkg = lower.endsWith('.apk') || lower.endsWith('.ipa');
     setDropStatus({
       status: 'uploading',
-      message: isApk ? `Instalando ${file.name}...` : `Transfiriendo ${file.name}...`,
+      message: isPkg ? `Instalando ${file.name}...` : `Transfiriendo ${file.name}...`,
     });
 
     const fd = new FormData();
@@ -55,11 +56,11 @@ export function useProjectionDrop(serial: string) {
     fd.append('serial', serial);
 
     try {
-      const res = await fetch(isApk ? '/api/install-apk' : '/api/upload-file', { method: 'POST', body: fd });
+      const res = await fetch(isPkg ? '/api/install-apk' : '/api/upload-file', { method: 'POST', body: fd });
       const data = await res.json();
       setDropStatus(
         data.success
-          ? { status: 'success', message: data.message || (isApk ? 'APK instalada' : 'Archivo enviado a /sdcard/Download/') }
+          ? { status: 'success', message: data.message || (isPkg ? 'Paquete instalado' : 'Archivo enviado a /sdcard/Download/') }
           : { status: 'error', message: data.error || 'Error en la transferencia' },
       );
     } catch (err: unknown) {

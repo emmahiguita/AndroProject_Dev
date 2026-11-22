@@ -1,0 +1,80 @@
+# ============================================================================
+# WORKFLOW: ios-build.yml
+# QUÉ HACE: Compila paquetes .ipa para iOS desde la nube (macOS runner) sin
+#           necesitar una Mac física, incluyendo WebDriverAgent para control
+#           táctil desde Windows o proyectos Xcode/Flutter propios.
+# CÓMO FUNCIONA: Usa `macos-latest` con Xcode, compila sin firma obligatoria
+#           (`CODE_SIGNING_ALLOWED=NO`) y empaqueta `Payload/*.app` en `.ipa`.
+# POR QUÉ: Windows no puede ejecutar `xcodebuild`; así obtienes el `.ipa`
+#           listo para firmar con Sideloadly/AltServer e instalar por USB.
+# ============================================================================
+name: Build iOS IPA (macOS Cloud)
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: 'Qué compilar (wda = WebDriverAgent para control PC, custom_xcode = proyecto Xcode del repo)'
+        required: true
+        default: 'wda'
+        type: choice
+        options:
+          - wda
+          - custom_xcode
+      scheme:
+        description: 'Scheme de Xcode (solo para custom_xcode)'
+        required: false
+        default: 'Runner'
+
+jobs:
+  build-ipa:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout repositorio
+        uses: actions/checkout@v4
+
+      - name: Compilar WebDriverAgentRunner (.ipa)
+        if: ${{ inputs.target == 'wda' }}
+        run: |
+          git clone --depth 1 https://github.com/appium/WebDriverAgent.git wda-src
+          cd wda-src
+          xcodebuild -project WebDriverAgent.xcodeproj \
+            -scheme WebDriverAgentRunner \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO \
+            build-for-testing
+          mkdir -p ../out/Payload
+          cp -R build/Build/Products/Debug-iphoneos/WebDriverAgentRunner-Runner.app ../out/Payload/
+          cd ../out && zip -r WebDriverAgentRunner.ipa Payload/
+
+      - name: Compilar proyecto Xcode del repositorio (.ipa)
+        if: ${{ inputs.target == 'custom_xcode' }}
+        run: |
+          WORK_ARG=$(ls -d *.xcworkspace 2>/dev/null | head -n1)
+          PROJ_ARG=$(ls -d *.xcodeproj 2>/dev/null | head -n1)
+          if [ -n "$WORK_ARG" ]; then
+            TARGET_FLAG="-workspace $WORK_ARG"
+          elif [ -n "$PROJ_ARG" ]; then
+            TARGET_FLAG="-project $PROJ_ARG"
+          else
+            echo "No se encontró .xcworkspace ni .xcodeproj en la raíz" && exit 1
+          fi
+          xcodebuild $TARGET_FLAG \
+            -scheme "${{ inputs.scheme }}" \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO \
+            build
+          mkdir -p out/Payload
+          APP_PATH=$(find build/Build/Products -name "*.app" -maxdepth 4 | head -n1)
+          cp -R "$APP_PATH" out/Payload/
+          cd out && zip -r App-Unsigned.ipa Payload/
+
+      - name: Publicar artifact .ipa descargable
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-ipa-build
+          path: out/*.ipa
+          retention-days: 14

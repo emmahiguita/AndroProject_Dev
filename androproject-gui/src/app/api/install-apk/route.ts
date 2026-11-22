@@ -7,6 +7,7 @@ import fs from 'fs';
 import { pipeline } from 'stream/promises';
 import { Readable } from 'stream';
 import { ADB, ANDROPROJECT_HOME } from '@/lib/config';
+import { installIpaBuffer } from '@/lib/services/ios-ipa-installer';
 
 const execFileAsync = promisify(execFile);
 const MAX_APK_SIZE = 500 * 1024 * 1024;
@@ -26,11 +27,17 @@ export async function POST(req: Request) {
     if (!(fileEntry instanceof File)) {
       return NextResponse.json({ success: false, error: 'No se envió ningún archivo.' }, { status: 400 });
     }
-    if (path.extname(fileEntry.name).toLowerCase() !== '.apk') {
-      return NextResponse.json({ success: false, error: 'El archivo debe tener extensión APK.' }, { status: 400 });
+    const ext = path.extname(fileEntry.name).toLowerCase();
+    if (ext !== '.apk' && ext !== '.ipa') {
+      return NextResponse.json({ success: false, error: 'El archivo debe tener extensión .apk o .ipa.' }, { status: 400 });
     }
     if (fileEntry.size > MAX_APK_SIZE) {
-      return NextResponse.json({ success: false, error: 'El APK supera el límite de 500 MB.' }, { status: 413 });
+      return NextResponse.json({ success: false, error: 'El paquete supera el límite de 500 MB.' }, { status: 413 });
+    }
+    if (ext === '.ipa') {
+      const buf = Buffer.from(await fileEntry.arrayBuffer());
+      const res = await installIpaBuffer(fileEntry.name, buf, serial || undefined);
+      return NextResponse.json(res, { status: res.success ? 200 : 500 });
     }
 
     const tempDir = path.join(ANDROPROJECT_HOME, 'temp');
