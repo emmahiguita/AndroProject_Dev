@@ -5,9 +5,17 @@
 
 $ErrorActionPreference = "Stop"
 $InstallerDir = $PSScriptRoot
-$SourceReleaseDir = "C:\Users\emman\Downloads\scrcpy-win64-v4.0"
+$GuiDir       = Join-Path $InstallerDir "..\androproject-gui"
 $OutputDir    = Join-Path $InstallerDir "output"
 $TempDir      = Join-Path $InstallerDir "temp_build"
+
+# Detectar carpeta de scrcpy (WinGet v4.1, C:\AndroProject o Downloads v4.0)
+$Candidates = @(
+    "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\Genymobile.scrcpy_Microsoft.Winget.Source_8wekyb3d8bbwe\scrcpy-win64-v4.1",
+    "C:\AndroProject",
+    "C:\Users\emman\Downloads\scrcpy-win64-v4.0"
+)
+$SourceReleaseDir = $Candidates | Where-Object { Test-Path $_ } | Select-Object -First 1
 
 Set-Location $InstallerDir
 
@@ -49,27 +57,33 @@ foreach ($key in $RenameMap.Keys) {
     }
 }
 
-if (Test-Path "$TempDir\scrcpy.png") {
+if (Test-Path "$GuiDir\public\icon.ico") {
+    Copy-Item "$GuiDir\public\icon.ico" "$TempDir\AndroProject.ico" -Force
+}
+if (Test-Path "$GuiDir\public\logo.png") {
+    Copy-Item "$GuiDir\public\logo.png" "$TempDir\AndroProject.png" -Force
+} elseif (Test-Path "$TempDir\scrcpy.png") {
     Copy-Item "$TempDir\scrcpy.png" "$TempDir\AndroProject.png" -Force
 }
-Write-Host "      > Archivos renombrados correctamente a AndroProject." -ForegroundColor Green
+Write-Host "      > Archivos, logo e icono oficial copiados correctamente." -ForegroundColor Green
 
 
-# --- PASO 3: Compilar y empaquetar GUI (Dashboard) ---
+# --- PASO 3: Compilar y empaquetar GUI (Dashboard Tauri / Next.js) ---
 Write-Host ""
-Write-Host "[3/5] Compilando Dashboard con Electron Builder..." -ForegroundColor Yellow
-$GuiDir = "$InstallerDir\..\androproject-gui"
+Write-Host "[3/5] Compilando Dashboard (Tauri + Next.js)..." -ForegroundColor Yellow
 if (Test-Path "$GuiDir") {
     Push-Location $GuiDir
-    Write-Host "      > Ejecutando npm run build:win en $GuiDir..." -ForegroundColor Cyan
-    npm run build:win
+    Write-Host "      > Ejecutando npm run tauri:build en $GuiDir..." -ForegroundColor Cyan
+    npm run tauri:build
     Pop-Location
-    if (Test-Path "$GuiDir\dist\win-unpacked") {
-        Write-Host "      > Copiando GUI compilada al instalador..." -ForegroundColor Green
+    $TauriExe = Get-ChildItem -Path "$GuiDir\src-tauri\target\release" -Filter "*.exe" -File -ErrorAction SilentlyContinue |
+        Where-Object { $_.Name -notmatch 'uninstall|setup' } | Select-Object -First 1
+    if ($TauriExe) {
+        Write-Host "      > Copiando GUI compilada ($($TauriExe.Name)) al instalador..." -ForegroundColor Green
         New-Item -ItemType Directory -Force -Path "$TempDir\Dashboard" | Out-Null
-        Copy-Item "$GuiDir\dist\win-unpacked\*" "$TempDir\Dashboard\" -Recurse -Force
+        Copy-Item $TauriExe.FullName "$TempDir\Dashboard\AndroProject.exe" -Force
     } else {
-        Write-Host "      ERROR: No se encontro el Dashboard compilado." -ForegroundColor Red
+        Write-Host "      ERROR: No se encontro el binario Tauri compilado en src-tauri\target\release." -ForegroundColor Red
         exit 1
     }
 } else {
