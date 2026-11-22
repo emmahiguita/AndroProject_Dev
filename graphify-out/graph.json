@@ -612,10 +612,30 @@
       "norm_label": "lint"
     },
     {
-      "label": "type",
+      "label": "lint:200",
+      "file_type": "code",
+      "source_file": "androproject-gui/package.json",
+      "source_location": "L15",
+      "_origin": "ast",
+      "id": "androproject_gui_package_scripts_lint_200",
+      "community": 61,
+      "norm_label": "lint:200"
+    },
+    {
+      "label": "lint:200:fix",
       "file_type": "code",
       "source_file": "androproject-gui/package.json",
       "source_location": "L16",
+      "_origin": "ast",
+      "id": "androproject_gui_package_scripts_lint_200_fix",
+      "community": 61,
+      "norm_label": "lint:200:fix"
+    },
+    {
+      "label": "type",
+      "file_type": "code",
+      "source_file": "androproject-gui/package.json",
+      "source_location": "L18",
       "_origin": "ast",
       "id": "androproject_gui_package_type",
       "community": 61,
@@ -625,7 +645,7 @@
       "label": "dependencies",
       "file_type": "code",
       "source_file": "androproject-gui/package.json",
-      "source_location": "L17",
+      "source_location": "L19",
       "_origin": "ast",
       "id": "androproject_gui_package_dependencies",
       "community": 61,
@@ -635,7 +655,7 @@
       "label": "@yume-chan/adb",
       "file_type": "code",
       "source_file": "androproject-gui/package.json",
-      "source_location": "L18",
+      "source_location": "L20",
       "_origin": "ast",
       "id": "androproject_gui_package_dependencies_yume_chan_adb",
       "community": 61,
@@ -645,7 +665,7 @@
       "label": "@yume-chan/adb-scrcpy",
       "file_type": "code",
       "source_file": "androproject-gui/package.json",
-      "source_location": "L19",
+      "source_location": "L21",
       "_origin": "ast",
       "id": "androproject_gui_package_dependencies_yume_chan_adb_scrcpy",
       "community": 61,
@@ -655,7 +675,7 @@
       "label": "@yume-chan/adb-server-node-tcp",
       "file_type": "code",
       "source_file": "androproject-gui/package.json",
-      "source_location": "L20",
+      "source_location": "L22",
       "_origin": "ast",
       "id": "androproject_gui_package_dependencies_yume_chan_adb_server_node_tcp",
       "community": 61,
@@ -665,7 +685,7 @@
       "label": "@yume-chan/scrcpy",
       "file_type": "code",
       "source_file": "androproject-gui/package.json",
-      "source_location": "L21",
+      "source_location": "L23",
       "_origin": "ast",
       "id": "androproject_gui_package_dependencies_yume_chan_scrcpy",
       "community": 61,
@@ -675,7 +695,7 @@
       "label": "@yume-chan/scrcpy-decoder-webcodecs",
       "file_type": "code",
       "source_file": "androproject-gui/package.json",
-      "source_location": "L22",
+      "source_location": "L24",
       "_origin": "ast",
       "id": "androproject_gui_package_dependencies_yume_chan_scrcpy_decoder_webcodecs",
       "community": 61,
@@ -685,7 +705,7 @@
       "label": "lucide-react",
       "file_type": "code",
       "source_file": "androproject-gui/package.json",
-      "source_location": "L23",
+      "source_location": "L25",
       "_origin": "ast",
       "id": "androproject_gui_package_dependencies_lucide_react",
       "community": 61,
@@ -695,7 +715,7 @@
       "label": "multicast-dns",
       "file_type": "code",
       "source_file": "androproject-gui/package.json",
-      "source_location": "L24",
+      "source_location": "L26",
       "_origin": "ast",
       "id": "androproject_gui_package_dependencies_multicast_dns",
       "community": 61,
@@ -705,7 +725,7 @@
       "label": "next",
       "file_type": "code",
       "source_file": "androproject-gui/package.json",
-      "source_location": "L25",
+      "source_location": "L27",
       "_origin": "ast",
       "id": "androproject_gui_package_dependencies_next",
       "community": 61,
@@ -715,17 +735,17 @@
       "label": "react",
       "file_type": "code",
       "source_file": "androproject-gui/package.json",
-      "source_location": "L26",
+      "source_location": "L28",
       "_origin": "ast",
       "id": "androproject_gui_package_dependencies_react",
-      "community": 73,
+      "community": 65,
       "norm_label": "react"
     },
     {
       "label": "react-dom",
       "file_type": "code",
       "source_file": "androproject-gui/package.json",
-      "source_location": "L27",
+      "source_location": "L29",
       "_origin": "ast",
       "id": "androproject_gui_package_dependencies_react_dom",
       "community": 61,
@@ -735,7 +755,7 @@
       "label": "zustand",
       "file_type": "code",
       "source_file": "androproject-gui/package.json",
-      "source_location": "L28",
+      "source_location": "L30",
       "_origin": "ast",
       "id": "androproject_gui_package_dependencies_zustand",
       "community": 61,
@@ -745,7 +765,7 @@
       "label": "devDependencies",
       "file_type": "code",
       "source_file": "androproject-gui/package.json",
-      "source_location": "L30",
+      "source_location": "L32",
       "_origin": "ast",
       "id": "androproject_gui_package_devdependencies",
       "community": 61,
@@ -755,7 +775,7 @@
       "label": "@tauri-apps/cli",
       "file_type": "code",
       "source_file": "androproject-gui/package.json",
-      "source_location": "L31",
+      "source_location": "L33",
       "_origin": "ast",
       "id": "androproject_gui_package_devdependencies_tauri_apps_cli",
       "community": 61,
@@ -765,7 +785,7 @@
       "label": "@types/node",
       "file_type": "code",
       "source_file": "androproject-gui/package.json",
-      "source_location": "L32",
+      "source_location": "L34",
       "_origin": "ast",
       "id": "androproject_gui_package_devdependencies_types_node",
       "community": 61,
@@ -775,7 +795,7 @@
       "label": "@types/react",
       "file_type": "code",
       "source_file": "androproject-gui/package.json",
-      "source_location": "L33",
+      "source_location": "L35",
       "_origin": "ast",
       "id": "androproject_gui_package_devdependencies_types_react",
       "community": 61,
@@ -785,7 +805,7 @@
       "label": "@types/react-dom",
       "file_type": "code",
       "source_file": "androproject-gui/package.json",
-      "source_location": "L34",
+      "source_location": "L36",
       "_origin": "ast",
       "id": "androproject_gui_package_devdependencies_types_react_dom",
       "community": 61,
@@ -795,7 +815,7 @@
       "label": "autoprefixer",
       "file_type": "code",
       "source_file": "androproject-gui/package.json",
-      "source_location": "L35",
+      "source_location": "L37",
       "_origin": "ast",
       "id": "androproject_gui_package_devdependencies_autoprefixer",
       "community": 61,
@@ -805,7 +825,7 @@
       "label": "cross-env",
       "file_type": "code",
       "source_file": "androproject-gui/package.json",
-      "source_location": "L36",
+      "source_location": "L38",
       "_origin": "ast",
       "id": "androproject_gui_package_devdependencies_cross_env",
       "community": 61,
@@ -815,7 +835,7 @@
       "label": "eslint",
       "file_type": "code",
       "source_file": "androproject-gui/package.json",
-      "source_location": "L37",
+      "source_location": "L39",
       "_origin": "ast",
       "id": "androproject_gui_package_devdependencies_eslint",
       "community": 61,
@@ -825,7 +845,7 @@
       "label": "eslint-config-next",
       "file_type": "code",
       "source_file": "androproject-gui/package.json",
-      "source_location": "L38",
+      "source_location": "L40",
       "_origin": "ast",
       "id": "androproject_gui_package_devdependencies_eslint_config_next",
       "community": 61,
@@ -835,7 +855,7 @@
       "label": "postcss",
       "file_type": "code",
       "source_file": "androproject-gui/package.json",
-      "source_location": "L39",
+      "source_location": "L41",
       "_origin": "ast",
       "id": "androproject_gui_package_devdependencies_postcss",
       "community": 61,
@@ -845,7 +865,7 @@
       "label": "tailwindcss",
       "file_type": "code",
       "source_file": "androproject-gui/package.json",
-      "source_location": "L40",
+      "source_location": "L42",
       "_origin": "ast",
       "id": "androproject_gui_package_devdependencies_tailwindcss",
       "community": 61,
@@ -855,7 +875,7 @@
       "label": "typescript",
       "file_type": "code",
       "source_file": "androproject-gui/package.json",
-      "source_location": "L41",
+      "source_location": "L43",
       "_origin": "ast",
       "id": "androproject_gui_package_devdependencies_typescript",
       "community": 61,
@@ -5208,7 +5228,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "androproject_gui_src_app_api_ios_route",
-      "community": 74,
+      "community": 127,
       "norm_label": "route.ts"
     },
     {
@@ -5218,7 +5238,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "androproject_gui_src_app_api_ios_route_getiosbridge",
-      "community": 74,
+      "community": 127,
       "norm_label": "getiosbridge()"
     },
     {
@@ -5228,7 +5248,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "androproject_gui_src_app_api_ios_route_getairplay",
-      "community": 74,
+      "community": 127,
       "norm_label": "getairplay()"
     },
     {
@@ -5238,7 +5258,7 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "androproject_gui_src_app_api_ios_route_get",
-      "community": 74,
+      "community": 127,
       "norm_label": "get()"
     },
     {
@@ -5248,7 +5268,7 @@
       "source_location": "L44",
       "_origin": "ast",
       "id": "androproject_gui_src_app_api_ios_route_post",
-      "community": 74,
+      "community": 127,
       "norm_label": "post()"
     },
     {
@@ -5918,7 +5938,7 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "androproject_gui_src_components_viewshell_viewshellprops",
-      "community": 106,
+      "community": 91,
       "norm_label": "viewshellprops"
     },
     {
@@ -6008,7 +6028,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "androproject_gui_src_components_layout_deviceframe_deviceframeprops",
-      "community": 51,
+      "community": 73,
       "norm_label": "deviceframeprops"
     },
     {
@@ -6198,7 +6218,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "androproject_gui_src_components_layout_usestreamtracker",
-      "community": 106,
+      "community": 91,
       "norm_label": "usestreamtracker.ts"
     },
     {
@@ -6208,7 +6228,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "androproject_gui_src_components_layout_usestreamtracker_usestreamtrackerprops",
-      "community": 106,
+      "community": 91,
       "norm_label": "usestreamtrackerprops"
     },
     {
@@ -6228,7 +6248,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "androproject_gui_src_components_projection_deviceinfopanel",
-      "community": 126,
+      "community": 51,
       "norm_label": "deviceinfopanel.tsx"
     },
     {
@@ -6238,7 +6258,7 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "androproject_gui_src_components_projection_deviceinfopanel_deviceinfopanelprops",
-      "community": 126,
+      "community": 51,
       "norm_label": "deviceinfopanelprops"
     },
     {
@@ -6248,7 +6268,7 @@
       "source_location": "L51",
       "_origin": "ast",
       "id": "androproject_gui_src_components_projection_deviceinfopanel_deviceinfopanel",
-      "community": 126,
+      "community": 51,
       "norm_label": "deviceinfopanel()"
     },
     {
@@ -6258,7 +6278,7 @@
       "source_location": "L676",
       "_origin": "ast",
       "id": "androproject_gui_src_components_projection_deviceinfopanel_togglerow",
-      "community": 126,
+      "community": 51,
       "norm_label": "togglerow()"
     },
     {
@@ -6268,7 +6288,7 @@
       "source_location": "L724",
       "_origin": "ast",
       "id": "androproject_gui_src_components_projection_deviceinfopanel_toolbutton",
-      "community": 126,
+      "community": 51,
       "norm_label": "toolbutton()"
     },
     {
@@ -6278,7 +6298,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "androproject_gui_src_components_projection_emptystate",
-      "community": 126,
+      "community": 79,
       "norm_label": "emptystate.tsx"
     },
     {
@@ -6288,7 +6308,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "androproject_gui_src_components_projection_emptystate_emptystateprops",
-      "community": 126,
+      "community": 79,
       "norm_label": "emptystateprops"
     },
     {
@@ -6298,7 +6318,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "androproject_gui_src_components_projection_emptystate_emptystate",
-      "community": 126,
+      "community": 79,
       "norm_label": "emptystate()"
     },
     {
@@ -6418,7 +6438,7 @@
       "source_location": "L124",
       "_origin": "ast",
       "id": "androproject_gui_src_components_projection_multiscreengrid_multiscreengrid",
-      "community": 73,
+      "community": 65,
       "norm_label": "multiscreengrid()"
     },
     {
@@ -6518,7 +6538,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "androproject_gui_src_components_projection_splitdivider",
-      "community": 126,
+      "community": 79,
       "norm_label": "splitdivider.tsx"
     },
     {
@@ -6528,7 +6548,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "androproject_gui_src_components_projection_splitdivider_splitdividerprops",
-      "community": 126,
+      "community": 79,
       "norm_label": "splitdividerprops"
     },
     {
@@ -6538,7 +6558,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "androproject_gui_src_components_projection_splitdivider_splitdivider",
-      "community": 126,
+      "community": 79,
       "norm_label": "splitdivider()"
     },
     {
@@ -6548,7 +6568,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "androproject_gui_src_components_projection_webcodecscanvas",
-      "community": 127,
+      "community": 79,
       "norm_label": "webcodecscanvas.tsx"
     },
     {
@@ -6558,7 +6578,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "androproject_gui_src_components_projection_webcodecscanvas_webcodecscanvasprops",
-      "community": 127,
+      "community": 79,
       "norm_label": "webcodecscanvasprops"
     },
     {
@@ -6568,7 +6588,7 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "androproject_gui_src_components_projection_webcodecscanvas_sendtouchevent",
-      "community": 127,
+      "community": 79,
       "norm_label": "sendtouchevent()"
     },
     {
@@ -6578,7 +6598,7 @@
       "source_location": "L30",
       "_origin": "ast",
       "id": "androproject_gui_src_components_projection_webcodecscanvas_webcodecscanvas",
-      "community": 127,
+      "community": 79,
       "norm_label": "webcodecscanvas()"
     },
     {
@@ -6588,7 +6608,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "androproject_gui_src_components_projection_index",
-      "community": 126,
+      "community": 79,
       "norm_label": "index.ts"
     },
     {
@@ -7028,7 +7048,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "androproject_gui_src_components_ui_realappicon",
-      "community": 84,
+      "community": 91,
       "norm_label": "realappicon.tsx"
     },
     {
@@ -7038,7 +7058,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "androproject_gui_src_components_ui_realappicon_realappiconprops",
-      "community": 84,
+      "community": 91,
       "norm_label": "realappiconprops"
     },
     {
@@ -7048,7 +7068,7 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "androproject_gui_src_components_ui_realappicon_realappicon",
-      "community": 84,
+      "community": 91,
       "norm_label": "realappicon()"
     },
     {
@@ -7118,7 +7138,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "androproject_gui_src_core_container_servicecontainer_servicecontainer",
-      "community": 19,
+      "community": 123,
       "norm_label": "servicecontainer"
     },
     {
@@ -7128,7 +7148,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "androproject_gui_src_core_container_servicecontainer_servicecontainer_getinstance",
-      "community": 19,
+      "community": 123,
       "norm_label": ".getinstance()"
     },
     {
@@ -7138,7 +7158,7 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "androproject_gui_src_core_container_servicecontainer_servicecontainer_registertransient",
-      "community": 19,
+      "community": 123,
       "norm_label": ".registertransient()"
     },
     {
@@ -7148,7 +7168,7 @@
       "source_location": "L33",
       "_origin": "ast",
       "id": "androproject_gui_src_core_container_servicecontainer_servicecontainer_registersingleton",
-      "community": 19,
+      "community": 123,
       "norm_label": ".registersingleton()"
     },
     {
@@ -7158,7 +7178,7 @@
       "source_location": "L41",
       "_origin": "ast",
       "id": "androproject_gui_src_core_container_servicecontainer_servicecontainer_registerinstance",
-      "community": 19,
+      "community": 123,
       "norm_label": ".registerinstance()"
     },
     {
@@ -7178,7 +7198,7 @@
       "source_location": "L66",
       "_origin": "ast",
       "id": "androproject_gui_src_core_container_servicecontainer_servicecontainer_has",
-      "community": 19,
+      "community": 123,
       "norm_label": ".has()"
     },
     {
@@ -7188,7 +7208,7 @@
       "source_location": "L71",
       "_origin": "ast",
       "id": "androproject_gui_src_core_container_servicecontainer_servicecontainer_reset",
-      "community": 19,
+      "community": 123,
       "norm_label": ".reset()"
     },
     {
@@ -7218,7 +7238,7 @@
       "source_location": "L96",
       "_origin": "ast",
       "id": "androproject_gui_src_core_container_servicecontainer_initializedefaultbindings",
-      "community": 19,
+      "community": 123,
       "norm_label": "initializedefaultbindings()"
     },
     {
@@ -7238,7 +7258,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "androproject_gui_src_core_domain_entities_devicesession",
-      "community": 104,
+      "community": 74,
       "norm_label": "devicesession.ts"
     },
     {
@@ -7248,7 +7268,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "androproject_gui_src_core_domain_entities_devicesession_devicesession",
-      "community": 104,
+      "community": 74,
       "norm_label": "devicesession"
     },
     {
@@ -7258,7 +7278,7 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "androproject_gui_src_core_domain_entities_devicesession_createsessionid",
-      "community": 104,
+      "community": 74,
       "norm_label": "createsessionid()"
     },
     {
@@ -7388,7 +7408,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "androproject_gui_src_core_index",
-      "community": 104,
+      "community": 74,
       "norm_label": "index.ts"
     },
     {
@@ -7548,7 +7568,7 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "androproject_gui_src_features_appsview_appsviewprops",
-      "community": 84,
+      "community": 73,
       "norm_label": "appsviewprops"
     },
     {
@@ -7558,7 +7578,7 @@
       "source_location": "L28",
       "_origin": "ast",
       "id": "androproject_gui_src_features_appsview_appsview",
-      "community": 65,
+      "community": 84,
       "norm_label": "appsview()"
     },
     {
@@ -7568,7 +7588,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "androproject_gui_src_features_archivosview",
-      "community": 65,
+      "community": 49,
       "norm_label": "archivosview.tsx"
     },
     {
@@ -7578,7 +7598,7 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "androproject_gui_src_features_archivosview_archivosviewprops",
-      "community": 65,
+      "community": 73,
       "norm_label": "archivosviewprops"
     },
     {
@@ -7688,7 +7708,7 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "androproject_gui_src_features_curarview_curarviewprops",
-      "community": 49,
+      "community": 73,
       "norm_label": "curarviewprops"
     },
     {
@@ -7728,7 +7748,7 @@
       "source_location": "L28",
       "_origin": "ast",
       "id": "androproject_gui_src_features_dashboardview_dashboardviewprops",
-      "community": 106,
+      "community": 91,
       "norm_label": "dashboardviewprops"
     },
     {
@@ -7738,7 +7758,7 @@
       "source_location": "L34",
       "_origin": "ast",
       "id": "androproject_gui_src_features_dashboardview_dashboardview",
-      "community": 91,
+      "community": 65,
       "norm_label": "dashboardview()"
     },
     {
@@ -7898,7 +7918,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "androproject_gui_src_features_apps_appitemviews_appitemprops",
-      "community": 84,
+      "community": 81,
       "norm_label": "appitemprops"
     },
     {
@@ -7948,7 +7968,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "androproject_gui_src_features_apps_appmanagerpanel",
-      "community": 49,
+      "community": 84,
       "norm_label": "appmanagerpanel.tsx"
     },
     {
@@ -7958,7 +7978,7 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "androproject_gui_src_features_apps_appmanagerpanel_appmanagerpanelprops",
-      "community": 84,
+      "community": 81,
       "norm_label": "appmanagerpanelprops"
     },
     {
@@ -8478,7 +8498,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "androproject_gui_src_features_types",
-      "community": 123,
+      "community": 81,
       "norm_label": "types.ts"
     },
     {
@@ -8488,7 +8508,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "androproject_gui_src_features_types_devicedata",
-      "community": 123,
+      "community": 81,
       "norm_label": "devicedata"
     },
     {
@@ -8518,7 +8538,7 @@
       "source_location": "L70",
       "_origin": "ast",
       "id": "androproject_gui_src_features_types_systemlogs",
-      "community": 123,
+      "community": 4,
       "norm_label": "systemlogs"
     },
     {
@@ -8528,7 +8548,7 @@
       "source_location": "L77",
       "_origin": "ast",
       "id": "androproject_gui_src_features_types_navsection",
-      "community": 106,
+      "community": 91,
       "norm_label": "navsection"
     },
     {
@@ -8538,7 +8558,7 @@
       "source_location": "L79",
       "_origin": "ast",
       "id": "androproject_gui_src_features_types_quickactionitem",
-      "community": 123,
+      "community": 4,
       "norm_label": "quickactionitem"
     },
     {
@@ -8548,7 +8568,7 @@
       "source_location": "L86",
       "_origin": "ast",
       "id": "androproject_gui_src_features_types_appinfo",
-      "community": 84,
+      "community": 81,
       "norm_label": "appinfo"
     },
     {
@@ -8558,7 +8578,7 @@
       "source_location": "L104",
       "_origin": "ast",
       "id": "androproject_gui_src_features_types_apppackage",
-      "community": 123,
+      "community": 4,
       "norm_label": "apppackage"
     },
     {
@@ -8568,7 +8588,7 @@
       "source_location": "L106",
       "_origin": "ast",
       "id": "androproject_gui_src_features_types_diagnosticsstorage",
-      "community": 123,
+      "community": 81,
       "norm_label": "diagnosticsstorage"
     },
     {
@@ -8608,7 +8628,7 @@
       "source_location": "L139",
       "_origin": "ast",
       "id": "androproject_gui_src_features_types_bluetoothinfo",
-      "community": 123,
+      "community": 81,
       "norm_label": "bluetoothinfo"
     },
     {
@@ -8618,7 +8638,7 @@
       "source_location": "L147",
       "_origin": "ast",
       "id": "androproject_gui_src_features_types_optimizersettings",
-      "community": 123,
+      "community": 81,
       "norm_label": "optimizersettings"
     },
     {
@@ -8628,7 +8648,7 @@
       "source_location": "L176",
       "_origin": "ast",
       "id": "androproject_gui_src_features_types_devicelistitem",
-      "community": 123,
+      "community": 81,
       "norm_label": "devicelistitem"
     },
     {
@@ -8758,7 +8778,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "androproject_gui_src_hooks_usedevicepolling_usedevicepollingresult",
-      "community": 65,
+      "community": 73,
       "norm_label": "usedevicepollingresult"
     },
     {
@@ -8928,7 +8948,7 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "androproject_gui_src_hooks_useprojection_scrcpyoptions",
-      "community": 126,
+      "community": 51,
       "norm_label": "scrcpyoptions"
     },
     {
@@ -9088,7 +9108,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "androproject_gui_src_hooks_usesystemlogs",
-      "community": 123,
+      "community": 4,
       "norm_label": "usesystemlogs.ts"
     },
     {
@@ -9098,7 +9118,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "androproject_gui_src_hooks_usesystemlogs_systemlogtype",
-      "community": 123,
+      "community": 4,
       "norm_label": "systemlogtype"
     },
     {
@@ -9108,7 +9128,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "androproject_gui_src_hooks_usesystemlogs_usesystemlogsresult",
-      "community": 123,
+      "community": 4,
       "norm_label": "usesystemlogsresult"
     },
     {
@@ -9118,7 +9138,7 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "androproject_gui_src_hooks_usesystemlogs_createsystemlogentry",
-      "community": 123,
+      "community": 4,
       "norm_label": "createsystemlogentry()"
     },
     {
@@ -9128,7 +9148,7 @@
       "source_location": "L28",
       "_origin": "ast",
       "id": "androproject_gui_src_hooks_usesystemlogs_usesystemlogs",
-      "community": 123,
+      "community": 4,
       "norm_label": "usesystemlogs()"
     },
     {
@@ -11448,7 +11468,7 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_projection_coordinator_iprojectioncoordinator",
-      "community": 73,
+      "community": 104,
       "norm_label": "iprojectioncoordinator"
     },
     {
@@ -11458,7 +11478,7 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_projection_coordinator_iprojectioncoordinator_registertransport",
-      "community": 73,
+      "community": 104,
       "norm_label": ".registertransport()"
     },
     {
@@ -11468,7 +11488,7 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_projection_coordinator_iprojectioncoordinator_gettransport",
-      "community": 73,
+      "community": 104,
       "norm_label": ".gettransport()"
     },
     {
@@ -11478,7 +11498,7 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_projection_coordinator_iprojectioncoordinator_start",
-      "community": 73,
+      "community": 104,
       "norm_label": ".start()"
     },
     {
@@ -11488,7 +11508,7 @@
       "source_location": "L27",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_projection_coordinator_iprojectioncoordinator_stop",
-      "community": 73,
+      "community": 104,
       "norm_label": ".stop()"
     },
     {
@@ -11498,7 +11518,7 @@
       "source_location": "L28",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_projection_coordinator_iprojectioncoordinator_isalive",
-      "community": 73,
+      "community": 104,
       "norm_label": ".isalive()"
     },
     {
@@ -11518,7 +11538,7 @@
       "source_location": "L34",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_projection_coordinator_projectioncoordinator_constructor",
-      "community": 73,
+      "community": 104,
       "norm_label": ".constructor()"
     },
     {
@@ -11528,7 +11548,7 @@
       "source_location": "L49",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_projection_coordinator_projectioncoordinator_registertransport",
-      "community": 73,
+      "community": 104,
       "norm_label": ".registertransport()"
     },
     {
@@ -11618,7 +11638,7 @@
       "source_location": "L38",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_scrcpy_engine_visionnanoresult",
-      "community": 73,
+      "community": 104,
       "norm_label": "visionnanoresult"
     },
     {
@@ -11998,7 +12018,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_spyware_heuristic_scanner_spywarefinding",
-      "community": 49,
+      "community": 99,
       "norm_label": "spywarefinding"
     },
     {
@@ -12318,7 +12338,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_webcodecs_h264_player",
-      "community": 127,
+      "community": 79,
       "norm_label": "webcodecs-h264-player.ts"
     },
     {
@@ -12328,7 +12348,7 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_webcodecs_h264_player_webcodecsplayercallbacks",
-      "community": 127,
+      "community": 79,
       "norm_label": "webcodecsplayercallbacks"
     },
     {
@@ -12338,7 +12358,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_webcodecs_h264_player_concatbytes",
-      "community": 127,
+      "community": 79,
       "norm_label": "concatbytes()"
     },
     {
@@ -12348,7 +12368,7 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_webcodecs_h264_player_bytesequal",
-      "community": 127,
+      "community": 79,
       "norm_label": "bytesequal()"
     },
     {
@@ -12358,7 +12378,7 @@
       "source_location": "L32",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_webcodecs_h264_player_extractavccodec",
-      "community": 127,
+      "community": 79,
       "norm_label": "extractavccodec()"
     },
     {
@@ -12368,7 +12388,7 @@
       "source_location": "L41",
       "_origin": "ast",
       "id": "androproject_gui_src_lib_services_webcodecs_h264_player_startwebcodecsh264player",
-      "community": 127,
+      "community": 79,
       "norm_label": "startwebcodecsh264player()"
     },
     {
@@ -12498,7 +12518,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "androproject_gui_src_services_contracts",
-      "community": 123,
+      "community": 4,
       "norm_label": "contracts.ts"
     },
     {
@@ -12508,7 +12528,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "androproject_gui_src_services_contracts_ideviceservice",
-      "community": 139,
+      "community": 4,
       "norm_label": "ideviceservice"
     },
     {
@@ -12518,7 +12538,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "androproject_gui_src_services_contracts_ideviceservice_getdevices",
-      "community": 139,
+      "community": 4,
       "norm_label": ".getdevices()"
     },
     {
@@ -12528,7 +12548,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "androproject_gui_src_services_contracts_ideviceservice_getdevicedetails",
-      "community": 139,
+      "community": 4,
       "norm_label": ".getdevicedetails()"
     },
     {
@@ -12538,7 +12558,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "androproject_gui_src_services_contracts_ideviceservice_rebootdevice",
-      "community": 139,
+      "community": 4,
       "norm_label": ".rebootdevice()"
     },
     {
@@ -12548,7 +12568,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "androproject_gui_src_services_contracts_ideviceservice_takescreenshot",
-      "community": 139,
+      "community": 4,
       "norm_label": ".takescreenshot()"
     },
     {
@@ -12558,7 +12578,7 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "androproject_gui_src_services_contracts_ideviceservice_startscreenrecord",
-      "community": 139,
+      "community": 4,
       "norm_label": ".startscreenrecord()"
     },
     {
@@ -12568,7 +12588,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "androproject_gui_src_services_contracts_ideviceservice_stopscreenrecord",
-      "community": 139,
+      "community": 4,
       "norm_label": ".stopscreenrecord()"
     },
     {
@@ -12788,7 +12808,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "androproject_gui_src_stores_deviceslice",
-      "community": 123,
+      "community": 81,
       "norm_label": "deviceslice.ts"
     },
     {
@@ -12798,7 +12818,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "androproject_gui_src_stores_deviceslice_deviceslice",
-      "community": 123,
+      "community": 81,
       "norm_label": "deviceslice"
     },
     {
@@ -12808,7 +12828,7 @@
       "source_location": "L46",
       "_origin": "ast",
       "id": "androproject_gui_src_stores_deviceslice_createdeviceslice",
-      "community": 123,
+      "community": 81,
       "norm_label": "createdeviceslice()"
     },
     {
@@ -12968,7 +12988,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "androproject_gui_src_stores_uislice",
-      "community": 81,
+      "community": 91,
       "norm_label": "uislice.ts"
     },
     {
@@ -12978,7 +12998,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "androproject_gui_src_stores_uislice_uislice",
-      "community": 81,
+      "community": 91,
       "norm_label": "uislice"
     },
     {
@@ -12988,7 +13008,7 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "androproject_gui_src_stores_uislice_createuislice",
-      "community": 81,
+      "community": 91,
       "norm_label": "createuislice()"
     },
     {
@@ -14202,6 +14222,76 @@
       "id": "scan",
       "community": 42,
       "norm_label": "scan.ps1"
+    },
+    {
+      "label": "auto_clean_200.py",
+      "file_type": "code",
+      "source_file": "scripts/auto_clean_200.py",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "scripts_auto_clean_200",
+      "community": 126,
+      "norm_label": "auto_clean_200.py"
+    },
+    {
+      "label": "collect_paths()",
+      "file_type": "code",
+      "source_file": "scripts/auto_clean_200.py",
+      "source_location": "L23",
+      "_origin": "ast",
+      "id": "scripts_auto_clean_200_collect_paths",
+      "community": 126,
+      "norm_label": "collect_paths()"
+    },
+    {
+      "label": "clean_safe_whitespace()",
+      "file_type": "code",
+      "source_file": "scripts/auto_clean_200.py",
+      "source_location": "L37",
+      "_origin": "ast",
+      "id": "scripts_auto_clean_200_clean_safe_whitespace",
+      "community": 126,
+      "norm_label": "clean_safe_whitespace()"
+    },
+    {
+      "label": "list_srp_symbols()",
+      "file_type": "code",
+      "source_file": "scripts/auto_clean_200.py",
+      "source_location": "L58",
+      "_origin": "ast",
+      "id": "scripts_auto_clean_200_list_srp_symbols",
+      "community": 126,
+      "norm_label": "list_srp_symbols()"
+    },
+    {
+      "label": "main()",
+      "file_type": "code",
+      "source_file": "scripts/auto_clean_200.py",
+      "source_location": "L69",
+      "_origin": "ast",
+      "id": "scripts_auto_clean_200_main",
+      "community": 126,
+      "norm_label": "main()"
+    },
+    {
+      "label": "Elimina trailing spaces y >2 l\u00edneas en blanco seguidas sin alterar c\u00f3digo.",
+      "file_type": "rationale",
+      "source_file": "scripts/auto_clean_200.py",
+      "source_location": "L38",
+      "_origin": "ast",
+      "id": "scripts_auto_clean_200_rationale_38",
+      "community": 126,
+      "norm_label": "elimina trailing spaces y >2 lineas en blanco seguidas sin alterar codigo."
+    },
+    {
+      "label": "Identifica s\u00edmbolos principales para guiar extracci\u00f3n modular SRP.",
+      "file_type": "rationale",
+      "source_file": "scripts/auto_clean_200.py",
+      "source_location": "L59",
+      "_origin": "ast",
+      "id": "scripts_auto_clean_200_rationale_59",
+      "community": 126,
+      "norm_label": "identifica simbolos principales para guiar extraccion modular srp."
     },
     {
       "label": "fix-screenshot.ps1",
@@ -16673,7 +16763,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/package.json",
-      "source_location": "L17",
+      "source_location": "L19",
       "weight": 1.0,
       "source": "androproject_gui_package",
       "target": "androproject_gui_package_dependencies",
@@ -16693,7 +16783,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/package.json",
-      "source_location": "L30",
+      "source_location": "L32",
       "weight": 1.0,
       "source": "androproject_gui_package",
       "target": "androproject_gui_package_devdependencies",
@@ -16733,7 +16823,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/package.json",
-      "source_location": "L16",
+      "source_location": "L18",
       "weight": 1.0,
       "source": "androproject_gui_package",
       "target": "androproject_gui_package_type",
@@ -16777,6 +16867,26 @@
       "weight": 1.0,
       "source": "androproject_gui_package_scripts",
       "target": "androproject_gui_package_scripts_lint",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/package.json",
+      "source_location": "L15",
+      "weight": 1.0,
+      "source": "androproject_gui_package_scripts",
+      "target": "androproject_gui_package_scripts_lint_200",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "androproject-gui/package.json",
+      "source_location": "L16",
+      "weight": 1.0,
+      "source": "androproject_gui_package_scripts",
+      "target": "androproject_gui_package_scripts_lint_200_fix",
       "confidence_score": 1.0
     },
     {
@@ -16833,7 +16943,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/package.json",
-      "source_location": "L23",
+      "source_location": "L25",
       "weight": 1.0,
       "source": "androproject_gui_package_dependencies",
       "target": "androproject_gui_package_dependencies_lucide_react",
@@ -16843,7 +16953,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/package.json",
-      "source_location": "L24",
+      "source_location": "L26",
       "weight": 1.0,
       "source": "androproject_gui_package_dependencies",
       "target": "androproject_gui_package_dependencies_multicast_dns",
@@ -16853,7 +16963,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/package.json",
-      "source_location": "L25",
+      "source_location": "L27",
       "weight": 1.0,
       "source": "androproject_gui_package_dependencies",
       "target": "androproject_gui_package_dependencies_next",
@@ -16863,7 +16973,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/package.json",
-      "source_location": "L26",
+      "source_location": "L28",
       "weight": 1.0,
       "source": "androproject_gui_package_dependencies",
       "target": "androproject_gui_package_dependencies_react",
@@ -16873,7 +16983,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/package.json",
-      "source_location": "L27",
+      "source_location": "L29",
       "weight": 1.0,
       "source": "androproject_gui_package_dependencies",
       "target": "androproject_gui_package_dependencies_react_dom",
@@ -16883,7 +16993,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/package.json",
-      "source_location": "L18",
+      "source_location": "L20",
       "weight": 1.0,
       "source": "androproject_gui_package_dependencies",
       "target": "androproject_gui_package_dependencies_yume_chan_adb",
@@ -16893,7 +17003,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/package.json",
-      "source_location": "L19",
+      "source_location": "L21",
       "weight": 1.0,
       "source": "androproject_gui_package_dependencies",
       "target": "androproject_gui_package_dependencies_yume_chan_adb_scrcpy",
@@ -16903,7 +17013,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/package.json",
-      "source_location": "L20",
+      "source_location": "L22",
       "weight": 1.0,
       "source": "androproject_gui_package_dependencies",
       "target": "androproject_gui_package_dependencies_yume_chan_adb_server_node_tcp",
@@ -16913,7 +17023,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/package.json",
-      "source_location": "L21",
+      "source_location": "L23",
       "weight": 1.0,
       "source": "androproject_gui_package_dependencies",
       "target": "androproject_gui_package_dependencies_yume_chan_scrcpy",
@@ -16923,7 +17033,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/package.json",
-      "source_location": "L22",
+      "source_location": "L24",
       "weight": 1.0,
       "source": "androproject_gui_package_dependencies",
       "target": "androproject_gui_package_dependencies_yume_chan_scrcpy_decoder_webcodecs",
@@ -16933,7 +17043,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/package.json",
-      "source_location": "L28",
+      "source_location": "L30",
       "weight": 1.0,
       "source": "androproject_gui_package_dependencies",
       "target": "androproject_gui_package_dependencies_zustand",
@@ -16965,7 +17075,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/package.json",
-      "source_location": "L35",
+      "source_location": "L37",
       "weight": 1.0,
       "source": "androproject_gui_package_devdependencies",
       "target": "androproject_gui_package_devdependencies_autoprefixer",
@@ -16975,7 +17085,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/package.json",
-      "source_location": "L36",
+      "source_location": "L38",
       "weight": 1.0,
       "source": "androproject_gui_package_devdependencies",
       "target": "androproject_gui_package_devdependencies_cross_env",
@@ -16985,7 +17095,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/package.json",
-      "source_location": "L37",
+      "source_location": "L39",
       "weight": 1.0,
       "source": "androproject_gui_package_devdependencies",
       "target": "androproject_gui_package_devdependencies_eslint",
@@ -16995,7 +17105,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/package.json",
-      "source_location": "L38",
+      "source_location": "L40",
       "weight": 1.0,
       "source": "androproject_gui_package_devdependencies",
       "target": "androproject_gui_package_devdependencies_eslint_config_next",
@@ -17005,7 +17115,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/package.json",
-      "source_location": "L39",
+      "source_location": "L41",
       "weight": 1.0,
       "source": "androproject_gui_package_devdependencies",
       "target": "androproject_gui_package_devdependencies_postcss",
@@ -17015,7 +17125,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/package.json",
-      "source_location": "L40",
+      "source_location": "L42",
       "weight": 1.0,
       "source": "androproject_gui_package_devdependencies",
       "target": "androproject_gui_package_devdependencies_tailwindcss",
@@ -17025,7 +17135,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/package.json",
-      "source_location": "L31",
+      "source_location": "L33",
       "weight": 1.0,
       "source": "androproject_gui_package_devdependencies",
       "target": "androproject_gui_package_devdependencies_tauri_apps_cli",
@@ -17035,7 +17145,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/package.json",
-      "source_location": "L32",
+      "source_location": "L34",
       "weight": 1.0,
       "source": "androproject_gui_package_devdependencies",
       "target": "androproject_gui_package_devdependencies_types_node",
@@ -17045,7 +17155,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/package.json",
-      "source_location": "L33",
+      "source_location": "L35",
       "weight": 1.0,
       "source": "androproject_gui_package_devdependencies",
       "target": "androproject_gui_package_devdependencies_types_react",
@@ -17055,7 +17165,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/package.json",
-      "source_location": "L34",
+      "source_location": "L36",
       "weight": 1.0,
       "source": "androproject_gui_package_devdependencies",
       "target": "androproject_gui_package_devdependencies_types_react_dom",
@@ -17065,7 +17175,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "androproject-gui/package.json",
-      "source_location": "L41",
+      "source_location": "L43",
       "weight": 1.0,
       "source": "androproject_gui_package_devdependencies",
       "target": "androproject_gui_package_devdependencies_typescript",
@@ -43778,6 +43888,99 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "scripts/auto_clean_200.py",
+      "source_location": "L37",
+      "weight": 1.0,
+      "source": "scripts_auto_clean_200",
+      "target": "scripts_auto_clean_200_clean_safe_whitespace",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/auto_clean_200.py",
+      "source_location": "L23",
+      "weight": 1.0,
+      "source": "scripts_auto_clean_200",
+      "target": "scripts_auto_clean_200_collect_paths",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/auto_clean_200.py",
+      "source_location": "L58",
+      "weight": 1.0,
+      "source": "scripts_auto_clean_200",
+      "target": "scripts_auto_clean_200_list_srp_symbols",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/auto_clean_200.py",
+      "source_location": "L69",
+      "weight": 1.0,
+      "source": "scripts_auto_clean_200",
+      "target": "scripts_auto_clean_200_main",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/auto_clean_200.py",
+      "source_location": "L75",
+      "weight": 1.0,
+      "source": "scripts_auto_clean_200_main",
+      "target": "scripts_auto_clean_200_collect_paths",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/auto_clean_200.py",
+      "source_location": "L82",
+      "weight": 1.0,
+      "source": "scripts_auto_clean_200_main",
+      "target": "scripts_auto_clean_200_clean_safe_whitespace",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/auto_clean_200.py",
+      "source_location": "L38",
+      "weight": 1.0,
+      "source": "scripts_auto_clean_200_rationale_38",
+      "target": "scripts_auto_clean_200_clean_safe_whitespace",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/auto_clean_200.py",
+      "source_location": "L91",
+      "weight": 1.0,
+      "source": "scripts_auto_clean_200_main",
+      "target": "scripts_auto_clean_200_list_srp_symbols",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/auto_clean_200.py",
+      "source_location": "L59",
+      "weight": 1.0,
+      "source": "scripts_auto_clean_200_rationale_59",
+      "target": "scripts_auto_clean_200_list_srp_symbols",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "scripts/fix-screenshot.ps1",
       "source_location": "L34",
       "weight": 1.0,
@@ -45395,5 +45598,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "718e05cb95a748ac25a2d97070f81228e55470b8"
+  "built_at_commit": "e190b6883950d785839fa72893aeeb74c72ae4c3"
 }

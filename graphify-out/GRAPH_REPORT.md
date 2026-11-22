@@ -1,16 +1,16 @@
 # Graph Report - AndroProject_Dev  (2026-11-22)
 
 ## Corpus Check
-- 231 files · ~313,279 words
+- 232 files · ~313,697 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1582 nodes · 2807 edges · 144 communities (117 shown, 27 thin omitted)
+- 1591 nodes · 2818 edges · 143 communities (116 shown, 27 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 12 edges (avg confidence: 0.67)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `718e05cb`
+- Built from commit: `e190b688`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -130,7 +130,6 @@
 - AdbExecutor
 - Value
 - ThemeProvider.tsx
-- IDeviceService
 - ISessionManager
 - useRescueSync.ts
 - route.ts
@@ -151,19 +150,19 @@
 ## Surprising Connections (you probably didn't know these)
 - `AutoDetectionToastProps` --references--> `DeviceInfo`  [EXTRACTED]
   androproject-gui/src/components/layout/AutoDetectionToast.tsx → androproject-gui/src/features/types.ts
-- `DeviceFrameProps` --references--> `DeviceInfo`  [EXTRACTED]
-  androproject-gui/src/components/layout/DeviceFrame.tsx → androproject-gui/src/features/types.ts
-- `AppsViewProps` --references--> `DeviceInfo`  [EXTRACTED]
-  androproject-gui/src/features/AppsView.tsx → androproject-gui/src/features/types.ts
-- `ArchivosViewProps` --references--> `DeviceInfo`  [EXTRACTED]
-  androproject-gui/src/features/ArchivosView.tsx → androproject-gui/src/features/types.ts
-- `CurarViewProps` --references--> `DeviceInfo`  [EXTRACTED]
-  androproject-gui/src/features/CurarView.tsx → androproject-gui/src/features/types.ts
+- `SidebarProps` --references--> `NavSection`  [EXTRACTED]
+  androproject-gui/src/components/layout/Sidebar.tsx → androproject-gui/src/features/types.ts
+- `FlasherViewProps` --references--> `DeviceInfo`  [EXTRACTED]
+  androproject-gui/src/features/FlasherView.tsx → androproject-gui/src/features/types.ts
+- `OptimizerViewProps` --references--> `DeviceInfo`  [EXTRACTED]
+  androproject-gui/src/features/OptimizerView.tsx → androproject-gui/src/features/types.ts
+- `ToolsViewProps` --references--> `DeviceInfo`  [EXTRACTED]
+  androproject-gui/src/features/ToolsView.tsx → androproject-gui/src/features/types.ts
 
 ## Import Cycles
 - None detected.
 
-## Communities (144 total, 27 thin omitted)
+## Communities (143 total, 27 thin omitted)
 
 ### Community 0 - "types.ts"
 Cohesion: 0.11
@@ -178,8 +177,8 @@ Cohesion: 0.15
 Nodes (13): definitions, Number, PermissionEntry, Target, Value, anyOf, description, anyOf (+5 more)
 
 ### Community 4 - "CommandResult"
-Cohesion: 0.12
-Nodes (8): AdbCommandExecutor, execAsync, MockCommandExecutor, IAdbCommandExecutor, INetworkRadarService, AdbConfig, CommandResult, ICommandExecutor
+Cohesion: 0.07
+Nodes (16): AppPackage, QuickActionItem, SystemLogs, createSystemLogEntry(), SystemLogType, useSystemLogs(), UseSystemLogsResult, AdbCommandExecutor (+8 more)
 
 ### Community 5 - "types.ts"
 Cohesion: 0.18
@@ -234,24 +233,24 @@ Cohesion: 0.15
 Nodes (13): Acceso Directo Manual, 🔄 Actualización, ⌨️ Comandos Rápidos (Aliases), 🤝 Contribuciones, 📱 Crear Accesos Directos en Android, Kali Linux en Termux - Instalación Automatizada, ⚖️ Licencia, ⚠️ Notas Importantes (+5 more)
 
 ### Community 19 - "route.ts"
-Cohesion: 0.09
-Nodes (18): execAsync, runDiagnostic(), execAsync(), execAsyncOrig, GET(), LogcatEntry, LEVEL_COLORS, LogcatInspectorPanel() (+10 more)
+Cohesion: 0.13
+Nodes (16): execAsync, runDiagnostic(), execAsync(), execAsyncOrig, GET(), LogcatEntry, LEVEL_COLORS, LogcatInspectorPanel() (+8 more)
 
 ### Community 48 - "📱 Instrucciones para Descargar e Instalar en Oppo"
 Cohesion: 0.13
 Nodes (14): 1. Conectar tu Oppo a la misma red WiFi, 2. Abrir Termux en tu Oppo, 3. Dar permisos de almacenamiento, 4. Descargar el script de instalación, 5. Dar permisos de ejecución, 6. Ejecutar la instalación, 📦 Archivos Disponibles para Descargar:, 🚀 Después de la Instalación: (+6 more)
 
 ### Community 49 - "route.ts"
-Cohesion: 0.11
-Nodes (29): Badge(), BadgeProps, BadgeSize, BadgeTone, sizeClasses, toneClasses, Button(), ButtonProps (+21 more)
+Cohesion: 0.12
+Nodes (27): Badge(), BadgeProps, BadgeSize, BadgeTone, sizeClasses, toneClasses, Button(), ButtonProps (+19 more)
 
 ### Community 50 - "samsung-watchdog.ps1"
 Cohesion: 0.17
 Nodes (10): Get-DeviceWifiIp(), Get-MdnsTargets(), Get-WirelessAttachedDevices(), Invoke-Adb(), Invoke-DeviceHardening(), Start-Projection(), Stop-ScrcpyIfRunning(), Test-AdbHealth() (+2 more)
 
 ### Community 51 - "detect.ts"
-Cohesion: 0.14
-Nodes (18): DeviceFrame(), DeviceFrameProps, DeviceNavControls(), DeviceNavControlsProps, MobileProjection(), MobileProjectionProps, ProjectionToolbar(), ProjectionToolbarProps (+10 more)
+Cohesion: 0.12
+Nodes (20): DeviceFrame(), DeviceNavControls(), DeviceNavControlsProps, DeviceInfoPanel(), DeviceInfoPanelProps, MobileProjection(), MobileProjectionProps, ProjectionToolbar() (+12 more)
 
 ### Community 52 - "debloat-driver.ps1"
 Cohesion: 0.32
@@ -279,7 +278,7 @@ Nodes (4): IOSMirrorPage(), AirPlayServerStatus, useAirPlayServer(), IAirPlayRec
 
 ### Community 61 - "Button.tsx"
 Cohesion: 0.05
-Nodes (37): dependencies, lucide-react, multicast-dns, next, react-dom, @yume-chan/adb, @yume-chan/adb-scrcpy, @yume-chan/adb-server-node-tcp (+29 more)
+Nodes (39): dependencies, lucide-react, multicast-dns, next, react-dom, @yume-chan/adb, @yume-chan/adb-scrcpy, @yume-chan/adb-server-node-tcp (+31 more)
 
 ### Community 62 - "DeviceInfoFetcher"
 Cohesion: 0.14
@@ -295,7 +294,7 @@ Nodes (16): APKSIGNER_JAR, appendLog(), execAsync(), execAsyncOrig, getErrorMess
 
 ### Community 65 - "paths.ts"
 Cohesion: 0.11
-Nodes (21): Page(), QuickAction(), QuickActionProps, ThemeProps, ViewShell(), AppsView(), ArchivosView(), ArchivosViewProps (+13 more)
+Nodes (21): react, Page(), MultiScreenGrid(), QuickAction(), QuickActionProps, ThemeProps, ViewShell(), ArchivosView() (+13 more)
 
 ### Community 66 - "ViewShell.tsx"
 Cohesion: 0.27
@@ -318,12 +317,12 @@ Cohesion: 0.20
 Nodes (10): properties, type, default, description, type, identifier, local, remote (+2 more)
 
 ### Community 73 - "route.ts"
-Cohesion: 0.16
-Nodes (9): react, DeviceScreenTile, DeviceScreenTileProps, MultiScreenGrid(), MultiScreenGridProps, DeviceInfo, IProjectionCoordinator, ProjectionCoordinator (+1 more)
+Cohesion: 0.22
+Nodes (10): DeviceFrameProps, DeviceScreenTile, DeviceScreenTileProps, MultiScreenGridProps, AppsViewProps, ArchivosViewProps, CurarViewProps, DeviceInfo (+2 more)
 
 ### Community 74 - "route.ts"
-Cohesion: 0.23
-Nodes (11): GET(), getAirPlayEngine(), POST(), GET(), getAirPlay(), getIosBridge(), POST(), container (+3 more)
+Cohesion: 0.28
+Nodes (9): GET(), getAirPlayEngine(), POST(), container, ServiceFactory, ServiceToken, TOKENS, createSessionId() (+1 more)
 
 ### Community 75 - "build"
 Cohesion: 0.20
@@ -342,16 +341,16 @@ Cohesion: 0.33
 Nodes (4): open_device_popout(), Result, String, AppHandle
 
 ### Community 79 - "DeviceInfo"
-Cohesion: 0.18
-Nodes (16): clamp(), clamp01(), mapClientToDeviceCoords(), TouchRipple, ZoomState, ProjectionCanvas(), ProjectionCanvasProps, ProjectionOverlays() (+8 more)
+Cohesion: 0.10
+Nodes (28): EmptyState(), EmptyStateProps, clamp(), clamp01(), mapClientToDeviceCoords(), TouchRipple, ZoomState, ProjectionCanvas() (+20 more)
 
 ### Community 80 - "package.json"
 Cohesion: 0.20
 Nodes (10): $ref, description, items, type, uniqueItems, description, items, type (+2 more)
 
 ### Community 81 - "route.ts"
-Cohesion: 0.14
-Nodes (20): AnimScales, DiagnosticsData, GpuTweaks, AppsFilter, AppsSlice, AppsSubTab, AppsViewMode, createAppsSlice() (+12 more)
+Cohesion: 0.11
+Nodes (28): AppItemProps, AppManagerPanelProps, AnimScales, AppInfo, BluetoothInfo, DeviceData, DeviceListItem, DiagnosticsData (+20 more)
 
 ### Community 82 - "ArchivosView.tsx"
 Cohesion: 0.25
@@ -362,8 +361,8 @@ Cohesion: 0.20
 Nodes (10): type, webviews, windows, items, description, items, type, description (+2 more)
 
 ### Community 84 - "paths.ts"
-Cohesion: 0.16
-Nodes (14): RealAppIcon(), RealAppIconProps, formatBytes(), formatDate(), getErrorMessage(), AppInstallerPanel(), AppInstallerPanelProps, AppCard() (+6 more)
+Cohesion: 0.25
+Nodes (9): formatBytes(), formatDate(), getErrorMessage(), AppInstallerPanel(), AppInstallerPanelProps, AppCard(), AppRow(), AppManagerPanel() (+1 more)
 
 ### Community 85 - "ios-bridge.ts"
 Cohesion: 0.20
@@ -382,8 +381,8 @@ Cohesion: 0.25
 Nodes (8): description, properties, required, type, CapabilityRemote, urls, description, type
 
 ### Community 91 - "DashboardView.tsx"
-Cohesion: 0.21
-Nodes (12): APP_COLORS, AppsFilterDash, computeDeviceTelemetry(), DeviceTelemetrySummary, getAppColor(), parseTempNum(), TelemetryLevel, DashboardAppsPanel() (+4 more)
+Cohesion: 0.12
+Nodes (19): UseStreamTrackerProps, RealAppIcon(), RealAppIconProps, ViewShellProps, APP_COLORS, AppsFilterDash, computeDeviceTelemetry(), DeviceTelemetrySummary (+11 more)
 
 ### Community 93 - "ToolsView.tsx"
 Cohesion: 0.22
@@ -402,8 +401,8 @@ Cohesion: 0.36
 Nodes (11): fetchPlayStoreFallback(), GET(), playUrlCache, assertValidPackageName(), CACHE_DIR, CachedIcon, execFileAsync, extractDeviceApkIcon() (+3 more)
 
 ### Community 99 - "useRescueSync.ts"
-Cohesion: 0.36
-Nodes (9): adbShell(), execFileAsync, parseAccessibilityPkgs(), parseAppOpsMap(), parseLauncherSet(), parseThirdPartyInstallers(), scanDeviceForSpyware(), SPY_OPS (+1 more)
+Cohesion: 0.31
+Nodes (10): adbShell(), execFileAsync, parseAccessibilityPkgs(), parseAppOpsMap(), parseLauncherSet(), parseThirdPartyInstallers(), scanDeviceForSpyware(), SPY_OPS (+2 more)
 
 ### Community 100 - "stream.ts"
 Cohesion: 0.67
@@ -418,16 +417,16 @@ Cohesion: 0.42
 Nodes (9): adb_bin(), adb_key_fast(), adb_list_devices_fast(), FastDevice, launch_multi_scrcpy_native(), PathBuf, Result, String (+1 more)
 
 ### Community 104 - "IVisionNanoEngine"
-Cohesion: 0.20
-Nodes (13): createSessionId(), DeviceSession, IStreamTransport, StreamSessionConfig, StreamSessionResult, AirPlayStreamTransport, airPlayTransport, ScrcpyStreamTransport (+5 more)
+Cohesion: 0.14
+Nodes (13): IStreamTransport, StreamSessionConfig, StreamSessionResult, AirPlayStreamTransport, airPlayTransport, ScrcpyStreamTransport, scrcpyTransport, AirPlayServerOptions (+5 more)
 
 ### Community 105 - "route.ts"
 Cohesion: 0.12
 Nodes (7): BLOCKED_PATTERNS, inputSwipe(), inputTap(), inputText(), isValidPoint(), pasteClipboard(), setClipboard()
 
 ### Community 106 - "ISessionManager"
-Cohesion: 0.07
-Nodes (39): inter, metadata, plusJakartaSans, AppShell(), AppShellProps, AutoDetectionToast(), AutoDetectionToastProps, DeviceManagerDropdown() (+31 more)
+Cohesion: 0.08
+Nodes (35): inter, metadata, plusJakartaSans, AppShell(), AppShellProps, AutoDetectionToast(), AutoDetectionToastProps, DeviceManagerDropdown() (+27 more)
 
 ### Community 108 - "ISessionManager"
 Cohesion: 0.32
@@ -469,10 +468,6 @@ Nodes (6): "Dependencias no instaladas", "Espacio insuficiente", "Kali no se ini
 Cohesion: 0.50
 Nodes (4): description, required, type, Capability
 
-### Community 123 - "useAirPlayServer.ts"
-Cohesion: 0.18
-Nodes (14): AppPackage, BluetoothInfo, DeviceData, DeviceListItem, DiagnosticsStorage, OptimizerSettings, QuickActionItem, SystemLogs (+6 more)
-
 ### Community 124 - "Capability"
 Cohesion: 0.31
 Nodes (8): GET(), inFlightWorkers, lastGoodFrame, lastGoodFrameId, lastGoodTs, placeholderFrame(), pruneStaleCache(), triggerCapture()
@@ -482,12 +477,12 @@ Cohesion: 0.67
 Nodes (3): Identifier, description, oneOf
 
 ### Community 126 - "Value"
-Cohesion: 0.21
-Nodes (7): DeviceInfoPanel(), DeviceInfoPanelProps, EmptyState(), EmptyStateProps, SplitDivider(), SplitDividerProps, ScrcpyOptions
+Cohesion: 0.43
+Nodes (6): clean_safe_whitespace(), collect_paths(), list_srp_symbols(), main(), Elimina trailing spaces y >2 líneas en blanco seguidas sin alterar código., Identifica símbolos principales para guiar extracción modular SRP.
 
 ### Community 127 - "ServiceContainer"
-Cohesion: 0.33
-Nodes (8): sendTouchEvent(), WebCodecsCanvas(), WebCodecsCanvasProps, bytesEqual(), concatBytes(), extractAvcCodec(), startWebCodecsH264Player(), WebCodecsPlayerCallbacks
+Cohesion: 0.80
+Nodes (4): GET(), getAirPlay(), getIosBridge(), POST()
 
 ### Community 128 - "useSystemLogs.ts"
 Cohesion: 0.40
@@ -538,24 +533,24 @@ Cohesion: 0.50
 Nodes (4): description, required, type, Capability
 
 ## Knowledge Gaps
-- **441 isolated node(s):** `INSTALL-OPPO-DIRECTO.sh script`, `{ app, BrowserWindow, Tray, Menu, nativeImage, shell, dialog }`, `{ spawn }`, `path`, `fs` (+436 more)
+- **443 isolated node(s):** `INSTALL-OPPO-DIRECTO.sh script`, `{ app, BrowserWindow, Tray, Menu, nativeImage, shell, dialog }`, `{ spawn }`, `path`, `fs` (+438 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **27 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `DeviceInfo` connect `route.ts` to `paths.ts`, `IVisionNanoEngine`, `ISessionManager`, `useAirPlayServer.ts`, `route.ts`, `IDeviceService`, `DeviceInfo`, `route.ts`, `ArchivosView.tsx`, `detect.ts`, `paths.ts`, `DeviceInfoFetcher`, `useRescueSync.ts`, `DashboardView.tsx`, `index.ts`, `ToolsView.tsx`, `Value`?**
-  _High betweenness centrality (0.092) - this node is a cross-community bridge._
-- **Why does `react` connect `route.ts` to `paths.ts`, `Button.tsx`?**
-  _High betweenness centrality (0.038) - this node is a cross-community bridge._
-- **Why does `dependencies` connect `Button.tsx` to `route.ts`?**
-  _High betweenness centrality (0.032) - this node is a cross-community bridge._
+- **Why does `DeviceInfo` connect `route.ts` to `paths.ts`, `CommandResult`, `IVisionNanoEngine`, `ISessionManager`, `route.ts`, `DeviceInfo`, `route.ts`, `ArchivosView.tsx`, `detect.ts`, `paths.ts`, `route.ts`, `DeviceInfoFetcher`, `DashboardView.tsx`, `index.ts`, `ToolsView.tsx`, `useRescueSync.ts`?**
+  _High betweenness centrality (0.091) - this node is a cross-community bridge._
+- **Why does `dependencies` connect `Button.tsx` to `paths.ts`?**
+  _High betweenness centrality (0.039) - this node is a cross-community bridge._
+- **Why does `react` connect `paths.ts` to `Button.tsx`?**
+  _High betweenness centrality (0.039) - this node is a cross-community bridge._
 - **What connects `INSTALL-OPPO-DIRECTO.sh script`, `{ app, BrowserWindow, Tray, Menu, nativeImage, shell, dialog }`, `{ spawn }` to the rest of the system?**
-  _453 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _457 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `types.ts` be split into smaller, more focused modules?**
   _Cohesion score 0.1111111111111111 - nodes in this community are weakly interconnected._
 - **Should `safeExec` be split into smaller, more focused modules?**
   _Cohesion score 0.06298904538341157 - nodes in this community are weakly interconnected._
 - **Should `CommandResult` be split into smaller, more focused modules?**
-  _Cohesion score 0.11965811965811966 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.06976744186046512 - nodes in this community are weakly interconnected._

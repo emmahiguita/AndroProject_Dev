@@ -11,7 +11,9 @@
     "tauri": "tauri",
     "tauri:dev": "tauri dev",
     "tauri:build": "tauri build",
-    "lint": "eslint"
+    "lint": "eslint",
+    "lint:200": "python ../scripts/auto_clean_200.py src",
+    "lint:200:fix": "python ../scripts/auto_clean_200.py --fix src"
   },
   "type": "module",
   "dependencies": {

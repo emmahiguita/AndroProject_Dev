@@ -30,8 +30,8 @@
     "semantic_hash": ""
   },
   "androproject-gui/package.json": {
-    "mtime": 1795309435.1525488,
-    "ast_hash": "ba167cbc7e0624670ff9637152ff6512",
+    "mtime": 1795350404.734012,
+    "ast_hash": "57c204ee09b4cbafd28ca7077c7efc26",
     "semantic_hash": ""
   },
   "androproject-gui/postcss.config.mjs": {
@@ -1567,6 +1567,11 @@
   "androproject-gui/src/lib/services/driver-manager.ts": {
     "mtime": 1795349876.3391137,
     "ast_hash": "26c4ed5d4b29a757d20ed1f183c26107",
+    "semantic_hash": ""
+  },
+  "scripts/auto_clean_200.py": {
+    "mtime": 1795350380.933053,
+    "ast_hash": "70f90c1adc61f01cc934d01a3fb99908",
     "semantic_hash": ""
   }
 }
