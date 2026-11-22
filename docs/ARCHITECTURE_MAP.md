@@ -4,11 +4,16 @@ Documentación técnica de los módulos activos, diagramas de flujo de datos y a
 
 ---
 
-## 1. Vista Multi-Pantalla en Vivo (Verificada en Hardware Real)
+## 1. Vistas Reales Actualizadas (Hardware Físico)
 
-Transmisión simultánea de **Samsung Galaxy A30s (`SM-A307G`)** + **OPPO A79 5G (`CPH2557`)** a 60 FPS vía WebCodecs H.264:
-
+### Multi-Pantalla en Vivo (`SM-A307G` + `CPH2557` a 60 FPS WebCodecs H.264)
 ![Multi-Pantalla en vivo Android](./images/multiscreen-live.png)
+
+### Panel Principal y Telemetría de Kernel
+![Panel Principal y Telemetría](./images/dashboard-telemetry.png)
+
+### Flasheador Fastboot, Bootloader y Estado Root
+![Flasheador y Bootloader](./images/flasher-root.png)
 
 ---
 
