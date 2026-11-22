@@ -414,54 +414,9 @@
     "ast_hash": "3bdec73c4b7ff50e1e77e4d19577c9f3",
     "semantic_hash": ""
   },
-  "androproject-gui/public/file.svg": {
-    "mtime": 1781448856.1265905,
-    "ast_hash": "d09f95206c3fa0bb9bd9fefabfd0ea71",
-    "semantic_hash": ""
-  },
-  "androproject-gui/public/globe.svg": {
-    "mtime": 1781448856.1372285,
-    "ast_hash": "2aaafa6a49b6563925fe440891e32717",
-    "semantic_hash": ""
-  },
   "androproject-gui/public/icon.png": {
     "mtime": 1795363421.0626104,
     "ast_hash": "01f5c3b7a4c57747aecd4e9d822c4710",
-    "semantic_hash": ""
-  },
-  "androproject-gui/public/next.svg": {
-    "mtime": 1781448856.1507523,
-    "ast_hash": "8e061864f388b47f33a1c3780831193e",
-    "semantic_hash": ""
-  },
-  "androproject-gui/public/vercel.svg": {
-    "mtime": 1781448856.1639302,
-    "ast_hash": "c0af2f507b369b085b35ef4bbe3bcf1e",
-    "semantic_hash": ""
-  },
-  "androproject-gui/public/window.svg": {
-    "mtime": 1781448856.1749198,
-    "ast_hash": "a2760511c65806022ad20adf74370ff3",
-    "semantic_hash": ""
-  },
-  "androproject-gui/temp/androproject-window-final.png": {
-    "mtime": 1785812929.2997005,
-    "ast_hash": "7f9d5fb96bd0cc7bf2b3b484804ba9c8",
-    "semantic_hash": ""
-  },
-  "androproject-gui/temp/androproject-window-responsive.png": {
-    "mtime": 1785812714.3080888,
-    "ast_hash": "7f9d5fb96bd0cc7bf2b3b484804ba9c8",
-    "semantic_hash": ""
-  },
-  "androproject-gui/temp/androproject-window.png": {
-    "mtime": 1785812390.914153,
-    "ast_hash": "d0f4c98d811be7b685f03fed733c133d",
-    "semantic_hash": ""
-  },
-  "androproject-gui/test.png": {
-    "mtime": 1782234524.0560992,
-    "ast_hash": "ea5bd5d872502c185d3dd48ae89d733b",
     "semantic_hash": ""
   },
   "androproject-gui/src/components/ui/Badge.tsx": {
@@ -574,11 +529,6 @@
     "ast_hash": "fe126ccf49b7bb5568cb1d5329d2b347",
     "semantic_hash": ""
   },
-  "scripts/stream-diagnostic.mjs": {
-    "mtime": 1787973140.5427394,
-    "ast_hash": "fe126ccf49b7bb5568cb1d5329d2b347",
-    "semantic_hash": ""
-  },
   "androproject-gui/src/lib/services/binary-resolver.ts": {
     "mtime": 1787977974.3120098,
     "ast_hash": "767bbbac1105a38bbfb13de7dfde4a9b",
@@ -644,36 +594,6 @@
     "ast_hash": "76117485bdc492a805f8d74d9419d488",
     "semantic_hash": ""
   },
-  "scratch/launch_airplay.js": {
-    "mtime": 1788030655.3364434,
-    "ast_hash": "359c5a2c6ea223fe6adcdcd3a112c42f",
-    "semantic_hash": ""
-  },
-  "scratch/test_airplay_run.js": {
-    "mtime": 1788030697.8546433,
-    "ast_hash": "cce698ae4a4dcb12f9f44845246fe32d",
-    "semantic_hash": ""
-  },
-  "scratch/debug_uxplay.js": {
-    "mtime": 1788031205.2235343,
-    "ast_hash": "9f21bc24c57f0f66944c1ad3416d86a7",
-    "semantic_hash": ""
-  },
-  "scratch/run_uxplay_standalone.js": {
-    "mtime": 1788031184.7527094,
-    "ast_hash": "2f49d37acdbd12ef0878f457de867b0a",
-    "semantic_hash": ""
-  },
-  "scratch/test_uxplay_live.js": {
-    "mtime": 1788031112.6839406,
-    "ast_hash": "98896581058250c6295d9bcfe6bc3a6e",
-    "semantic_hash": ""
-  },
-  "scratch/stress_test_airplay.js": {
-    "mtime": 1788031695.3587441,
-    "ast_hash": "1e97a29f208a67db9d95d7d2b528bbfa",
-    "semantic_hash": ""
-  },
   "androproject-gui/src/app/popout/page.tsx": {
     "mtime": 1795363116.947199,
     "ast_hash": "f1b34207612014237ee9259beb6a4912",
@@ -684,34 +604,9 @@
     "ast_hash": "14b166b18bb44421137a6d88479b4256",
     "semantic_hash": ""
   },
-  "scratch/run_airplay_server.ps1": {
-    "mtime": 1788033344.6942623,
-    "ast_hash": "36e21fe3e33b7c6dccf4d4df89d6dd56",
-    "semantic_hash": ""
-  },
-  "scratch/run_uxplay_clean.ps1": {
-    "mtime": 1788033299.3115227,
-    "ast_hash": "af36148342abf436e90c455746366676",
-    "semantic_hash": ""
-  },
   "package.json": {
     "mtime": 1795309428.9844308,
     "ast_hash": "1fae02a53cfd4f2bda3f05e5332e4b26",
-    "semantic_hash": ""
-  },
-  "scratch/bonjour_broadcaster.js": {
-    "mtime": 1788037470.6238463,
-    "ast_hash": "fe1659f7b067123c41903cbc187d2fb9",
-    "semantic_hash": ""
-  },
-  "scratch/check_all_services.ps1": {
-    "mtime": 1788037275.8628025,
-    "ast_hash": "58446373da96bbb4825c995a302eae96",
-    "semantic_hash": ""
-  },
-  "scratch/inspect_mdns_discovery.js": {
-    "mtime": 1788037608.7698941,
-    "ast_hash": "47f82734048f5837516f999f149dac9a",
     "semantic_hash": ""
   },
   "androproject-gui/src-tauri/src/main.rs": {
