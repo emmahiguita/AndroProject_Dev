@@ -25,7 +25,7 @@ export const AutoDetectionToast: React.FC<AutoDetectionToastProps> = ({
   if (!device) return null;
 
   return (
-    <div className="fixed bottom-3 right-3 sm:absolute sm:top-14 sm:bottom-auto sm:right-4 z-40 flex items-center gap-3 px-3.5 py-2.5 rounded-xl bg-zinc-900 border border-zinc-700 text-zinc-100 shadow-2xl animate-in fade-in slide-in-from-top-2 duration-200 max-w-[calc(100vw-24px)]">
+    <div className="fixed bottom-4 right-4 z-40 flex items-center gap-3 px-3.5 py-2.5 rounded-xl bg-zinc-900 border border-zinc-700 text-zinc-100 shadow-2xl animate-in fade-in slide-in-from-bottom-2 duration-200 max-w-[calc(100vw-24px)]">
       <div className="w-2.5 h-2.5 rounded-full bg-zinc-100 shrink-0" />
       <div className="text-xs">
         <p className="font-bold text-zinc-100">Dispositivo detectado</p>

@@ -14,16 +14,21 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: transparent;
+  background: #09090b;
+  padding: 12px;
+  box-sizing: border-box;
   -webkit-app-region: drag;
 }
 
 .iphone {
   position: relative;
-  width: calc(100% - 24px);
-  height: calc(100% - 24px);
+  aspect-ratio: 9 / 19.5;
+  height: calc(100vh - 96px);
+  max-height: 780px;
+  width: auto;
+  max-width: calc(100vw - 32px);
   padding: 8px;
-  border-radius: 56px;
+  border-radius: 50px;
   background: linear-gradient(145deg, #444, #181818 35%, #2a2a2a 65%, #0d0d0d);
   box-shadow: 0 30px 80px rgba(0, 0, 0, 0.85), inset 0 0 0 1px rgba(255, 255, 255, 0.25), inset 0 0 20px rgba(0,0,0,0.8);
   -webkit-app-region: drag;

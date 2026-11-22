@@ -109,13 +109,14 @@ if (Test-Path "$GuiDir") {
         Copy-Item $TauriExe.FullName "$TempDir\Dashboard\ANDRO-IOS.exe" -Force
         Copy-Item $TauriExe.FullName "$TempDir\Dashboard\AndroProject.exe" -Force
         if (Test-Path "$GuiDir\.next\standalone") {
-            New-Item -ItemType Directory -Force -Path "$TempDir\Dashboard\next-standalone" | Out-Null
-            Copy-Item "$GuiDir\.next\standalone\*" "$TempDir\Dashboard\next-standalone\" -Recurse -Force
-            # Depurar binarios/archivos pesados no requeridos en runtime dentro del paquete
-            $AirDir = "$TempDir\Dashboard\next-standalone\bin\airplay"
-            if (Test-Path $AirDir) {
-                Remove-Item "$AirDir\uxplay-windows*", "$AirDir\uxplay-bluetooth-beacon.exe", "$AirDir\*.zip", "$AirDir\*.bak" -Force -ErrorAction SilentlyContinue
-            }
+            $StandaloneDest = "$TempDir\Dashboard\next-standalone"
+            New-Item -ItemType Directory -Force -Path "$StandaloneDest\.next\static", "$StandaloneDest\public", "$StandaloneDest\node_modules\next\dist\compiled\next-server" | Out-Null
+            Copy-Item "$GuiDir\.next\standalone\*" "$StandaloneDest\" -Recurse -Force
+            if (Test-Path "$GuiDir\.next\static") { Copy-Item "$GuiDir\.next\static\*" "$StandaloneDest\.next\static\" -Recurse -Force }
+            if (Test-Path "$GuiDir\public") { Copy-Item "$GuiDir\public\*" "$StandaloneDest\public\" -Recurse -Force }
+            Copy-Item "$GuiDir\node_modules\next\dist\compiled\next-server\*.prod.js" "$StandaloneDest\node_modules\next\dist\compiled\next-server\" -Force -ErrorAction SilentlyContinue
+            $AirDir = "$StandaloneDest\bin\airplay"
+            if (Test-Path $AirDir) { Remove-Item "$AirDir\uxplay-windows*", "$AirDir\uxplay-bluetooth-beacon.exe", "$AirDir\*.zip", "$AirDir\*.bak" -Force -ErrorAction SilentlyContinue }
         }
     } else {
         Write-Host "      ERROR: No se encontro el binario Tauri compilado en src-tauri\target\release." -ForegroundColor Red

@@ -3,6 +3,9 @@ import path from "path";
 
 const nextConfig: NextConfig = {
   output: "standalone",
+  outputFileTracingIncludes: {
+    '/api/**': ['./node_modules/next/dist/compiled/next-server/*.prod.js'],
+  },
   outputFileTracingExcludes: {
     '*': [
       './dist/**',

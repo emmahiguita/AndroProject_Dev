@@ -11,7 +11,7 @@
 // ============================================================================
 'use client';
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useAirPlayServer } from '@/hooks/useAirPlayServer';
 import './ios-mirror.css';
 
@@ -19,10 +19,14 @@ export default function IOSMirrorPage() {
   const { status, loading, error, toggleServer, refresh } = useAirPlayServer();
   const [frameSrc, setFrameSrc] = useState('/api/device-image?serial=airplay-ios&t=0');
   const [toastMsg, setToastMsg] = useState<string | null>(null);
+  const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => () => { if (toastTimerRef.current) clearTimeout(toastTimerRef.current); }, []);
 
   const notify = useCallback((msg: string) => {
     setToastMsg(msg);
-    setTimeout(() => setToastMsg(null), 2400);
+    if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+    toastTimerRef.current = setTimeout(() => setToastMsg(null), 2400);
   }, []);
 
   useEffect(() => {
@@ -172,22 +176,18 @@ export default function IOSMirrorPage() {
         />
 
         <div className="screen" onClick={handleFocusNative} style={{ cursor: 'pointer' }}>
-          <img
-            src={frameSrc}
-            alt="AirPlay 2 Live Mirror"
-            className="video"
-            style={{ width: '100%', height: '100%', objectFit: 'contain' }}
-          />
-
-          <div className="dynamicIsland">
-            <div className="camera" />
-          </div>
-
+          {serverReady ? (
+            <img src={frameSrc} alt="AirPlay 2 Live Mirror" className="video" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+          ) : (
+            <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '24px', textAlign: 'center', color: '#a1a1aa' }}>
+              <span style={{ fontSize: '13px', fontWeight: 700, color: '#f4f4f5' }}>AirPlay 2 en espera</span>
+              <span style={{ fontSize: '11px' }}>Pulsa &quot;Iniciar AirPlay&quot; arriba para proyectar tu iPhone o iPad</span>
+            </div>
+          )}
+          <div className="dynamicIsland"><div className="camera" /></div>
           <div className="status">
-            <span className="liveDot" />
-            {serverReady
-              ? 'AIRPLAY 2 LISTO · 60 FPS · AUDIO EN CELULAR'
-              : 'RECEPTOR EN ESPERA — PULSA INICIAR AIRPLAY'}
+            <span className="liveDot" style={{ background: serverReady ? '#34d399' : '#fbbf24' }} />
+            {serverReady ? 'AIRPLAY 2 LISTO · 60 FPS · AUDIO EN CELULAR' : 'RECEPTOR EN ESPERA — PULSA INICIAR AIRPLAY'}
           </div>
         </div>
       </section>

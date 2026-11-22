@@ -1,6 +1,7 @@
 import type { Config } from "tailwindcss";
 
 const config: Config = {
+  darkMode: "class",
   content: [
     // Escanear TODO src/: las vistas viven en src/features/ y sus clases
     // no se generaban (top-1/2, grid-cols-2, text-[10px]… ausentes del CSS),
