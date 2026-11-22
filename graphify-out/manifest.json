@@ -190,8 +190,8 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/features/ConfigView.tsx": {
-    "mtime": 1795309428.8203318,
-    "ast_hash": "ec2d1add3f0c0b33909d25a00bd1dd3e",
+    "mtime": 1795349832.3688784,
+    "ast_hash": "8242e68e3e953d8e8c1c10954de3a6f1",
     "semantic_hash": ""
   },
   "androproject-gui/src/features/CurarView.tsx": {
@@ -1400,8 +1400,8 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/features/dashboard/TelemetryModal.tsx": {
-    "mtime": 1795309428.836045,
-    "ast_hash": "bee6e3b5b1e06c7597a426e3785d8b49",
+    "mtime": 1795349834.2755148,
+    "ast_hash": "b5963c32fcc5390eaa9a30e6cf319ceb",
     "semantic_hash": ""
   },
   "androproject-gui/src/features/dashboard/dashboard-helpers.ts": {
@@ -1500,8 +1500,8 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/app/api/security-scan/route.ts": {
-    "mtime": 1795349371.3186288,
-    "ast_hash": "a4589d8edec7e18a9a6de08264e14b6c",
+    "mtime": 1795349803.8039885,
+    "ast_hash": "36ae1283537f615db9ab40904acce8df",
     "semantic_hash": ""
   },
   "androproject-gui/src/features/curar/ScreenshotPanel.tsx": {
@@ -1510,8 +1510,8 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/features/curar/SpywareAuditPanel.tsx": {
-    "mtime": 1795349374.7978454,
-    "ast_hash": "9c8ee9e1d9b0ac5a9597024e51815faf",
+    "mtime": 1795349808.8254828,
+    "ast_hash": "8df637ee512427f9bbe40292093f7d46",
     "semantic_hash": ""
   },
   "androproject-gui/src/hooks/useMouseLight.ts": {
@@ -1555,18 +1555,18 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/app/api/drivers/route.ts": {
-    "mtime": 1795349336.396161,
-    "ast_hash": "5b2040ddcad76dffee30e1c112fae87a",
+    "mtime": 1795349780.7606583,
+    "ast_hash": "d74091950765cdb6b71c19bfec6f3119",
     "semantic_hash": ""
   },
   "androproject-gui/src/features/tools/DriverManagerPanel.tsx": {
-    "mtime": 1795349353.3150673,
-    "ast_hash": "12f9657da03cd8e402817b4bc31ca9bc",
+    "mtime": 1795349801.59454,
+    "ast_hash": "ea4ea7997bdba997eb1e14faac670fe3",
     "semantic_hash": ""
   },
   "androproject-gui/src/lib/services/driver-manager.ts": {
-    "mtime": 1795349335.1821284,
-    "ast_hash": "547089e9206e85d249b0cd45bf933c99",
+    "mtime": 1795349876.3391137,
+    "ast_hash": "26c4ed5d4b29a757d20ed1f183c26107",
     "semantic_hash": ""
   }
 }

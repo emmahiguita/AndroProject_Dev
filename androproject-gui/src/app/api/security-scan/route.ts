@@ -38,6 +38,10 @@ export async function GET(req: NextRequest) {
   }
 }
 
+const PROTECTED_SYSTEM_PKGS = new Set([
+  'android', 'com.android.systemui', 'com.android.settings', 'com.android.phone', 'com.android.shell',
+]);
+
 export async function POST(req: NextRequest) {
   try {
     const { serial, packageName, action } = (await req.json()) as {
@@ -47,6 +51,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, error: 'Serial inválido.' }, { status: 400 });
     }
     const pkg = assertValidPackageName(packageName);
+    if (PROTECTED_SYSTEM_PKGS.has(pkg) && (action === 'suspend' || action === 'disable')) {
+      return NextResponse.json({ success: false, error: `Paquete crítico protegido: ${pkg}` }, { status: 400 });
+    }
 
     const shellArgs =
       action === 'revoke_overlay' ? ['appops', 'set', pkg, 'SYSTEM_ALERT_WINDOW', 'ignore']
@@ -60,13 +67,17 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, error: 'Acción de remediación no soportada.' }, { status: 400 });
     }
 
-    await execFileAsync(ADB, ['-s', serial, 'shell', ...shellArgs], { timeout: 8000, windowsHide: true });
+    const { stdout, stderr } = await execFileAsync(ADB, ['-s', serial, 'shell', ...shellArgs], { timeout: 8000, windowsHide: true });
+    const out = `${stdout || ''}\n${stderr || ''}`.trim();
+    if (/exception|error|failed|not allowed|securityexception/i.test(out)) {
+      return NextResponse.json({ success: false, error: out }, { status: 422 });
+    }
     const label = action === 'revoke_overlay' ? 'Overlay/anuncios bloqueados'
       : action === 'force_stop' ? 'Proceso detenido'
         : action === 'suspend' ? 'App congelada sin perder datos (Hail)'
           : action === 'unsuspend' ? 'App descongelada'
             : 'Aplicación deshabilitada';
-    return NextResponse.json({ success: true, message: `${label}: ${pkg}` });
+    return NextResponse.json({ success: true, message: `${label}: ${pkg}`, output: out });
   } catch (err: unknown) {
     return NextResponse.json({ success: false, error: err instanceof Error ? err.message : String(err) }, { status: 500 });
   }

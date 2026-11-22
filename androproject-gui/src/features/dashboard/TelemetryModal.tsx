@@ -163,7 +163,7 @@ export const TelemetryModal: React.FC<TelemetryModalProps> = ({
           </div>
 
           <div className={`grid grid-cols-3 sm:grid-cols-6 gap-1.5 p-2 rounded border text-[10px] font-mono ${dark ? 'bg-zinc-900/60 border-zinc-800 text-zinc-300' : 'bg-slate-50 border-slate-200 text-slate-700'}`}>
-            <div><span className="opacity-60 block text-[8px] uppercase">Modelo</span><strong className="truncate block">{device?.marketName || device?.model || '--'}</strong></div>
+            <div><span className="opacity-60 block text-[8px] uppercase">Modelo</span><strong className="truncate block">{(device as { marketName?: string } | null)?.marketName || device?.model || '--'}</strong></div>
             <div><span className="opacity-60 block text-[8px] uppercase">Serial</span><strong className="truncate block">{device?.serial || '--'}</strong></div>
             <div><span className="opacity-60 block text-[8px] uppercase">Android</span><strong className="truncate block">{device?.androidVersion || '--'} ({device?.connectionType || 'USB'})</strong></div>
             <div><span className="opacity-60 block text-[8px] uppercase">Pantalla</span><strong className="truncate block">{device?.resolution || '--'}</strong></div>

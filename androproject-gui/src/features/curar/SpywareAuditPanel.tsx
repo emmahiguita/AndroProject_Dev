@@ -25,6 +25,7 @@ export const SpywareAuditPanel: React.FC<SpywareAuditPanelProps> = ({ serial, on
   const { dark, t } = useTheme();
   const [scanning, setScanning] = useState(false);
   const [findings, setFindings] = useState<SpywareFinding[] | null>(null);
+  const [suspendedPkgs, setSuspendedPkgs] = useState<Set<string>>(new Set());
   const [meta, setMeta] = useState<{ scanned: number; accessCount: number; topPkg: string | null } | null>(null);
 
   const runDeepScan = async () => {
@@ -53,7 +54,7 @@ export const SpywareAuditPanel: React.FC<SpywareAuditPanelProps> = ({ serial, on
     }
   };
 
-  const runRemediation = async (pkg: string, action: 'revoke_overlay' | 'force_stop' | 'suspend') => {
+  const runRemediation = async (pkg: string, action: 'revoke_overlay' | 'force_stop' | 'suspend' | 'unsuspend') => {
     if (!serial) return;
     try {
       const r = await fetch('/api/security-scan', {
@@ -64,6 +65,13 @@ export const SpywareAuditPanel: React.FC<SpywareAuditPanelProps> = ({ serial, on
       const d = await r.json();
       onLog(d.message || d.error || 'Acción aplicada', d.success ? 'success' : 'error');
       if (d.success && action === 'revoke_overlay') runDeepScan();
+      if (d.success && (action === 'suspend' || action === 'unsuspend')) {
+        setSuspendedPkgs((prev) => {
+          const next = new Set(prev);
+          if (action === 'suspend') next.add(pkg); else next.delete(pkg);
+          return next;
+        });
+      }
     } catch {
       onLog(`Error aplicando ${action} sobre ${pkg}`, 'error');
     }
@@ -150,8 +158,13 @@ export const SpywareAuditPanel: React.FC<SpywareAuditPanelProps> = ({ serial, on
                   <Button variant="secondary" size="sm" icon={<Square size={12} />} onClick={() => runRemediation(f.packageName, 'force_stop')}>
                     Detener
                   </Button>
-                  <Button variant="secondary" size="sm" icon={<Ban size={12} />} onClick={() => runRemediation(f.packageName, 'suspend')}>
-                    Congelar
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    icon={<Ban size={12} />}
+                    onClick={() => runRemediation(f.packageName, suspendedPkgs.has(f.packageName) ? 'unsuspend' : 'suspend')}
+                  >
+                    {suspendedPkgs.has(f.packageName) ? 'Descongelar' : 'Congelar'}
                   </Button>
                   <Button variant="danger" size="sm" icon={<Trash2 size={12} />} onClick={() => handleUninstall(f.packageName)}>
                     Desinstalar

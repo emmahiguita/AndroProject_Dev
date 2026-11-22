@@ -32,7 +32,8 @@ export const DriverManagerPanel: React.FC = () => {
       if (d.success) {
         setReport({
           mobileUsb: d.mobileUsb || [],
-          problemDevices: d.problemDevices || [],
+          mobileProblems: d.mobileProblems || [],
+          otherProblemsCount: d.otherProblemsCount || 0,
           adbDevices: d.adbDevices || [],
           fastbootDevices: d.fastbootDevices || [],
         });
@@ -112,9 +113,12 @@ export const DriverManagerPanel: React.FC = () => {
             <Badge tone="info">USB Móvil: {report.mobileUsb.length}</Badge>
             <Badge tone="neutral">ADB: {report.adbDevices.length}</Badge>
             <Badge tone="neutral">Fastboot: {report.fastbootDevices.length}</Badge>
-            <Badge tone={report.problemDevices.length > 0 ? 'warning' : 'success'}>
-              Problemas PnP: {report.problemDevices.length}
+            <Badge tone={report.mobileProblems.length > 0 ? 'warning' : 'success'}>
+              Problemas USB Móvil: {report.mobileProblems.length}
             </Badge>
+            {report.otherProblemsCount > 0 && (
+              <Badge tone="neutral">Otros PC: {report.otherProblemsCount}</Badge>
+            )}
           </div>
           {report.mobileUsb.map((u) => (
             <div key={u.instanceId} className={`p-2 rounded-lg border font-mono text-[10px] ${dark ? 'bg-zinc-900/70 border-zinc-800' : 'bg-slate-50 border-slate-200'}`}>
@@ -122,7 +126,7 @@ export const DriverManagerPanel: React.FC = () => {
               <div className="opacity-70 truncate">{u.instanceId}</div>
             </div>
           ))}
-          {report.problemDevices.map((p) => (
+          {report.mobileProblems.map((p) => (
             <div key={p.instanceId} className={`p-2 rounded-lg border text-[10px] flex items-start gap-2 ${dark ? 'bg-amber-500/5 border-amber-500/20 text-amber-300' : 'bg-amber-50 border-amber-200 text-amber-800'}`}>
               <AlertTriangle size={13} className="shrink-0 mt-0.5" />
               <div className="min-w-0">

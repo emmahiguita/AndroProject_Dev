@@ -39,7 +39,7 @@ export function ConfigView({ addLog: propAddLog }: ConfigViewProps = {}) {
   const log = useCallback(
     (msg: string, type: 'info' | 'success' | 'error' = 'info') => {
       if (propAddLog) propAddLog(msg, type);
-      else storeAddLog(msg, new Date().toLocaleTimeString(), type);
+      else storeAddLog(msg);
     },
     [propAddLog, storeAddLog],
   );
@@ -114,7 +114,7 @@ export function ConfigView({ addLog: propAddLog }: ConfigViewProps = {}) {
           </div>
         </div>
 
-        <DeviceSettingsPanel dark={dark} serial={activeSerial} model={device?.marketName || device?.model} settings={deviceSettings} busyAction={busyAction} onApplySetting={handleApplySetting} />
+        <DeviceSettingsPanel dark={dark} serial={activeSerial || undefined} model={(device as { marketName?: string } | null)?.marketName || device?.model} settings={deviceSettings} busyAction={busyAction} onApplySetting={handleApplySetting} />
 
         {/* Cuadrícula de 2 columnas: Binarios verificados + Red y Accesos */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
