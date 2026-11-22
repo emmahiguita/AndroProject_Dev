@@ -17,10 +17,12 @@ import fs from 'fs';
 const execAsync = promisify(exec);
 
 export function resolveAirPlayDir(): string {
+  const androHome = process.env.ANDROPROJECT_HOME || 'C:\\AndroProject';
   const candidates = [
     path.join(/*turbopackIgnore: true*/ process.cwd(), 'bin', 'airplay'),
     path.join(/*turbopackIgnore: true*/ process.cwd(), 'androproject-gui', 'bin', 'airplay'),
-    'c:\\Users\\emman\\Desktop\\Proyectos\\AndroProject_Dev\\androproject-gui\\bin\\airplay',
+    path.join(androHome, 'Dashboard', 'next-standalone', 'bin', 'airplay'),
+    path.join(androHome, 'bin', 'airplay'),
   ];
   for (const dir of candidates) {
     if (fs.existsSync(path.join(dir, 'AirPlayServer.exe'))) return dir;

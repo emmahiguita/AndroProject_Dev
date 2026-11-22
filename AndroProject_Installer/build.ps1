@@ -43,7 +43,8 @@ if (-not (Test-Path $SourceReleaseDir)) {
 }
 
 New-Item -ItemType Directory -Force -Path $TempDir | Out-Null
-Copy-Item "$SourceReleaseDir\*" "$TempDir\" -Recurse -Force
+Copy-Item "$SourceReleaseDir\*" "$TempDir\" -Recurse -Force -Exclude "-", "*.log", "*.tmp", "*.bak"
+if (Test-Path "$TempDir\-") { Remove-Item -LiteralPath "$TempDir\-" -Force }
 
 # Renombrar los ejecutables y archivos para que digan AndroProject en vez de scrcpy
 $RenameMap = @{
@@ -93,6 +94,11 @@ if (Test-Path "$GuiDir") {
         if (Test-Path "$GuiDir\.next\standalone") {
             New-Item -ItemType Directory -Force -Path "$TempDir\Dashboard\next-standalone" | Out-Null
             Copy-Item "$GuiDir\.next\standalone\*" "$TempDir\Dashboard\next-standalone\" -Recurse -Force
+            # Depurar binarios/archivos pesados no requeridos en runtime dentro del paquete
+            $AirDir = "$TempDir\Dashboard\next-standalone\bin\airplay"
+            if (Test-Path $AirDir) {
+                Remove-Item "$AirDir\uxplay-windows*", "$AirDir\uxplay-bluetooth-beacon.exe", "$AirDir\*.zip", "$AirDir\*.bak" -Force -ErrorAction SilentlyContinue
+            }
         }
     } else {
         Write-Host "      ERROR: No se encontro el binario Tauri compilado en src-tauri\target\release." -ForegroundColor Red
