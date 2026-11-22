@@ -18,7 +18,7 @@ const plusJakartaSans = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "ANDROIS — Control Android & iOS Studio",
+  title: "ANDRO-IOS — Control Android & iOS Studio",
   description: "Control, transmisión, diagnóstico y mantenimiento profesional de dispositivos Android e iOS",
   icons: { icon: "/favicon.png", apple: "/icon.png" },
 };

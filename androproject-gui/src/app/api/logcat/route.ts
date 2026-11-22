@@ -12,7 +12,7 @@
 export const dynamic = 'force-dynamic';
 
 import { NextRequest } from 'next/server';
-import { spawn, exec } from 'child_process';
+import { spawn, execFile } from 'child_process';
 import { promisify } from 'util';
 import { ADB } from '@/lib/config';
 import { isValidDeviceSerial } from '@/lib/security/input-sanitizer';
@@ -20,7 +20,7 @@ import { parseLogcatLine, type LogcatEntry } from './_lib/logcat-parser';
 
 export type { LogcatEntry };
 
-const execAsyncOrig = promisify(exec);
+const execFileAsync = promisify(execFile);
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -70,7 +70,7 @@ export async function GET(req: NextRequest) {
         encoder.encode(`event: connected\ndata: ${JSON.stringify({ serial, status: 'streaming' })}\n\n`),
       );
 
-      execAsyncOrig(`"${ADB}" -s ${serial} shell "dumpsys window | grep -E mCurrentFocus"`, {
+      execFileAsync(ADB, ['-s', serial, 'shell', 'dumpsys window | grep -E mCurrentFocus'], {
         encoding: 'utf8', timeout: 2500, windowsHide: true,
       }).then(({ stdout }) => {
         const match = String(stdout).match(/([a-zA-Z0-9._]+)\/([a-zA-Z0-9._]+)/);

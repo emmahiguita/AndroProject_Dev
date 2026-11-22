@@ -11,7 +11,7 @@
 //           sin condiciones de carrera ni cierres prematuros (< 200L, SOLID).
 // ============================================================================
 
-import { spawn, execFileSync, type ChildProcess } from 'child_process';
+import { spawn, execFile, execFileSync, type ChildProcess } from 'child_process';
 import net from 'net';
 import fs from 'fs';
 import { ADB, SCRCPY_SERVER_PATH } from '@/lib/config';
@@ -24,18 +24,27 @@ interface ActiveSession {
   configPacket: Buffer | null; lastKeyPacket: Buffer | null;
   listeners: Set<(rawFrame: Buffer) => void>;
   readyResolve?: () => void; readyPromise: Promise<void>;
-  idleTimer: ReturnType<typeof setTimeout> | null; destroyed: boolean;
+  idleTimer: ReturnType<typeof setTimeout> | null;
+  retryTimer: ReturnType<typeof setTimeout> | null;
+  destroyed: boolean;
 }
 
 const g = globalThis as unknown as {
   __scrcpySessions?: Map<string, ActiveSession>;
   __scrcpyPushedSerials?: Set<string>;
   __scrcpyNextPort?: number;
+  __scrcpyShutdownHooked?: boolean;
 };
 const sessions = (g.__scrcpySessions ??= new Map<string, ActiveSession>());
 const pushedSerials = (g.__scrcpyPushedSerials ??= new Set<string>());
 if (!g.__scrcpyNextPort) g.__scrcpyNextPort = 27210;
 const REMOTE_JAR = '/data/local/tmp/scrcpy-web.jar';
+
+if (!g.__scrcpyShutdownHooked) {
+  g.__scrcpyShutdownHooked = true;
+  const cleanupAll = () => { for (const serial of Array.from(sessions.keys())) destroySession(serial); };
+  process.once('beforeExit', cleanupAll).once('SIGINT', cleanupAll).once('SIGTERM', cleanupAll);
+}
 
 function allocPort(): number {
   const p = g.__scrcpyNextPort!++;
@@ -47,29 +56,23 @@ function destroySession(serial: string): void {
   const s = sessions.get(serial);
   if (!s || s.destroyed) return;
   s.destroyed = true;
-  if (s.idleTimer) clearTimeout(s.idleTimer);
+  if (s.idleTimer) { clearTimeout(s.idleTimer); s.idleTimer = null; }
+  if (s.retryTimer) { clearTimeout(s.retryTimer); s.retryTimer = null; }
   sessions.delete(serial);
   try { s.videoSock?.destroy(); } catch {}
   try { s.ctrlSock?.destroy(); } catch {}
   try { s.srvProc.kill('SIGKILL'); } catch {}
-  try { execFileSync(ADB, ['-s', serial, 'forward', '--remove', `tcp:${s.port}`], { windowsHide: true, timeout: 1500 }); } catch {}
+  try { execFile(ADB, ['-s', serial, 'forward', '--remove', `tcp:${s.port}`], { windowsHide: true, timeout: 1500 }, () => {}); } catch {}
 }
 
 function startSession(serial: string): ActiveSession {
-  const port = allocPort();
-  const scid = Math.floor(Math.random() * 0x7fffffff).toString(16).padStart(8, '0');
-
+  const port = allocPort(), scid = Math.floor(Math.random() * 0x7fffffff).toString(16).padStart(8, '0');
   if (fs.existsSync(SCRCPY_SERVER_PATH) && !pushedSerials.has(serial)) {
-    try {
-      execFileSync(ADB, ['-s', serial, 'push', SCRCPY_SERVER_PATH, REMOTE_JAR], { windowsHide: true, timeout: 4000 });
-      pushedSerials.add(serial);
-    } catch {
-      try { execFileSync(ADB, ['reconnect', 'offline'], { windowsHide: true, timeout: 2500 }); } catch {}
-    }
+    try { execFileSync(ADB, ['-s', serial, 'push', SCRCPY_SERVER_PATH, REMOTE_JAR], { windowsHide: true, timeout: 4000 }); pushedSerials.add(serial); }
+    catch { try { execFileSync(ADB, ['reconnect', 'offline'], { windowsHide: true, timeout: 2500 }); } catch {} }
   }
-  try {
-    execFileSync(ADB, ['-s', serial, 'forward', `tcp:${port}`, `localabstract:scrcpy_${scid}`], { windowsHide: true, timeout: 3000 });
-  } catch {
+  try { execFileSync(ADB, ['-s', serial, 'forward', `tcp:${port}`, `localabstract:scrcpy_${scid}`], { windowsHide: true, timeout: 3000 }); }
+  catch {
     execFileSync(ADB, ['reconnect', 'offline'], { windowsHide: true, timeout: 2500 });
     execFileSync(ADB, ['-s', serial, 'forward', `tcp:${port}`, `localabstract:scrcpy_${scid}`], { windowsHide: true, timeout: 3000 });
   }
@@ -87,9 +90,13 @@ function startSession(serial: string): ActiveSession {
   const session: ActiveSession = {
     serial, port, srvProc, createdAt: Date.now(), videoSock: null, ctrlSock: null,
     width: 486, height: 1080, configPacket: null, lastKeyPacket: null,
-    listeners: new Set(), readyResolve, readyPromise, idleTimer: null, destroyed: false,
+    listeners: new Set(), readyResolve, readyPromise, idleTimer: null, retryTimer: null, destroyed: false,
   };
-
+  const scheduleConnect = (ms: number) => {
+    if (session.destroyed) return;
+    if (session.retryTimer) clearTimeout(session.retryTimer);
+    session.retryTimer = setTimeout(attemptConnect, ms);
+  };
   let buf: Buffer = Buffer.alloc(0);
   let gotDummy = false;
   let gotHeader = false;
@@ -101,7 +108,6 @@ function startSession(serial: string): ActiveSession {
     connecting = true;
     const vSock = net.createConnection({ host: '127.0.0.1', port });
     vSock.setNoDelay(true);
-
     vSock.on('data', (chunk: Buffer) => {
       buf = buf.length === 0 ? chunk : Buffer.concat([buf, chunk]);
       if (!gotDummy && buf.length >= 1) {
@@ -121,9 +127,7 @@ function startSession(serial: string): ActiveSession {
         session.readyResolve?.();
       }
       while (gotHeader && buf.length >= 12) {
-        const ptsHi = buf.readUInt32BE(0);
-        const ptsLo = buf.readUInt32BE(4);
-        const size = buf.readUInt32BE(8);
+        const ptsHi = buf.readUInt32BE(0), ptsLo = buf.readUInt32BE(4), size = buf.readUInt32BE(8);
         if (size > 8 * 1024 * 1024) { buf = Buffer.alloc(0); break; }
         if (buf.length < 12 + size) break;
         const payload = Buffer.from(buf.subarray(12, 12 + size));
@@ -135,26 +139,22 @@ function startSession(serial: string): ActiveSession {
         for (const fn of session.listeners) { try { fn(framed); } catch {} }
       }
     });
-
-    const handleDisconnect = () => {
-      connecting = false;
-      if (gotDummy) destroySession(serial);
-      else if (!session.destroyed && retries < 60) { retries++; setTimeout(attemptConnect, 80); }
-      else destroySession(serial);
-    };
     vSock.on('error', () => {});
-    vSock.once('close', handleDisconnect);
+    vSock.once('close', () => {
+      connecting = false;
+      if (!gotDummy && !session.destroyed && retries < 60) { retries++; scheduleConnect(80); }
+      else destroySession(serial);
+    });
   };
-
   const onLog = (d: Buffer) => {
     const txt = d.toString();
     if (txt.includes('ClassNotFoundException')) pushedSerials.delete(serial);
-    if (!gotDummy && txt.includes('INFO: Device:')) setTimeout(attemptConnect, 40);
+    if (!gotDummy && txt.includes('INFO: Device:')) scheduleConnect(40);
   };
   srvProc.stdout?.on('data', onLog);
   srvProc.stderr?.on('data', onLog);
   srvProc.on('exit', () => destroySession(serial));
-  setTimeout(attemptConnect, 150);
+  scheduleConnect(150);
 
   sessions.set(serial, session);
   return session;

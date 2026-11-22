@@ -18,7 +18,7 @@ export function isIosStreamSerial(serial: string): boolean {
 }
 
 /** Responde con un stream MJPEG o captura única para iOS sin invocar ADB. */
-export function handleIosDeviceStream(serial: string, mode: string | null, maxFps = 30): Response {
+export function handleIosDeviceStream(serial: string, mode: string | null, maxFps = 30, signal?: AbortSignal): Response {
   if (mode === 'screenshot' || mode === 'single') {
     const frame = airPlayReceiverEngine.getLatestFrame(serial);
     const ct = airPlayReceiverEngine.getLatestFrameContentType();
@@ -29,6 +29,7 @@ export function handleIosDeviceStream(serial: string, mode: string | null, maxFp
 
   const intervalMs = Math.max(33, Math.round(1000 / Math.min(Math.max(maxFps, 5), 30)));
   let timer: ReturnType<typeof setInterval> | null = null;
+  const stopTimer = () => { if (timer) { clearInterval(timer); timer = null; } };
 
   const stream = new ReadableStream<Uint8Array>({
     start(ctrl) {
@@ -40,14 +41,15 @@ export function handleIosDeviceStream(serial: string, mode: string | null, maxFp
           ctrl.enqueue(new Uint8Array(frame.buffer, frame.byteOffset, frame.byteLength));
           ctrl.enqueue(PART_SEP);
         } catch {
-          if (timer) { clearInterval(timer); timer = null; }
+          stopTimer();
         }
       };
       pushFrame();
       timer = setInterval(pushFrame, intervalMs);
+      signal?.addEventListener('abort', stopTimer, { once: true });
     },
     cancel() {
-      if (timer) { clearInterval(timer); timer = null; }
+      stopTimer();
     },
   });
 

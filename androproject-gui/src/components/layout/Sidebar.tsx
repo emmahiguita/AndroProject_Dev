@@ -65,11 +65,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeNav, onSelectNav, collap
         {/* Logo row */}
         <div className={`flex items-center px-3 mb-5 ${collapsed ? 'justify-center' : 'gap-2.5'}`}>
           <div className="w-8 h-8 rounded-lg overflow-hidden border border-zinc-800 shrink-0 bg-zinc-900 flex items-center justify-center ring-1 ring-white/[0.04] hover:scale-105 transition-transform">
-            <img src="/logo.png" alt="ANDROIS Logo" className="w-full h-full object-cover" />
+            <img src="/logo.png" alt="ANDRO-IOS Logo" className="w-full h-full object-cover" />
           </div>
           {!collapsed && (
             <div className="min-w-0">
-              <h1 className={`text-xs font-bold tracking-wider ${isDark ? 'text-zinc-100' : 'text-slate-900'}`}>ANDROIS</h1>
+              <h1 className={`text-xs font-bold tracking-wider ${isDark ? 'text-zinc-100' : 'text-slate-900'}`}>ANDRO-IOS</h1>
               <p className={`text-[10px] font-medium tracking-wider uppercase ${isDark ? 'text-zinc-400' : 'text-slate-600'}`}>Studio</p>
             </div>
           )}

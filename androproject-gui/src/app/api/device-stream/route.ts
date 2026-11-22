@@ -100,6 +100,7 @@ export async function GET(req: NextRequest) {
       serial,
       searchParams.get('mode'),
       parseInt(searchParams.get('maxFps') ?? '30', 10),
+      req.signal,
     );
   }
 
