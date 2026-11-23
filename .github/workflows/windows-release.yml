@@ -45,14 +45,14 @@ jobs:
       - name: Setup Rust stable
         uses: dtolnay/rust-toolchain@stable
 
-      - name: Install & build Next.js standalone
+      - name: Install & build static UI export (out/)
         working-directory: androproject-gui
         run: |
           npm ci
           npm run build
-          New-Item -ItemType Directory -Force -Path ".next\standalone\.next\static", ".next\standalone\public" | Out-Null
-          Copy-Item ".next\static\*" ".next\standalone\.next\static\" -Recurse -Force
-          Copy-Item "public\*" ".next\standalone\public\" -Recurse -Force
+          if (-not (Test-Path "out\index.html")) {
+            throw "Static UI export (out/index.html) was not generated."
+          }
 
       - name: Build Tauri native binary
         working-directory: androproject-gui/src-tauri
