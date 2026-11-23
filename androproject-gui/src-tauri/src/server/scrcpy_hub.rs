@@ -91,7 +91,10 @@ pub async fn get_or_start_session(serial: &str) -> Result<Arc<ScrcpySession>, St
         if let Ok(mut s) = TcpStream::connect(("127.0.0.1", port)).await {
             let _ = s.set_nodelay(true);
             let mut dummy = [0u8; 1];
-            if tokio::time::timeout(Duration::from_millis(450), s.read_exact(&mut dummy)).await.is_ok() {
+            if matches!(
+                tokio::time::timeout(Duration::from_millis(450), s.read_exact(&mut dummy)).await,
+                Ok(Ok(_))
+            ) {
                 v_sock = Some(s);
                 break;
             }

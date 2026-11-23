@@ -18,7 +18,8 @@ use serde_json::{json, Value};
 use std::process::Stdio;
 use std::time::Duration;
 
-use super::paths::{adb_bin, captures_dir, fastboot_bin, home_dir, run_adb, safe_serial, scrcpy_bin, silent_cmd};
+use super::extra_actions::read_live_android_settings;
+use super::paths::{adb_bin, captures_dir, fastboot_bin, home_dir, run_adb, safe_serial, scrcpy_bin, scrcpy_server_path, silent_cmd};
 use super::telemetry::fetch_telemetry;
 
 const TRANSPARENT_PNG_1X1: &[u8] = &[
@@ -34,18 +35,36 @@ pub struct SerialQuery {
     pub serial: Option<String>,
 }
 
-/// `GET /api/config` — Rutas del host y estado de herramientas nativas.
-pub async fn get_config() -> Json<Value> {
+/// `GET /api/config` — Rutas verificadas del host y ajustes en vivo de Android.
+pub async fn get_config(Query(q): Query<SerialQuery>) -> Json<Value> {
+    let adb = adb_bin();
+    let fb = fastboot_bin();
+    let sc = scrcpy_bin();
+    let srv = scrcpy_server_path();
+    let serial = q.serial.as_deref().map(safe_serial).unwrap_or_default();
+    let device_settings = read_live_android_settings(&serial).await;
     Json(json!({
         "success": true,
         "runtime": "rust-native-axum",
+        "version": "v3.3.0-rust",
         "home": home_dir().to_string_lossy(),
-        "adb": adb_bin().to_string_lossy(),
-        "fastboot": fastboot_bin().to_string_lossy(),
-        "streamingEngine": scrcpy_bin().to_string_lossy(),
+        "adb": adb.to_string_lossy(),
+        "fastboot": fb.to_string_lossy(),
+        "streamingEngine": sc.to_string_lossy(),
+        "scrcpyServer": srv.to_string_lossy(),
+        "capturesDir": captures_dir().to_string_lossy(),
         "screenshotsDir": captures_dir().to_string_lossy(),
-        "nodeRequired": false,
-        "pythonRequired": false,
+        "wifiPort": 5555, "apiPort": 3000, "streamingWsPort": 7001, "visionPort": 8000,
+        "nodeRequired": false, "pythonRequired": false,
+        "verified": {
+            "adb": adb.exists(),
+            "fastboot": fb.exists(),
+            "scrcpy": sc.exists(),
+            "scrcpyServer": srv.exists(),
+            "vision": false,
+            "airplay": false,
+        },
+        "deviceSettings": device_settings,
     }))
 }
 

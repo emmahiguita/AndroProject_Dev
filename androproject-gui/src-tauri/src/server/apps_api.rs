@@ -7,14 +7,13 @@
 // POR QUÉ: Gestionar cientos de apps sin procesos Node.js intermedios (< 200L).
 // ============================================================================
 
-use axum::{
-    extract::Multipart,
-    http::StatusCode,
-    response::IntoResponse,
-    Json,
-};
+use axum::{extract::{Multipart, Query}, http::StatusCode, response::IntoResponse, Json};
+use serde::Deserialize;
 use serde_json::{json, Value};
 use std::collections::HashSet;
+
+#[derive(Deserialize)]
+pub struct FileListQuery { pub serial: Option<String>, pub path: Option<String> }
 
 use super::paths::{adb_shell, run_adb, safe_serial};
 
@@ -138,6 +137,29 @@ pub async fn post_install_apk(mut multipart: Multipart) -> impl IntoResponse {
     };
     let _ = tokio::fs::remove_file(&tmp).await;
     (StatusCode::OK, Json(json!({ "success": ok && out.contains("Success"), "message": out.trim(), "error": err })))
+}
+
+/// `GET /api/upload-file?path=...&serial=...` — Lista archivos reales en `/sdcard/...`.
+pub async fn get_upload_file(Query(q): Query<FileListQuery>) -> Json<Value> {
+    let serial = q.serial.as_deref().map(safe_serial).unwrap_or_default();
+    let dir = q.path.as_deref().unwrap_or("/sdcard/Download").trim().replace('\'', "");
+    let (ok, out, err) = adb_shell(&serial, &format!("ls -la '{}'", dir), 6000).await;
+    let mut entries: Vec<Value> = out
+        .lines()
+        .skip(1)
+        .filter_map(|l| {
+            let p: Vec<&str> = l.split_whitespace().collect();
+            if p.len() < 8 { return None; }
+            let name = p[7..].join(" ");
+            if name == "." || name == ".." || name.is_empty() { return None; }
+            Some(json!({ "name": name, "isDir": p[0].starts_with('d'), "size": p[4].parse::<u64>().unwrap_or(0) }))
+        })
+        .collect();
+    entries.sort_by(|a, b| {
+        b["isDir"].as_bool().unwrap_or(false).cmp(&a["isDir"].as_bool().unwrap_or(false))
+            .then_with(|| a["name"].as_str().unwrap_or("").cmp(b["name"].as_str().unwrap_or("")))
+    });
+    Json(json!({ "success": ok, "path": dir, "entries": entries, "error": err }))
 }
 
 /// `POST /api/upload-file` — Recibe archivo multipart y lo sube a `/sdcard/Download/`.

@@ -8,15 +8,7 @@
 // POR QUÉ: Completar el 100% del backend API dentro de ANDRO-IOS.exe (< 200L).
 // ============================================================================
 
-use axum::{
-    extract::Query,
-    http::StatusCode,
-    response::{
-        sse::{Event, KeepAlive, Sse},
-        IntoResponse,
-    },
-    Json,
-};
+use axum::{extract::{Multipart, Query}, http::StatusCode, response::{sse::{Event, KeepAlive, Sse}, IntoResponse}, Json};
 use futures_util::stream::Stream;
 use serde_json::{json, Value};
 use std::convert::Infallible;
@@ -147,34 +139,54 @@ pub async fn get_security_scan(Query(q): Query<SerialQuery>) -> Json<Value> {
     Json(json!({ "success": true, "findings": findings, "scannedCount": pkgs.len() }))
 }
 
-/// `POST /api/flash` — Operaciones Fastboot nativas sin Node.js.
-pub async fn post_flash(Json(body): Json<Value>) -> impl IntoResponse {
-    let action = body["action"].as_str().unwrap_or("devices");
-    let args: Vec<&str> = match action {
-        "devices" => vec!["devices"],
-        "getvar_all" => vec!["getvar", "all"],
+/// `POST /api/flash` — Operaciones Fastboot/ADB vía `multipart/form-data`.
+pub async fn post_flash(mut multipart: Multipart) -> impl IntoResponse {
+    let (mut action, mut serial) = ("check_state".to_string(), String::new());
+    while let Ok(Some(field)) = multipart.next_field().await {
+        let name = field.name().unwrap_or("").to_string();
+        if name == "action" { if let Ok(v) = field.text().await { action = v; } }
+        else if name == "serial" { if let Ok(v) = field.text().await { serial = safe_serial(&v); } }
+    }
+    if action == "check_state" || action == "devices" {
+        let (ok, prod, _) = adb_shell(&serial, "getprop ro.product.model", 3000).await;
+        if ok && !prod.trim().is_empty() {
+            let (_, ver, _) = adb_shell(&serial, "getprop ro.build.version.release", 2500).await;
+            let (_, lock, _) = adb_shell(&serial, "getprop ro.boot.flash.locked", 2500).await;
+            return (StatusCode::OK, Json(json!({
+                "success": true, "state": "adb",
+                "deviceInfo": {
+                    "product": prod.trim(), "serial": serial,
+                    "androidVersion": ver.trim(), "unlocked": lock.trim() == "0",
+                }
+            })));
+        }
+        let mut cmd = silent_cmd(fastboot_bin());
+        cmd.arg("devices").stdout(Stdio::piped()).stderr(Stdio::piped());
+        let out = tokio::time::timeout(Duration::from_secs(3), cmd.output()).await.ok().and_then(|r| r.ok());
+        let txt = out.map(|o| String::from_utf8_lossy(&o.stdout).to_string()).unwrap_or_default();
+        return (StatusCode::OK, Json(json!({
+            "success": !txt.trim().is_empty(),
+            "state": if txt.trim().is_empty() { "disconnected" } else { "fastboot" },
+            "output": txt.trim(),
+        })));
+    }
+    let args: Vec<&str> = match action.as_str() {
         "reboot" => vec!["reboot"],
         "reboot_bootloader" => vec!["reboot-bootloader"],
-        _ => return (StatusCode::BAD_REQUEST, Json(json!({ "success": false, "error": "Acción fastboot no soportada" }))),
+        _ => vec!["devices"],
     };
     let mut cmd = silent_cmd(fastboot_bin());
     cmd.args(&args).stdout(Stdio::piped()).stderr(Stdio::piped());
-    match tokio::time::timeout(Duration::from_secs(6), cmd.output()).await {
-        Ok(Ok(out)) => (
-            StatusCode::OK,
-            Json(json!({
-                "success": out.status.success(),
-                "output": format!("{}{}", String::from_utf8_lossy(&out.stdout), String::from_utf8_lossy(&out.stderr)),
-            })),
-        ),
-        _ => (StatusCode::OK, Json(json!({ "success": false, "error": "Fastboot sin respuesta" }))),
-    }
+    let out = tokio::time::timeout(Duration::from_secs(6), cmd.output()).await.ok().and_then(|r| r.ok());
+    (StatusCode::OK, Json(json!({ "success": out.as_ref().map(|o| o.status.success()).unwrap_or(false) })))
 }
 
-/// `GET/POST /api/ai-cli` — Estado de motores CLI locales desde Rust.
+/// `GET/POST /api/ai-cli` — Estado de motores CLI locales en el contrato exacto de UI.
 pub async fn handle_ai_cli() -> Json<Value> {
     Json(json!({
         "success": true,
+        "ollama": { "online": false, "host": "http://127.0.0.1:11434", "models": [], "binary": false },
+        "clis": { "claude": false, "adb": true, "python": false, "gemini": false, "ollama": false },
         "engines": { "adb": true, "rustNative": true, "ollama": false, "deepseek": false },
         "message": "Motor nativo Rust ADB activo"
     }))

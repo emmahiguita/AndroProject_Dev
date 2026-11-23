@@ -14,6 +14,7 @@ use std::process::Stdio;
 use std::sync::{Mutex, OnceLock};
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
+use super::extra_actions::{handle_get_adb_status, handle_optimizer_query};
 use super::paths::{adb_bin, adb_shell, captures_dir, run_adb, safe_serial, scrcpy_bin, silent_cmd};
 
 static SCREEN_PIDS: OnceLock<Mutex<HashMap<String, u32>>> = OnceLock::new();
@@ -43,6 +44,8 @@ pub async fn post_actions(Json(body): Json<Value>) -> impl IntoResponse {
     let serial = safe_serial(body["serial"].as_str().unwrap_or(""));
 
     match action {
+        "get_adb_status" => json_ok(handle_get_adb_status().await),
+        "get_optimizer_settings" | "get_perf_status" => json_ok(handle_optimizer_query(&serial, action).await),
         "check_screen" => {
             let alive = screen_pids().lock().unwrap().contains_key(&serial);
             json_ok(json!({ "success": true, "alive": alive, "sessions": [] }))

@@ -10,6 +10,7 @@
 pub mod actions_api;
 pub mod apps_api;
 pub mod device_api;
+pub mod extra_actions;
 pub mod paths;
 pub mod scrcpy_api;
 pub mod scrcpy_hub;
@@ -40,7 +41,7 @@ pub fn build_router() -> Router {
         .allow_headers(Any);
 
     let mut router = Router::new()
-        .route("/api/config", get(device_api::get_config))
+        .route("/api/config", get(device_api::get_config).post(extra_actions::post_config))
         .route("/api/device", get(device_api::get_device))
         .route("/api/device-image", get(device_api::get_device_image))
         .route("/api/device-stream", get(device_api::get_device_image))
@@ -50,7 +51,7 @@ pub fn build_router() -> Router {
         .route("/api/apps", post(apps_api::post_apps))
         .route("/api/apps/icon", get(apps_api::get_app_icon))
         .route("/api/install-apk", post(apps_api::post_install_apk))
-        .route("/api/upload-file", post(apps_api::post_upload_file))
+        .route("/api/upload-file", get(apps_api::get_upload_file).post(apps_api::post_upload_file))
         .route("/api/drivers", get(system_api::get_drivers))
         .route("/api/airplay", get(system_api::get_airplay).post(system_api::post_airplay))
         .route("/api/ios", get(system_api::get_ios))
