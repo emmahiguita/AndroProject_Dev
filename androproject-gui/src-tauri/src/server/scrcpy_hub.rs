@@ -57,7 +57,7 @@ pub async fn get_or_start_session(serial: &str) -> Result<Arc<ScrcpySession>, St
     }
 
     let port = alloc_port();
-    let scid = format!("{:08x}", (port as u32 * 2654435761) & 0x7fffffff);
+    let scid = format!("{:08x}", (port as u32).wrapping_mul(2654435761) & 0x7fffffff);
     let srv_jar = scrcpy_server_path();
     if srv_jar.exists() {
         let jar_str = srv_jar.to_string_lossy().to_string();
@@ -114,14 +114,14 @@ pub async fn get_or_start_session(serial: &str) -> Result<Arc<ScrcpySession>, St
         let _ = c.set_nodelay(true);
     }
 
-    // Leer cabecera de scrcpy v4: 64B nombre + 4B codec + 4B width + 4B height
-    let mut hdr = [0u8; 76];
+    // Leer cabecera de scrcpy v4.1: 64B nombre + 4B codec + 4B flags + 4B width + 4B height (80B)
+    let mut hdr = [0u8; 80];
     if v_sock.read_exact(&mut hdr).await.is_err() {
         let _ = srv_child.kill().await;
         return Err("Cabecera de video scrcpy incompleta".to_string());
     }
-    let width = u32::from_be_bytes([hdr[68], hdr[69], hdr[70], hdr[71]]).max(1);
-    let height = u32::from_be_bytes([hdr[72], hdr[73], hdr[74], hdr[75]]).max(1);
+    let width = u32::from_be_bytes([hdr[72], hdr[73], hdr[74], hdr[75]]).max(1);
+    let height = u32::from_be_bytes([hdr[76], hdr[77], hdr[78], hdr[79]]).max(1);
 
     let (tx, _) = broadcast::channel::<Arc<Vec<u8>>>(64);
     let session = Arc::new(ScrcpySession {
@@ -155,8 +155,9 @@ pub async fn get_or_start_session(serial: &str) -> Result<Arc<ScrcpySession>, St
                 break;
             }
             let arc_pkt = Arc::new(packet);
-            let is_config = (pts_flags & (1u64 << 63)) != 0;
-            let is_key = (pts_flags & (1u64 << 62)) != 0;
+            let nal_type = if arc_pkt.len() >= 17 { arc_pkt[16] & 0x1f } else { 0 };
+            let is_config = (pts_flags & (1u64 << 63)) != 0 || nal_type == 7;
+            let is_key = (pts_flags & (1u64 << 62)) != 0 || nal_type == 5;
             if is_config {
                 *sess_bg.config_pkt.lock().await = Some(arc_pkt.clone());
             } else if is_key {
