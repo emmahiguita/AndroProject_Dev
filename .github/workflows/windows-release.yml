@@ -87,26 +87,46 @@ jobs:
           $scrcpy = Join-Path $env:RUNNER_TEMP 'scrcpy-win64-v4.1'
           & '.\AndroProject_Installer\build.ps1' -SkipTauriBuild -ScrcpyReleaseDir $scrcpy
 
-      - name: Upload unsigned installer artifact for SignPath
+      - name: Upload unsigned installer artifact for SignPath (release-signing)
         id: upload-unsigned
-        if: env.HAS_SIGNPATH == 'true'
+        if: env.HAS_SIGNPATH == 'true' && inputs.signpath_test_policy == ''
         uses: actions/upload-artifact@v4
         with:
           name: unsigned-installer
           path: AndroProject_Installer/output/Instalador_ANDRO-IOS.exe
           if-no-files-found: error
 
-      - name: Submit signing request to SignPath.io
-        if: env.HAS_SIGNPATH == 'true'
+      - name: Submit signing request to SignPath.io (GitHub Trusted Build System)
+        if: env.HAS_SIGNPATH == 'true' && inputs.signpath_test_policy == ''
         uses: signpath/github-action-submit-signing-request@v3
         with:
           api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
           organization-id: ${{ secrets.SIGNPATH_ORGANIZATION_ID }}
           project-slug: 'andro-ios'
-          signing-policy-slug: ${{ inputs.signpath_test_policy || 'release-signing' }}
+          signing-policy-slug: 'release-signing'
           github-artifact-id: ${{ steps.upload-unsigned.outputs.artifact-id }}
           wait-for-completion: true
           output-artifact-directory: 'AndroProject_Installer/signed'
+
+      - name: Submit test signing request to SignPath.io (PowerShell API)
+        if: env.HAS_SIGNPATH == 'true' && inputs.signpath_test_policy != ''
+        shell: pwsh
+        env:
+          SIGNPATH_API_TOKEN: ${{ secrets.SIGNPATH_API_TOKEN }}
+          SIGNPATH_ORGANIZATION_ID: ${{ secrets.SIGNPATH_ORGANIZATION_ID }}
+          TEST_POLICY: ${{ inputs.signpath_test_policy }}
+        run: |
+          New-Item -ItemType Directory -Force -Path 'AndroProject_Installer/signed' | Out-Null
+          Install-Module -Name SignPath -Scope CurrentUser -Force -AllowClobber
+          Import-Module SignPath
+          Submit-SigningRequest `
+            -InputArtifactPath 'AndroProject_Installer/output/Instalador_ANDRO-IOS.exe' `
+            -ApiToken $env:SIGNPATH_API_TOKEN `
+            -OrganizationId $env:SIGNPATH_ORGANIZATION_ID `
+            -ProjectSlug 'andro-ios' `
+            -SigningPolicySlug $env:TEST_POLICY `
+            -OutputArtifactPath 'AndroProject_Installer/signed/Instalador_ANDRO-IOS.exe' `
+            -WaitForCompletion
 
       - name: Check installer signature and refresh SHA256SUMS.txt
         if: env.HAS_SIGNPATH == 'true' || env.HAS_PFX == 'true'
