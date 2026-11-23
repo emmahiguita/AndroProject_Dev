@@ -121,10 +121,10 @@ jobs:
           Import-Module SignPath
           Submit-SigningRequest `
             -InputArtifactPath 'AndroProject_Installer/output/Instalador_ANDRO-IOS.exe' `
-            -ApiToken $env:SIGNPATH_API_TOKEN `
-            -OrganizationId $env:SIGNPATH_ORGANIZATION_ID `
+            -ApiToken $env:SIGNPATH_API_TOKEN.Trim() `
+            -OrganizationId $env:SIGNPATH_ORGANIZATION_ID.Trim() `
             -ProjectSlug 'andro-ios' `
-            -SigningPolicySlug $env:TEST_POLICY `
+            -SigningPolicySlug $env:TEST_POLICY.Trim() `
             -OutputArtifactPath 'AndroProject_Installer/signed/Instalador_ANDRO-IOS.exe' `
             -WaitForCompletion
 
