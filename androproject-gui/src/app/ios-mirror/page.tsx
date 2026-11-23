@@ -12,7 +12,7 @@
 'use client';
 import { apiUrl } from '@/lib/api-url';
 
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { Camera, ExternalLink, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { useAirPlayServer } from '@/hooks/useAirPlayServer';

@@ -45,9 +45,9 @@ const variantClasses: Record<ButtonVariant, string> = {
 };
 
 const sizeClasses: Record<ButtonSize, string> = {
-  sm: 'h-9 px-3 text-xs gap-1.5',
-  md: 'h-10 px-4 text-sm gap-2',
-  lg: 'h-12 px-5 text-base gap-2',
+  sm: 'min-h-[2.25rem] px-3 py-1.5 text-xs gap-1.5',
+  md: 'min-h-[2.5rem] px-4 py-2 text-sm gap-2',
+  lg: 'min-h-[3rem] px-5 py-2.5 text-base gap-2',
 };
 
 export function Button({
@@ -68,9 +68,9 @@ export function Button({
       type={type}
       disabled={isDisabled}
       className={cn(
-        'inline-flex select-none items-center justify-center whitespace-nowrap rounded-md font-semibold',
+        'inline-flex min-w-0 select-none items-center justify-center whitespace-normal break-words rounded-md text-center font-semibold leading-tight',
         'transition-colors duration-150 ease-out',
-        'disabled:opacity-65',
+        'disabled:opacity-80',
         variantClasses[variant],
         sizeClasses[size],
         fullWidth && 'w-full',

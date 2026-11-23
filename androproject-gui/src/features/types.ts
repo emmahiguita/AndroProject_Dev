@@ -76,13 +76,6 @@ export type SystemLogs = {
 
 export type NavSection = 'dashboard' | 'projection' | 'apps' | 'flasher' | 'curar' | 'archivos' | 'tools' | 'cli' | 'optimizer' | 'config';
 
-export type QuickActionItem = {
-  id: string;
-  title: string;
-  sub: string;
-  icon: string;
-};
-
 export type AppInfo = {
   packageName: string;
   name: string;
@@ -101,8 +94,6 @@ export type AppInfo = {
   safeToRemove?: boolean;
   criticalSystem?: boolean;
 };
-
-export type AppPackage = AppInfo;
 
 export type DiagnosticsStorage = {
   size?: string;
@@ -135,43 +126,6 @@ export interface GpuTweaks {
   force_gpu: boolean;
   disable_overlays: boolean;
   force_msaa: boolean;
-}
-
-export interface BluetoothInfo {
-  bluetooth_a2dp_codec_selection?: string;
-  bluetooth_a2dp_sample_rate_selection?: string;
-  bluetooth_a2dp_bits_per_sample_selection?: string;
-  bluetooth_a2dp_ldac_playback_quality?: string;
-  bluetooth_disable_absolute_volume?: string;
-}
-
-export interface OptimizerSettings {
-  animScales: AnimScales;
-  dpi: number;
-  gpuTweaks: GpuTweaks;
-  backgroundLimit: string;
-  screenTimeout: string;
-  peakRefreshRate: string;
-  nightMode: string;
-  autoBrightness: boolean;
-  stayAwake: boolean;
-  demoMode: boolean;
-  showTouches: boolean;
-  wifiScanInterval: number;
-  wifiPowerSave: boolean;
-  privateDnsMode: string;
-  privateDnsSpecifier: string;
-  bluetooth: {
-    codec: string;
-    sampleRate: string;
-    bitsPerSample: string;
-    ldacQuality: string;
-    disableAbsoluteVolume: boolean;
-  };
-  shade: {
-    highContrast: boolean;
-    fontScale: string;
-  };
 }
 
 export interface DeviceListItem {

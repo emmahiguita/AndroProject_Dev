@@ -10,6 +10,7 @@
 
 import React from 'react';
 import { Terminal, Cpu, Smartphone, RefreshCw } from 'lucide-react';
+import { engineAvailable } from './cli-suggestions';
 import { Button } from '@/components/ui/Button';
 
 export type InjectorMode = 'claude' | 'ollama' | 'adb' | 'cli';
@@ -47,7 +48,7 @@ export const CliEngineSelector: React.FC<CliEngineSelectorProps> = ({
   const mutedCls = dark ? 'text-zinc-400' : 'text-slate-600';
 
   const tabCls = (active: boolean) =>
-    `px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border ${
+    `px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border disabled:cursor-not-allowed disabled:opacity-70 ${
       active
         ? dark
           ? 'bg-zinc-100 text-zinc-950 border-zinc-100 shadow-sm'
@@ -77,16 +78,16 @@ export const CliEngineSelector: React.FC<CliEngineSelectorProps> = ({
       {/* Pestañas de modo + insignias de detección */}
       <div className="flex flex-wrap items-center justify-between gap-3 pt-1 border-t border-zinc-200/50 dark:border-zinc-800/50">
         <div className="flex flex-wrap items-center gap-1.5">
-          <button type="button" onClick={() => onSelectMode('claude')} className={tabCls(mode === 'claude')}>
+          <button type="button" disabled={!engineAvailable('claude', discovery)} onClick={() => onSelectMode('claude')} className={tabCls(mode === 'claude')}>
             Claude
           </button>
-          <button type="button" onClick={() => onSelectMode('ollama')} className={tabCls(mode === 'ollama')}>
+          <button type="button" disabled={!engineAvailable('ollama', discovery)} onClick={() => onSelectMode('ollama')} className={tabCls(mode === 'ollama')}>
             Ollama / Llama
           </button>
-          <button type="button" onClick={() => onSelectMode('adb')} className={tabCls(mode === 'adb')}>
+          <button type="button" disabled={!engineAvailable('adb', discovery)} onClick={() => onSelectMode('adb')} className={tabCls(mode === 'adb')}>
             ADB Shell
           </button>
-          <button type="button" onClick={() => onSelectMode('cli')} className={tabCls(mode === 'cli')}>
+          <button type="button" disabled={!engineAvailable('cli', discovery)} onClick={() => onSelectMode('cli')} className={tabCls(mode === 'cli')}>
             CLI Sistema
           </button>
         </div>
@@ -123,9 +124,9 @@ export const CliEngineSelector: React.FC<CliEngineSelectorProps> = ({
 
       <div className="flex items-center justify-between pt-1 text-xs">
         <label className={`flex items-center gap-2 cursor-pointer ${mutedCls}`}>
-          <input type="checkbox" checked={includeDevice} onChange={(e) => onToggleIncludeDevice(e.target.checked)} className="rounded" />
+          <input type="checkbox" checked={mode !== 'adb' && includeDevice} disabled={mode === 'adb'} onChange={(e) => onToggleIncludeDevice(e.target.checked)} className="rounded" />
           <Smartphone size={13} />
-          <span>Inyectar contexto y estado del dispositivo al prompt</span>
+          <span>{mode === 'adb' ? 'Las consultas ADB no usan contexto adicional' : 'Inyectar contexto y estado del dispositivo al prompt'}</span>
         </label>
       </div>
     </div>

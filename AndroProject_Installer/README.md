@@ -1,41 +1,29 @@
-# AndroProject - Instalador Oficial
+# Instalador de ANDRO-IOS para Windows
 
-## Estructura de carpetas
+El instalador despliega el dashboard, la interfaz web, ADB y scrcpy en `C:\AndroProject`. El acceso directo **ANDRO-IOS** del escritorio abre `Dashboard\ANDRO-IOS.exe`.
 
+[Consultar los archivos, la firma y las pruebas de la edición del 23 de noviembre](../docs/releases/windows-local-20261123.md).
+
+## Compilar desde el repositorio
+
+En Windows x64, prepara las dependencias de Node.js del proyecto, la herramienta Rust para Windows, las herramientas de compilación de Visual Studio y la distribución de scrcpy compatible. El constructor utiliza IExpress de Windows. Desde la raíz del repositorio ejecuta lo siguiente en PowerShell.
+
+```powershell
+Push-Location androproject-gui
+npm ci
+Pop-Location
+.\AndroProject_Installer\build.ps1 -ScrcpyReleaseDir 'C:\ruta\a\scrcpy-win64-v4.1'
 ```
-AndroProject_Installer/
-├── build.ps1          ← EJECUTAR ESTO para generar el instalador
-├── installer.sed      ← Configuracion de IExpress (no editar)
-├── setup.bat          ← Script que se ejecuta al instalar
-├── src/               ← Scripts de la aplicacion
-│   ├── iniciar_scrcpy_sin_cable.bat
-│   ├── iniciar_scrcpy.bat
-│   ├── iniciar_wifi_magico.bat
-│   └── emparejar_inalambrico.bat
-└── output/            ← Aqui aparece el .exe generado
-    └── Instalador_AndroProject.exe
-```
 
-## Como generar el instalador
+El resultado queda en `AndroProject_Installer/output/Instalador_ANDRO-IOS.exe`. La opción `-SkipTauriBuild` utiliza una exportación y un ejecutable de producción ya compilados.
 
-1. Haz clic derecho en **`build.ps1`**
-2. Selecciona **"Ejecutar con PowerShell"**
-3. Espera a que termine (tarda ~15 segundos)
-4. El instalador aparecera en la carpeta **`output/`**
+## Archivos del constructor
 
-## Que hace el instalador al ejecutarse
-
-1. Pregunta al usuario si desea instalar
-2. Crea la carpeta `C:\AndroProject`
-3. Extrae los binarios de la app (carpetas `x/` y `app/`)
-4. Copia los scripts `.bat`
-5. Crea 3 accesos directos en el Escritorio:
-   - **AndroProject Inalambrico** (uso diario sin cable)
-   - **AndroProject Iniciar Wi-Fi (Cable)** (primera vez o si cambia la IP)
-   - **AndroProject (Cable USB)** (conexion por cable)
-
-## Requisitos del sistema
-
-- Windows 10 / 11
-- ADB instalado en `C:\Users\emman\AppData\Local\Android\Sdk\platform-tools`
-- Celular Oppo con depuracion USB activada
+| Archivo | Función |
+|---|---|
+| `build.ps1` | Prepara el runtime, copia el dashboard y empaqueta la instalación. |
+| `installer.sed` | Define el paquete de IExpress y el punto de entrada de la instalación. |
+| `setup.bat` | Extrae el runtime, copia los lanzadores y crea el acceso directo. |
+| `InstallerSigning.ps1` | Resuelve el certificado configurado y verifica la firma de publicación. |
+| `Sign-LocalArtifact.ps1` | Firma una compilación de prueba con una identidad local protegida por Windows. |
+| `Set-InstallerIcon.ps1` | Aplica el icono antes de firmar el instalador. |

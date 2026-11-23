@@ -10,7 +10,7 @@
 // ============================================================================
 'use client';
 
-import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
+import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { Sliders, Terminal } from 'lucide-react';
 import { useTheme } from '@/hooks/useTheme';
 import { useSplitPanel } from '@/hooks/useSplitPanel';

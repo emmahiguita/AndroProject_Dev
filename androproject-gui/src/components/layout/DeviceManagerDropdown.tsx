@@ -10,7 +10,7 @@
 
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Power, ChevronDown, X, Link2, Unlink, Plus } from 'lucide-react';
 import type { DeviceInfo } from '../../features/types';
 import type { RegisteredDevice } from '../../hooks/useAdbConnection';

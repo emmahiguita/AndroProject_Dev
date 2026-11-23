@@ -11,7 +11,7 @@
 'use client';
 import { apiUrl } from '@/lib/api-url';
 
-import React, { useState, useEffect, useCallback, type ReactNode } from 'react';
+import { useState, useEffect, useCallback, type ReactNode } from 'react';
 import {
   Settings, FolderOpen, HardDrive, Monitor, Zap, Camera,
   Wifi, Globe, Radio, Copy, Check, Wrench, RefreshCw, Terminal, ChevronRight,
