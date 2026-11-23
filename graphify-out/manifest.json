@@ -15,8 +15,8 @@
     "semantic_hash": ""
   },
   "androproject-gui/next.config.ts": {
-    "mtime": 1795394336.0479748,
-    "ast_hash": "ae3ed53d06978dbe79999ddaae495abe",
+    "mtime": 1795394462.8497226,
+    "ast_hash": "8d0fab1cad8dde6cc65f0cfb84405a65",
     "semantic_hash": ""
   },
   "androproject-gui/package.json": {
@@ -895,13 +895,13 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/features/curar/SpywareAuditPanel.tsx": {
-    "mtime": 1795394331.2900665,
+    "mtime": 1795394462.8517578,
     "ast_hash": "5b3d3c7092f4a8220c5c930c5454c88e",
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1795379393.5690184,
-    "ast_hash": "996edfb3d69c7663752d63a6e3fec4f0",
+    "mtime": 1795397434.4007401,
+    "ast_hash": "abfebba0d00e7b87611bc6913dfbae74",
     "semantic_hash": ""
   },
   "docs/ARCHITECTURE_MAP.md": {
@@ -925,7 +925,7 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/features/tools/DriverManagerPanel.tsx": {
-    "mtime": 1795394333.644873,
+    "mtime": 1795394462.8548498,
     "ast_hash": "708ae1901554e3c046a931cab6ba84c7",
     "semantic_hash": ""
   },
@@ -950,8 +950,8 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/components/projection/VisionNanoStudioCard.tsx": {
-    "mtime": 1795367137.5772567,
-    "ast_hash": "0067ba8bea75eb9f2a4e6de0269d12e0",
+    "mtime": 1795397432.6009142,
+    "ast_hash": "fa1fa61c540b21cfa7df6febacabfadb",
     "semantic_hash": ""
   },
   "androproject-gui/src/hooks/useProjectionActions.ts": {
@@ -960,8 +960,8 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/hooks/useProjectionTypes.ts": {
-    "mtime": 1795367137.7063837,
-    "ast_hash": "cf523f627141fd35b1f6d5ef782e4cc5",
+    "mtime": 1795397431.051222,
+    "ast_hash": "f2f19f4f7f78cc8e7fd19aaa01c4869f",
     "semantic_hash": ""
   },
   "androproject-gui/src/hooks/logcatCrashBuilder.ts": {
@@ -1345,8 +1345,8 @@
     "semantic_hash": ""
   },
   "androproject-gui/src-tauri/src/server/actions_api.rs": {
-    "mtime": 1795393270.8855972,
-    "ast_hash": "7a57042d5bdee6853a1fefdb0ed6bc53",
+    "mtime": 1795397385.6782787,
+    "ast_hash": "5fb0c8a0b95e6094423f167456ab53d5",
     "semantic_hash": ""
   },
   "androproject-gui/src-tauri/src/server/apps_api.rs": {
@@ -1375,8 +1375,8 @@
     "semantic_hash": ""
   },
   "androproject-gui/src-tauri/src/server/scrcpy_hub.rs": {
-    "mtime": 1795393270.954462,
-    "ast_hash": "4d51877449701133880c031c2770fdc3",
+    "mtime": 1795395351.149872,
+    "ast_hash": "585d1ff16d970393a8a5538967fd2f3d",
     "semantic_hash": ""
   },
   "androproject-gui/src-tauri/src/server/system_api.rs": {
@@ -1390,8 +1390,8 @@
     "semantic_hash": ""
   },
   "androproject-gui/src-tauri/src/server/extra_actions.rs": {
-    "mtime": 1795393270.950421,
-    "ast_hash": "99a4535c211010746591216fc6d88f7f",
+    "mtime": 1795397362.077258,
+    "ast_hash": "d6a9f038ddef9cc8abf8e755504dac3d",
     "semantic_hash": ""
   },
   "androproject-gui/src-tauri/src/server/telemetry.rs": {
@@ -1400,8 +1400,8 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/features/security-types.ts": {
-    "mtime": 1795394330.0447054,
-    "ast_hash": "86f21efce371da4ca1436f1649b04d7a",
+    "mtime": 1795394462.8530474,
+    "ast_hash": "3f6b2f2cc67ee386cf483de9f9310a59",
     "semantic_hash": ""
   }
 }

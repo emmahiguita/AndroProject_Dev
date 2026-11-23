@@ -19,6 +19,9 @@ export interface ScrcpyOptions {
   alwaysOnTop: boolean;
   borderless: boolean;
   videoSource: 'display' | 'camera';
+  cameraFacing?: 'back' | 'front' | 'external';
+  cameraSize?: string;
+  cameraTorch?: boolean;
   enableAudio?: boolean;
 }
 

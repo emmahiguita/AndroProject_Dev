@@ -12,7 +12,9 @@ use axum::Json;
 use serde_json::{json, Value};
 
 use super::device_api::list_adb_devices;
-use super::paths::{adb_shell, safe_serial};
+use super::paths::{adb_shell, safe_serial, scrcpy_bin, silent_cmd};
+use std::process::Stdio;
+use std::time::Duration;
 
 /// Responde `action: "get_adb_status"` para el indicador superior de ADB.
 pub async fn handle_get_adb_status() -> Value {
@@ -111,4 +113,43 @@ pub async fn post_config(Json(body): Json<Value>) -> Json<Value> {
     };
     let (ok, _, err) = adb_shell(&serial, &cmd, 4000).await;
     Json(json!({ "success": ok, "message": if ok { "Ajuste aplicado" } else { "Error aplicando ajuste" }, "error": err }))
+}
+
+/// Construye argumentos reales de VisionNano / Cámara (Android 12+) para `open_screen`.
+pub fn build_screen_args(serial: &str, body: &Value) -> Vec<String> {
+    let fps = body["maxFps"].as_str().map(|s| s.to_string()).unwrap_or_else(|| body["maxFps"].as_u64().unwrap_or(60).to_string());
+    let size = body["maxSize"].as_str().map(|s| s.to_string()).unwrap_or_else(|| body["maxSize"].as_u64().unwrap_or(1080).to_string());
+    let rate = body["bitRate"].as_str().unwrap_or("16M").to_string();
+    let is_cam = body["videoSource"].as_str() == Some("camera");
+
+    let mut args = vec!["-s".into(), serial.into(), "--video-codec=h264".into(), "-b".into(), rate, "--video-buffer=0".into(), "--no-audio".into(), "--render-driver=direct3d11".into()];
+    if is_cam {
+        args.push("--video-source=camera".into());
+        let facing = body["cameraFacing"].as_str().unwrap_or("back");
+        args.push(format!("--camera-facing={}", facing));
+        if let Some(cs) = body["cameraSize"].as_str().filter(|s| !s.is_empty() && *s != "auto") {
+            args.push(format!("--camera-size={}", cs));
+        }
+        args.push(format!("--camera-fps={}", fps));
+        if body["cameraTorch"].as_bool().unwrap_or(false) { args.push("--camera-torch".into()); }
+    } else {
+        args.push("--max-size".into()); args.push(size);
+        args.push(format!("--max-fps={}", fps));
+    }
+    if body["stayAwake"].as_bool().unwrap_or(true) { args.push("--stay-awake".into()); }
+    if body["turnScreenOff"].as_bool().unwrap_or(false) && !is_cam { args.push("--turn-screen-off".into()); }
+    if body["alwaysOnTop"].as_bool().unwrap_or(false) { args.push("--always-on-top".into()); }
+    if body["borderless"].as_bool().unwrap_or(false) { args.push("--window-borderless".into()); }
+    args
+}
+
+/// Lista dinámicamente las cámaras físicas (trasera, frontal, gran angular) de cualquier Android 12+.
+pub async fn handle_list_cameras(serial: &str) -> Value {
+    if serial.is_empty() { return json!({ "success": false, "cameras": [], "error": "Serial requerido" }); }
+    let mut cmd = silent_cmd(scrcpy_bin());
+    cmd.args(["-s", serial, "--list-cameras"]).stdout(Stdio::piped()).stderr(Stdio::piped());
+    let out = tokio::time::timeout(Duration::from_secs(6), cmd.output()).await.ok().and_then(|r| r.ok());
+    let raw = out.map(|o| format!("{}{}", String::from_utf8_lossy(&o.stdout), String::from_utf8_lossy(&o.stderr))).unwrap_or_default();
+    let cameras: Vec<String> = raw.lines().filter(|l| l.contains("--camera-id=")).map(|l| l.trim().to_string()).collect();
+    json!({ "success": !cameras.is_empty(), "cameras": cameras, "raw": raw.trim() })
 }

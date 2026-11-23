@@ -14,7 +14,7 @@ use std::process::Stdio;
 use std::sync::{Mutex, OnceLock};
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
-use super::extra_actions::{handle_get_adb_status, handle_optimizer_query};
+use super::extra_actions::{build_screen_args, handle_get_adb_status, handle_list_cameras, handle_optimizer_query};
 use super::paths::{adb_bin, adb_shell, captures_dir, run_adb, safe_serial, scrcpy_bin, silent_cmd};
 
 static SCREEN_PIDS: OnceLock<Mutex<HashMap<String, u32>>> = OnceLock::new();
@@ -50,16 +50,14 @@ pub async fn post_actions(Json(body): Json<Value>) -> impl IntoResponse {
             let alive = screen_pids().lock().unwrap().contains_key(&serial);
             json_ok(json!({ "success": true, "alive": alive, "sessions": [] }))
         }
+        "list_cameras" => json_ok(handle_list_cameras(&serial).await),
         "open_screen" => {
             if serial.is_empty() {
                 return (StatusCode::BAD_REQUEST, Json(json!({ "success": false, "error": "Serial requerido" })));
             }
-            let fps = body["maxFps"].as_u64().unwrap_or(60).to_string();
-            let size = body["maxSize"].as_u64().unwrap_or(960).to_string();
-            let rate = body["bitRate"].as_str().unwrap_or("16M").to_string();
+            let args = build_screen_args(&serial, &body);
             let mut cmd = silent_cmd(scrcpy_bin());
-            cmd.args(["-s", &serial, "--video-codec=h264", "-b", &rate, "--max-size", &size, &format!("--max-fps={}", fps), "--video-buffer=0", "--no-audio", "--stay-awake", "--render-driver=direct3d11"])
-                .stdout(Stdio::null()).stderr(Stdio::null());
+            cmd.args(&args).stdout(Stdio::null()).stderr(Stdio::null());
             match cmd.spawn() {
                 Ok(child) => {
                     let pid = child.id().unwrap_or(0);

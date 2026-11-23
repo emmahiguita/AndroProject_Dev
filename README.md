@@ -63,33 +63,31 @@ Inspección en vivo de estado ADB/Fastboot, Slot A/B activo, OEM Unlock, VBMeta,
 
 ---
 
-## Mapa de Arquitectura y Flujos
+## Mapa de Arquitectura y Flujos (100% Rust Backend · Cero Node.js / Cero Python)
 
 ```mermaid
 flowchart LR
-  ANDROID["Android USB / Wi-Fi<br/>scrcpy-server v4.1"] -->|H.264 Zero-Copy SC41| VSTREAM["/api/scrcpy-video"]
-  VSTREAM -->|GPU VideoDecoder| WEBCODECS["WebCodecsCanvas (60 FPS)"]
-  IPHONE["iPhone USB / AirPlay 2"] -->|pymobiledevice3 + AirPlayServer| ISTREAM["/api/device-stream"]
-  WEBCODECS --> GRID["MultiScreenGrid & ProjectionCanvas"]
-  ISTREAM --> GRID
-  GRID -->|Tap / Swipe / APK / IPA| ACTIONS["/api/actions · /api/ios · /api/install-apk"]
-  FLASH["FlasherView + /api/flash"] -->|Fastboot / ADB| BOOT["Bootloader · Slots A/B · Root Check"]
+  ANDROID["Android USB / Wi-Fi<br/>scrcpy-server v4.1"] -->|H.264 SC41 60 FPS| RUST["ANDRO-IOS.exe (Tauri v2 + Axum + Tokio)"]
+  RUST -->|/api/scrcpy-video| WEBCODECS["WebCodecsCanvas (60 FPS GPU)"]
+  RUST -->|/api/scrcpy-control| ANDROID
+  WEBCODECS --> GRID["MultiScreenGrid · Popout · Cámara Android 12+"]
+  RUST -->|/api/actions · /api/apps · /api/upload-file| TOOLS["Apps · Archivos · Optimizador · Logcat SSE"]
+  RUST -->|/api/flash · Fastboot| BOOT["Bootloader · Slots A/B · Root Check"]
 ```
 
 ---
 
-## Explicación de Funciones por Módulo
+## Explicación de Funciones por Módulo (100% Rust Nativo)
 
 | Módulo | Qué hace | Cómo funciona | Archivo |
 |---|---|---|---|
-| **Hub Scrcpy 60 FPS** | Administra streams H.264 paralelos por serial | Asigna puerto/SCID único, evita opciones incompatibles con Exynos | [scrcpy-session-hub.ts](./androproject-gui/src/lib/services/scrcpy-session-hub.ts) |
-| **Stream Binario Zero-Copy** | Envía frames `SC41` al navegador sin clonar buffers | `ReadableStream` con vista `Uint8Array` sobre `Buffer` y backpressure | [scrcpy-video/route.ts](./androproject-gui/src/app/api/scrcpy-video/route.ts) |
+| **Servidor Embebido Rust** | Sirve la UI estática (`www/`, 4.7 MB) y toda la API local en `127.0.0.1:3000` | Axum + Tokio embebido dentro de `ANDRO-IOS.exe` (`0` Node.js, `0` Python, arranque `< 15 ms`) | [mod.rs](./androproject-gui/src-tauri/src/server/mod.rs) · [main.rs](./androproject-gui/src-tauri/src/main.rs) |
+| **Hub Scrcpy 4.1 (60 FPS)** | Administra streams H.264 paralelos por serial e inyección táctil binaria `< 1 ms` | Cabecera `80B` (`scrcpy 4.1`), clasificación NAL SPS/IDR y broadcast Tokio zero-overhead | [scrcpy_hub.rs](./androproject-gui/src-tauri/src/server/scrcpy_hub.rs) · [scrcpy_api.rs](./androproject-gui/src-tauri/src/server/scrcpy_api.rs) |
 | **Player GPU WebCodecs** | Decodifica H.264 hardware a 60 FPS | Lee `avc1.PPCCLL` del SPS y dibuja en `<canvas desynchronized>` | [webcodecs-h264-player.ts](./androproject-gui/src/lib/services/webcodecs-h264-player.ts) |
-| **Visor & Gestos** | Mapea taps, swipes, zoom, wheel y Drag & Drop | Separa matemática, gestos, overlays y carga APK/IPA (`< 200L`) | [ProjectionCanvas.tsx](./androproject-gui/src/components/projection/ProjectionCanvas.tsx) |
-| **Multi-Pantalla** | Proyecta todos los dispositivos físicos en paralelo | Deduplica USB vs Wi-Fi y aísla cada panel con `React.memo` | [MultiScreenGrid.tsx](./androproject-gui/src/components/projection/MultiScreenGrid.tsx) |
-| **Detección & Stream iOS** | Detecta iPhone USB y sirve frames AirPlay 2 | Consulta `pymobiledevice3 usbmux` + `AirPlayServer.exe` | [ios-usb-detector.ts](./androproject-gui/src/lib/services/ios-usb-detector.ts) · [ios-stream-handler.ts](./androproject-gui/src/lib/services/ios-stream-handler.ts) |
-| **Build & Install `.ipa`** | Compila `.ipa` en macOS Cloud e instala por USB | Workflow `macos-latest` + `pymobiledevice3 apps install` | [ios-build.yml](./.github/workflows/ios-build.yml) · [ios-ipa-installer.ts](./androproject-gui/src/lib/services/ios-ipa-installer.ts) |
-| **Flasheador & Root** | Inspecciona Bootloader, Slot A/B, OEM, `su`/Magisk y flashea | Ejecuta `adb`/`fastboot`, protege particiones críticas y bloquea seriales iOS | [FlasherView.tsx](./androproject-gui/src/features/FlasherView.tsx) · [flash-device-inspector.ts](./androproject-gui/src/lib/services/flash-device-inspector.ts) |
+| **Telemetría Kernel Real** | Lee CPU, RAM, almacenamiento, batería, temperatura y VBMeta | Lote único `adb shell` con `CREATE_NO_WINDOW` | [telemetry.rs](./androproject-gui/src-tauri/src/server/telemetry.rs) · [device_api.rs](./androproject-gui/src-tauri/src/server/device_api.rs) |
+| **Cámara Universal Android 12+ & VisionNano** | Configura cámara de cualquier celular (lente trasera/frontal/externa, resolución, FPS, linterna) y pantalla externa sin CMD | Flags `--video-source=camera`, `--camera-facing`, `--camera-size`, `--camera-torch`, `--list-cameras` + `Subsystem 2 GUI` | [extra_actions.rs](./androproject-gui/src-tauri/src/server/extra_actions.rs) · [VisionNanoStudioCard.tsx](./androproject-gui/src/components/projection/VisionNanoStudioCard.tsx) |
+| **Apps, Archivos & Logcat SSE** | Lista/desinstala apps, explora `/sdcard`, instala APK y transmite Logcat en vivo | `POST /api/apps`, `GET/POST /api/upload-file`, `GET /api/logcat` SSE nativo en Rust | [apps_api.rs](./androproject-gui/src-tauri/src/server/apps_api.rs) · [system_api.rs](./androproject-gui/src-tauri/src/server/system_api.rs) |
+| **Flasheador & Seguridad** | Inspecciona Bootloader/ADB/Fastboot, escaneo heurístico anti-spyware y comandos seguros | `POST /api/flash` (multipart), `GET /api/security-scan` y filtro anti-`rm -rf /` (`403`) | [actions_api.rs](./androproject-gui/src-tauri/src/server/actions_api.rs) · [FlasherView.tsx](./androproject-gui/src/features/FlasherView.tsx) |
 
 ---
 

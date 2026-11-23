@@ -152,10 +152,37 @@ export const VisionNanoStudioCard: React.FC<VisionNanoStudioCardProps> = ({
         />
         <ToggleRow
           dark={dark} icon={<Camera size={12} className="text-zinc-400" />}
-          label="Transmitir Cámara Trasera" description="Usa el sensor de cámara en lugar de la pantalla"
+          label="Transmitir Cámara del Celular (Android 12+)" description="Usa el sensor de cámara real con lente, resolución y linterna"
           checked={scrcpyOptions.videoSource === 'camera'} disabled={isBusy}
           onChange={(checked) => updateOpt({ videoSource: checked ? 'camera' : 'display' })}
         />
+        {scrcpyOptions.videoSource === 'camera' && (
+          <div className="grid grid-cols-3 gap-2 pt-1 pl-1">
+            <div>
+              <label className={labelCls}>Lente</label>
+              <select value={scrcpyOptions.cameraFacing || 'back'} onChange={(e) => updateOpt({ cameraFacing: e.target.value as 'back' | 'front' | 'external' })} disabled={isBusy} className={selectCls}>
+                <option value="back">Trasera</option>
+                <option value="front">Frontal</option>
+                <option value="external">Externa</option>
+              </select>
+            </div>
+            <div>
+              <label className={labelCls}>Resolución Cam</label>
+              <select value={scrcpyOptions.cameraSize || 'auto'} onChange={(e) => updateOpt({ cameraSize: e.target.value })} disabled={isBusy} className={selectCls}>
+                <option value="auto">Automática</option>
+                <option value="1920x1080">1920×1080</option>
+                <option value="1280x720">1280×720</option>
+              </select>
+            </div>
+            <div>
+              <label className={labelCls}>Linterna</label>
+              <select value={scrcpyOptions.cameraTorch ? 'on' : 'off'} onChange={(e) => updateOpt({ cameraTorch: e.target.value === 'on' })} disabled={isBusy} className={selectCls}>
+                <option value="off">Apagada</option>
+                <option value="on">Encendida</option>
+              </select>
+            </div>
+          </div>
+        )}
         {onToggleAutoProject && (
           <ToggleRow
             dark={dark} icon={<Zap size={12} className="text-zinc-400" />}
