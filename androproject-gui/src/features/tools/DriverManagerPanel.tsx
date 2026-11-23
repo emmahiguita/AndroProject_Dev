@@ -15,7 +15,7 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Badge } from '@/components/ui/Badge';
 import { useTheme } from '@/hooks/useTheme';
-import type { DriverScanReport } from '@/lib/services/driver-manager';
+import type { DriverScanReport } from '@/features/security-types';
 
 interface DriverManagerPanelProps {
   onLog?: (msg: string, type?: 'info' | 'success' | 'error') => void;

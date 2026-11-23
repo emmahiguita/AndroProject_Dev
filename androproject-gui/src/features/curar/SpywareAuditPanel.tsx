@@ -15,7 +15,7 @@ import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { useTheme } from '@/hooks/useTheme';
-import type { SpywareFinding } from '@/lib/services/spyware-heuristic-scanner';
+import type { SpywareFinding } from '@/features/security-types';
 
 type RemediationKind =
   | 'revoke_overlay'
