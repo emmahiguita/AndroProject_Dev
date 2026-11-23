@@ -190,5 +190,10 @@ pub fn rust_app_action_fast(
         "clear_data" => vec!["shell", "pm", "clear", pkg],
         _ => return Err("Acción no soportada".into()),
     };
-    run_adb_args(&serial, &args)
+    // El proceso puede terminar con código cero y devolver "Failure" o "Error".
+    let output = run_adb_args(&serial, &args)?;
+    if has_adb_error(&output) || (matches!(action.trim(), "uninstall" | "clear_data") && !output.contains("Success")) {
+        return Err(if output.trim().is_empty() { "ADB no confirmó la operación".into() } else { output.trim().into() });
+    }
+    Ok(output)
 }

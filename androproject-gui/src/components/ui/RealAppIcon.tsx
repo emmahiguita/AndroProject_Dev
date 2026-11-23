@@ -11,7 +11,8 @@
 
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { apiUrl } from '@/lib/api-url';
 
 interface RealAppIconProps {
   packageName: string;
@@ -29,8 +30,17 @@ export function RealAppIcon({
   sizeClass = 'w-7 h-7',
 }: RealAppIconProps) {
   const [failed, setFailed] = useState(false);
+  const [source, setSource] = useState<string | null>(null);
 
-  if (failed || !packageName) {
+  // La URL se decide en el cliente para evitar diferencias con el render estático.
+  useEffect(() => {
+    const query = new URLSearchParams({ package: packageName });
+    if (serial && serial !== 'Hardware Level') query.set('serial', serial);
+    setFailed(false);
+    setSource(apiUrl(`/api/apps/icon?${query.toString()}`));
+  }, [packageName, serial]);
+
+  if (failed || !packageName || !source) {
     return (
       <div
         className={`${sizeClass} rounded-lg flex items-center justify-center text-white text-[10px] font-bold shrink-0`}
@@ -41,12 +51,9 @@ export function RealAppIcon({
     );
   }
 
-  const query = new URLSearchParams({ package: packageName });
-  if (serial && serial !== 'Hardware Level') query.set('serial', serial);
-
   return (
     <img
-      src={`/api/apps/icon?${query.toString()}`}
+      src={source}
       alt={appName}
       loading="lazy"
       onError={() => setFailed(true)}

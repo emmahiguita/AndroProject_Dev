@@ -7,6 +7,7 @@
 // POR QUÉ: Desacoplar la física de gestos del renderizado visual (SRP, < 200L).
 // ============================================================================
 'use client';
+import { apiUrl } from '@/lib/api-url';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
@@ -59,7 +60,7 @@ export function useProjectionGestures({
   }, []);
 
   const postTouch = useCallback((payload: Record<string, unknown>) => {
-    fetch('/api/actions', {
+    fetch(apiUrl('/api/actions'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),

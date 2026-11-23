@@ -8,17 +8,31 @@
 // ============================================================================
 
 pub mod actions_api;
+pub mod airplay_process;
 pub mod apps_api;
+pub mod apk_extract;
+pub mod cli_api;
+pub mod capture_diagnostics;
 pub mod device_api;
+pub mod developer_actions;
+pub mod driver_actions;
+pub mod driver_scan;
 pub mod extra_actions;
+pub mod file_operations_api;
+pub mod flasher_actions;
+pub mod flash_image_api;
+pub mod optimizer_actions;
+pub mod origin_guard;
 pub mod paths;
 pub mod scrcpy_api;
 pub mod scrcpy_hub;
+pub mod screen_process;
 pub mod system_api;
 pub mod telemetry;
+pub mod transfer_api;
 
 use axum::{
-    routing::{get, post},
+    routing::{any, get, post},
     Router,
 };
 use std::net::SocketAddr;
@@ -36,7 +50,12 @@ pub fn build_router() -> Router {
     let camera_html = www.join("camera.html");
 
     let cors = CorsLayer::new()
-        .allow_origin(Any)
+        // CORS restringe la lectura; check_origin también bloquea peticiones simples.
+        .allow_origin([
+            "http://127.0.0.1:3000".parse().unwrap(), "http://localhost:3000".parse().unwrap(),
+            "http://tauri.localhost".parse().unwrap(), "https://tauri.localhost".parse().unwrap(),
+            "tauri://localhost".parse().unwrap(),
+        ])
         .allow_methods(Any)
         .allow_headers(Any);
 
@@ -50,15 +69,23 @@ pub fn build_router() -> Router {
         .route("/api/actions", post(actions_api::post_actions))
         .route("/api/apps", post(apps_api::post_apps))
         .route("/api/apps/icon", get(apps_api::get_app_icon))
-        .route("/api/install-apk", post(apps_api::post_install_apk))
-        .route("/api/upload-file", get(apps_api::get_upload_file).post(apps_api::post_upload_file))
-        .route("/api/drivers", get(system_api::get_drivers))
+        .route("/api/install-apk", post(transfer_api::install).layer(axum::extract::DefaultBodyLimit::max(512 * 1024 * 1024)))
+        .route("/api/upload-file", get(apps_api::get_upload_file).post(transfer_api::upload).layer(axum::extract::DefaultBodyLimit::max(512 * 1024 * 1024)))
+        .route("/api/device-file/download", post(file_operations_api::download))
+        .route("/api/device-file/delete", post(file_operations_api::delete))
+        .route("/api/drivers", get(system_api::get_drivers).post(driver_actions::run))
         .route("/api/airplay", get(system_api::get_airplay).post(system_api::post_airplay))
         .route("/api/ios", get(system_api::get_ios))
         .route("/api/logcat", get(system_api::get_logcat))
         .route("/api/security-scan", get(system_api::get_security_scan))
         .route("/api/flash", post(system_api::post_flash))
-        .route("/api/ai-cli", get(system_api::handle_ai_cli).post(system_api::handle_ai_cli));
+        .route("/api/flash-image", post(flash_image_api::run).layer(axum::extract::DefaultBodyLimit::max(8_usize * 1024 * 1024 * 1024)))
+        .route("/api/ai-cli", get(cli_api::discover).post(cli_api::execute));
+
+    // Una API inexistente debe responder 404, no la página HTML de inicio.
+    router = router.route("/api/*path", any(|| async {
+        (axum::http::StatusCode::NOT_FOUND, axum::Json(serde_json::json!({ "success": false, "error": "Ruta API no implementada" })))
+    }));
 
     if popout_html.exists() {
         router = router.route_service("/popout", ServeFile::new(popout_html));
@@ -71,7 +98,13 @@ pub fn build_router() -> Router {
     }
 
     let static_service = ServeDir::new(&www).not_found_service(ServeFile::new(index_html));
-    router.fallback_service(static_service).layer(cors)
+    router.fallback_service(static_service).layer(cors).layer(axum::middleware::from_fn(origin_guard::check_origin))
+}
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn router_accepts_api_fallback() { let _ = super::build_router(); }
 }
 
 /// Inicia el servidor HTTP 100% Rust en un hilo dedicado Tokio sobre 127.0.0.1:3000.

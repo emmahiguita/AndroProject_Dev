@@ -3,6 +3,7 @@
  */
 
 'use client';
+import { apiUrl } from '@/lib/api-url';
 
 import { useState, useEffect, useCallback } from 'react';
 import type { AirPlayServerStatus } from '@/features/types';
@@ -22,12 +23,11 @@ export function useAirPlayServer() {
 
   const fetchStatus = useCallback(async () => {
     try {
-      const res = await fetch('/api/airplay');
+      const res = await fetch(apiUrl('/api/airplay'));
       if (!res.ok) return;
       const data = await res.json();
-      if (data.success && data.status) {
-        setStatus(data.status);
-      }
+      if (data.status) setStatus(data.status);
+      setError(data.success ? null : (data.error || 'Receptor AirPlay no disponible'));
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
       setError(msg);
@@ -48,7 +48,7 @@ export function useAirPlayServer() {
     setError(null);
     try {
       const action = status.running ? 'stop' : 'start';
-      const res = await fetch('/api/airplay', {
+      const res = await fetch(apiUrl('/api/airplay'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -75,7 +75,7 @@ export function useAirPlayServer() {
 
   const setServerName = useCallback(async (name: string) => {
     try {
-      const res = await fetch('/api/airplay', {
+      const res = await fetch(apiUrl('/api/airplay'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'set_name', name }),
@@ -87,7 +87,7 @@ export function useAirPlayServer() {
 
   const setPin = useCallback(async (pin: string) => {
     try {
-      const res = await fetch('/api/airplay', {
+      const res = await fetch(apiUrl('/api/airplay'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'set_pin', pin }),

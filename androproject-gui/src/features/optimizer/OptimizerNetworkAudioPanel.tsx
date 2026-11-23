@@ -9,6 +9,7 @@
 // POR QUÉ: Eliminar todos los setters y endpoints huérfanos de `optimizerSlice` (<200L).
 // ============================================================================
 'use client';
+import { apiUrl } from '@/lib/api-url';
 
 import React, { useState } from 'react';
 import { Wifi, Globe, Radio, Volume2, Bell, Play, Square } from 'lucide-react';
@@ -35,7 +36,7 @@ export const OptimizerNetworkAudioPanel: React.FC<OptimizerNetworkAudioPanelProp
     if (!serial) { addLog('Conecta un dispositivo Android por ADB.', 'error'); return null; }
     setBusy(true);
     try {
-      const r = await fetch('/api/actions', {
+      const r = await fetch(apiUrl('/api/actions'), {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action, serial, ...payload }),
       });
@@ -77,7 +78,7 @@ export const OptimizerNetworkAudioPanel: React.FC<OptimizerNetworkAudioPanelProp
                 { id: 'family', label: 'Familiar' },
                 { id: 'nonfiltering', label: 'Sin Filtro' },
               ] as { id: AdguardProfile; label: string }[]).map((p) => (
-                <button key={p.id} type="button" disabled={!serial || busy} onClick={() => { s.setAdguardProfile(p.id); postAction('set_adguard_dns', { profile: p.id }); }} className={chipCls(s.adguardProfile === p.id)}>{p.label}</button>
+                <button key={p.id} type="button" disabled={!serial || busy} onClick={() => { void postAction('set_adguard_dns', { profile: p.id }).then((d) => { if (d?.success) s.setAdguardProfile(p.id); }); }} className={chipCls(s.adguardProfile === p.id)}>{p.label}</button>
               ))}
             </div>
           </div>
@@ -86,8 +87,8 @@ export const OptimizerNetworkAudioPanel: React.FC<OptimizerNetworkAudioPanelProp
             <span className="text-xs font-semibold">DNS Privado Personalizado ({s.privateDnsMode})</span>
             <div className="flex flex-wrap items-center gap-1.5">
               <input type="text" placeholder="dns.google / one.one.one.one" value={s.privateDnsSpecifier} onChange={(e) => s.setPrivateDnsSpecifier(e.target.value)} className={inputCls} />
-              <button type="button" disabled={!serial || busy || !s.privateDnsSpecifier.trim()} onClick={() => { s.setPrivateDnsMode('hostname'); postAction('set_private_dns', { mode: 'hostname', hostname: s.privateDnsSpecifier.trim() }); }} className={chipCls(s.privateDnsMode === 'hostname')}>Aplicar Host</button>
-              <button type="button" disabled={!serial || busy} onClick={() => { s.setPrivateDnsMode('automatic'); postAction('set_private_dns', { mode: 'automatic' }); }} className={chipCls(s.privateDnsMode === 'automatic')}>Auto</button>
+              <button type="button" disabled={!serial || busy || !s.privateDnsSpecifier.trim()} onClick={() => { void postAction('set_private_dns', { mode: 'hostname', hostname: s.privateDnsSpecifier.trim() }).then((d) => { if (d?.success) s.setPrivateDnsMode('hostname'); }); }} className={chipCls(s.privateDnsMode === 'hostname')}>Aplicar Host</button>
+              <button type="button" disabled={!serial || busy} onClick={() => { void postAction('set_private_dns', { mode: 'automatic' }).then((d) => { if (d?.success) s.setPrivateDnsMode('automatic'); }); }} className={chipCls(s.privateDnsMode === 'automatic')}>Auto</button>
             </div>
           </div>
         </Card>
@@ -99,13 +100,13 @@ export const OptimizerNetworkAudioPanel: React.FC<OptimizerNetworkAudioPanelProp
               <span className="text-xs font-semibold">Intervalo escaneo Wi-Fi</span>
               <div className="flex gap-1">
                 {[{ label: 'Sin límite', ms: 0 }, { label: '15s', ms: 15000 }, { label: '30s', ms: 30000 }, { label: '60s', ms: 60000 }].map((i) => (
-                  <button key={i.ms} type="button" disabled={!serial || busy} onClick={() => { s.setWifiScanInterval(i.ms); postAction('set_wifi_scan_interval', { interval: i.ms }); }} className={chipCls(s.wifiScanInterval === i.ms)}>{i.label}</button>
+                  <button key={i.ms} type="button" disabled={!serial || busy} onClick={() => { postAction('set_wifi_scan_interval', { interval: i.ms }); }} className={chipCls(s.wifiScanInterval === i.ms)}>{i.label}</button>
                 ))}
               </div>
             </div>
             <div className={rowCls}>
               <span className="text-xs font-semibold">Ahorro de energía Wi-Fi</span>
-              <button type="button" disabled={!serial || busy} onClick={() => { const next = !s.wifiPowerSave; s.setWifiPowerSave(next); postAction('set_wifi_power_save', { enabled: next }); }} className={chipCls(s.wifiPowerSave)}>
+              <button type="button" disabled={!serial || busy} onClick={() => { const next = !s.wifiPowerSave; postAction('set_wifi_power_save', { enabled: next }); }} className={chipCls(s.wifiPowerSave)}>
                 {s.wifiPowerSave ? 'ACTIVO' : 'INACTIVO'}
               </button>
             </div>
@@ -120,7 +121,7 @@ export const OptimizerNetworkAudioPanel: React.FC<OptimizerNetworkAudioPanelProp
             <Button size="sm" variant="secondary" disabled={!serial || busy || !s.dnsTunnelDomain || !s.dnsTunnelKey} onClick={() => postAction('dns_tunnel_setup', { domain: s.dnsTunnelDomain, key: s.dnsTunnelKey })}>Configurar</Button>
             <Button size="sm" icon={<Play size={12} />} disabled={!serial || busy} onClick={async () => { const d = await postAction('dns_tunnel_start'); if (d?.success) { s.setDnsTunnelRunning(true); s.setDnsTunnelProxy('127.0.0.1:2080'); } }}>Iniciar</Button>
             <Button size="sm" variant="secondary" icon={<Square size={12} />} disabled={!serial || busy} onClick={async () => { const d = await postAction('dns_tunnel_stop'); if (d?.success) { s.setDnsTunnelRunning(false); s.setDnsTunnelProxy(':0'); } }}>Detener</Button>
-            <Button size="sm" variant="secondary" disabled={!serial || busy} onClick={async () => { const d = await postAction('dns_tunnel_status'); if (d) { s.setDnsTunnelRunning(Boolean(d.running)); s.setDnsTunnelProxy(d.proxy || ''); } }}>Estado</Button>
+            <Button size="sm" variant="secondary" disabled={!serial || busy} onClick={async () => { const d = await postAction('dns_tunnel_status'); if (d?.success) { s.setDnsTunnelRunning(Boolean(d.running)); s.setDnsTunnelProxy(d.proxy || ''); } }}>Estado</Button>
           </div>
           <p className="text-[11px] font-mono text-text-secondary">
             Estado: <strong>{s.dnsTunnelRunning ? 'EN EJECUCIÓN' : 'DETENIDO'}</strong> · Proxy: <strong>{s.dnsTunnelProxy || 'ninguno'}</strong>
@@ -138,7 +139,7 @@ export const OptimizerNetworkAudioPanel: React.FC<OptimizerNetworkAudioPanelProp
           <span className="text-xs font-semibold">Códec de audio Bluetooth</span>
           <div className="flex flex-wrap gap-1">
             {(['sbc', 'aac', 'aptx', 'aptx_hd', 'ldac', 'lhdc'] as const).map((c) => (
-              <button key={c} type="button" disabled={!serial || busy} onClick={() => { s.setBluetoothInfo((p) => ({ ...p, codec: c })); postAction('set_bluetooth_codec', { codec: c }); }} className={chipCls(s.bluetoothInfo.codec === c)}>{c.toUpperCase()}</button>
+              <button key={c} type="button" disabled={!serial || busy} onClick={() => { postAction('set_bluetooth_codec', { codec: c }); }} className={chipCls(s.bluetoothInfo.codec === c)}>{c.toUpperCase()}</button>
             ))}
           </div>
         </div>
@@ -149,7 +150,6 @@ export const OptimizerNetworkAudioPanel: React.FC<OptimizerNetworkAudioPanelProp
             disabled={!serial || busy}
             onClick={() => {
               const dis = s.bluetoothInfo.disableAbsoluteVolume === 'true' ? '0' : '1';
-              s.setBluetoothInfo((p) => ({ ...p, disableAbsoluteVolume: dis === '1' ? 'true' : 'false' }));
               postAction('set_bluetooth_absolute_volume', { disable: dis });
             }}
             className={chipCls(s.bluetoothInfo.disableAbsoluteVolume === 'true')}
@@ -164,31 +164,31 @@ export const OptimizerNetworkAudioPanel: React.FC<OptimizerNetworkAudioPanelProp
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
           <div className={rowCls}>
             <span className="text-xs font-semibold">Texto de alto contraste</span>
-            <button type="button" disabled={!serial || busy} onClick={() => { const next = !s.shadeHighContrast; s.setShadeHighContrast(next); postAction('set_shade_style', { highContrast: next }); }} className={chipCls(s.shadeHighContrast)}>{s.shadeHighContrast ? 'ACTIVO' : 'NORMAL'}</button>
+            <button type="button" disabled={!serial || busy} onClick={() => { const next = !s.shadeHighContrast; postAction('set_shade_style', { highContrast: next }); }} className={chipCls(s.shadeHighContrast)}>{s.shadeHighContrast ? 'ACTIVO' : 'NORMAL'}</button>
           </div>
           <div className={rowCls}>
             <span className="text-xs font-semibold">Reducir desenfoque del panel (Sin Blur)</span>
-            <button type="button" disabled={!serial || busy} onClick={() => { const next = !s.shadeReduceBlur; s.setShadeReduceBlur(next); postAction('set_shade_style', { reduceBlur: next }); }} className={chipCls(s.shadeReduceBlur)}>{s.shadeReduceBlur ? 'SIN BLUR' : 'CON BLUR'}</button>
+            <button type="button" disabled={!serial || busy} onClick={() => { const next = !s.shadeReduceBlur; postAction('set_shade_style', { reduceBlur: next }); }} className={chipCls(s.shadeReduceBlur)}>{s.shadeReduceBlur ? 'SIN BLUR' : 'CON BLUR'}</button>
           </div>
           <div className={rowCls}>
             <span className="text-xs font-semibold">Tipografía resaltada (Escala 1.1x)</span>
-            <button type="button" disabled={!serial || busy} onClick={() => { const next = !s.shadeBoldText; s.setShadeBoldText(next); postAction('set_shade_style', { boldText: next }); }} className={chipCls(s.shadeBoldText)}>{s.shadeBoldText ? '1.1x ACTIVO' : '1.0x ESTÁNDAR'}</button>
+            <button type="button" disabled={!serial || busy} onClick={() => { const next = !s.shadeBoldText; postAction('set_shade_style', { boldText: next }); }} className={chipCls(s.shadeBoldText)}>{s.shadeBoldText ? '1.1x ACTIVO' : '1.0x ESTÁNDAR'}</button>
           </div>
           <div className={rowCls}>
             <span className="text-xs font-semibold">Modo Noche / Tema Oscuro del Sistema</span>
             <div className="flex gap-1">
               {[{ id: '1', label: 'Claro' }, { id: '2', label: 'Oscuro' }, { id: '0', label: 'Auto' }].map((m) => (
-                <button key={m.id} type="button" disabled={!serial || busy} onClick={() => { s.setNightMode(m.id); postAction('set_night_mode', { mode: m.id }); }} className={chipCls(s.nightMode === m.id)}>{m.label}</button>
+                <button key={m.id} type="button" disabled={!serial || busy} onClick={() => { void postAction('set_night_mode', { mode: m.id }).then((d) => { if (d?.success) s.setNightMode(m.id); }); }} className={chipCls(s.nightMode === m.id)}>{m.label}</button>
               ))}
             </div>
           </div>
           <div className={rowCls}>
             <span className="text-xs font-semibold">Brillo automático adaptativo</span>
-            <button type="button" disabled={!serial || busy} onClick={() => { const next = !s.autoBrightness; s.setAutoBrightness(next); postAction('set_auto_brightness', { enabled: next }); }} className={chipCls(s.autoBrightness)}>{s.autoBrightness ? 'AUTO ON' : 'MANUAL'}</button>
+            <button type="button" disabled={!serial || busy} onClick={() => { const next = !s.autoBrightness; void postAction('set_auto_brightness', { enabled: next }).then((d) => { if (d?.success) s.setAutoBrightness(next); }); }} className={chipCls(s.autoBrightness)}>{s.autoBrightness ? 'AUTO ON' : 'MANUAL'}</button>
           </div>
           <div className={rowCls}>
             <span className="text-xs font-semibold">Animaciones rápidas del panel</span>
-            <button type="button" disabled={!serial || busy} onClick={() => { const next = !s.shadeFastAnims; s.setShadeFastAnims(next); postAction('set_shade_style', { animationsFast: next, solidTheme: s.shadeSolidTheme }); }} className={chipCls(s.shadeFastAnims)}>{s.shadeFastAnims ? '0.5x RÁPIDO' : '1.0x NORMAL'}</button>
+            <button type="button" disabled={!serial || busy} onClick={() => { const next = !s.shadeFastAnims; postAction('set_shade_style', { animationsFast: next, solidTheme: s.shadeSolidTheme }); }} className={chipCls(s.shadeFastAnims)}>{s.shadeFastAnims ? '0.5x RÁPIDO' : '1.0x NORMAL'}</button>
           </div>
         </div>
       </Card>

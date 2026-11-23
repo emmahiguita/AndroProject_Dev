@@ -1,15 +1,13 @@
 // ============================================================================
 // ARCHIVO: DeviceFileBrowser.tsx
-// QUÉ HACE: Explorador bidireccional de archivos Android (`/sdcard/...`) que
-//           permite navegar carpetas, descargar archivos al PC (`adb pull`)
-//           y eliminar archivos del dispositivo (`rm -f`).
-// CÓMO FUNCIONA: Consulta `GET /api/upload-file?path=...&serial=...` y
-//           despacha descargas o borrados con confirmación explícita.
+// QUÉ HACE: Explora, descarga y elimina archivos Android mediante ADB.
+// CÓMO FUNCIONA: Consulta carpetas y envía operaciones con el serial seleccionado.
 // POR QUÉ: Completar la lógica faltante Android → PC en `ArchivosView` (< 200L).
 // ============================================================================
 'use client';
+import { apiUrl } from '@/lib/api-url';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Folder, FileText, Download, Trash2, RefreshCw, ArrowUp } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -34,52 +32,60 @@ export const DeviceFileBrowser: React.FC<DeviceFileBrowserProps> = ({
 }) => {
   const [entries, setEntries] = useState<RemoteEntry[]>([]);
   const [loading, setLoading] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [operation, setOperation] = useState<string | null>(null);
+  const requestRef = useRef(0);
+  const currentRef = useRef({ serial, currentPath });
+  currentRef.current = { serial, currentPath };
 
   const loadDir = useCallback(async () => {
+    const request = ++requestRef.current;
     if (!serial || serial.startsWith('apple-') || serial.startsWith('airplay-')) {
       setEntries([]);
+      setLoading(false);
+      setLoadError(null);
       return;
     }
     setLoading(true);
+    setLoadError(null);
     try {
       const q = new URLSearchParams({ path: currentPath, serial });
-      const r = await fetch(`/api/upload-file?${q.toString()}`, { cache: 'no-store' });
+      const r = await fetch(apiUrl(`/api/upload-file?${q.toString()}`), { cache: 'no-store' });
       const d = await r.json();
+      // Descarta respuestas tardías si se cambió de carpeta o dispositivo.
+      if (request !== requestRef.current) return;
       if (d.success) setEntries(d.entries || []);
-      else onStatus(d.error || 'No se pudo leer la carpeta del dispositivo.', false);
+      else { const error = d.error || 'No se pudo leer la carpeta del dispositivo.'; setEntries([]); setLoadError(error); onStatus(error, false); }
     } catch {
+      if (request !== requestRef.current) return;
+      setEntries([]);
+      setLoadError('Error consultando archivos del dispositivo.');
       onStatus('Error consultando archivos del dispositivo.', false);
-    } finally { setLoading(false); }
+    } finally { if (request === requestRef.current) setLoading(false); }
   }, [serial, currentPath, onStatus]);
 
-  useEffect(() => { loadDir(); }, [loadDir, refreshSignal]);
+  useEffect(() => { loadDir(); return () => { requestRef.current++; }; }, [loadDir, refreshSignal]);
+
+  // El borrado requiere confirmación; la descarga informa la ruta real en el PC.
+  const runFileOperation = async (action: 'download' | 'delete', name: string) => {
+    if (!serial || operation || (action === 'delete' && !confirm(`¿Eliminar "${name}" del teléfono?`))) return;
+    setOperation(name);
+    try {
+      const response = await fetch(apiUrl(`/api/device-file/${action}`), {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ serial, path: `${currentPath}/${name}` }),
+      });
+      const data = await response.json();
+      onStatus(`${serial}: ${data.success ? data.message : (data.error || 'No se pudo completar la operación.')}`, Boolean(data.success));
+      if (data.success && action === 'delete' && currentRef.current.serial === serial && currentRef.current.currentPath === currentPath) await loadDir();
+    } catch { onStatus('Error de comunicación durante la operación de archivo.', false); }
+    finally { setOperation(null); }
+  };
 
   const handleGoUp = () => {
     if (currentPath === '/sdcard') return;
     const parent = currentPath.split('/').slice(0, -1).join('/') || '/sdcard';
     onPathChange(parent.startsWith('/sdcard') ? parent : '/sdcard');
-  };
-
-  const handleDownload = (name: string) => {
-    if (!serial) return;
-    const full = `${currentPath}/${name}`;
-    const q = new URLSearchParams({ path: full, serial, download: '1' });
-    window.open(`/api/upload-file?${q.toString()}`, '_blank', 'noopener,noreferrer');
-    onStatus(`Descargando ${name} desde el dispositivo...`, true);
-  };
-
-  const handleDelete = async (name: string) => {
-    if (!serial || !confirm(`¿Eliminar "${name}" de ${currentPath} en el teléfono?`)) return;
-    try {
-      const r = await fetch('/api/upload-file', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ serial, path: `${currentPath}/${name}` }),
-      });
-      const d = await r.json();
-      onStatus(d.message || d.error || 'Operación completada', Boolean(d.success));
-      if (d.success) loadDir();
-    } catch { onStatus('Error de red al eliminar archivo.', false); }
   };
 
   const mutedCls = dark ? 'text-zinc-400' : 'text-slate-600';
@@ -103,6 +109,8 @@ export const DeviceFileBrowser: React.FC<DeviceFileBrowserProps> = ({
           <p className={`text-xs text-center py-6 ${mutedCls}`}>Conecta un dispositivo Android para explorar su almacenamiento.</p>
         ) : loading ? (
           <p className={`text-xs text-center py-6 ${mutedCls}`}>Leyendo {currentPath}...</p>
+        ) : loadError ? (
+          <p role="alert" className={`text-xs text-center py-6 ${mutedCls}`}>{loadError}</p>
         ) : entries.length === 0 ? (
           <p className={`text-xs text-center py-6 ${mutedCls}`}>Carpeta vacía.</p>
         ) : entries.map((item) => (
@@ -118,8 +126,8 @@ export const DeviceFileBrowser: React.FC<DeviceFileBrowserProps> = ({
             {!item.isDir && (
               <div className="flex items-center gap-1.5 shrink-0">
                 <span className={`text-[10px] font-mono ${mutedCls}`}>{formatSize(item.size)}</span>
-                <button type="button" onClick={() => handleDownload(item.name)} title="Descargar al PC" className={`p-1 rounded border cursor-pointer ${dark ? 'border-zinc-800 hover:bg-zinc-800' : 'border-slate-200 hover:bg-slate-200'}`}><Download size={12} /></button>
-                <button type="button" onClick={() => handleDelete(item.name)} title="Eliminar del teléfono" className={`p-1 rounded border cursor-pointer ${dark ? 'border-zinc-800 hover:bg-zinc-800' : 'border-slate-200 hover:bg-slate-200'}`}><Trash2 size={12} /></button>
+                <button type="button" disabled={operation !== null} onClick={() => runFileOperation('download', item.name)} aria-label={`Descargar ${item.name}`} title="Descargar a Capturas/Descargas" className="p-1 rounded border border-border disabled:opacity-50"><Download size={12} /></button>
+                <button type="button" disabled={operation !== null} onClick={() => runFileOperation('delete', item.name)} aria-label={`Eliminar ${item.name}`} title="Eliminar del teléfono" className="p-1 rounded border border-border disabled:opacity-50"><Trash2 size={12} /></button>
               </div>
             )}
           </div>

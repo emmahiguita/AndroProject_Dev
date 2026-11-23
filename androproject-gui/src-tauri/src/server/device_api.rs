@@ -108,11 +108,12 @@ pub async fn list_adb_devices() -> Vec<Value> {
 pub async fn get_device(Query(q): Query<SerialQuery>) -> Json<Value> {
     let devices = list_adb_devices().await;
     let req_serial = q.serial.as_deref().map(safe_serial).unwrap_or_default();
-    let chosen = devices
-        .iter()
-        .find(|d| !req_serial.is_empty() && d["serial"].as_str() == Some(req_serial.as_str()))
-        .or_else(|| devices.iter().find(|d| d["state"].as_str() == Some("device")))
-        .or_else(|| devices.first());
+    // Si se pidió un serial, no se muestran los datos de otro teléfono al desconectarse.
+    let chosen = if req_serial.is_empty() {
+        devices.iter().find(|d| d["state"].as_str() == Some("device")).or_else(|| devices.first())
+    } else {
+        devices.iter().find(|d| d["serial"].as_str() == Some(req_serial.as_str()))
+    };
 
     let active = if let Some(dev) = chosen {
         let ser = dev["serial"].as_str().unwrap_or("");
@@ -127,7 +128,7 @@ pub async fn get_device(Query(q): Query<SerialQuery>) -> Json<Value> {
     };
 
     Json(json!({
-        "connected": !devices.is_empty(),
+        "connected": devices.iter().any(|d| d["state"].as_str() == Some("device")),
         "devices": devices,
         "serialChanged": Value::Null,
         "activeDevice": active,
@@ -141,7 +142,8 @@ pub async fn get_device_image(Query(q): Query<SerialQuery>) -> Response {
         return ([(header::CONTENT_TYPE, "image/png")], TRANSPARENT_PNG_1X1).into_response();
     }
     let mut cmd = silent_cmd(adb_bin());
-    cmd.args(["-s", &serial, "exec-out", "screencap", "-p"])
+    // Al vencer el tiempo de captura se termina ADB para no dejar procesos huérfanos.
+    cmd.kill_on_drop(true).args(["-s", &serial, "exec-out", "screencap", "-p"])
         .stdout(Stdio::piped())
         .stderr(Stdio::null());
     if let Ok(Ok(out)) = tokio::time::timeout(Duration::from_millis(3500), cmd.output()).await {

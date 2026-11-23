@@ -1,13 +1,6 @@
-// ============================================================================
-// ARCHIVO: CliInjectorView.tsx
-// QUÉ HACE: Consola profesional de inyección CLI / IA: DeepSeek (Claude CLI),
-//           Ollama local, ADB Shell nativo y comandos de sistema.
-// CÓMO FUNCIONA: Orquesta la entrada de texto, selección de motor, presets rápidos
-//           y respuestas interactivas dinámicas con opciones de respuesta.
-// POR QUÉ: Permite entender cualquier texto (desde 'hola' hasta párrafos grandes)
-//           con ejecución real y diseño monocromo de alta legibilidad (< 200L).
-// ============================================================================
+// Consola CLI: coordina motores, entrada de comandos y respuestas interactivas.
 'use client';
+import { apiUrl } from '@/lib/api-url';
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Play } from 'lucide-react';
@@ -49,7 +42,7 @@ export function CliInjectorView({ device: propDevice }: { device?: DeviceInfo | 
   const device = propDevice || storeDevice;
   const targetSerial = activeSerial || device?.serial;
   const abortRef = useRef<AbortController | null>(null);
-  const [mode, setMode] = useState<InjectorMode>('claude');
+  const [mode, setMode] = useState<InjectorMode>('adb');
   const [model, setModel] = useState('llama3.2');
   const [prompt, setPrompt] = useState('');
   const [includeDevice, setIncludeDevice] = useState(true);
@@ -62,7 +55,7 @@ export function CliInjectorView({ device: propDevice }: { device?: DeviceInfo | 
 
   const refreshDiscovery = useCallback(async () => {
     try {
-      const res = await fetch('/api/ai-cli');
+      const res = await fetch(apiUrl('/api/ai-cli'));
       const data = await res.json();
       if (data.success) {
         setDiscovery({ ollamaOnline: Boolean(data.ollama?.online), models: data.ollama?.models || [], clis: data.clis || {} });
@@ -75,6 +68,7 @@ export function CliInjectorView({ device: propDevice }: { device?: DeviceInfo | 
     return () => { abortRef.current?.abort(); };
   }, [refreshDiscovery]);
 
+  // Envía la consulta al motor elegido y descarta la salida anterior al fallar.
   const executePrompt = async (textToSend: string) => {
     const text = textToSend.trim();
     if (!text || running) return;
@@ -83,12 +77,15 @@ export function CliInjectorView({ device: propDevice }: { device?: DeviceInfo | 
     abortRef.current = ctrl;
     setRunning(true);
     setError(null);
+    setOutput('');
+    setSuggestions([]);
+    setProviderMeta('');
     try {
       const deviceContext = includeDevice && device?.connected
         ? `Modelo: ${device.model || 'Android'}, Serial: ${device.serial}, Android: ${device.androidVersion || '--'}, Batería: ${device.battery ?? '--'}%`
         : undefined;
 
-      const res = await fetch('/api/ai-cli', {
+      const res = await fetch(apiUrl('/api/ai-cli'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ mode, prompt: text, model, serial: targetSerial, deviceContext }),
@@ -151,11 +148,11 @@ export function CliInjectorView({ device: propDevice }: { device?: DeviceInfo | 
             }}
             placeholder={
               mode === 'claude'
-                ? 'Escribe tu solicitud para DeepSeek / Claude Code (desde un saludo hasta párrafos largos)... [Ctrl+Enter]'
+                ? 'Escribe tu solicitud para Claude... [Ctrl+Enter]'
                 : mode === 'ollama'
                 ? 'Prompt para Ollama / Llama local... [Ctrl+Enter]'
                 : mode === 'adb'
-                ? 'Comando ADB Shell (ej: getprop ro.product.model)...'
+                ? 'Selecciona una consulta ADB de los botones superiores...'
                 : 'Comando CLI (claude, adb, python, gemini)...'
             }
             className={`w-full rounded-lg border p-3 text-xs font-mono outline-none resize-y transition-colors ${

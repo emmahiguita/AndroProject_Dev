@@ -10,6 +10,7 @@
 //           sobre cualquier móvil sin código específico de modelo (< 200L).
 // ============================================================================
 'use client';
+import { apiUrl } from '@/lib/api-url';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import type { DeviceInfo } from '@/features/types';
@@ -30,7 +31,7 @@ const DEFAULT_CONFIG: RescueSyncConfig = {
 };
 
 const postAction = (body: Record<string, unknown>) =>
-  fetch('/api/actions', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).then((r) => r.json());
+  fetch(apiUrl('/api/actions'), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).then((r) => r.json());
 
 const extractIp = (serial?: string) => serial?.match(/^(\d{1,3}(?:\.\d{1,3}){3})(?::\d+)?$/)?.[1] || '';
 

@@ -1,15 +1,10 @@
 // ============================================================================
 // ARCHIVO: AirPlayStudioCard.tsx
-// QUÉ HACE: Tarjeta de control del receptor Apple AirPlay 2 para dispositivos
-//           iOS (ventana libre, control de ratón, audio en PC/iPhone, botones
-//           físicos, captura PNG, portapapeles, túnel WDA y Bluetooth).
-// CÓMO FUNCIONA: Invoca `/api/airplay`, `/api/ios` y `run('keyevent')` con
-//           retroalimentación inmediata vía `showToast`.
-// POR QUÉ: Separar el estudio iOS del estudio Android mantiene DeviceInfoPanel
-//           modular y bajo el límite estricto de 200 líneas (SRP).
+// QUÉ HACE: Conecta controles iOS al receptor y muestra sus errores.
 // ============================================================================
 
 'use client';
+import { apiUrl } from '@/lib/api-url';
 
 import React, { useState } from 'react';
 import {
@@ -38,16 +33,19 @@ export const AirPlayStudioCard: React.FC<AirPlayStudioCardProps> = ({
   onMouseControl, onScreenshotClick, onPasteClipboard, run, showToast,
 }) => {
   const [mouseControlActive, setMouseControlActive] = useState(false);
-  const { status: airplayStatus, loading: airplayLoading, toggleServer } = useAirPlayServer();
+  const { status: airplayStatus, loading: airplayLoading, error: airplayError, toggleServer } = useAirPlayServer();
 
   const postJson = async (url: string, payload: Record<string, unknown>, fallbackErr: string) => {
     try {
-      const res = await fetch(url, {
+      const res = await fetch(apiUrl(url), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
-      return await res.json();
+      // Una respuesta HTTP válida puede contener un fallo funcional del receptor.
+      const data = await res.json();
+      if (!res.ok || !data.success) { showToast(data.error || fallbackErr, true); return null; }
+      return data;
     } catch {
       showToast(fallbackErr, true);
       return null;
@@ -84,14 +82,15 @@ export const AirPlayStudioCard: React.FC<AirPlayStudioCardProps> = ({
             <h3 className={`text-xs font-semibold ${dark ? 'text-zinc-100' : 'text-slate-900'}`}>
               Receptor Apple AirPlay 2
             </h3>
-            <p className={`text-[10px] ${dark ? 'text-emerald-400' : 'text-emerald-700'}`}>Video H.264 60 FPS • Audio en Celular</p>
+            <p className={`text-[10px] ${dark ? 'text-zinc-400' : 'text-slate-600'}`}>Estado del proceso receptor</p>
           </div>
         </div>
         <span className={`flex items-center gap-1 px-2 py-0.5 rounded-md border text-[10px] font-medium ${dark ? 'bg-zinc-800 border-zinc-700 text-zinc-300' : 'bg-slate-100 border-slate-300 text-slate-800'}`}>
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> 60 FPS
+          <span className="w-1.5 h-1.5 rounded-full bg-zinc-500" /> iOS
         </span>
       </div>
 
+      {airplayError && <p role="alert" className="text-xs text-red-500">{airplayError}</p>}
       <div className={`p-2.5 rounded-lg border space-y-2 ${dark ? 'bg-zinc-950/60 border-zinc-800/80' : 'bg-slate-50 border-slate-200'}`}>
         <div className="flex items-center justify-between text-[11px]">
           <span className={dark ? 'text-zinc-400 font-normal' : 'text-slate-600 font-normal'}>Nombre en Red:</span>
@@ -100,7 +99,7 @@ export const AirPlayStudioCard: React.FC<AirPlayStudioCardProps> = ({
         <div className="flex items-center justify-between text-[11px]">
           <span className={dark ? 'text-zinc-400 font-normal' : 'text-slate-600 font-normal'}>Estado Receptor:</span>
           <span className={`font-medium font-mono ${airplayStatus.running ? (dark ? 'text-emerald-400' : 'text-emerald-700') : (dark ? 'text-amber-400' : 'text-amber-700')}`}>
-            {airplayStatus.running ? 'Activo · Bonjour ON' : 'En espera'}
+            {airplayStatus.running ? 'Proceso activo · Bonjour sin comprobar' : 'En espera'}
           </span>
         </div>
       </div>
@@ -157,9 +156,8 @@ export const AirPlayStudioCard: React.FC<AirPlayStudioCardProps> = ({
           description="Desactivado por defecto: el sonido se escucha en el celular"
           checked={Boolean(scrcpyOptions.enableAudio)}
           onChange={async (checked) => {
-            setScrcpyOptions((o) => ({ ...o, enableAudio: checked }));
             const data = await postJson('/api/airplay', { action: 'set_audio', audioEnabled: checked }, 'Error cambiando salida de audio');
-            if (data) showToast(data.message || (checked ? 'Audio en PC activado' : 'Audio en Celular activado'));
+            if (data) { setScrcpyOptions((o) => ({ ...o, enableAudio: checked })); showToast(data.message || (checked ? 'Audio en PC activado' : 'Audio en Celular activado')); }
           }}
         />
       </div>

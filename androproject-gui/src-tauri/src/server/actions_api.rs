@@ -14,15 +14,11 @@ use std::process::Stdio;
 use std::sync::{Mutex, OnceLock};
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
-use super::extra_actions::{build_screen_args, handle_get_adb_status, handle_list_cameras, handle_optimizer_query};
+use super::extra_actions::{handle_get_adb_status, handle_list_cameras, handle_optimizer_query};
 use super::paths::{adb_bin, adb_shell, captures_dir, run_adb, safe_serial, scrcpy_bin, silent_cmd};
 
-static SCREEN_PIDS: OnceLock<Mutex<HashMap<String, u32>>> = OnceLock::new();
 static RECORD_PIDS: OnceLock<Mutex<HashMap<String, (u32, String)>>> = OnceLock::new();
 
-fn screen_pids() -> &'static Mutex<HashMap<String, u32>> {
-    SCREEN_PIDS.get_or_init(|| Mutex::new(HashMap::new()))
-}
 fn record_pids() -> &'static Mutex<HashMap<String, (u32, String)>> {
     RECORD_PIDS.get_or_init(|| Mutex::new(HashMap::new()))
 }
@@ -45,35 +41,16 @@ pub async fn post_actions(Json(body): Json<Value>) -> impl IntoResponse {
 
     match action {
         "get_adb_status" => json_ok(handle_get_adb_status().await),
-        "get_optimizer_settings" | "get_perf_status" => json_ok(handle_optimizer_query(&serial, action).await),
-        "check_screen" => {
-            let alive = screen_pids().lock().unwrap().contains_key(&serial);
-            json_ok(json!({ "success": true, "alive": alive, "sessions": [] }))
-        }
+        "get_optimizer_settings" => json_ok(handle_optimizer_query(&serial, action).await),
+        "get_perf_status" => json_ok(super::developer_actions::status(&serial).await),
+        "set_developer_mode" | "open_developer_settings" | "set_developer_option" | "set_animation_scale" | "set_dpi" => json_ok(super::developer_actions::apply(&serial, action, &body).await),
+        "set_adguard_dns" | "set_private_dns" | "set_night_mode" | "set_auto_brightness" => json_ok(super::optimizer_actions::apply(&serial, action, &body).await),
+        "optimize_ram" | "run_trim" => json_ok(super::optimizer_actions::run_maintenance(&serial, action).await),
+        "check_screen" => json_ok(super::screen_process::check(&serial).await),
+        "diagnose_screenshot" => json_ok(super::capture_diagnostics::diagnose(&serial).await),
         "list_cameras" => json_ok(handle_list_cameras(&serial).await),
-        "open_screen" => {
-            if serial.is_empty() {
-                return (StatusCode::BAD_REQUEST, Json(json!({ "success": false, "error": "Serial requerido" })));
-            }
-            let args = build_screen_args(&serial, &body);
-            let mut cmd = silent_cmd(scrcpy_bin());
-            cmd.args(&args).stdout(Stdio::null()).stderr(Stdio::null());
-            match cmd.spawn() {
-                Ok(child) => {
-                    let pid = child.id().unwrap_or(0);
-                    screen_pids().lock().unwrap().insert(serial.clone(), pid);
-                    json_ok(json!({ "success": true, "alive": true, "pid": pid, "message": "VisionNano nativo activo a 60 FPS" }))
-                }
-                Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, Json(json!({ "success": false, "error": e.to_string() }))),
-            }
-        }
-        "stop_screen" => {
-            let pid_opt = { screen_pids().lock().unwrap().remove(&serial) };
-            if let Some(pid) = pid_opt {
-                let _ = silent_cmd("taskkill").args(["/PID", &pid.to_string(), "/F", "/T"]).output().await;
-            }
-            json_ok(json!({ "success": true, "alive": false, "message": "Proyección detenida" }))
-        }
+        "open_screen" => json_ok(super::screen_process::start(&serial, &body).await),
+        "stop_screen" => json_ok(super::screen_process::stop(&serial).await),
         "check_record" => {
             let rec = record_pids().lock().unwrap().contains_key(&serial);
             json_ok(json!({ "success": true, "recording": rec }))
@@ -108,13 +85,16 @@ pub async fn post_actions(Json(body): Json<Value>) -> impl IntoResponse {
         }
         "screenshot" => {
             let mut cmd = silent_cmd(adb_bin());
-            cmd.args(["-s", &serial, "exec-out", "screencap", "-p"]).stdout(Stdio::piped()).stderr(Stdio::null());
+            cmd.kill_on_drop(true).args(["-s", &serial, "exec-out", "screencap", "-p"]).stdout(Stdio::piped()).stderr(Stdio::null());
             match tokio::time::timeout(Duration::from_secs(5), cmd.output()).await {
-                Ok(Ok(out)) if out.stdout.len() > 200 => {
+                Ok(Ok(out)) if out.status.success() && out.stdout.starts_with(b"\x89PNG\r\n\x1a\n") => {
                     let ts = SystemTime::now().duration_since(UNIX_EPOCH).unwrap_or_default().as_secs();
                     let file = captures_dir().join(format!("screenshot_{}.png", ts));
-                    let _ = tokio::fs::write(&file, &out.stdout).await;
-                    json_ok(json!({ "success": true, "path": file.to_string_lossy(), "message": format!("Captura guardada en {}", file.to_string_lossy()) }))
+                    // Comunicar error real si Windows no puede guardar la captura.
+                    if let Err(e) = tokio::fs::write(&file, &out.stdout).await {
+                        return (StatusCode::INTERNAL_SERVER_ERROR, Json(json!({ "success": false, "error": format!("No se pudo guardar la captura: {}", e) })));
+                    }
+                    json_ok(json!({ "success": true, "size": out.stdout.len(), "path": file.to_string_lossy(), "message": format!("Captura guardada en {}", file.to_string_lossy()) }))
                 }
                 _ => (StatusCode::INTERNAL_SERVER_ERROR, Json(json!({ "success": false, "error": "No se pudo capturar pantalla PNG" }))),
             }
@@ -156,7 +136,7 @@ pub async fn post_actions(Json(body): Json<Value>) -> impl IntoResponse {
         "connect_adb" => {
             let target = safe_serial(body["target"].as_str().unwrap_or(""));
             let (ok, out, err) = run_adb(&["connect", &target], 5000).await;
-            json_ok(json!({ "success": ok && out.contains("connected"), "message": out.trim(), "error": err }))
+            json_ok(json!({ "success": ok && !out.contains("unable to connect") && (out.starts_with("connected to ") || out.starts_with("already connected to ")), "message": out.trim(), "error": err }))
         }
         "restart_adb" => {
             let _ = run_adb(&["kill-server"], 3000).await;
@@ -173,7 +153,7 @@ pub async fn post_actions(Json(body): Json<Value>) -> impl IntoResponse {
             let (ok, out, err) = adb_shell(&serial, &format!("ls -la '{}'", dir.replace('\'', "")), 5000).await;
             let files: Vec<Value> = out.lines().skip(1).filter_map(|l| {
                 let p: Vec<&str> = l.split_whitespace().collect();
-                if p.len() < 7 { return None; }
+                if p.len() < 8 { return None; }
                 let name = p[7..].join(" ");
                 if name == "." || name == ".." || name.is_empty() { return None; }
                 Some(json!({ "name": name, "isDir": p[0].starts_with('d'), "size": p[4].parse::<u64>().unwrap_or(0), "permissions": p[0] }))
@@ -181,8 +161,11 @@ pub async fn post_actions(Json(body): Json<Value>) -> impl IntoResponse {
             json_ok(json!({ "success": ok, "path": dir, "files": files, "error": err }))
         }
         "open_captures" => {
-            let _ = silent_cmd("explorer.exe").arg(captures_dir()).spawn();
-            json_ok(json!({ "success": true, "message": "Carpeta de capturas abierta" }))
+            // Solo se informa éxito si Windows acepta iniciar el explorador.
+            match silent_cmd("explorer.exe").arg(captures_dir()).spawn() {
+                Ok(_) => json_ok(json!({ "success": true, "message": "Carpeta de capturas abierta" })),
+                Err(e) => json_ok(json!({ "success": false, "error": e.to_string() })),
+            }
         }
         "toggle_wifi_adb" => {
             let (ok, out, err) = run_adb(&["-s", &serial, "tcpip", "5555"], 4000).await;

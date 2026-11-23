@@ -9,6 +9,7 @@
 // ============================================================================
 
 'use client';
+import { apiUrl } from '@/lib/api-url';
 
 import { useRef, useCallback } from 'react';
 import { useAppStore } from '@/stores';
@@ -90,7 +91,7 @@ export function useActions() {
     if (!serial || serial === 'Hardware Level') return;
     setAppsLoading(true);
     try {
-      const res = await fetch('/api/apps', {
+      const res = await fetch(apiUrl('/api/apps'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'list', serial }),

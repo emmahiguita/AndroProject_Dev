@@ -6,6 +6,7 @@
 // POR QUÉ: Estabilidad 100% continua de imagen y tacto sin cortes ni pantallas negras.
 // ============================================================================
 'use client';
+import { apiUrl } from '@/lib/api-url';
 
 import React, { useEffect, useRef, useState } from 'react';
 import { startWebCodecsH264Player } from '@/lib/services/webcodecs-h264-player';
@@ -19,7 +20,7 @@ interface WebCodecsCanvasProps {
 }
 
 function sendTouchEvent(serial: string, action: 0 | 1 | 2, nx: number, ny: number): void {
-  fetch('/api/scrcpy-control', {
+  fetch(apiUrl('/api/scrcpy-control'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ serial, action, nx, ny }),

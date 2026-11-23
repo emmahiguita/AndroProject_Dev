@@ -6,6 +6,7 @@
 // POR QUÉ: Garantizar legibilidad 100% clara en los campos y etiquetas (< 200L).
 // ============================================================================
 'use client';
+import { apiUrl } from '@/lib/api-url';
 
 import React, { useState } from 'react';
 import { Wifi, X } from 'lucide-react';
@@ -31,7 +32,7 @@ export const WirelessConnectModal: React.FC<WirelessConnectModalProps> = ({
     addLog(`Conectando vía Wi-Fi a ${target}...`, 'info');
 
     try {
-      const res = await fetch('/api/actions', {
+      const res = await fetch(apiUrl('/api/actions'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'connect_adb', target }),

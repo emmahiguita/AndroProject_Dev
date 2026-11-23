@@ -7,6 +7,7 @@
 // POR QUÉ: Aislar I/O de archivos y evitar fugas de memoria por timers (SRP).
 // ============================================================================
 'use client';
+import { apiUrl } from '@/lib/api-url';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 
@@ -45,7 +46,8 @@ export function useProjectionDrop(serial: string) {
 
     const file = e.dataTransfer.files[0];
     const lower = file.name.toLowerCase();
-    const isPkg = lower.endsWith('.apk') || lower.endsWith('.ipa');
+    // El instalador usa ADB y solo acepta APK; un IPA se trata como archivo.
+    const isPkg = lower.endsWith('.apk');
     setDropStatus({
       status: 'uploading',
       message: isPkg ? `Instalando ${file.name}...` : `Transfiriendo ${file.name}...`,
@@ -56,7 +58,7 @@ export function useProjectionDrop(serial: string) {
     fd.append('serial', serial);
 
     try {
-      const res = await fetch(isPkg ? '/api/install-apk' : '/api/upload-file', { method: 'POST', body: fd });
+      const res = await fetch(apiUrl(isPkg ? '/api/install-apk' : '/api/upload-file'), { method: 'POST', body: fd });
       const data = await res.json();
       setDropStatus(
         data.success

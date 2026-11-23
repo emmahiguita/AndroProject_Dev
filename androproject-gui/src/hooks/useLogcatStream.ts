@@ -1,5 +1,3 @@
-// ============================================================================
-// ARCHIVO: useLogcatStream.ts
 // QUÉ HACE: Hook React que consume el stream SSE `/api/logcat`, agrupa logs
 //           en micro-batches de 100ms, detecta crashes y filtra en tiempo real.
 // CÓMO FUNCIONA: Mantiene EventSource conectado por `serial`, acumula líneas
@@ -7,9 +5,9 @@
 //           a `logcatCrashBuilder.ts` y limpia cola/timers al desmontar o limpiar.
 // POR QUÉ: Evitar saturación de renders en React y mantener el hook bajo
 //           200 líneas (SRP) sin fugas de timers o buffers fantasma tras `clearLogs`.
-// ============================================================================
 
 'use client';
+import { apiUrl } from '@/lib/api-url';
 
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import type { LogcatEntry } from '@/features/logcat-types';
@@ -96,7 +94,7 @@ export function useLogcatStream({ serial, enabled = true, onAppSwitch, onCrash }
       return;
     }
 
-    const es = new EventSource(`/api/logcat?serial=${encodeURIComponent(serial)}`);
+    const es = new EventSource(apiUrl(`/api/logcat?serial=${encodeURIComponent(serial)}`));
     eventSourceRef.current = es;
     es.onopen = () => setIsConnected(true);
     es.onerror = () => setIsConnected(false);

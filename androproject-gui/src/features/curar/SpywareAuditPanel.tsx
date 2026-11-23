@@ -8,24 +8,17 @@
 // POR QUÉ: Detectar y neutralizar amenazas reales sin componentes huérfanos (< 200L).
 // ============================================================================
 'use client';
+import { apiUrl } from '@/lib/api-url';
 
 import React, { useState } from 'react';
-import { ShieldAlert, Radar, Trash2, CheckCircle2, Ban, Square, EyeOff, BellOff } from 'lucide-react';
+import { ShieldAlert, Radar, Trash2, CheckCircle2, Ban, Square } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { useTheme } from '@/hooks/useTheme';
 import type { SpywareFinding } from '@/features/security-types';
 
-type RemediationKind =
-  | 'revoke_overlay'
-  | 'revoke_install_packages'
-  | 'revoke_accessibility'
-  | 'revoke_notifications'
-  | 'force_stop'
-  | 'disable'
-  | 'suspend'
-  | 'unsuspend';
+type RemediationKind = 'force_stop' | 'disable';
 
 interface SpywareAuditPanelProps {
   serial: string | null;
@@ -36,27 +29,23 @@ export const SpywareAuditPanel: React.FC<SpywareAuditPanelProps> = ({ serial, on
   const { dark } = useTheme();
   const [scanning, setScanning] = useState(false);
   const [findings, setFindings] = useState<SpywareFinding[] | null>(null);
-  const [suspendedPkgs, setSuspendedPkgs] = useState<Set<string>>(new Set());
-  const [meta, setMeta] = useState<{ scanned: number; hiddenCount: number; accessCount: number; topPkg: string | null } | null>(null);
+  const [scannedCount, setScannedCount] = useState<number | null>(null);
 
+  // La ruta solo compara nombres de paquetes, por eso informa su alcance real.
   const runDeepScan = async () => {
     if (!serial) return;
     setScanning(true);
+    setFindings(null);
+    setScannedCount(null);
     onLog(`Iniciando auditoría heurística profunda en ${serial}...`);
     try {
-      const res = await fetch(`/api/security-scan?serial=${encodeURIComponent(serial)}`);
+      const res = await fetch(apiUrl(`/api/security-scan?serial=${encodeURIComponent(serial)}`));
       const data = await res.json();
       if (!data.success) {
         onLog(data.error || 'No se pudo completar el escaneo heurístico', 'error');
-        setFindings([]);
       } else {
         setFindings(data.findings || []);
-        setMeta({
-          scanned: data.scannedThirdParty || 0,
-          hiddenCount: data.hiddenAppsCount || 0,
-          accessCount: data.accessibilityCount || 0,
-          topPkg: data.topWindowPkg || null,
-        });
+        setScannedCount(data.scannedCount);
         onLog(`Escaneo heurístico completado: ${(data.findings || []).length} hallazgos`, 'success');
       }
     } catch {
@@ -69,21 +58,13 @@ export const SpywareAuditPanel: React.FC<SpywareAuditPanelProps> = ({ serial, on
   const runRemediation = async (pkg: string, action: RemediationKind) => {
     if (!serial) return;
     try {
-      const r = await fetch('/api/security-scan', {
+      const r = await fetch(apiUrl('/api/apps'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ serial, packageName: pkg, action }),
       });
       const d = await r.json();
-      onLog(d.message || d.error || 'Acción aplicada', d.success ? 'success' : 'error');
-      if (d.success && action.startsWith('revoke_')) runDeepScan();
-      if (d.success && (action === 'suspend' || action === 'unsuspend')) {
-        setSuspendedPkgs((prev) => {
-          const next = new Set(prev);
-          if (action === 'suspend') next.add(pkg); else next.delete(pkg);
-          return next;
-        });
-      }
+      onLog(d.success ? (d.message || 'Acción aplicada') : (d.error || 'No se pudo aplicar la acción'), d.success ? 'success' : 'error');
     } catch {
       onLog(`Error aplicando ${action} sobre ${pkg}`, 'error');
     }
@@ -92,7 +73,7 @@ export const SpywareAuditPanel: React.FC<SpywareAuditPanelProps> = ({ serial, on
   const handleUninstall = async (pkg: string) => {
     if (!serial || !confirm(`¿Desinstalar paquete sospechoso ${pkg}?`)) return;
     try {
-      const r = await fetch('/api/apps', {
+      const r = await fetch(apiUrl('/api/apps'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'uninstall', packageName: pkg, serial }),
@@ -119,23 +100,20 @@ export const SpywareAuditPanel: React.FC<SpywareAuditPanelProps> = ({ serial, on
             <Radar size={18} />
           </div>
           <div>
-            <h3 className="text-sm font-bold">Auditoría heurística: Adware Invasivo, Spyware &amp; Apps Ocultas</h3>
+            <h3 className="text-sm font-bold">Revisión de nombres de paquetes</h3>
             <p className={`text-xs ${mutedCls}`}>
-              Detecta apps sin ícono en launcher, overlays publicitarios, Accesibilidad abusiva, escucha de notificaciones y sideload.
+              Busca términos en los nombres de las aplicaciones de terceros.
             </p>
           </div>
         </div>
         <Button size="sm" icon={<ShieldAlert size={13} />} onClick={runDeepScan} disabled={scanning || !serial}>
-          {scanning ? 'Analizando kernel...' : 'Escaneo profundo'}
+          {scanning ? 'Consultando paquetes...' : 'Revisar paquetes'}
         </Button>
       </div>
 
-      {meta && (
+      {scannedCount !== null && (
         <div className={`mt-3 text-xs flex flex-wrap gap-4 ${mutedCls}`}>
-          <span>Apps de terceros: <strong>{meta.scanned}</strong></span>
-          <span>Apps ocultas sin icono: <strong>{meta.hiddenCount}</strong></span>
-          <span>Accesibilidad activa: <strong>{meta.accessCount}</strong></span>
-          {meta.topPkg && <span>Ventana actual: <strong className="font-mono">{meta.topPkg}</strong></span>}
+          <span>Apps de terceros revisadas: <strong>{scannedCount}</strong></span>
         </div>
       )}
 
@@ -144,7 +122,7 @@ export const SpywareAuditPanel: React.FC<SpywareAuditPanelProps> = ({ serial, on
           dark ? 'bg-zinc-900 border-zinc-800 text-zinc-200' : 'bg-slate-50 border-slate-200 text-slate-800'
         }`}>
           <CheckCircle2 size={15} />
-          <span>No se detectaron combinaciones sospechosas de adware invasivo, spyware ni accesibilidad abusiva.</span>
+          <span>No hay coincidencias con los términos de búsqueda.</span>
         </div>
       )}
 
@@ -155,26 +133,10 @@ export const SpywareAuditPanel: React.FC<SpywareAuditPanelProps> = ({ serial, on
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex items-center gap-2 flex-wrap min-w-0">
                   <span className="font-mono text-xs font-bold truncate">{f.packageName}</span>
-                  <Badge tone="neutral">{f.category.toUpperCase()} · {f.severity.toUpperCase()} · {f.score} pts</Badge>
-                  {f.isHidden && <Badge tone="danger">APP OCULTA</Badge>}
+                  <Badge tone="neutral">Coincidencia de nombre</Badge>
                 </div>
                 <div className="flex items-center gap-1.5 flex-wrap">
-                  {f.hasOverlay && (
-                    <Button variant="secondary" size="sm" icon={<Ban size={12} />} onClick={() => runRemediation(f.packageName, 'revoke_overlay')}>Cortar Overlay</Button>
-                  )}
-                  {f.hasAccessibility && (
-                    <Button variant="secondary" size="sm" icon={<EyeOff size={12} />} onClick={() => runRemediation(f.packageName, 'revoke_accessibility')}>Quitar Accesibilidad</Button>
-                  )}
-                  {f.hasNotificationAccess && (
-                    <Button variant="secondary" size="sm" icon={<BellOff size={12} />} onClick={() => runRemediation(f.packageName, 'revoke_notifications')}>Quitar Notifs</Button>
-                  )}
-                  {f.hasInstallPackages && (
-                    <Button variant="secondary" size="sm" icon={<Ban size={12} />} onClick={() => runRemediation(f.packageName, 'revoke_install_packages')}>Bloquear APK</Button>
-                  )}
                   <Button variant="secondary" size="sm" icon={<Square size={12} />} onClick={() => runRemediation(f.packageName, 'force_stop')}>Detener</Button>
-                  <Button variant="secondary" size="sm" icon={<Ban size={12} />} onClick={() => runRemediation(f.packageName, suspendedPkgs.has(f.packageName) ? 'unsuspend' : 'suspend')}>
-                    {suspendedPkgs.has(f.packageName) ? 'Descongelar' : 'Congelar'}
-                  </Button>
                   <Button variant="secondary" size="sm" icon={<Ban size={12} />} onClick={() => runRemediation(f.packageName, 'disable')}>Deshabilitar</Button>
                   <Button variant="danger" size="sm" icon={<Trash2 size={12} />} onClick={() => handleUninstall(f.packageName)}>Desinstalar</Button>
                 </div>

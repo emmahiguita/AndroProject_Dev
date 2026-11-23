@@ -43,6 +43,7 @@ export const FlasherImagePanel: React.FC<FlasherImagePanelProps> = ({
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+      <p className="text-xs text-text-secondary lg:col-span-2">Usa archivos compatibles con el modelo conectado. Fastboot exige comprobar el bootloader desbloqueado.</p>
       {/* Columna 1: Flashear Partición mediante Fastboot (.img / .bin) */}
       <div className={`rounded-lg border p-3.5 space-y-3 ${cardCls}`}>
         <div className="flex items-center justify-between">
@@ -145,7 +146,7 @@ export const FlasherImagePanel: React.FC<FlasherImagePanelProps> = ({
           </p>
 
           <label className={`border border-dashed rounded-md p-3.5 flex items-center justify-between gap-3 cursor-pointer transition-colors ${dark ? 'border-zinc-700 bg-zinc-900/40 hover:bg-zinc-900' : 'border-slate-300 bg-slate-50 hover:bg-slate-100'}`}>
-            <input type="file" accept=".zip" className="hidden" disabled={flashing} onChange={(e) => { const f = e.target.files?.[0]; if (f) onExecuteSideload(f); e.target.value = ''; }} />
+            <input type="file" accept=".zip" className="hidden" disabled={flashing || flashState !== 'sideload'} onChange={(e) => { const f = e.target.files?.[0]; if (f) onExecuteSideload(f); e.target.value = ''; }} />
             <div className="flex items-center gap-2.5 min-w-0">
               <Download size={16} className="shrink-0 opacity-70" />
               <div className="min-w-0">

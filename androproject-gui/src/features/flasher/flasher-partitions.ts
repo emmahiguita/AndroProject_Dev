@@ -26,7 +26,7 @@ export const PARTITIONS: FlashPartitionSpec[] = [
   { id: 'system',      label: 'system',      desc: 'Imagen del sistema operativo Android', critical: false, group: 'standard' },
   { id: 'vendor',      label: 'vendor',      desc: 'Binarios HAL y drivers propietarios', critical: false, group: 'standard' },
   { id: 'product',     label: 'product',     desc: 'Aplicaciones y recursos del producto', critical: false, group: 'standard' },
-  { id: 'userdata',    label: 'userdata',    desc: 'Datos del usuario (formatea almacenamiento interno)', critical: false, group: 'standard' },
+  { id: 'userdata',    label: 'userdata',    desc: 'Datos del usuario (formatea almacenamiento interno)', critical: true, group: 'standard' },
   { id: 'boot_a',      label: 'boot_a',      desc: 'Slot A — Kernel de arranque', critical: false, group: 'ab' },
   { id: 'boot_b',      label: 'boot_b',      desc: 'Slot B — Kernel de arranque', critical: false, group: 'ab' },
   { id: 'recovery_a',  label: 'recovery_a',  desc: 'Slot A — Recuperación', critical: false, group: 'ab' },

@@ -8,6 +8,7 @@
 // POR QUÉ: Conectar `device` prop, `fastboot_boot` y `--disable-verity` (< 200L).
 // ============================================================================
 'use client';
+import { apiUrl } from '@/lib/api-url';
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useAppStore } from '@/stores';
@@ -28,7 +29,7 @@ export function FlasherView({ device: propDevice, addLog: propAddLog }: FlasherV
   const s = useAppStore();
   const targetSerial = s.activeSerial || propDevice?.serial || s.device?.serial || null;
   const [busyAction, setBusyAction] = useState<string | null>(null);
-  const [disableVerity, setDisableVerity] = useState(true);
+  const [disableVerity, setDisableVerity] = useState(false);
   const [cmdResult, setCmdResult] = useState<{ text: string; isError: boolean } | null>(null);
   const refreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => () => { if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current); }, []);
@@ -44,7 +45,7 @@ export function FlasherView({ device: propDevice, addLog: propAddLog }: FlasherV
       const fd = new FormData();
       fd.append('action', 'check_state');
       if (targetSerial) fd.append('serial', targetSerial);
-      const r = await fetch('/api/flash', { method: 'POST', body: fd });
+      const r = await fetch(apiUrl('/api/flash'), { method: 'POST', body: fd });
       const d = await r.json();
       s.setFlashState(d.state || 'unknown');
       s.setFlashInfo(d.deviceInfo || {});
@@ -65,7 +66,7 @@ export function FlasherView({ device: propDevice, addLog: propAddLog }: FlasherV
       fd.append('action', action);
       if (targetSerial) fd.append('serial', targetSerial);
       if (extra) for (const [k, v] of Object.entries(extra)) fd.append(k, v);
-      const r = await fetch('/api/flash', { method: 'POST', body: fd });
+      const r = await fetch(apiUrl('/api/flash'), { method: 'POST', body: fd });
       const d = await r.json();
       const msg = d.message || d.info || d.error || 'Comando procesado.';
       setCmdResult({ text: msg, isError: !d.success });
@@ -96,7 +97,7 @@ export function FlasherView({ device: propDevice, addLog: propAddLog }: FlasherV
       if (isCritical) fd.append('confirmCritical', 'true');
       if (disableVerity && s.selectedPartition.startsWith('vbmeta')) fd.append('disableVerity', 'true');
       if (targetSerial) fd.append('serial', targetSerial);
-      const r = await fetch('/api/flash', { method: 'POST', body: fd });
+      const r = await fetch(apiUrl('/api/flash-image'), { method: 'POST', body: fd });
       const d = await r.json();
       const msg = d.message || d.error || 'Operación finalizada.';
       setCmdResult({ text: msg, isError: !d.success });
@@ -117,7 +118,7 @@ export function FlasherView({ device: propDevice, addLog: propAddLog }: FlasherV
       fd.append('action', 'fastboot_boot');
       fd.append('file', s.flashFile);
       if (targetSerial) fd.append('serial', targetSerial);
-      const r = await fetch('/api/flash', { method: 'POST', body: fd });
+      const r = await fetch(apiUrl('/api/flash-image'), { method: 'POST', body: fd });
       const d = await r.json();
       const msg = d.message || d.error || 'Boot temporal enviado.';
       setCmdResult({ text: msg, isError: !d.success });
@@ -136,7 +137,7 @@ export function FlasherView({ device: propDevice, addLog: propAddLog }: FlasherV
       fd.append('action', 'sideload');
       fd.append('file', file);
       if (targetSerial) fd.append('serial', targetSerial);
-      const r = await fetch('/api/flash', { method: 'POST', body: fd });
+      const r = await fetch(apiUrl('/api/flash-image'), { method: 'POST', body: fd });
       const d = await r.json();
       const msg = d.message || d.error || 'Sideload finalizado.';
       setCmdResult({ text: msg, isError: !d.success });

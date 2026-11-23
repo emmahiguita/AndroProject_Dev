@@ -8,6 +8,7 @@
 // POR QUÉ: Inyectar lógica real a todos los controles de la ventana popout (< 200L).
 // ============================================================================
 'use client';
+import { apiUrl } from '@/lib/api-url';
 
 import React, { useState, useEffect, useRef, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
@@ -46,13 +47,13 @@ function PopoutContent() {
     msgTimerRef.current = setTimeout(() => setStatusMsg(null), 2500);
   };
   const postAction = (payload: Record<string, unknown>) =>
-    fetch('/api/actions', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ serial: device.serial, ...payload }) }).then((r) => r.json());
+    fetch(apiUrl('/api/actions'), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ serial: device.serial, ...payload }) }).then((r) => r.json());
 
   useEffect(() => {
     let alive = true;
     const poll = async () => {
       try {
-        const res = await fetch('/api/device', { cache: 'no-store' });
+        const res = await fetch(apiUrl('/api/device'), { cache: 'no-store' });
         if (!res.ok || !alive) return;
         const devList: DeviceInfo[] = (await res.json()).devices || [];
         const found = devList.find((d) => (requestedSerial ? d.serial === requestedSerial : (isIos ? d.platform === 'ios' : d.platform !== 'ios')));
@@ -72,7 +73,7 @@ function PopoutContent() {
   const handleToggleMute = async () => {
     const next = !isMuted; setIsMuted(next);
     try {
-      if (isIos) await fetch('/api/airplay', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'set_audio', audioEnabled: !next }) });
+      if (isIos) await fetch(apiUrl('/api/airplay'), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'set_audio', audioEnabled: !next }) });
       else await postAction({ action: 'keyevent', keycode: 'KEYCODE_VOLUME_MUTE' });
       flashMsg(next ? 'Audio silenciado' : 'Audio activado');
     } catch {}

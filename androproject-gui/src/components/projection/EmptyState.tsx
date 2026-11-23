@@ -7,6 +7,7 @@
 // POR QUÉ: Eliminar `text-white/25` y `text-white/40` no legibles (< 200L).
 // ============================================================================
 'use client';
+import { apiUrl } from '@/lib/api-url';
 
 import React, { useState } from 'react';
 import { Smartphone, Wifi, Usb, Radar, Loader2, ArrowRight } from 'lucide-react';
@@ -37,7 +38,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({ dark, onConnectAdb, isCo
     setStatus('Escaneando red local en busca de dispositivos Android...');
     setDiscoveredIps([]);
     try {
-      const res = await fetch('/api/actions', {
+      const res = await fetch(apiUrl('/api/actions'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'radar' }),

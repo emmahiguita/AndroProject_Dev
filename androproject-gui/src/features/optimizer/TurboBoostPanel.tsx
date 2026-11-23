@@ -9,6 +9,7 @@
 //           con diseño neutro de estudio (< 200 líneas, SRP).
 // ============================================================================
 'use client';
+import { apiUrl } from '@/lib/api-url';
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { Gauge, Flame, RotateCcw, Sparkles, Sliders, CheckCircle2, RefreshCw, ExternalLink, Power } from 'lucide-react';
@@ -51,13 +52,14 @@ export const TurboBoostPanel: React.FC<TurboBoostPanelProps> = ({ device, addLog
   const fetchStatus = useCallback(async () => {
     if (!isAndroid || !serial) { setStatus(null); return; }
     try {
-      const res = await fetch('/api/actions', {
+      const res = await fetch(apiUrl('/api/actions'), {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'get_perf_status', serial }),
       });
       const data = await res.json();
       if (data.success && data.status) setStatus(data.status);
-    } catch { /* Silencioso si se desconecta */ }
+      else setStatus(null);
+    } catch { setStatus(null); }
   }, [isAndroid, serial]);
 
   useEffect(() => { void Promise.resolve().then(fetchStatus); }, [fetchStatus]);
@@ -67,13 +69,15 @@ export const TurboBoostPanel: React.FC<TurboBoostPanelProps> = ({ device, addLog
     setLoading(true);
     const nextState = openInPhone ? true : !status?.developerMode;
     try {
-      const res = await fetch('/api/actions', {
+      const res = await fetch(apiUrl('/api/actions'), {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'set_developer_mode', serial: device.serial, enabled: nextState, openSettings: openInPhone }),
+        body: JSON.stringify(openInPhone
+          ? { action: 'open_developer_settings', serial: device.serial, screen: 'dev' }
+          : { action: 'set_developer_mode', serial: device.serial, enabled: nextState }),
       });
       const data = await res.json();
       if (data.status) setStatus(data.status);
-      addLog(data.message || `Modo Desarrollador: ${nextState ? 'ON' : 'OFF'}`, data.success ? 'success' : 'error');
+      addLog(data.success ? (data.message || 'Comando enviado') : (data.error || 'No se pudo completar la acción'), data.success ? 'success' : 'error');
     } catch { addLog('Error cambiando estado del Modo Desarrollador', 'error'); }
     finally { setLoading(false); }
   };
@@ -84,7 +88,7 @@ export const TurboBoostPanel: React.FC<TurboBoostPanelProps> = ({ device, addLog
     setActiveProfile(profile);
     addLog(`Aplicando perfil "${profile}" en ${device.serial}...`, 'info');
     try {
-      const res = await fetch('/api/actions', {
+      const res = await fetch(apiUrl('/api/actions'), {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'apply_perf_profile', serial: device.serial, profile }),
       });
@@ -128,10 +132,6 @@ export const TurboBoostPanel: React.FC<TurboBoostPanelProps> = ({ device, addLog
         <div className="flex flex-wrap gap-1.5 text-[10px] font-mono">
           <span className="px-2 py-0.5 rounded border border-border bg-surface-raised text-text-primary">Desarrollador: <strong>{status.developerMode ? 'ACTIVO' : 'INACTIVO'}</strong></span>
           <span className="px-2 py-0.5 rounded border border-border bg-surface-raised text-text-primary">Animaciones: <strong>{status.windowScale}x / {status.transitionScale}x / {status.animatorScale}x</strong></span>
-          <span className="px-2 py-0.5 rounded border border-border bg-surface-raised text-text-primary">GPU: <strong>{status.gpuRenderer}</strong></span>
-          <span className="px-2 py-0.5 rounded border border-border bg-surface-raised text-text-primary">Blur: <strong>{status.disableBlur ? 'OFF' : 'ON'}</strong></span>
-          <span className="px-2 py-0.5 rounded border border-border bg-surface-raised text-text-primary">Refresco: <strong>{status.peakRefresh}</strong></span>
-          <span className="px-2 py-0.5 rounded border border-border bg-surface-raised text-text-primary">Fondo: <strong>{status.bgLimit}</strong></span>
         </div>
       )}
 

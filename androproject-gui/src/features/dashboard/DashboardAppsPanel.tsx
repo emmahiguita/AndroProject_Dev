@@ -10,6 +10,7 @@
 //          manteniendo el archivo bajo 200 líneas (SOLID).
 // ============================================================================
 'use client';
+import { apiUrl } from '@/lib/api-url';
 
 import React, { useState } from 'react';
 import {
@@ -90,7 +91,7 @@ export const DashboardAppsPanel: React.FC<DashboardAppsPanelProps> = ({
   const handleLaunchApp = async (pkg: string) => {
     setQuickStatus(`Abriendo ${pkg}...`);
     try {
-      const r = await fetch('/api/apps', {
+      const r = await fetch(apiUrl('/api/apps'), {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'launch', packageName: pkg, serial }),
       });

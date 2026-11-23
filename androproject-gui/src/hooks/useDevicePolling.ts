@@ -1,4 +1,5 @@
 'use client';
+import { apiUrl } from '@/lib/api-url';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAppStore } from '@/stores';
@@ -45,7 +46,7 @@ export function useDevicePolling(): UseDevicePollingResult {
       const url = requestedSerial
         ? `/api/device?serial=${encodeURIComponent(requestedSerial)}`
         : '/api/device';
-      const res = await fetch(url, { cache: 'no-store' });
+      const res = await fetch(apiUrl(url), { cache: 'no-store' });
       if (!res.ok) return;
       const data = await res.json();
 
@@ -130,7 +131,7 @@ export function useDevicePolling(): UseDevicePollingResult {
   const scanRadar = useCallback(async () => {
     setIsScanning(true);
     try {
-      const res = await fetch('/api/actions', {
+      const res = await fetch(apiUrl('/api/actions'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'scan_radar' }),

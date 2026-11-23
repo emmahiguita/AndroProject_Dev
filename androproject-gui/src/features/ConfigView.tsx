@@ -9,6 +9,7 @@
 //           e inyectar control real sobre el dispositivo y el host (< 200L).
 // ============================================================================
 'use client';
+import { apiUrl } from '@/lib/api-url';
 
 import React, { useState, useEffect, useCallback, type ReactNode } from 'react';
 import {
@@ -47,7 +48,7 @@ export function ConfigView({ addLog: propAddLog }: ConfigViewProps = {}) {
     setBusyAction('load');
     try {
       const q = activeSerial ? `?serial=${encodeURIComponent(activeSerial)}` : '';
-      const res = await fetch(`/api/config${q}`, { cache: 'no-store' });
+      const res = await fetch(apiUrl(`/api/config${q}`), { cache: 'no-store' });
       const data = await res.json();
       if (data.success) { useAppStore.setState({ configData: data }); setVerified(data.verified || {}); setDeviceSettings(data.deviceSettings || null); }
     } catch { log('Error al leer la configuración del sistema.', 'error'); }
@@ -60,9 +61,11 @@ export function ConfigView({ addLog: propAddLog }: ConfigViewProps = {}) {
   const handleApplySetting = async (action: string, value?: string | number | boolean) => {
     setBusyAction(action);
     try {
-      const res = await fetch('/api/config', {
+      // Las acciones del equipo usan /api/actions; los ajustes Android usan /api/config.
+      const nativeAction = action === 'open_captures' || action === 'restart_adb' || action === 'enable_tcpip';
+      const res = await fetch(apiUrl(nativeAction ? '/api/actions' : '/api/config'), {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action, serial: activeSerial, value }),
+        body: JSON.stringify({ action: action === 'enable_tcpip' ? 'toggle_wifi_adb' : action, serial: activeSerial, value }),
       });
       const data = await res.json();
       if (data.success) {
@@ -70,8 +73,8 @@ export function ConfigView({ addLog: propAddLog }: ConfigViewProps = {}) {
         setStatusBanner({ text: data.message || `Ajuste aplicado (${action})`, ok: true });
         log(`Ajuste aplicado (${action})`, 'success');
       } else {
-        setStatusBanner({ text: data.error || 'Error aplicando ajuste', ok: false });
-        log(data.error || 'Error aplicando ajuste', 'error');
+        setStatusBanner({ text: data.error || data.message || 'Error aplicando ajuste', ok: false });
+        log(data.error || data.message || 'Error aplicando ajuste', 'error');
       }
     } catch { setStatusBanner({ text: 'Error de red al aplicar ajuste.', ok: false }); log('Error de red al aplicar ajuste.', 'error'); }
     finally { setBusyAction(null); }

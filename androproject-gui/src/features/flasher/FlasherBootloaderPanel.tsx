@@ -111,8 +111,8 @@ export const FlasherBootloaderPanel: React.FC<FlasherBootloaderPanelProps> = ({
           <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-1.5">
             <button type="button" onClick={() => onRunAction('fastboot_unlock', 'ADVERTENCIA: Desbloquear el bootloader borrará todos los datos del usuario. ¿Continuar?')} disabled={busyAction !== null} className={btnCls}><Unlock size={12} /><span>Unlock OEM</span></button>
             <button type="button" onClick={() => onRunAction('fastboot_lock', '¿Cerrar el bootloader (fastboot flashing lock)? Requiere ROM stock.')} disabled={busyAction !== null} className={btnCls}><Lock size={12} /><span>Lock OEM</span></button>
-            <button type="button" onClick={() => onRunAction('fastboot_set_slot', undefined, { slot: 'a' })} disabled={busyAction !== null} className={btnCls}><span>Activar Slot A</span></button>
-            <button type="button" onClick={() => onRunAction('fastboot_set_slot', undefined, { slot: 'b' })} disabled={busyAction !== null} className={btnCls}><span>Activar Slot B</span></button>
+            <button type="button" onClick={() => onRunAction('fastboot_set_slot', '¿Activar el slot A para el próximo arranque?', { slot: 'a' })} disabled={busyAction !== null} className={btnCls}><span>Activar Slot A</span></button>
+            <button type="button" onClick={() => onRunAction('fastboot_set_slot', '¿Activar el slot B para el próximo arranque?', { slot: 'b' })} disabled={busyAction !== null} className={btnCls}><span>Activar Slot B</span></button>
             <button type="button" onClick={() => onRunAction('fastboot_oem_device_info')} disabled={busyAction !== null} className={btnCls}><span>Info OEM</span></button>
             <button type="button" onClick={() => onRunAction('fastboot_erase_partition', '¿Formatear partición cache vía Fastboot?', { partition: 'cache' })} disabled={busyAction !== null} className={btnCls}><Trash2 size={12} /><span>Borrar Cache</span></button>
             <button type="button" onClick={() => onRunAction('fastboot_reboot')} disabled={busyAction !== null} className={btnCls}><RotateCcw size={12} /><span>Reiniciar</span></button>

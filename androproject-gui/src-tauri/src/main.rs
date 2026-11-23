@@ -92,6 +92,12 @@ fn main() {
             logcat_native::rust_logcat_clear,
             logcat_native::rust_device_metrics_fast,
         ])
-        .run(tauri::generate_context!())
-        .expect("error while running ANDRO-IOS 100% Rust desktop application");
+        .build(tauri::generate_context!())
+        .expect("No se pudo iniciar la aplicación")
+        .run(|_app, event| {
+            // El receptor iniciado por esta aplicación no debe quedar abierto al salir.
+            if matches!(event, tauri::RunEvent::Exit) {
+                tauri::async_runtime::block_on(server::airplay_process::action("stop"));
+            }
+        });
 }

@@ -9,6 +9,7 @@
 //           el límite estricto de 200 líneas (SRP / Clean Architecture).
 // ============================================================================
 
+import { apiUrl } from '@/lib/api-url';
 export async function postActionRequest(
   action: string,
   activeSerial: string | null,
@@ -16,7 +17,7 @@ export async function postActionRequest(
   extraBody: Record<string, unknown> = {},
 ): Promise<Record<string, any>> {
   const dIP = activeSerial?.includes(':') ? activeSerial.split(':')[0] : deviceIP;
-  const r = await fetch('/api/actions', {
+  const r = await fetch(apiUrl('/api/actions'), {
     method: 'POST',
     body: JSON.stringify({ action, ip: dIP, serial: activeSerial, ...extraBody }),
     headers: { 'Content-Type': 'application/json' },
@@ -29,7 +30,7 @@ export async function postPatchRequest(
   serial: string | null,
   isClone: boolean,
 ): Promise<Record<string, any>> {
-  const res = await fetch('/api/patch-app', {
+  const res = await fetch(apiUrl('/api/patch-app'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ action: 'patch_app', packageName, serial, isClone }),
@@ -44,7 +45,7 @@ export async function projectScreensBatch(
   return Promise.all(
     devicesList.map(async ({ serial }) => {
       try {
-        const res = await fetch('/api/actions', {
+        const res = await fetch(apiUrl('/api/actions'), {
           method: 'POST',
           body: JSON.stringify({ action: 'open_screen', serial, videoSource }),
           headers: { 'Content-Type': 'application/json' },

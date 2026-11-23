@@ -9,6 +9,7 @@
 // POR QUÉ: Eliminar acciones huérfanas y mostrar el 100% de métricas (< 200L).
 // ============================================================================
 'use client';
+import { apiUrl } from '@/lib/api-url';
 
 import { useState } from 'react';
 import {
@@ -50,7 +51,7 @@ export function ToolsView({ device, addLog: propAddLog }: ToolsViewProps = {}) {
     if (!targetSerial) return;
     setDiagLoading(true);
     try {
-      const res = await fetch('/api/actions', {
+      const res = await fetch(apiUrl('/api/actions'), {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'get_diagnostics', serial: targetSerial }),
       });

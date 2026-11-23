@@ -8,6 +8,7 @@
 // POR QUÉ: Inyectar lógica completa al módulo de capturas sin código muerto (<200L).
 // ============================================================================
 'use client';
+import { apiUrl } from '@/lib/api-url';
 
 import React, { useState } from 'react';
 import { Shield, AlertTriangle, Wrench, CheckCircle2, RefreshCw, Camera } from 'lucide-react';
@@ -53,7 +54,7 @@ export const ScreenshotPanel: React.FC<{ serial?: string | null }> = ({ serial: 
     setCapturing(true);
     setLastCaptureMsg(null);
     try {
-      const res = await fetch('/api/actions', {
+      const res = await fetch(apiUrl('/api/actions'), {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'screenshot', serial: targetSerial }),
       });
@@ -69,9 +70,9 @@ export const ScreenshotPanel: React.FC<{ serial?: string | null }> = ({ serial: 
     if (!isConnected) return;
     setDiagRunning(true);
     setDiagResult(null);
-    addLog(`Auditando y reparando subsistema de capturas en ${targetSerial}...`);
+    addLog(`Comprobando captura ADB en ${targetSerial}...`);
     try {
-      const res = await fetch('/api/actions', {
+      const res = await fetch(apiUrl('/api/actions'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'diagnose_screenshot', serial: targetSerial }),
@@ -108,8 +109,8 @@ export const ScreenshotPanel: React.FC<{ serial?: string | null }> = ({ serial: 
               <Wrench size={18} />
             </div>
             <div>
-              <h2 className="text-sm font-bold">Diagnóstico y Reparación de Capturas del Sistema</h2>
-              <p className={`text-xs ${mutedCls} mt-0.5`}>Detecta `FLAG_SECURE`, `disable_screen_shot=1`, gestos desactivados y políticas MDM, reparándolos por ADB.</p>
+              <h2 className="text-sm font-bold">Diagnóstico de captura ADB</h2>
+              <p className={`text-xs ${mutedCls} mt-0.5`}>Comprueba si el dispositivo devuelve una imagen PNG a través de ADB.</p>
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-2">
@@ -117,7 +118,7 @@ export const ScreenshotPanel: React.FC<{ serial?: string | null }> = ({ serial: 
               {capturing ? 'Capturando...' : 'Tomar Captura HD'}
             </Button>
             <Button size="sm" variant="secondary" icon={<RefreshCw size={13} className={diagRunning ? 'animate-spin' : ''} />} disabled={!isConnected || diagRunning} onClick={handleRunScreenshotDiag}>
-              {diagRunning ? 'Diagnosticando...' : 'Diagnosticar y Reparar'}
+              {diagRunning ? 'Diagnosticando...' : 'Comprobar captura'}
             </Button>
           </div>
         </div>

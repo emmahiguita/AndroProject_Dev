@@ -9,6 +9,7 @@
 //          huérfanos manteniendo < 200 líneas (SRP).
 // ============================================================================
 'use client';
+import { apiUrl } from '@/lib/api-url';
 
 import React, { useState } from 'react';
 import { Shield, ShieldAlert, AlertTriangle, Trash2, Globe, Ban, Square } from 'lucide-react';
@@ -94,7 +95,7 @@ function AntivirusPanel({ serial, propAddLog }: { serial: string | null; propAdd
   const handlePkgAction = async (pkg: string, action: 'uninstall' | 'disable' | 'force_stop') => {
     if (action === 'uninstall' && !confirm(`¿Desinstalar amenaza ${pkg}?`)) return;
     try {
-      const r = await fetch('/api/apps', {
+      const r = await fetch(apiUrl('/api/apps'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action, packageName: pkg, serial }),
@@ -140,8 +141,8 @@ function AntivirusPanel({ serial, propAddLog }: { serial: string | null; propAdd
           <div className="flex items-center gap-3">
             <div className={iconBoxCls}><ShieldAlert size={18} /></div>
             <div>
-              <h2 className="text-sm font-bold">Indicadores de Malware, HiddenAds y Paquetes Camuflados</h2>
-              <p className={`text-xs ${mutedCls}`}>Coteja los paquetes instalados contra firmas conocidas de troyanos, adware y apps sin icono.</p>
+              <h2 className="text-sm font-bold">Indicadores del catálogo de aplicaciones</h2>
+              <p className={`text-xs ${mutedCls}`}>Muestra los indicadores proporcionados por el catálogo del dispositivo.</p>
             </div>
           </div>
           <Button size="sm" variant="secondary" icon={<Shield size={13} />} onClick={fetchApps} disabled={appsLoading || !serial}>
@@ -153,8 +154,8 @@ function AntivirusPanel({ serial, propAddLog }: { serial: string | null; propAdd
       {appsList.length > 0 && malwareApps.length === 0 && (
         <Card className="border-border text-center">
           <Shield size={22} className={`mx-auto mb-2 ${dark ? 'text-zinc-300' : 'text-slate-700'}`} />
-          <p className="font-bold text-xs">Catálogo limpio ({appsList.length} paquetes verificados)</p>
-          <p className={`text-xs ${mutedCls} mt-1`}>No se hallaron firmas conocidas de troyanos ni apps ocultas de usuario.</p>
+          <p className="font-bold text-xs">Sin indicadores en el catálogo ({appsList.length} paquetes)</p>
+          <p className={`text-xs ${mutedCls} mt-1`}>El catálogo no realiza un análisis antivirus de los paquetes.</p>
         </Card>
       )}
 

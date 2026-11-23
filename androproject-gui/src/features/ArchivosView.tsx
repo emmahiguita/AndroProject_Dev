@@ -1,13 +1,12 @@
 // ============================================================================
 // ARCHIVO: ArchivosView.tsx
-// QUÉ HACE: Vista bidireccional de transferencia y exploración de archivos
-//           PC ↔ Android (`/sdcard/Download`, `DCIM`, `Pictures`, etc.).
+// QUÉ HACE: Envía archivos a Android y explora su almacenamiento compartido.
 // CÓMO FUNCIONA: Sube archivos vía `XMLHttpRequest` (`POST /api/upload-file`)
-//           con barra de progreso real y monta `DeviceFileBrowser` para listar,
-//           descargar (`adb pull`) y eliminar archivos del dispositivo.
-// POR QUÉ: Evitar transferencia unidireccional incompleta y mantener < 200L.
+//           con progreso de subida al servidor y `DeviceFileBrowser` para listar.
+// POR QUÉ: Separar la transferencia del explorador y facilitar el mantenimiento.
 // ============================================================================
 'use client';
+import { apiUrl } from '@/lib/api-url';
 
 import React, { useState, useCallback } from 'react';
 import { Copy, FolderOpen, CheckCircle2, AlertCircle } from 'lucide-react';
@@ -55,12 +54,12 @@ export function ArchivosView({ device, addLog: propAddLog }: { device?: DeviceIn
 
   const handleOpenLocalCaptures = async () => {
     try {
-      const res = await fetch('/api/config', {
+      const res = await fetch(apiUrl('/api/actions'), {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'open_captures', serial: targetSerial }),
       });
       const d = await res.json();
-      setStatusBanner({ text: d.message || 'Carpeta de Capturas abierta en el PC.', ok: Boolean(d.success) });
+      setStatusBanner({ text: d.success ? (d.message || 'Carpeta de Capturas abierta en el PC.') : (d.error || 'No se pudo abrir la carpeta de Capturas.'), ok: Boolean(d.success) });
     } catch { setStatusBanner({ text: 'No se pudo abrir la carpeta local de Capturas.', ok: false }); }
   };
 
@@ -78,7 +77,7 @@ export function ArchivosView({ device, addLog: propAddLog }: { device?: DeviceIn
       await new Promise<void>((resolve) => {
         const xhr = new XMLHttpRequest();
         xhr.timeout = 120000;
-        xhr.open('POST', '/api/upload-file');
+        xhr.open('POST', apiUrl('/api/upload-file'));
         xhr.upload.onprogress = (ev) => {
           if (ev.lengthComputable) setUploadProgress({ ...useAppStore.getState().uploadProgress, [file.name]: Math.round((ev.loaded / ev.total) * 100) });
         };
@@ -112,7 +111,7 @@ export function ArchivosView({ device, addLog: propAddLog }: { device?: DeviceIn
               </div>
               <div>
                 <h2 className="text-xs font-bold">Transferencia y Explorador de Archivos (PC ↔ Android)</h2>
-                <p className={`text-[11px] ${mutedCls}`}>Sube archivos por ADB Push o explora y descarga desde el dispositivo.</p>
+                <p className={`text-[11px] ${mutedCls}`}>Sube archivos por ADB y descarga a Capturas/Descargas o elimina archivos confirmados.</p>
               </div>
             </div>
             <Button size="sm" variant="secondary" icon={<FolderOpen size={12} />} onClick={handleOpenLocalCaptures}>Abrir Capturas PC</Button>
@@ -149,7 +148,7 @@ export function ArchivosView({ device, addLog: propAddLog }: { device?: DeviceIn
                 <div className="w-full max-w-md space-y-2 z-20">
                   {Object.entries(uploadProgress).map(([fileName, progress]) => (
                     <Card key={fileName} padding="sm" className="w-full">
-                      <div className="flex justify-between text-xs mb-1.5 items-center"><span className="truncate max-w-[80%] font-medium">{fileName}</span><Badge tone="neutral">{progress}%</Badge></div>
+                      <div className="flex justify-between text-xs mb-1.5 items-center"><span className="truncate max-w-[80%] font-medium">{fileName}</span><Badge tone="neutral">{progress}% al servidor</Badge></div>
                       <div className={`w-full h-1.5 rounded-full overflow-hidden ${dark ? 'bg-zinc-800' : 'bg-slate-200'}`}><div className={`h-full transition-all duration-300 ${dark ? 'bg-zinc-200' : 'bg-slate-800'}`} style={{ width: `${progress}%` }} /></div>
                     </Card>
                   ))}

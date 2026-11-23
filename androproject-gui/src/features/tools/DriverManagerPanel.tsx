@@ -8,6 +8,7 @@
 // POR QUÉ: Inyectar diagnóstico USB completo sin código huérfano (< 200L, SRP).
 // ============================================================================
 'use client';
+import { apiUrl } from '@/lib/api-url';
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { Usb, ShieldCheck, AlertTriangle, RefreshCw, Download, Copy, Check } from 'lucide-react';
@@ -25,6 +26,7 @@ export const DriverManagerPanel: React.FC<DriverManagerPanelProps> = ({ onLog })
   const { dark } = useTheme();
   const [loading, setLoading] = useState(false);
   const [report, setReport] = useState<DriverScanReport | null>(null);
+  const [availability, setAvailability] = useState({ pnp: false, fastboot: false });
   const [driverPath, setDriverPath] = useState('');
   const [statusMsg, setStatusMsg] = useState<{ text: string; ok: boolean } | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -32,9 +34,10 @@ export const DriverManagerPanel: React.FC<DriverManagerPanelProps> = ({ onLog })
   const scanDrivers = useCallback(async () => {
     setLoading(true);
     try {
-      const r = await fetch('/api/drivers');
+      const r = await fetch(apiUrl('/api/drivers'));
       const d = await r.json();
       if (d.success) {
+        setAvailability({ pnp: Boolean(d.pnpAvailable), fastboot: Boolean(d.fastbootAvailable) });
         setReport({
           mobileUsb: d.mobileUsb || [],
           mobileProblems: d.mobileProblems || [],
@@ -42,7 +45,9 @@ export const DriverManagerPanel: React.FC<DriverManagerPanelProps> = ({ onLog })
           adbDevices: d.adbDevices || [],
           fastbootDevices: d.fastbootDevices || [],
         });
-      }
+        const issues = [!d.pnpAvailable && `PnP: ${d.pnpError || 'no disponible'}`, !d.fastbootAvailable && `Fastboot: ${d.fastbootError || 'no disponible'}`].filter(Boolean);
+        setStatusMsg({ text: issues.length ? `Consulta parcial. ${issues.join('; ')}` : 'Consultas ADB, Fastboot y PnP completadas.', ok: issues.length === 0 });
+      } else { setReport(null); setStatusMsg({ text: d.error || 'No se pudo consultar ADB.', ok: false }); }
     } catch {
       setStatusMsg({ text: 'No se pudo consultar PnPUtil (/api/drivers)', ok: false });
     } finally {
@@ -54,10 +59,12 @@ export const DriverManagerPanel: React.FC<DriverManagerPanelProps> = ({ onLog })
 
   const runDriverAction = async (action: 'verify_cat' | 'install_inf') => {
     if (!driverPath.trim()) return;
+    // Instalar un controlador modifica Windows y puede requerir administrador.
+    if (action === 'install_inf' && !confirm(`¿Instalar el controlador "${driverPath.trim()}" en Windows?`)) return;
     setLoading(true);
     setStatusMsg(null);
     try {
-      const r = await fetch('/api/drivers', {
+      const r = await fetch(apiUrl('/api/drivers'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action, filePath: driverPath.trim() }),
@@ -99,7 +106,7 @@ export const DriverManagerPanel: React.FC<DriverManagerPanelProps> = ({ onLog })
           </div>
           <div>
             <h2 className="text-xs font-bold">DriverManager USB Windows (PnPUtil)</h2>
-            <p className={`text-[11px] ${mutedCls}`}>Diagnostica VID/PID, errores USB, firma `.cat` e instala `.inf` OEM sin romper MTP/ADB.</p>
+            <p className={`text-[11px] ${mutedCls}`}>Consulta dispositivos ADB, verifica catálogos e instala controladores INF con PnPUtil.</p>
           </div>
         </div>
         <Button size="sm" variant="secondary" icon={<RefreshCw size={12} className={loading ? 'animate-spin' : ''} />} onClick={scanDrivers} disabled={loading}>
@@ -133,11 +140,9 @@ export const DriverManagerPanel: React.FC<DriverManagerPanelProps> = ({ onLog })
       {report && (
         <div className="space-y-2 text-xs">
           <div className="flex flex-wrap gap-2">
-            <Badge tone="neutral">USB Móvil: {report.mobileUsb.length}</Badge>
             <Badge tone="neutral">ADB: {report.adbDevices.length}</Badge>
-            <Badge tone="neutral">Fastboot: {report.fastbootDevices.length}</Badge>
-            <Badge tone={report.mobileProblems.length > 0 ? 'danger' : 'neutral'}>Problemas USB Móvil: {report.mobileProblems.length}</Badge>
-            {report.otherProblemsCount > 0 && <Badge tone="neutral">Otros PC: {report.otherProblemsCount}</Badge>}
+            <Badge tone="neutral">PnP móvil: {availability.pnp ? report.mobileUsb.length : 'no disponible'}</Badge>
+            <Badge tone="neutral">Fastboot: {availability.fastboot ? report.fastbootDevices.length : 'no disponible'}</Badge>
           </div>
           {report.mobileUsb.map((u) => (
             <div key={u.instanceId} className={`p-2.5 rounded-lg border font-mono text-[11px] flex items-center justify-between gap-2 ${rowCls}`}>

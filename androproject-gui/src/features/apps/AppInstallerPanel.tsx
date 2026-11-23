@@ -1,6 +1,6 @@
 // ============================================================================
 // ARCHIVO: AppInstallerPanel.tsx
-// QUÉ HACE: Subpanel de instalación de paquetes APK/IPA por arrastrar o
+// QUÉ HACE: Subpanel de instalación de paquetes APK por arrastrar o
 //           seleccionar archivos hacia el dispositivo conectado.
 // CÓMO FUNCIONA: Envía cada archivo vía FormData a `POST /api/install-apk`,
 //           muestra el estado de instalación en vivo y refresca el catálogo.
@@ -9,6 +9,7 @@
 // ============================================================================
 
 'use client';
+import { apiUrl } from '@/lib/api-url';
 
 import React, { useState } from 'react';
 import { Smartphone, Download, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
@@ -46,7 +47,7 @@ export function AppInstallerPanel({
         formData.append('file', file);
         if (activeSerial) formData.append('serial', activeSerial);
         try {
-          const res = await fetch('/api/install-apk', { method: 'POST', body: formData });
+          const res = await fetch(apiUrl('/api/install-apk'), { method: 'POST', body: formData });
           const data = await res.json();
           if (data.success) {
             anyInstalled = true;
@@ -79,9 +80,9 @@ export function AppInstallerPanel({
             <Smartphone size={18} />
           </div>
           <div>
-            <h2 className="text-sm font-semibold">Instalar APK / IPA en el dispositivo</h2>
+            <h2 className="text-sm font-semibold">Instalar APK en Android</h2>
             <p className={`text-xs mt-0.5 ${dark ? 'text-zinc-400' : 'text-slate-600'}`}>
-              Selecciona archivos .apk (Android) o .ipa (iOS) desde tu PC para instalarlos por USB/Wi-Fi.
+              Selecciona archivos .apk desde tu PC para instalarlos en el Android conectado.
             </p>
           </div>
         </div>
@@ -91,7 +92,7 @@ export function AppInstallerPanel({
         }`}>
           <input
             type="file"
-            accept=".apk,.ipa"
+            accept=".apk"
             multiple
             disabled={!connected || installing}
             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10 disabled:cursor-not-allowed"
@@ -101,7 +102,7 @@ export function AppInstallerPanel({
             {installing ? <Loader2 size={24} className="animate-spin" /> : <Download size={24} />}
           </div>
           <p className="text-sm font-semibold">
-            {installing ? 'Instalando paquete en el dispositivo...' : 'Arrastra archivos APK o IPA aquí'}
+            {installing ? 'Instalando paquete en el dispositivo...' : 'Selecciona archivos APK'}
           </p>
           <p className={`text-xs mt-1 ${dark ? 'text-zinc-400' : 'text-slate-500'}`}>
             O haz clic para explorar en tu equipo
@@ -119,7 +120,7 @@ export function AppInstallerPanel({
 
         {!connected && (
           <div className={`mt-4 p-3 rounded-lg border text-xs text-center font-medium ${dark ? 'bg-zinc-900 border-zinc-800 text-zinc-300' : 'bg-slate-100 border-slate-200 text-slate-700'}`}>
-            Conecta un dispositivo Android o iOS para habilitar la instalación de paquetes.
+            Conecta un dispositivo Android para habilitar la instalación de paquetes.
           </div>
         )}
       </div>

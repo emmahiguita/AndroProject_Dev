@@ -126,7 +126,8 @@ pub fn silent_cmd(program: impl AsRef<std::ffi::OsStr>) -> Command {
 /// Ejecuta `adb` con timeout y devuelve `(ok, stdout, stderr)`.
 pub async fn run_adb(args: &[&str], timeout_ms: u64) -> (bool, String, String) {
     let mut cmd = silent_cmd(adb_bin());
-    cmd.args(args).stdout(Stdio::piped()).stderr(Stdio::piped());
+    // Si vence el plazo, Tokio termina el proceso hijo al descartar la operación.
+    cmd.kill_on_drop(true).args(args).stdout(Stdio::piped()).stderr(Stdio::piped());
     match tokio::time::timeout(Duration::from_millis(timeout_ms), cmd.output()).await {
         Ok(Ok(out)) => (
             out.status.success(),

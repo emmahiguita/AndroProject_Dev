@@ -61,7 +61,11 @@ export const rustBridge = {
     serial: string,
     packageName: string,
     action: 'uninstall' | 'disable' | 'enable' | 'force_stop' | 'clear_data' | 'launch'
-  ) => invokeRust<string>('rust_app_action_fast', { serial, packageName, action }),
+  ) => {
+    // La acción puede ser irreversible: propaga el error para no ejecutarla dos veces.
+    const tauri = getTauri();
+    return tauri ? tauri.invoke<string>('rust_app_action_fast', { serial, packageName, action }) : Promise.resolve(null);
+  },
   logcatSnapshot: (serial: string, lines = 150, filter?: string) =>
     invokeRust<string[]>('rust_logcat_snapshot', { serial, lines, filter }),
   logcatClear: (serial: string) => invokeRust<boolean>('rust_logcat_clear', { serial }),

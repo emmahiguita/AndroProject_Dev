@@ -9,6 +9,7 @@
 //           innecesarias de memoria ni tirones de GPU (< 200 líneas, SOLID).
 // ============================================================================
 
+import { apiUrl } from '@/lib/api-url';
 export interface WebCodecsPlayerCallbacks {
   onFrameRendered?: () => void;
   onFps?: (fps: number) => void;
@@ -71,7 +72,7 @@ export function startWebCodecsH264Player(
       let cachedCtx: CanvasRenderingContext2D | null = null;
 
       try {
-        const res = await fetch(`/api/scrcpy-video?serial=${encodeURIComponent(serial)}`, {
+        const res = await fetch(apiUrl(`/api/scrcpy-video?serial=${encodeURIComponent(serial)}`), {
           signal: activeAbort.signal,
           cache: 'no-store',
         });

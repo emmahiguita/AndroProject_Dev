@@ -60,30 +60,34 @@ pub async fn read_live_android_settings(serial: &str) -> Value {
 /// Responde `get_optimizer_settings` y `get_perf_status` para la vista Optimizador.
 pub async fn handle_optimizer_query(serial: &str, action: &str) -> Value {
     let live = read_live_android_settings(serial).await;
-    let anim = live["animScale"].as_str().unwrap_or("1.0");
+    // Un teléfono inaccesible no debe aparecer como una lectura satisfactoria.
+    if live.is_null() {
+        return json!({ "success": false, "error": "No se pudieron leer los ajustes del dispositivo" });
+    }
+    let state = super::developer_actions::status(serial).await;
+    if state["success"] != true { return state; }
+    let status = &state["status"];
+    let display = super::optimizer_actions::read(serial).await;
     let stay = live["stayAwake"].as_bool().unwrap_or(false);
     let touches = live["showTouches"].as_bool().unwrap_or(false);
     if action == "get_perf_status" {
-        return json!({
-            "success": true,
-            "status": {
-                "animScale": anim,
-                "stayAwake": stay,
-                "showTouches": touches,
-                "profile": "balanced",
-                "adbActive": !serial.is_empty(),
-            }
-        });
+        return state;
     }
     json!({
         "success": true,
         "settings": {
-            "windowAnimationScale": anim,
-            "transitionAnimationScale": anim,
-            "animatorDurationScale": anim,
+            "animScales": {
+                "window_animation_scale": status["windowScale"],
+                "transition_animation_scale": status["transitionScale"],
+                "animator_duration_scale": status["animatorScale"],
+            },
             "stayAwake": stay,
             "showTouches": touches,
-            "wifiScanThrottle": true,
+            "privateDnsMode": display.get("privateDnsMode"),
+            "privateDnsSpecifier": display.get("privateDnsSpecifier"),
+            "adguardProfile": display.get("adguardProfile"),
+            "autoBrightness": display.get("autoBrightness"),
+            "nightMode": display.get("nightMode"),
         }
     })
 }
@@ -91,7 +95,12 @@ pub async fn handle_optimizer_query(serial: &str, action: &str) -> Value {
 /// `POST /api/config` — Modifica ajustes reales del sistema Android en vivo.
 pub async fn post_config(Json(body): Json<Value>) -> Json<Value> {
     let action = body["action"].as_str().unwrap_or("");
-    let serial = safe_serial(body["serial"].as_str().unwrap_or(""));
+    let raw_serial = body["serial"].as_str().unwrap_or("").trim();
+    let serial = safe_serial(raw_serial);
+    // Exigir serial evita modificar otro móvil cuando hay varias conexiones.
+    if serial.is_empty() || serial != raw_serial {
+        return Json(json!({ "success": false, "error": "Serial requerido" }));
+    }
     let cmd = match action {
         "set_stay_awake" => {
             let v = if body["value"].as_bool().unwrap_or(false) { "3" } else { "0" };
@@ -102,17 +111,21 @@ pub async fn post_config(Json(body): Json<Value>) -> Json<Value> {
             format!("settings put system show_touches {}", v)
         }
         "set_anim_scale" => {
-            let v = body["value"].as_str().unwrap_or("1.0");
+            // Solo se permiten valores ofrecidos por la interfaz, sin texto shell.
+            let Some(v @ ("0.0" | "0.5" | "1.0")) = body["value"].as_str() else {
+                return Json(json!({ "success": false, "error": "Escala de animación no válida" }));
+            };
             format!("settings put global window_animation_scale {0}; settings put global transition_animation_scale {0}; settings put global animator_duration_scale {0}", v)
         }
         "set_screen_timeout" => {
             let ms = body["value"].as_u64().unwrap_or(60000);
             format!("settings put system screen_off_timeout {}", ms)
         }
-        _ => return Json(json!({ "success": true, "message": "Configuración actualizada" })),
+        _ => return Json(json!({ "success": false, "error": format!("Ajuste no implementado: {}", action) })),
     };
     let (ok, _, err) = adb_shell(&serial, &cmd, 4000).await;
-    Json(json!({ "success": ok, "message": if ok { "Ajuste aplicado" } else { "Error aplicando ajuste" }, "error": err }))
+    let settings = if ok { read_live_android_settings(&serial).await } else { Value::Null };
+    Json(json!({ "success": ok, "message": if ok { "Ajuste aplicado" } else { "Error aplicando ajuste" }, "error": err, "deviceSettings": settings }))
 }
 
 /// Construye argumentos reales de VisionNano / Cámara (Android 12+) para `open_screen`.

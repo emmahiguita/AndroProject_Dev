@@ -9,6 +9,7 @@
 //           mantener ambos archivos por debajo de 200 líneas (SRP / DRY).
 // ============================================================================
 
+import { apiUrl } from '@/lib/api-url';
 export interface RegisteredDevice {
   serial: string;
   model: string;
@@ -56,7 +57,7 @@ export async function postAdbAction<T = Record<string, unknown>>(
   action: string,
   extra: Record<string, unknown> = {},
 ): Promise<T> {
-  const res = await fetch('/api/actions', {
+  const res = await fetch(apiUrl('/api/actions'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ action, ...extra }),

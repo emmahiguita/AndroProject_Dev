@@ -10,6 +10,7 @@
 //          el intervalo zombi (< 200 líneas, SRP).
 // ============================================================================
 'use client';
+import { apiUrl } from '@/lib/api-url';
 
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { Camera, ExternalLink, RefreshCw } from 'lucide-react';
@@ -19,7 +20,6 @@ import './ios-mirror.css';
 
 export default function IOSMirrorPage() {
   const { status, loading, error, toggleServer, refresh } = useAirPlayServer();
-  const [frameSrc, setFrameSrc] = useState('/api/device-image?serial=airplay-ios&t=0');
   const [toastMsg, setToastMsg] = useState<string | null>(null);
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -31,21 +31,10 @@ export default function IOSMirrorPage() {
     toastTimerRef.current = setTimeout(() => setToastMsg(null), 2400);
   }, []);
 
-  useEffect(() => {
-    if (!status.running) return;
-    const tick = () => {
-      if (document.visibilityState === 'hidden') return;
-      setFrameSrc(`/api/device-image?serial=airplay-ios&t=${Date.now()}`);
-    };
-    tick();
-    const timer = setInterval(tick, 350);
-    return () => clearInterval(timer);
-  }, [status.running]);
-
   const sendIosKey = async (keycode: string, label: string) => {
     notify(label);
     try {
-      await fetch('/api/actions', {
+      await fetch(apiUrl('/api/actions'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'keyevent', keycode, serial: 'airplay-ios' }),
@@ -58,7 +47,7 @@ export default function IOSMirrorPage() {
   const handleFocusNative = async () => {
     notify('Abriendo ventana nativa AirPlay...');
     try {
-      const res = await fetch('/api/airplay', {
+      const res = await fetch(apiUrl('/api/airplay'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'open_native_window' }),
@@ -73,7 +62,7 @@ export default function IOSMirrorPage() {
   const handleScreenshot = async () => {
     notify('Capturando pantalla iOS HD...');
     try {
-      const res = await fetch('/api/actions', {
+      const res = await fetch(apiUrl('/api/actions'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'screenshot', serial: 'airplay-ios' }),
@@ -95,13 +84,13 @@ export default function IOSMirrorPage() {
         </a>
         <h1 className="text-base font-bold">Espejo AirPlay</h1>
         <span className={`mr-auto text-xs font-semibold ${serverReady ? 'text-semantic-success' : 'text-text-secondary'}`} role="status" title={`${status.serverName} (${status.port})`}>
-          {serverReady ? 'Receptor activo' : 'Receptor detenido'}
+          {serverReady ? 'Proceso receptor activo' : 'Receptor detenido'}
         </span>
         <Button size="sm" variant={serverReady ? 'secondary' : 'primary'} onClick={toggleServer} loading={loading}>
           {serverReady ? 'Detener AirPlay' : 'Iniciar AirPlay'}
         </Button>
-        <Button size="sm" variant="secondary" onClick={handleScreenshot} disabled={!serverReady} icon={<Camera size={15} />}>Captura HD</Button>
-        <Button size="sm" variant="secondary" onClick={handleFocusNative} icon={<ExternalLink size={15} />}>Ventana libre</Button>
+        <Button size="sm" variant="secondary" onClick={handleScreenshot} disabled icon={<Camera size={15} />}>Captura no disponible</Button>
+        <Button size="sm" variant="secondary" onClick={handleFocusNative} disabled icon={<ExternalLink size={15} />}>Ventana libre</Button>
         <Button size="sm" variant="secondary" onClick={refresh} aria-label="Actualizar estado de AirPlay" title="Actualizar estado de AirPlay" className="px-2">
           <RefreshCw size={16} />
         </Button>
@@ -119,6 +108,7 @@ export default function IOSMirrorPage() {
           className="sideButton volumeUp"
           title="Subir Volumen (iOS)"
           aria-label="Subir Volumen"
+          disabled
           onClick={() => sendIosKey('KEYCODE_VOLUME_UP', 'Subiendo volumen iOS...')}
           style={{ cursor: 'pointer', border: 'none' }}
         />
@@ -127,6 +117,7 @@ export default function IOSMirrorPage() {
           className="sideButton volumeDown"
           title="Bajar Volumen (iOS)"
           aria-label="Bajar Volumen"
+          disabled
           onClick={() => sendIosKey('KEYCODE_VOLUME_DOWN', 'Bajando volumen iOS...')}
           style={{ cursor: 'pointer', border: 'none' }}
         />
@@ -135,23 +126,20 @@ export default function IOSMirrorPage() {
           className="powerButton"
           title="Bloquear / Encender Pantalla (iOS)"
           aria-label="Botón de encendido"
+          disabled
           onClick={() => sendIosKey('KEYCODE_POWER', 'Alternando bloqueo iOS...')}
           style={{ cursor: 'pointer', border: 'none' }}
         />
 
-        <div className="screen" onClick={handleFocusNative} style={{ cursor: 'pointer' }}>
-          {serverReady ? (
-            <img src={frameSrc} alt="AirPlay 2 Live Mirror" className="video" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-          ) : (
+        <div className="screen">
             <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '24px', textAlign: 'center', color: '#a1a1aa' }}>
-              <span style={{ fontSize: '13px', fontWeight: 700, color: '#f4f4f5' }}>AirPlay 2 en espera</span>
-              <span style={{ fontSize: '11px' }}>Pulsa &quot;Iniciar AirPlay&quot; arriba para proyectar tu iPhone o iPad</span>
+              <span style={{ fontSize: '13px', fontWeight: 700, color: '#f4f4f5' }}>Vídeo integrado no disponible</span>
+              <span style={{ fontSize: '11px' }}>El receptor se abre en su propia ventana. La conexión del iPhone aún no está verificada.</span>
             </div>
-          )}
           <div className="dynamicIsland"><div className="camera" /></div>
           <div className="status">
             <span className="liveDot" style={{ background: serverReady ? '#34d399' : '#fbbf24' }} />
-            {serverReady ? 'AIRPLAY 2 LISTO · 60 FPS · AUDIO EN CELULAR' : 'RECEPTOR EN ESPERA — PULSA INICIAR AIRPLAY'}
+            {serverReady ? 'PROCESO ACTIVO - CONEXIÓN SIN COMPROBAR' : 'RECEPTOR DETENIDO'}
           </div>
         </div>
       </section>

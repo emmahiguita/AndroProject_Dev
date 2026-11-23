@@ -12,6 +12,7 @@
 // ============================================================================
 
 'use client';
+import { apiUrl } from '@/lib/api-url';
 
 import { useMemo, useCallback, useEffect, useState, useRef } from 'react';
 import { useAppStore } from '@/stores';
@@ -39,7 +40,8 @@ export function AppsView({ device: propDevice, addLog: propAddLog }: AppsViewPro
   const s = useAppStore();
   const device = propDevice || s.device;
   const targetSerial = device?.serial || s.activeSerial;
-  const isConnected = Boolean(device?.connected || (targetSerial && targetSerial !== 'Hardware Level'));
+  // ADB gestiona Android; un serial iOS o una conexión caída no habilitan la instalación.
+  const isConnected = Boolean(device?.connected && device.platform !== 'ios' && targetSerial && targetSerial !== 'Hardware Level');
   const [statusMessage, setStatusMessage] = useState<{ text: string; isError?: boolean; serial: string | null } | null>(null);
   const loadedSerialRef = useRef<string | null>(null);
 
@@ -50,10 +52,10 @@ export function AppsView({ device: propDevice, addLog: propAddLog }: AppsViewPro
   }, [propAddLog, s, targetSerial]);
 
   const fetchApps = useCallback(async (forceRefresh = false) => {
-    if (!targetSerial || targetSerial === 'Hardware Level') return;
+    if (!isConnected || !targetSerial) return;
     s.setAppsLoading(true);
     try {
-      const res = await fetch('/api/apps', {
+      const res = await fetch(apiUrl('/api/apps'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'list', serial: targetSerial, forceRefresh }),
@@ -67,14 +69,14 @@ export function AppsView({ device: propDevice, addLog: propAddLog }: AppsViewPro
     } finally {
       if (useAppStore.getState().activeSerial === targetSerial) s.setAppsLoading(false);
     }
-  }, [targetSerial, s, notify]);
+  }, [targetSerial, isConnected, s, notify]);
 
   useEffect(() => {
-    if (!targetSerial || targetSerial === 'Hardware Level') return;
+    if (!isConnected || !targetSerial) return;
     if (s.appsList.length > 0 && loadedSerialRef.current === targetSerial) return;
     fetchApps(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [targetSerial]);
+  }, [targetSerial, isConnected]);
 
   const applyLocalMutation = useCallback((action: PkgAction, pkgName: string) => {
     const state = useAppStore.getState();
@@ -114,8 +116,10 @@ export function AppsView({ device: propDevice, addLog: propAddLog }: AppsViewPro
           notify(cleanMsg);
           return;
         }
+        notify(`No se pudo completar ${action} para ${pkgName}: ${rustOut || 'sin respuesta del servicio nativo'}`, true);
+        return;
       }
-      const res = await fetch('/api/apps', {
+      const res = await fetch(apiUrl('/api/apps'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action, packageName: pkgName, serial: targetSerial }),
@@ -124,7 +128,7 @@ export function AppsView({ device: propDevice, addLog: propAddLog }: AppsViewPro
       if (data.success) { applyLocalMutation(action, pkgName); notify(data.message || `Acción ${action} aplicada a ${pkgName}.`); }
       else notify(`Error (${action} en ${pkgName}): ${data.error || 'fallo ADB'}`, true);
     } catch (err: unknown) {
-      notify(`Error de red: ${getErrorMessage(err)}`, true);
+      notify(`Error al ejecutar ${action}: ${getErrorMessage(err)}`, true);
     } finally {
       if (useAppStore.getState().activeSerial === targetSerial) s.setAppActionLoading(null);
     }
@@ -148,7 +152,7 @@ export function AppsView({ device: propDevice, addLog: propAddLog }: AppsViewPro
     if (targets.length === 0) { notify('Los paquetes seleccionados son críticos del sistema y están protegidos.', true); return; }
     if ((action === 'uninstall' || action === 'disable') && !confirm(`¿Aplicar "${action}" a ${targets.length} aplicaciones seleccionadas?`)) return;
     for (const pkgName of targets) await runPkgAction(action, pkgName);
-    if (useAppStore.getState().activeSerial === targetSerial) s.setSelectedPackages(new Set());
+    // Conserva la selección para que el usuario revise el resultado del lote.
   };
 
   const handleAuditThreats = () => {
@@ -157,7 +161,8 @@ export function AppsView({ device: propDevice, addLog: propAddLog }: AppsViewPro
       s.setAppsFilter('malware');
       notify(`Auditoría: ${malwareCount} amenazas/spyware, ${overlayCount} apps con publicidad Overlay y ${hiddenUserCount} apps ocultas sin icono. Mostrando sospechosas.`, true);
     } else {
-      notify(`Auditoría limpia (${s.appsList.length} paquetes): 0 virus/spyware y 0 adware oculto detectados.`);
+      // La lista ADB no incluye un análisis antivirus; no acredita que el dispositivo esté limpio.
+      notify('La lista de paquetes no incluye un análisis de malware; no se puede confirmar que el dispositivo esté limpio.', true);
     }
   };
 
@@ -169,7 +174,7 @@ export function AppsView({ device: propDevice, addLog: propAddLog }: AppsViewPro
         <h1 className="mb-3 text-2xl font-bold tracking-tight text-text-primary">Aplicaciones</h1>
         <div className="flex flex-wrap gap-2" role="group" aria-label="Opciones de aplicaciones">
           <button type="button" aria-pressed={s.appsSubTab === 'manager'} onClick={() => s.setAppsSubTab('manager')} className={tabCls}>Administrar aplicaciones ({s.appsList.length})</button>
-          <button type="button" aria-pressed={s.appsSubTab === 'installer'} onClick={() => s.setAppsSubTab('installer')} className={tabCls}>Instalar APK / IPA</button>
+          <button type="button" aria-pressed={s.appsSubTab === 'installer'} onClick={() => s.setAppsSubTab('installer')} className={tabCls}>Instalar APK</button>
         </div>
       </div>
 

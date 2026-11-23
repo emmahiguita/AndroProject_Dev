@@ -7,6 +7,7 @@
 // POR QUÉ: Desacoplar la lógica de polling y control de streaming de la vista AppShell.
 // ============================================================================
 'use client';
+import { apiUrl } from '@/lib/api-url';
 
 import { useState, useEffect, useCallback } from 'react';
 import type { DeviceInfo, NavSection } from '@/features/types';
@@ -33,7 +34,7 @@ export function useStreamTracker({
     const checkStream = async () => {
       if (typeof document !== 'undefined' && document.visibilityState === 'hidden') return;
       try {
-        const res = await fetch('/api/actions', {
+        const res = await fetch(apiUrl('/api/actions'), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ action: 'check_screen', serial: selectedSerial }),
@@ -53,6 +54,7 @@ export function useStreamTracker({
     };
   }, [selectedSerial]);
 
+  // Abrir la vista prepara la proyección; solo el servidor confirma si está activa.
   const toggleTransmit = useCallback(async () => {
     if (!selectedSerial) return;
     const isCurrentlyActive = !!activeStreams[selectedSerial];
@@ -61,11 +63,16 @@ export function useStreamTracker({
 
     if (isCurrentlyActive) {
       try {
-        await fetch('/api/actions', {
+        const response = await fetch(apiUrl('/api/actions'), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ action: 'stop_screen', serial: selectedSerial }),
         });
+        const result = await response.json();
+        if (!response.ok || !result.success) {
+          addLog(result.error || `No se pudo detener la transmisión de ${devName}`, 'error');
+          return;
+        }
         setActiveStreams((prev) => ({ ...prev, [selectedSerial]: false }));
         addLog(`Transmisión scrcpy detenida: ${devName}`, 'info');
       } catch {
@@ -73,8 +80,7 @@ export function useStreamTracker({
       }
     } else {
       onNavigate('projection');
-      setActiveStreams((prev) => ({ ...prev, [selectedSerial]: true }));
-      addLog(`Proyección 60 FPS WebCodecs activada: ${devName}`, 'success');
+      addLog(`Vista de proyección abierta: ${devName}`, 'info');
     }
   }, [selectedSerial, activeStreams, devices, onNavigate, addLog]);
 

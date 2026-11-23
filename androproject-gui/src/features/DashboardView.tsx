@@ -10,6 +10,7 @@
 //           con componentes pequeños y limpios (< 200 líneas, SOLID).
 // ============================================================================
 'use client';
+import { apiUrl } from '@/lib/api-url';
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
@@ -57,7 +58,7 @@ export function DashboardView({ device: propDevice, addLog: propAddLog, onNaviga
   const refreshLiveTelemetry = useCallback(async () => {
     if (!device?.serial) return;
     try {
-      const res = await fetch(`/api/device?serial=${encodeURIComponent(device.serial)}`, { cache: 'no-store' });
+      const res = await fetch(apiUrl(`/api/device?serial=${encodeURIComponent(device.serial)}`), { cache: 'no-store' });
       const data = await res.json();
       if (data.activeDevice?.serial === device.serial && useAppStore.getState().activeSerial === device.serial) {
         setStoreDevice(data.activeDevice);
@@ -111,7 +112,7 @@ export function DashboardView({ device: propDevice, addLog: propAddLog, onNaviga
     setAppActionLoading(pkg);
     const logFn = (msg: string, t: 'info' | 'success' | 'error') => (propAddLog ? propAddLog(msg, t) : storeAddLog(msg));
     try {
-      const res = await fetch('/api/apps', {
+      const res = await fetch(apiUrl('/api/apps'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'uninstall', packageName: pkg, serial: device?.serial }),

@@ -10,6 +10,7 @@
 // POR QUÉ: Inyectar lógica completa sin acciones ni estados huérfanos (< 200L).
 // ============================================================================
 'use client';
+import { apiUrl } from '@/lib/api-url';
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { Zap, Cpu, HardDrive, RefreshCw, CheckCircle2, Sparkles, Sliders, Globe, Volume2, Trash2 } from 'lucide-react';
@@ -44,7 +45,7 @@ export const OptimizerView: React.FC<OptimizerViewProps> = ({ device: propDevice
   const loadOptimizerSettings = useCallback(async () => {
     if (!isAndroid || !targetSerial) return;
     try {
-      const res = await fetch('/api/actions', {
+      const res = await fetch(apiUrl('/api/actions'), {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'get_optimizer_settings', serial: targetSerial }),
       });
@@ -66,6 +67,7 @@ export const OptimizerView: React.FC<OptimizerViewProps> = ({ device: propDevice
       if (typeof st.wifiPowerSave === 'boolean') s.setWifiPowerSave(st.wifiPowerSave);
       if (st.privateDnsMode) s.setPrivateDnsMode(st.privateDnsMode);
       if (typeof st.privateDnsSpecifier === 'string') s.setPrivateDnsSpecifier(st.privateDnsSpecifier);
+      if (st.adguardProfile) s.setAdguardProfile(st.adguardProfile);
       if (st.bluetooth) {
         s.setBluetoothInfo({
           codec: String(st.bluetooth.codec || ''),
@@ -91,7 +93,7 @@ export const OptimizerView: React.FC<OptimizerViewProps> = ({ device: propDevice
     setOptimizationComplete(false);
     addLog(`Iniciando aceleración de RAM y procesos en ${targetSerial}...`, 'info');
     try {
-      const res = await fetch('/api/actions', {
+      const res = await fetch(apiUrl('/api/actions'), {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'optimize_ram', serial: targetSerial }),
       });
@@ -100,7 +102,7 @@ export const OptimizerView: React.FC<OptimizerViewProps> = ({ device: propDevice
       const freed = typeof data.freedMB === 'number' ? data.freedMB : null;
       setFreedMemoryMB(freed);
       setOptimizationComplete(true);
-      addLog(freed !== null ? `Optimización completada. Se liberaron ${freed} MB de RAM.` : 'Optimización completada.', 'success');
+      addLog(freed !== null ? `Optimización completada. Se liberaron ${freed} MB de RAM.` : (data.message || 'Solicitud enviada a Android.'), 'success');
     } catch (err: unknown) {
       addLog(`Error de red al optimizar: ${err instanceof Error ? err.message : String(err)}`, 'error');
     } finally { setIsOptimizing(false); }
@@ -111,7 +113,7 @@ export const OptimizerView: React.FC<OptimizerViewProps> = ({ device: propDevice
     setIsTrimming(true);
     addLog(`Ejecutando TRIM de almacenamiento y caché en ${targetSerial}...`, 'info');
     try {
-      const res = await fetch('/api/actions', {
+      const res = await fetch(apiUrl('/api/actions'), {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'run_trim', serial: targetSerial }),
       });
@@ -168,7 +170,7 @@ export const OptimizerView: React.FC<OptimizerViewProps> = ({ device: propDevice
                 <div className="flex items-center gap-3">
                   <CheckCircle2 size={18} className="text-text-primary shrink-0" />
                   <p className="text-xs text-text-secondary">
-                    <strong className="text-text-primary">¡Optimizado!</strong> {freedMemoryMB !== null ? <>Liberados <strong className="text-text-primary font-mono">{freedMemoryMB} MB</strong> de RAM.</> : 'Procesos detenidos y caché liberada.'}
+                    <strong className="text-text-primary">Solicitud enviada.</strong> {freedMemoryMB !== null ? <>Liberados <strong className="text-text-primary font-mono">{freedMemoryMB} MB</strong> de RAM.</> : 'Android recibió la solicitud de detener procesos en segundo plano.'}
                   </p>
                 </div>
               </Card>

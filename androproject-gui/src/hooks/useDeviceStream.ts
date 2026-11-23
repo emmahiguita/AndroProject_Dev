@@ -1,4 +1,5 @@
 'use client';
+import { apiUrl } from '@/lib/api-url';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 
@@ -51,7 +52,7 @@ export function useDeviceStream(
   const refreshNow = useCallback(() => {
     if (!serial) return;
     lastEtagRef.current = null;
-    fetch(`/api/device-image?serial=${encodeURIComponent(serial)}&force=true`, { cache: 'no-store' })
+    fetch(apiUrl(`/api/device-image?serial=${encodeURIComponent(serial)}&force=true`), { cache: 'no-store' })
       .then(async res => {
         if (res.ok) {
           const blob = await res.blob();
@@ -100,7 +101,7 @@ export function useDeviceStream(
         if (lastEtagRef.current) headers['If-None-Match'] = lastEtagRef.current;
 
         const url = `/api/device-image?serial=${encodeURIComponent(serial!)}`;
-        const res = await fetch(url, { headers, cache: 'no-store' });
+        const res = await fetch(apiUrl(url), { headers, cache: 'no-store' });
 
         if (!runningRef.current || aborted) {
           isPolling = false;

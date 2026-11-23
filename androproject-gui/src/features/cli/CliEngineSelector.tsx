@@ -65,8 +65,8 @@ export const CliEngineSelector: React.FC<CliEngineSelectorProps> = ({
             <Terminal size={17} />
           </div>
           <div>
-            <h2 className="text-sm font-semibold tracking-tight">Motor CLI &amp; IA Conectado</h2>
-            <p className={`text-xs ${mutedCls}`}>Inferencia local real con DeepSeek (Claude CLI), Ollama o ADB Shell nativo.</p>
+            <h2 className="text-sm font-semibold tracking-tight">Motores CLI y ADB</h2>
+            <p className={`text-xs ${mutedCls}`}>Consultas ADB disponibles. Los demás motores requieren integración.</p>
           </div>
         </div>
         <Button variant="secondary" size="sm" icon={<RefreshCw size={12} />} onClick={onRefreshDiscovery}>
@@ -78,7 +78,7 @@ export const CliEngineSelector: React.FC<CliEngineSelectorProps> = ({
       <div className="flex flex-wrap items-center justify-between gap-3 pt-1 border-t border-zinc-200/50 dark:border-zinc-800/50">
         <div className="flex flex-wrap items-center gap-1.5">
           <button type="button" onClick={() => onSelectMode('claude')} className={tabCls(mode === 'claude')}>
-            Claude (DeepSeek)
+            Claude
           </button>
           <button type="button" onClick={() => onSelectMode('ollama')} className={tabCls(mode === 'ollama')}>
             Ollama / Llama
@@ -93,7 +93,7 @@ export const CliEngineSelector: React.FC<CliEngineSelectorProps> = ({
 
         <div className="flex flex-wrap items-center gap-1.5 text-[11px]">
           <span className={`px-2 py-0.5 rounded border font-mono ${dark ? 'bg-zinc-900 border-zinc-800 text-zinc-300' : 'bg-slate-100 border-slate-200 text-slate-700'}`}>
-            DeepSeek: {discovery.clis.claude ? 'activo' : 'offline'}
+            Claude: {discovery.clis.claude ? 'activo' : 'no disponible'}
           </span>
           <span className={`px-2 py-0.5 rounded border font-mono ${dark ? 'bg-zinc-900 border-zinc-800 text-zinc-300' : 'bg-slate-100 border-slate-200 text-slate-700'}`}>
             Ollama: {discovery.ollamaOnline ? 'activo' : 'offline'}
