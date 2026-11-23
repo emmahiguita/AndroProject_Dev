@@ -10,7 +10,7 @@
 
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   Smartphone, Search, LayoutGrid, List, RefreshCw, Trash2, Loader2,
   CheckSquare, Square, EyeOff, Eye, CheckCircle2, AlertCircle, ShieldAlert,

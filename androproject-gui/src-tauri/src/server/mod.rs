@@ -102,10 +102,7 @@ pub fn build_router() -> Router {
 }
 
 #[cfg(test)]
-mod tests {
-    #[test]
-    fn router_accepts_api_fallback() { let _ = super::build_router(); }
-}
+mod route_tests;
 
 /// Inicia el servidor HTTP 100% Rust en un hilo dedicado Tokio sobre 127.0.0.1:3000.
 pub fn start_embedded_server() {

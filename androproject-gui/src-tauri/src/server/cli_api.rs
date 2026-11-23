@@ -4,6 +4,9 @@ use axum::{http::StatusCode, Json};
 use serde_json::{json, Value};
 use super::paths::{adb_shell, run_adb, safe_serial};
 
+// La misma lista limita la ejecución y alimenta los botones de seguimiento.
+const QUERIES: [&str; 4] = ["getprop ro.product.model", "dumpsys battery", "cat /proc/meminfo", "pm list packages -3"];
+
 /// Comprueba ADB en el equipo y declara los motores que tiene esta integración.
 pub async fn discover() -> Json<Value> {
     let (adb, _, _) = run_adb(&["version"], 3000).await;
@@ -23,12 +26,13 @@ pub async fn execute(Json(body): Json<Value>) -> (StatusCode, Json<Value>) {
     if serial.is_empty() || serial != raw_serial.trim() {
         return (StatusCode::BAD_REQUEST, Json(json!({"success": false, "error": "Selecciona un dispositivo Android válido"})));
     }
-    if !matches!(command, "getprop ro.product.model" | "dumpsys battery" | "cat /proc/meminfo" | "pm list packages -3") {
+    if !QUERIES.contains(&command) {
         return (StatusCode::BAD_REQUEST, Json(json!({"success": false, "error": "Consulta ADB no disponible en este módulo"})));
     }
     let (ok, output, error) = adb_shell(&serial, command, 10000).await;
     if !ok {
         return (StatusCode::BAD_GATEWAY, Json(json!({"success": false, "error": error})));
     }
-    (StatusCode::OK, Json(json!({"success": true, "output": output, "meta": {"provider": "ADB"}, "suggestions": []})))
+    let suggestions: Vec<_> = QUERIES.iter().copied().filter(|query| *query != command).collect();
+    (StatusCode::OK, Json(json!({"success": true, "output": output, "meta": {"provider": "ADB"}, "suggestions": suggestions})))
 }

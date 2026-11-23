@@ -12,7 +12,7 @@
 'use client';
 import { apiUrl } from '@/lib/api-url';
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   Thermometer, Cpu, Activity, Database,
   RefreshCw, MonitorPlay, BarChart3,
