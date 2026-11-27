@@ -23,17 +23,14 @@ type RunFn = (
 export function useProjectionActions(serial: string | undefined, isIos: boolean, run: RunFn) {
   /** Envía un keyevent genérico (Home, Back, Volumen, Power, etc.). */
   const sendKey = useCallback(async (keycode: string) => {
-    if (!serial) return;
+    if (!serial || isIos) return;
     await run('keyevent', '', { keycode, serial }, false);
-  }, [serial, run]);
+  }, [serial, isIos, run]);
 
   const goBack = useCallback(() => sendKey('KEYCODE_BACK'), [sendKey]);
   const goHome = useCallback(() => sendKey('KEYCODE_HOME'), [sendKey]);
   const openRecent = useCallback(() => sendKey('KEYCODE_APP_SWITCH'), [sendKey]);
-  const openAllApps = useCallback(async () => {
-    if (!serial) return;
-    await run('keyevent', 'Menú de aplicaciones', { keycode: 'KEYCODE_ALL_APPS', serial }, false);
-  }, [serial, run]);
+  const openAllApps = useCallback(() => sendKey('KEYCODE_ALL_APPS'), [sendKey]);
 
   const volumeUp = useCallback(() => sendKey('KEYCODE_VOLUME_UP'), [sendKey]);
   const volumeDown = useCallback(() => sendKey('KEYCODE_VOLUME_DOWN'), [sendKey]);

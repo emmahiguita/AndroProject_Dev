@@ -50,7 +50,7 @@ export default function Page() {
   const activeNav = useAppStore((s) => s.activeNav) ?? 'dashboard';
 
   const setActiveNav = useAppStore((s) => s.setActiveNav);
-  const { devices, device, selectedSerial, setSelectedSerial, isScanning, scanRadar, refresh } = useDevicePolling();
+  const { devices, device, selectedSerial, setSelectedSerial, isScanning, scanRadar, refresh, detectionError, discovery } = useDevicePolling();
   const { logs, addLog, clearLogs } = useSystemLogs();
   const adb = useAdbConnection();
 
@@ -85,8 +85,11 @@ export default function Page() {
       onUnregisterDevice={adb.unregisterDevice}
       onToggleAutoConnect={adb.toggleAutoConnect}
     >
+      {adb.lastError && <p role="alert" className="px-4 py-2 text-sm text-semantic-danger">{adb.lastError}</p>}
+      {detectionError && <p role="alert" className="px-4 py-2 text-sm text-semantic-danger">Error de detección ADB · {detectionError}</p>}
+      {discovery && <p role="status" className="px-4 py-2 text-sm text-text-secondary">{discovery}</p>}
       <FeatureErrorBoundary key={activeNav} onError={(err) => addLog(`[Vista ${activeNav}] ${err.message}`, 'error')}>
-        <ActiveView nav={activeNav} device={device} addLog={addLog} onNavigate={setActiveNav} />
+        <ActiveView key={device?.serial || "offline"} nav={activeNav} device={device} addLog={addLog} onNavigate={setActiveNav} />
       </FeatureErrorBoundary>
     </AppShell>
   );

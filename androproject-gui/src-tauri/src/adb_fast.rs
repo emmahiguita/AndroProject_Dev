@@ -8,7 +8,7 @@
 
 use serde::Serialize;
 use std::path::PathBuf;
-use std::process::{Command, Stdio};
+use std::process::Command;
 
 #[cfg(target_os = "windows")]
 use std::os::windows::process::CommandExt;
@@ -41,6 +41,7 @@ pub fn adb_list_devices_fast() -> Result<Vec<FastDevice>, String> {
     cmd.creation_flags(CREATE_NO_WINDOW);
 
     let out = cmd.output().map_err(|e| format!("Error ejecutando adb: {}", e))?;
+    if !out.status.success() { return Err(String::from_utf8_lossy(&out.stderr).trim().to_owned()); }
     let text = String::from_utf8_lossy(&out.stdout);
     let mut devices = Vec::new();
 
@@ -74,15 +75,9 @@ pub fn adb_list_devices_fast() -> Result<Vec<FastDevice>, String> {
 
 /// Inyecta una tecla física Android sin pasar por Node.js.
 #[tauri::command]
-pub fn adb_key_fast(serial: String, keycode: String) -> Result<bool, String> {
-    let mut cmd = Command::new(adb_bin());
-    cmd.args(["-s", serial.trim(), "shell", "input", "keyevent", keycode.trim()])
-        .stdout(Stdio::null())
-        .stderr(Stdio::null());
-    #[cfg(target_os = "windows")]
-    cmd.creation_flags(CREATE_NO_WINDOW);
-
-    cmd.spawn().map_err(|e| e.to_string())?;
+pub async fn adb_key_fast(serial: String, keycode: String) -> Result<bool, String> {
+    let code = crate::server::navigation::validate(&serial, &keycode)?;
+    crate::server::navigation::send(&serial, code).await?;
     Ok(true)
 }
 

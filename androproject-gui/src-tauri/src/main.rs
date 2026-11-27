@@ -3,57 +3,30 @@
 // QUÉ HACE: Punto de entrada 100% Rust de ANDRO-IOS Desktop (Tauri v2 + Axum).
 //           Inicia el servidor HTTP/API embebido en Rust (`127.0.0.1:3000`) y
 //           monta la ventana nativa WebView2 sin Node.js ni Python en runtime.
-// CÓMO FUNCIONA:
-//   1. Verifica si el puerto 3000 está libre; si no escucha, levanta el
-//      servidor Axum embebido (`server::start_embedded_server`) en < 15 ms.
-//   2. Registra los comandos IPC nativos (`adb_fast`, `apps_native`,
-//      `emulator`, `logcat_native`) y el comando `open_device_popout`.
-// POR QUÉ: Lograr 100% backend Rust nativo, cero Node.js, cero Python y cero
-//          ventanas CMD al abrir ANDRO-IOS (< 200L).
-// ============================================================================
-
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 mod adb_fast;
+mod apps_policy;
 mod apps_native;
 mod emulator;
 mod logcat_native;
 mod server;
 
-use std::net::{SocketAddr, TcpStream};
-use std::time::Duration;
 use tauri::{Manager, WebviewUrl, WebviewWindowBuilder};
-
-/// Comprueba en 80ms si el puerto local TCP ya está escuchando.
-fn is_port_open(port: u16) -> bool {
-    let addr = SocketAddr::from(([127, 0, 0, 1], port));
-    TcpStream::connect_timeout(&addr, Duration::from_millis(80)).is_ok()
-}
-
-/// Inicia el servidor HTTP + API 100% Rust embebido y espera hasta que acepte TCP.
-fn ensure_rust_server() {
-    if !is_port_open(3000) {
-        server::start_embedded_server();
-        for _ in 0..40 {
-            if is_port_open(3000) {
-                break;
-            }
-            std::thread::sleep(Duration::from_millis(50));
-        }
-    }
-}
 
 /// Comando IPC para abrir un dispositivo en su propia ventana flotante nativa.
 #[tauri::command]
 fn open_device_popout(app: tauri::AppHandle, serial: String) -> Result<(), String> {
+    if serial.is_empty() || server::paths::safe_serial(&serial) != serial { return Err("Serial no válido".into()); }
     let label = format!("popout_{}", serial.replace([':', '.'], "_"));
     if let Some(existing) = app.get_webview_window(&label) {
         existing.set_focus().map_err(|e| e.to_string())?;
         return Ok(());
     }
 
-    let url_str = format!("http://127.0.0.1:3000/popout?serial={}", serial);
-    let url = WebviewUrl::App(url_str.parse().map_err(|e| format!("{:?}", e))?);
+    let port = if cfg!(debug_assertions) { 3001 } else { 3000 };
+    let url_str = format!("http://127.0.0.1:{port}/popout?serial={}", serial);
+    let url = WebviewUrl::External(url_str.parse().map_err(|e| format!("{:?}", e))?);
 
     WebviewWindowBuilder::new(&app, &label, url)
         .title(format!("ANDRO-IOS — {}", serial))
@@ -67,7 +40,14 @@ fn open_device_popout(app: tauri::AppHandle, serial: String) -> Result<(), Strin
 }
 
 fn main() {
-    ensure_rust_server();
+    // La ventana solo se abre después de reservar el puerto de nuestra API.
+    if let Err(error) = server::start_embedded_server() {
+        let message = format!("No se pudo iniciar la API local (127.0.0.1:3000). {error}");
+        eprintln!("{message}");
+        #[cfg(windows)]
+        report_startup_error(&message);
+        std::process::exit(1);
+    }
 
     tauri::Builder::default()
         .setup(|app| {
@@ -97,7 +77,22 @@ fn main() {
         .run(|_app, event| {
             // El receptor iniciado por esta aplicación no debe quedar abierto al salir.
             if matches!(event, tauri::RunEvent::Exit) {
-                tauri::async_runtime::block_on(server::airplay_process::action("stop"));
+                tauri::async_runtime::block_on(async {
+                    tokio::join!(server::recording::shutdown(), server::screen_process::shutdown(), server::airplay_process::action("stop"), server::scrcpy_hub::shutdown());
+                });
             }
         });
+}
+
+/// El ejecutable gráfico carece de consola visible en Windows.
+#[cfg(windows)]
+fn report_startup_error(message: &str) {
+    #[link(name = "user32")]
+    extern "system" {
+        fn MessageBoxW(hwnd: isize, text: *const u16, title: *const u16, flags: u32) -> i32;
+    }
+    let text: Vec<u16> = message.encode_utf16().chain(Some(0)).collect();
+    let title: Vec<u16> = "ANDRO-IOS".encode_utf16().chain(Some(0)).collect();
+    // Ambas cadenas UTF-16 viven hasta que se cierra el cuadro de error.
+    unsafe { MessageBoxW(0, text.as_ptr(), title.as_ptr(), 0x10); }
 }

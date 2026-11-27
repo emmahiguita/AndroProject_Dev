@@ -156,10 +156,10 @@ export const TelemetryModal: React.FC<TelemetryModalProps> = ({
         {/* Cuerpo compacto: Cuadrícula 2x2 de componentes pequeños + tabla de hardware */}
         <div className="p-3 space-y-2.5 max-h-[82vh] overflow-y-auto custom-scrollbar">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            <MetricGaugeCard dark={dark} icon={<Cpu size={12} />} label="CPU (Delta Real)" value={`${telemetry.cpuPercent}%`} percent={telemetry.cpuPercent} status={telemetry.cpuStatus} subDetail={telemetry.cpuSubDetail} level={telemetry.cpuLevel} history={cpuHistory} />
-            <MetricGaugeCard dark={dark} icon={<Activity size={12} />} label="Memoria RAM" value={`${telemetry.ramPercent}%`} percent={telemetry.ramPercent} status={telemetry.ramStatus} subDetail={telemetry.ramSubDetail} level={telemetry.ramLevel} history={ramHistory} />
+            <MetricGaugeCard dark={dark} icon={<Cpu size={12} />} label="CPU (Delta Real)" value={device?.cpuUsagePercent == null ? '—' : `${telemetry.cpuPercent}%`} percent={telemetry.cpuPercent} status={telemetry.cpuStatus} subDetail={telemetry.cpuSubDetail} level={telemetry.cpuLevel} history={cpuHistory} />
+            <MetricGaugeCard dark={dark} icon={<Activity size={12} />} label="Memoria RAM" value={device?.ramUsagePercent == null ? '—' : `${telemetry.ramPercent}%`} percent={telemetry.ramPercent} status={telemetry.ramStatus} subDetail={telemetry.ramSubDetail} level={telemetry.ramLevel} history={ramHistory} />
             <MetricGaugeCard dark={dark} icon={<Thermometer size={12} />} label="Temperatura" value={`${telemetry.tempCelsius}°C`} percent={Math.min(100, Math.round((telemetry.tempNum / 60) * 100))} status={telemetry.tempStatus} subDetail={telemetry.tempSubDetail} level={telemetry.tempLevel} history={tempHistory} />
-            <MetricGaugeCard dark={dark} icon={<Database size={12} />} label="Almacenamiento" value={`${telemetry.storagePercent}%`} percent={telemetry.storagePercent} status={telemetry.storStatus} subDetail={telemetry.storSubDetail} level={telemetry.storLevel} history={storHistory} />
+            <MetricGaugeCard dark={dark} icon={<Database size={12} />} label="Almacenamiento" value={device?.storageUsagePercent == null ? '—' : `${telemetry.storagePercent}%`} percent={telemetry.storagePercent} status={telemetry.storStatus} subDetail={telemetry.storSubDetail} level={telemetry.storLevel} history={storHistory} />
           </div>
 
           <div className={`grid grid-cols-3 sm:grid-cols-6 gap-1.5 p-2 rounded border text-[11px] font-mono ${dark ? 'bg-zinc-900/60 border-zinc-800 text-zinc-200' : 'bg-slate-50 border-slate-200 text-slate-800'}`}>
@@ -168,14 +168,14 @@ export const TelemetryModal: React.FC<TelemetryModalProps> = ({
             <div><span className={`block text-[10px] uppercase ${dark ? 'text-zinc-400' : 'text-slate-600'}`}>Android</span><strong className="truncate block">{device?.androidVersion || '--'} ({device?.connectionType || 'USB'})</strong></div>
             <div><span className={`block text-[10px] uppercase ${dark ? 'text-zinc-400' : 'text-slate-600'}`}>Pantalla</span><strong className="truncate block">{device?.resolution || '--'}</strong></div>
             <div><span className={`block text-[10px] uppercase ${dark ? 'text-zinc-400' : 'text-slate-600'}`}>Uptime</span><strong className="truncate block">{device?.uptimeHours || '--'}</strong></div>
-            <div><span className={`block text-[10px] uppercase ${dark ? 'text-zinc-400' : 'text-slate-600'}`}>Batería</span><strong className="truncate block">{device?.battery !== undefined ? `${device.battery}% ${device.isCharging ? '⚡' : ''}` : '--'}</strong></div>
+            <div><span className={`block text-[10px] uppercase ${dark ? 'text-zinc-400' : 'text-slate-600'}`}>Batería</span><strong className="truncate block">{device?.battery != null ? `${device.battery}% ${device.isCharging ? '⚡' : ''}` : '--'}</strong></div>
           </div>
         </div>
 
         {/* Pie de ventana compacto */}
         <div className={`flex items-center justify-between px-3 py-2 border-t ${dark ? 'bg-zinc-900 border-zinc-800' : 'bg-slate-100 border-slate-300'}`}>
           <span className={`text-[9px] font-mono ${dark ? 'text-zinc-400' : 'text-slate-500'}`}>
-            Boot: {device?.verifiedBootState || 'green'} · VBMeta: {device?.vbmetaState || 'locked'}
+            Boot: {device?.verifiedBootState || 'Sin lectura'} · VBMeta: {device?.vbmetaState || 'Sin lectura'}
           </span>
           <button
             type="button"

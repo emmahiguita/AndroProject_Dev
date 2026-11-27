@@ -75,7 +75,7 @@ export const DEFAULT_SCRCPY_OPTIONS: ScrcpyOptions = {
   bitRate: '16M',
   turnScreenOff: false,
   stayAwake: true,
-  alwaysOnTop: true,
+  alwaysOnTop: false,
   borderless: false,
   videoSource: 'display',
 };

@@ -8,7 +8,6 @@
 // ============================================================================
 'use client';
 
-import React from 'react';
 import { Maximize, Minimize, Circle, Square } from 'lucide-react';
 import { DeviceFrame } from '@/components/layout/DeviceFrame';
 import type { DeviceInfo } from '@/features/types';

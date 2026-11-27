@@ -10,13 +10,14 @@
 'use client';
 import { apiUrl } from '@/lib/api-url';
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAppStore } from '@/stores';
 import { useTheme } from '@/hooks/useTheme';
 import { ViewShell } from '@/components/ViewShell';
 import { PARTITIONS } from './flasher/flasher-partitions';
 import { FlasherBootloaderPanel } from './flasher/FlasherBootloaderPanel';
 import { FlasherImagePanel } from './flasher/FlasherImagePanel';
+import { FlasherLiveMonitor } from './flasher/FlasherLiveMonitor';
 import type { DeviceInfo } from './types';
 
 interface FlasherViewProps {
@@ -153,6 +154,11 @@ export function FlasherView({ device: propDevice, addLog: propAddLog }: FlasherV
           dark={dark} flashState={s.flashState} flashInfo={s.flashInfo}
           busyAction={busyAction} cmdResult={cmdResult}
           onDetectState={detectDeviceState} onRunAction={handleRunAction}
+        />
+
+        <FlasherLiveMonitor
+          dark={dark} serial={targetSerial} flashState={s.flashState}
+          flashInfo={s.flashInfo as Record<string, unknown>} onLog={log}
         />
 
         <FlasherImagePanel

@@ -34,7 +34,7 @@ export const DeveloperOptionsPanel: React.FC<DeveloperOptionsPanelProps> = ({ se
   const [devStatus, setDevStatus] = useState<PerfStatus | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
   const [dpiDraft, setDpiDraft] = useState<string | null>(null);
-  const dpiInput = dpiDraft ?? String(s.currentDpi || 420);
+  const dpiInput = dpiDraft ?? String(s.currentDpi ?? '');
 
   const loadDevStatus = useCallback(async () => {
     if (!serial) return;
@@ -97,11 +97,10 @@ export const DeveloperOptionsPanel: React.FC<DeveloperOptionsPanelProps> = ({ se
             <p className="text-[11px] text-text-secondary">Activa `development_settings_enabled=1`, abre el menú en el móvil o salta a Compilación.</p>
           </div>
           <div className="flex flex-wrap items-center gap-1.5">
-            <Button size="sm" variant={devStatus?.developerMode ? 'primary' : 'secondary'} icon={<Power size={12} />} disabled={!serial || busy !== null} onClick={() => postAction('set_developer_mode', { enabled: !devStatus?.developerMode })}>
-              {devStatus?.developerMode ? 'Modo Desarrollador: ACTIVO' : 'Activar Modo Desarrollador'}
-            </Button>
+            <Button size="sm" variant="primary" icon={<Power size={12} />} disabled={!serial || busy !== null} onClick={() => postAction('auto_activate_dev_mode')}>Activar Todo Automático</Button>
+            <Button size="sm" variant={devStatus?.developerMode ? 'primary' : 'secondary'} icon={<Power size={12} />} disabled={!serial || busy !== null} onClick={() => postAction('set_developer_mode', { enabled: !devStatus?.developerMode })}>{devStatus?.developerMode ? 'Dev Mode: ACTIVO' : 'Dev Mode: OFF'}</Button>
             <Button size="sm" variant="secondary" icon={<ExternalLink size={12} />} disabled={!serial || busy !== null} onClick={() => postAction('open_developer_settings', { screen: 'dev' })}>Abrir en Teléfono</Button>
-            <Button size="sm" variant="secondary" icon={<Smartphone size={12} />} disabled={!serial || busy !== null} onClick={() => postAction('open_developer_settings', { screen: 'about' })}>Compilación (7 toques)</Button>
+            <Button size="sm" variant="secondary" icon={<Smartphone size={12} />} disabled={!serial || busy !== null} onClick={() => postAction('open_developer_settings', { screen: 'about' })}>Compilación</Button>
             <Button size="sm" variant="secondary" icon={<RefreshCw size={12} />} disabled={!serial || busy !== null} onClick={loadDevStatus}>Sincronizar</Button>
           </div>
         </div>
@@ -113,7 +112,7 @@ export const DeveloperOptionsPanel: React.FC<DeveloperOptionsPanelProps> = ({ se
           {toggles.map((item) => (
             <div key={item.key} className={rowCls}>
               <div className="min-w-0"><p className="text-xs font-semibold truncate">{item.title}</p><p className="text-[10px] font-mono text-text-secondary">{item.sub}</p></div>
-              <button type="button" disabled={!serial || busy !== null || !devStatus || ['debug_layout', 'adb_wifi'].includes(item.key)} onClick={() => postAction('set_developer_option', { option: item.key, value: !item.on })} className={chipCls(item.on)}>{['debug_layout', 'adb_wifi'].includes(item.key) ? 'No disponible' : !devStatus ? 'Sin lectura' : item.on ? 'ACTIVO' : 'INACTIVO'}</button>
+              <button type="button" disabled={!serial || busy !== null || !devStatus} onClick={() => postAction('set_developer_option', { option: item.key, value: !item.on })} className={chipCls(item.on)}>{!devStatus ? 'Sin lectura' : item.on ? 'ACTIVO' : 'INACTIVO'}</button>
             </div>
           ))}
         </div>
@@ -134,10 +133,10 @@ export const DeveloperOptionsPanel: React.FC<DeveloperOptionsPanelProps> = ({ se
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2 pt-1">
           <div className={rowCls}>
-            <div><p className="text-xs font-semibold">Motor de Renderizado GPU</p><p className="text-[10px] font-mono text-text-secondary">hardware.hwui.renderer</p></div>
+            <div><p className="text-xs font-semibold">Motor de Renderizado GPU</p><p className="text-[10px] font-mono text-text-secondary">debug.hwui.renderer</p></div>
             <div className="flex gap-1">
               {[{ id: 'default', label: 'Auto' }, { id: 'skiagl', label: 'SkiaGL' }, { id: 'skiavk', label: 'Vulkan' }].map((g) => (
-                <button key={g.id} type="button" disabled title="Lectura y cambio aún no implementados" className={chipCls(false)}>{g.label}</button>
+                <button key={g.id} type="button" disabled={!serial || busy !== null} onClick={() => postAction('set_gpu_renderer', { renderer: g.id })} className={chipCls(devStatus?.gpuRenderer === g.id)}>{g.label}</button>
               ))}
             </div>
           </div>
@@ -145,9 +144,9 @@ export const DeveloperOptionsPanel: React.FC<DeveloperOptionsPanelProps> = ({ se
           <div className={rowCls}>
             <div><p className="text-xs font-semibold">Superposiciones HW / 4x MSAA / Blur</p><p className="text-[10px] font-mono text-text-secondary">Composición GPU directa</p></div>
             <div className="flex flex-wrap gap-1">
-              <button type="button" disabled title="Aún no implementado" className={chipCls(false)}>Sin Overlays HW</button>
-              <button type="button" disabled title="Aún no implementado" className={chipCls(false)}>4x MSAA</button>
-              <button type="button" disabled title="Aún no implementado" className={chipCls(false)}>Sin Blur</button>
+              <button type="button" disabled={!serial || busy !== null} onClick={() => postAction('set_developer_option', { option: 'disable_hw_overlays', value: true })} className={chipCls(false)}>Sin Overlays HW</button>
+              <button type="button" disabled={!serial || busy !== null} onClick={() => postAction('set_developer_option', { option: 'force_msaa', value: !devStatus?.forceMsaa })} className={chipCls(Boolean(devStatus?.forceMsaa))}>4x MSAA</button>
+              <button type="button" disabled={!serial || busy !== null} onClick={() => postAction('set_developer_option', { option: 'disable_blur', value: !devStatus?.disableBlur })} className={chipCls(Boolean(devStatus?.disableBlur))}>Sin Blur</button>
             </div>
           </div>
         </div>
@@ -160,7 +159,7 @@ export const DeveloperOptionsPanel: React.FC<DeveloperOptionsPanelProps> = ({ se
             <span className="text-xs font-semibold">Límite procesos fondo</span>
             <div className="flex gap-1">
               {(['standard', '4', '3', '2', '1'] as const).map((lim) => (
-                <button key={lim} type="button" disabled title="Aún no implementado" className={chipCls(false)}>{lim === 'standard' ? 'Estándar' : `${lim} máx`}</button>
+                <button key={lim} type="button" disabled={!serial || busy !== null} onClick={() => postAction('set_bg_limit', { limit: lim })} className={chipCls(devStatus?.bgLimit === lim)}>{lim === 'standard' ? 'Estándar' : `${lim} máx`}</button>
               ))}
             </div>
           </div>
@@ -169,7 +168,7 @@ export const DeveloperOptionsPanel: React.FC<DeveloperOptionsPanelProps> = ({ se
             <span className="text-xs font-semibold">Congelador de apps en caché</span>
             <div className="flex gap-1">
               {(['default', 'enabled', 'disabled'] as const).map((fz) => (
-                <button key={fz} type="button" disabled title="Aún no implementado" className={chipCls(false)}>{fz === 'default' ? 'Auto' : fz === 'enabled' ? 'Activo' : 'Off'}</button>
+                <button key={fz} type="button" disabled={!serial || busy !== null} onClick={() => postAction('set_cached_freezer', { mode: fz })} className={chipCls(devStatus?.cachedFreezer === fz)}>{fz === 'default' ? 'Auto' : fz === 'enabled' ? 'Activo' : 'Off'}</button>
               ))}
             </div>
           </div>
@@ -178,17 +177,17 @@ export const DeveloperOptionsPanel: React.FC<DeveloperOptionsPanelProps> = ({ se
             <span className="text-xs font-semibold flex items-center gap-1"><Monitor size={12} /> Tasa de refresco pico</span>
             <div className="flex gap-1">
               {[60, 90, 120].map((hz) => (
-                <button key={hz} type="button" disabled title="Aún no implementado" className={chipCls(false)}>{hz}Hz</button>
+                <button key={hz} type="button" disabled={!serial || busy !== null} onClick={() => postAction('set_peak_refresh', { hz })} className={chipCls(Number(devStatus?.peakRefresh) === hz)}>{hz}Hz</button>
               ))}
             </div>
           </div>
 
           <div className={rowCls}>
-            <span className="text-xs font-semibold">Densidad DPI ({s.currentDpi} dpi)</span>
+            <span className="text-xs font-semibold">Densidad DPI ({s.currentDpi == null ? 'Sin lectura' : `${s.currentDpi} dpi`})</span>
             <div className="flex items-center gap-1">
               <input type="number" min={160} max={640} value={dpiInput} onChange={(e) => setDpiDraft(e.target.value)} className={`w-16 px-2 py-1 rounded border text-xs font-mono ${dark ? 'bg-zinc-900 border-zinc-700 text-zinc-100' : 'bg-white border-slate-300 text-slate-900'}`} />
-              <button type="button" disabled={!serial || busy !== null} onClick={() => postAction('set_dpi', { dpi: Number(dpiInput) })} className={chipCls(false)}>Aplicar</button>
-              <button type="button" disabled title="Aún no implementado" className={chipCls(false)}>Demo UI</button>
+              <button type="button" disabled={!serial || busy !== null || !dpiInput || Number(dpiInput) < 160 || Number(dpiInput) > 640} onClick={() => postAction('set_dpi', { dpi: Number(dpiInput) })} className={chipCls(false)}>Aplicar</button>
+              <button type="button" disabled={!serial || busy !== null} onClick={() => postAction('set_demo_mode', { enabled: true })} className={chipCls(false)}>Demo UI</button>
             </div>
           </div>
         </div>

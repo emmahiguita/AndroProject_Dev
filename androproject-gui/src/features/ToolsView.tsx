@@ -56,6 +56,7 @@ export function ToolsView({ device, addLog: propAddLog }: ToolsViewProps = {}) {
         body: JSON.stringify({ action: 'get_diagnostics', serial: targetSerial }),
       });
       const data = await res.json();
+      if (!data.success || !data.diagnostics) { setDiagData(null); log(data.error || 'Sin lectura de diagnóstico', 'error'); return; }
       if (data.diagnostics) {
         const d = data.diagnostics;
         s.setDiagnostics(d);
@@ -72,7 +73,7 @@ export function ToolsView({ device, addLog: propAddLog }: ToolsViewProps = {}) {
           'RAM Total / Disponible': `${ramObj.memtotal || '--'} / ${ramObj.memavailable || '--'}`,
           'Almacenamiento (/data)': stObj.size ? `${stObj.used || '--'} / ${stObj.size} (${stObj.free || '--'} libre · ${stObj.usage || '--'})` : '--',
           'Batería Nivel / Temperatura': `${d.battery_level ? d.battery_level + '%' : '--'} · ${tempC}`,
-          'Batería Voltaje / Tecnología': `${voltV} · ${d.battery_technology || 'Li-ion'}`,
+          'Batería Voltaje / Tecnología': `${voltV} · ${d.battery_technology || 'Sin lectura'}`,
           'Sensores Térmicos': Array.isArray(d.thermal) && d.thermal.length > 0 ? d.thermal.slice(0, 3).join(' | ') : tempC,
           'Resolución / Densidad DPI': `${d.display_resolution || '--'} · ${d.display_dpi || '--'}`,
         });

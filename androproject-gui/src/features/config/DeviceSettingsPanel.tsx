@@ -14,11 +14,11 @@ import React from 'react';
 import { Smartphone, Wifi, Eye, Sun, Gauge, Clock } from 'lucide-react';
 
 export interface LiveAndroidSettings {
-  stayAwake: boolean;
-  showTouches: boolean;
-  animScale: string;
-  screenTimeoutMs: number;
-  densityDpi: string;
+  stayAwake: boolean | null;
+  showTouches: boolean | null;
+  animScale: string | null;
+  screenTimeoutMs: number | null;
+  densityDpi: string | null;
 }
 
 interface DeviceSettingsPanelProps {
@@ -61,7 +61,7 @@ export const DeviceSettingsPanel: React.FC<DeviceSettingsPanelProps> = ({
         </div>
         {settings && (
           <span className={`text-[10px] font-mono px-2 py-0.5 rounded border ${dark ? 'bg-zinc-900 border-zinc-800 text-zinc-300' : 'bg-slate-100 border-slate-300 text-slate-700'}`}>
-            Densidad: {settings.densityDpi}
+            Densidad: {settings.densityDpi ?? 'Sin lectura'}
           </span>
         )}
       </div>
@@ -83,11 +83,11 @@ export const DeviceSettingsPanel: React.FC<DeviceSettingsPanelProps> = ({
             </div>
             <button
               type="button"
-              disabled={busyAction !== null}
+              disabled={busyAction !== null || settings.stayAwake === null}
               onClick={() => onApplySetting('set_stay_awake', !settings.stayAwake)}
-              className={chipCls(settings.stayAwake)}
+              className={chipCls(settings.stayAwake === true)}
             >
-              {settings.stayAwake ? 'ACTIVO (USB/AC)' : 'INACTIVO'}
+              {settings.stayAwake === null ? 'Sin lectura' : settings.stayAwake ? 'ACTIVO (USB/AC)' : 'INACTIVO'}
             </button>
           </div>
 
@@ -102,11 +102,11 @@ export const DeviceSettingsPanel: React.FC<DeviceSettingsPanelProps> = ({
             </div>
             <button
               type="button"
-              disabled={busyAction !== null}
+              disabled={busyAction !== null || settings.showTouches === null}
               onClick={() => onApplySetting('set_show_touches', !settings.showTouches)}
-              className={chipCls(settings.showTouches)}
+              className={chipCls(settings.showTouches === true)}
             >
-              {settings.showTouches ? 'VISIBLE' : 'OCULTO'}
+              {settings.showTouches === null ? 'Sin lectura' : settings.showTouches ? 'VISIBLE' : 'OCULTO'}
             </button>
           </div>
 

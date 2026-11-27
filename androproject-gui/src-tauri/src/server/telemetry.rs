@@ -14,6 +14,7 @@ use super::paths::adb_shell;
 /// Recolecta telemetría real del kernel Android en una sola llamada `adb shell`.
 pub async fn fetch_telemetry(serial: &str, base_model: &str, conn: &str) -> Value {
     let script = concat!(
+        "echo CPU1=$(head -n 1 /proc/stat 2>/dev/null);",
         "echo MODEL=$(getprop ro.product.model);",
         "echo MARKET=$(getprop ro.vendor.oplus.market.name || getprop ro.product.marketname || getprop ro.product.brand);",
         "echo VER=$(getprop ro.build.version.release);",
@@ -22,8 +23,8 @@ pub async fn fetch_telemetry(serial: &str, base_model: &str, conn: &str) -> Valu
         "echo DF=$(df -k /data 2>/dev/null | tail -n 1 | awk '{print $2,$3,$4,$5}');",
         "echo LOAD=$(cat /proc/loadavg 2>/dev/null | awk '{print $1,$4}');",
         "echo UP=$(awk '{print int($1/3600)}' /proc/uptime 2>/dev/null);",
-        "echo BAT=$(dumpsys battery 2>/dev/null | awk '/level:|temperature:|status:|voltage:/{print $1,$2}' | tr '\\n' ' ');",
-        "echo VBOOT=$(getprop ro.boot.verifiedbootstate);echo FLASH=$(getprop ro.boot.flash.locked)"
+        "echo BAT=$(dumpsys battery 2>/dev/null | awk '/level:|temperature:|status:|voltage:|technology:/{print $1,$2}' | tr '\\n' ' ');",
+        "echo VBOOT=$(getprop ro.boot.verifiedbootstate);echo FLASH=$(getprop ro.boot.flash.locked); echo VBMETA=$(getprop ro.boot.vbmeta.device_state); echo CPU2=$(head -n 1 /proc/stat 2>/dev/null)"
     );
     let (_, out, _) = adb_shell(serial, script, 4500).await;
     let get_val = |prefix: &str| -> String {
@@ -44,58 +45,67 @@ pub async fn fetch_telemetry(serial: &str, base_model: &str, conn: &str) -> Valu
         base_model.to_string()
     };
 
-    let mem_str = get_val("MEM=");
-    let (mut mem_tot_kb, mut mem_avail_kb) = (0f64, 0f64);
-    let toks: Vec<&str> = mem_str.split_whitespace().collect();
-    for pair in toks.chunks(2) {
-        if pair.len() == 2 {
-            if pair[0].starts_with("MemTotal") { mem_tot_kb = pair[1].parse().unwrap_or(0.0); }
-            if pair[0].starts_with("MemAvailable") { mem_avail_kb = pair[1].parse().unwrap_or(0.0); }
-        }
+    let mem = get_val("MEM=");
+    let bat = get_val("BAT=");
+    let field = |pairs: &str, label: &str| pairs.split_whitespace().collect::<Vec<_>>().chunks_exact(2)
+        .find(|pair| pair[0] == label).map(|pair| pair[1].to_owned());
+    let total = field(&mem, "MemTotal:").and_then(|s| s.parse::<u64>().ok()).filter(|v| *v > 0);
+    let free = field(&mem, "MemAvailable:").and_then(|s| s.parse::<u64>().ok());
+    let used = total.zip(free).and_then(|(t, f)| t.checked_sub(f));
+    let gib = |kb: u64| kb as f64 / 1_048_576.0;
+    let df = get_val("DF=");
+    let disk: Vec<_> = df.split_whitespace().collect();
+    let capacity = |i: usize| disk.get(i).and_then(|s| s.parse::<u64>().ok()).map(gib);
+    let load = get_val("LOAD=");
+    let mut load_fields = load.split_whitespace();
+    let uptime = get_val("UP=").parse::<u64>().ok();
+    let temperature = field(&bat, "temperature:").and_then(|s| s.parse::<i64>().ok());
+    let mut sample = json!({
+        "serial":serial, "model":model, "marketName":market,"connectionType":conn,
+        "state":"device","connected":true,"platform":"android", "androidVersion":get_val("VER="),
+        "resolution":get_val("RES=").replace('x', " × "),
+        "ram":total.map(|n| format!("{:.1} GB", gib(n))), "ramUsed":used.map(|n| format!("{:.1} GB", gib(n))),
+        "ramFreeMB":free.map(|n| n / 1024), "ramUsagePercent":used.zip(total).map(|(u,t)| (100.0*u as f64/t as f64).round()),
+        "storage":capacity(0).map(|v| format!("{v:.1} GB")), "storageUsedGB":capacity(1).map(|v| (v*10.0).round()/10.0),
+        "storageFreeGB":capacity(2).map(|v| (v*10.0).round()/10.0),
+        "storageUsagePercent":disk.get(3).and_then(|v| v.trim_end_matches('%').parse::<u8>().ok()),
+        "cpuUsagePercent":cpu_percent(&get_val("CPU1="), &get_val("CPU2=")),
+        "cpuLoadAvg":load_fields.next(), "activeThreads":load_fields.next(), "uptimeHours":uptime.map(|h| format!("{h} h")),
+        "battery":field(&bat,"level:").and_then(|s| s.parse::<u8>().ok()),
+        "isCharging":field(&bat,"status:").map(|s| s == "2" || s == "5"),
+        "temperature":temperature.map(|n| format!("{:.1}", n as f64/10.0)),
+        "batteryVoltageMv":field(&bat,"voltage:").and_then(|s| s.parse::<u32>().ok()), "batteryTech":field(&bat,"technology:"),
+        "verifiedBootState":get_val("VBOOT="), "vbmetaState":get_val("VBMETA="),
+        "bootloaderLocked":match get_val("FLASH=").as_str() {"1"=>Some(true),"0"=>Some(false),_=>None},
+    });
+    // Las propiedades opcionales se omiten para los consumidores antiguos de DeviceInfo.
+    if let Some(fields) = sample.as_object_mut() { fields.retain(|_, value| !value.is_null()); }
+    sample
+}
+
+/// Compara dos lecturas agregadas del kernel. Excluye guest, ya contado en user y nice.
+fn cpu_percent(first: &str, second: &str) -> Option<u64> {
+    fn ticks(line: &str) -> Option<(u64,u64)> {
+        let mut fields = line.split_whitespace();
+        if fields.next()? != "cpu" { return None; }
+        let values = fields.take(8).map(str::parse::<u64>).collect::<Result<Vec<_>,_>>().ok()?;
+        let idle = values.get(3)?.checked_add(values.get(4).copied().unwrap_or(0))?;
+        Some((values.iter().try_fold(0u64, |sum, n| sum.checked_add(*n))?, idle))
     }
-    let ram_tot_gb = mem_tot_kb / 1_048_576.0;
-    let ram_used_gb = (mem_tot_kb - mem_avail_kb).max(0.0) / 1_048_576.0;
-    let ram_pct = if mem_tot_kb > 0.0 { ((ram_used_gb / ram_tot_gb) * 100.0).round() as u64 } else { 0 };
+    let (a,ia) = ticks(first)?;
+    let (b,ib) = ticks(second)?;
+    let total = b.checked_sub(a)?;
+    let busy = total.checked_sub(ib.checked_sub(ia)?)?;
+    (total > 0).then(|| (100.0 * busy as f64 / total as f64).round() as u64)
+}
 
-    let df_str = get_val("DF=");
-    let df_toks: Vec<&str> = df_str.split_whitespace().collect();
-    let df_tot_gb = df_toks.first().and_then(|v| v.parse::<f64>().ok()).unwrap_or(0.0) / 1_048_576.0;
-    let df_used_gb = df_toks.get(1).and_then(|v| v.parse::<f64>().ok()).unwrap_or(0.0) / 1_048_576.0;
-    let df_free_gb = df_toks.get(2).and_then(|v| v.parse::<f64>().ok()).unwrap_or(0.0) / 1_048_576.0;
-    let df_pct: u64 = df_toks.get(3).map(|s| s.trim_end_matches('%')).and_then(|v| v.parse().ok()).unwrap_or(0);
-
-    let bat_str = get_val("BAT=");
-    let (mut bat_lvl, mut temp_c, mut charging, mut volt_mv) = (0u64, 0.0f64, false, 0u64);
-    let btoks: Vec<&str> = bat_str.split_whitespace().collect();
-    for pair in btoks.chunks(2) {
-        if pair.len() == 2 {
-            if pair[0].starts_with("level:") { bat_lvl = pair[1].parse().unwrap_or(0); }
-            if pair[0].starts_with("temperature:") { temp_c = pair[1].parse::<f64>().unwrap_or(0.0) / 10.0; }
-            if pair[0].starts_with("status:") { charging = pair[1] == "2" || pair[1] == "5"; }
-            if pair[0].starts_with("voltage:") { volt_mv = pair[1].parse().unwrap_or(0); }
-        }
+#[cfg(test)]
+mod tests {
+    use super::cpu_percent;
+    #[test]
+    fn cpu_uses_measured_ticks_and_preserves_missing_samples() {
+        assert_eq!(cpu_percent("cpu 1 0 1 8", "cpu 3 0 2 15"), Some(30));
+        assert_eq!(cpu_percent("cpu 1 0 1 8", "cpu 1 0 1 8"), None);
+        assert_eq!(cpu_percent("", ""), None);
     }
-
-    let load_str = get_val("LOAD=");
-    let load_toks: Vec<&str> = load_str.split_whitespace().collect();
-    let load1 = load_toks.first().copied().unwrap_or("0.0").to_string();
-    let cpu_pct = ((load1.parse::<f64>().unwrap_or(0.0) / 8.0) * 100.0).clamp(1.0, 100.0).round() as u64;
-    let res = get_val("RES=").replace('x', " × ");
-
-    json!({
-        "serial": serial, "model": model, "marketName": market,
-        "androidVersion": get_val("VER="), "resolution": if res.is_empty() { "1080 × 2400".to_string() } else { res },
-        "connectionType": conn, "state": "device", "connected": true, "platform": "android",
-        "ram": format!("{:.1} GB", ram_tot_gb), "ramUsed": format!("{:.1} GB", ram_used_gb),
-        "ramFreeMB": (mem_avail_kb / 1024.0).round() as u64, "ramUsagePercent": ram_pct,
-        "storage": format!("{:.1} GB", df_tot_gb),
-        "storageUsedGB": (df_used_gb * 10.0).round() / 10.0,
-        "storageFreeGB": (df_free_gb * 10.0).round() / 10.0, "storageUsagePercent": df_pct,
-        "cpuUsagePercent": cpu_pct, "cpuLoadAvg": load1,
-        "activeThreads": load_toks.get(1).copied().unwrap_or("0/0"),
-        "uptimeHours": format!("{} h", get_val("UP=")),
-        "battery": bat_lvl, "isCharging": charging, "temperature": format!("{:.1}", temp_c),
-        "batteryVoltageMv": volt_mv, "batteryTech": "Li-ion",
-        "verifiedBootState": get_val("VBOOT="), "bootloaderLocked": get_val("FLASH=") == "1",
-    })
 }

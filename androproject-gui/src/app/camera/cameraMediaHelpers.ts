@@ -30,6 +30,24 @@ export async function listVideoInputs(): Promise<MediaDeviceInfo[]> {
   return all.filter((d) => d.kind === 'videoinput');
 }
 
+/** Restores the camera's minimum optical zoom when the browser exposes it. */
+export async function resetCameraZoom(stream: MediaStream): Promise<boolean> {
+  const track = stream.getVideoTracks()[0];
+  if (!track) return false;
+  const capabilities = track.getCapabilities() as MediaTrackCapabilities & { zoom?: number | { min: number; max: number; step?: number } };
+  const zoom = capabilities.zoom;
+  if (zoom === undefined) return false;
+  const minimum = typeof zoom === 'number' ? zoom : zoom.min;
+  if (!Number.isFinite(minimum)) return false;
+  try {
+    await track.applyConstraints({ advanced: [{ zoom: minimum } as MediaTrackConstraintSet] });
+    return true;
+  } catch {
+    // Some Samsung camera providers advertise zoom but reject browser constraints.
+    return false;
+  }
+}
+
 /** Solicita cámara con fallback progresivo (4K60+audio -> HD+audio -> solo video). */
 export async function requestCameraStream(
   facingMode: 'environment' | 'user' = 'environment',

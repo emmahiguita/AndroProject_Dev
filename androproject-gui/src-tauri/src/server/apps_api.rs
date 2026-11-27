@@ -2,7 +2,6 @@
 use axum::{extract::Query, http::StatusCode, response::IntoResponse, Json};
 use serde::Deserialize;
 use serde_json::{json, Value};
-use std::collections::HashSet;
 
 #[derive(Deserialize)]
 pub struct FileListQuery { pub serial: Option<String>, pub path: Option<String> }
@@ -14,15 +13,6 @@ fn sanitize_pkg(raw: &str) -> String {
         .chars()
         .filter(|c| c.is_ascii_alphanumeric() || matches!(c, '.' | '_' | '-'))
         .collect()
-}
-
-fn friendly_name(pkg: &str) -> String {
-    let last = pkg.rsplit('.').next().unwrap_or(pkg);
-    let mut chars = last.chars();
-    match chars.next() {
-        Some(first) => format!("{}{}", first.to_uppercase(), chars.as_str()),
-        None => pkg.to_string(),
-    }
 }
 
 /// `POST /api/apps` — Lista, lanza, detiene, limpia o desinstala apps Android.
@@ -40,50 +30,36 @@ pub async fn post_apps(Json(body): Json<Value>) -> impl IntoResponse {
     if action != "list" && (pkg.is_empty() || pkg != raw_pkg || !pkg.contains('.')) {
         return (StatusCode::BAD_REQUEST, Json(json!({ "success": false, "error": "Nombre de paquete inválido" })));
     }
+    if matches!(action, "uninstall" | "disable" | "clear" | "clear_data")
+        && body["confirmed"] != true
+    {
+        return (StatusCode::BAD_REQUEST, Json(json!({
+            "success": false,
+            "error": "Esta operación requiere confirmación explícita"
+        })));
+    }
 
     match action {
         // El paquete puede contener un APK base y varias divisiones necesarias.
-        "extract_apk" => (StatusCode::OK, Json(super::apk_extract::extract(&serial, &pkg).await)),
-        "list" => {
-            let (ok_all, out_all, err) = adb_shell(&serial, "pm list packages", 8000).await;
-            if !ok_all {
-                return (StatusCode::OK, Json(json!({ "success": false, "apps": [], "error": err })));
-            }
-            let (ok_user, out_3rd, user_err) = adb_shell(&serial, "pm list packages -3", 5000).await;
-            if !ok_user {
-                return (StatusCode::OK, Json(json!({ "success": false, "apps": [], "error": user_err })));
-            }
-            let user_set: HashSet<String> = out_3rd
-                .lines()
-                .filter_map(|l| l.trim().strip_prefix("package:").map(|s| s.to_string()))
-                .collect();
-
-            let mut apps: Vec<Value> = out_all
-                .lines()
-                .filter_map(|l| l.trim().strip_prefix("package:"))
-                .map(|p| {
-                    let is_user = user_set.contains(p);
-                    let is_bloat = p.contains("facebook") || p.contains("tiktok") || p.contains("heytap") || p.contains("coloros.gamespace");
-                    json!({
-                        "packageName": p,
-                        "name": friendly_name(p),
-                        "isSystem": !is_user,
-                        "isBloatware": is_bloat,
-                        // El nombre por sí solo no demuestra que una app se pueda quitar sin efectos.
-                        "safeToRemove": false,
-                    })
-                })
-                .collect();
-            apps.sort_by(|a, b| a["name"].as_str().unwrap_or("").cmp(b["name"].as_str().unwrap_or("")));
-            (StatusCode::OK, Json(json!({ "success": true, "apps": apps, "total": apps.len() })))
+        _ if crate::apps_policy::is_critical_system_package(&pkg)
+            && matches!(action, "uninstall" | "disable" | "clear" | "clear_data") =>
+        {
+            (StatusCode::FORBIDDEN, Json(json!({
+                "success": false,
+                "error": format!("Paquete crítico del sistema protegido: {}", pkg)
+            })))
         }
+        "extract_apk" => (StatusCode::OK, Json(super::apk_extract::extract(&serial, &pkg).await)),
+        "list" => (StatusCode::OK, Json(super::apps_catalog::list_apps(&serial).await)),
         "uninstall" => {
             let (ok, out, err) = run_adb(&["-s", &serial, "uninstall", &pkg], 15000).await;
-            let ok2 = if !ok || !out.contains("Success") {
-                let (o2, out2, _) = adb_shell(&serial, &format!("pm uninstall --user 0 {}", pkg), 10000).await;
-                o2 && out2.contains("Success")
-            } else { true };
-            (StatusCode::OK, Json(json!({ "success": ok2, "message": out.trim(), "error": err })))
+            if ok && out.contains("Success") {
+                return (StatusCode::OK, Json(json!({ "success": true, "message": format!("Desinstalado correctamente: {pkg}"), "error": "" })));
+            }
+            let (o2, out2, err2) = adb_shell(&serial, &format!("pm uninstall --user 0 {}", pkg), 10000).await;
+            let ok2 = o2 && out2.contains("Success");
+            let detail = if !out2.trim().is_empty() { out2.trim() } else if !err2.trim().is_empty() { err2.trim() } else if !err.trim().is_empty() { err.trim() } else { out.trim() };
+            (StatusCode::OK, Json(json!({ "success": ok2, "message": if ok2 { format!("Desinstalado para usuario 0: {pkg}") } else { detail.to_string() }, "error": if ok2 { "" } else { detail } })))
         }
         "launch" => {
             let (ok, out, err) = adb_shell(&serial, &format!("monkey -p {} -c android.intent.category.LAUNCHER 1", pkg), 6000).await;

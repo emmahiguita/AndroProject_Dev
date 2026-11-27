@@ -8,7 +8,7 @@
 // ============================================================================
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Copy, Check, Sparkles, AlertCircle } from 'lucide-react';
 
 interface CliResponseViewerProps {
@@ -29,17 +29,27 @@ export const CliResponseViewer: React.FC<CliResponseViewerProps> = ({
   dark,
 }) => {
   const [copied, setCopied] = useState(false);
+  const [copyError, setCopyError] = useState(false);
+  const copyTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const mounted = useRef(false);
+  useEffect(() => { mounted.current = true; return () => { mounted.current = false; if (copyTimer.current) clearTimeout(copyTimer.current); }; }, []);
 
   if (!output && !error) return null;
 
   const cardCls = dark ? 'bg-zinc-950 border-zinc-800 text-zinc-100' : 'bg-white border-slate-200 text-slate-900';
   const mutedCls = dark ? 'text-zinc-400' : 'text-slate-600';
 
-  const handleCopy = () => {
+  // Solo se informa que se copió cuando el portapapeles confirma la operación.
+  const handleCopy = async () => {
     if (!output) return;
-    navigator.clipboard.writeText(output);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1500);
+    try {
+      await navigator.clipboard.writeText(output);
+      if (!mounted.current) return;
+      setCopied(true);
+      setCopyError(false);
+      if (copyTimer.current) clearTimeout(copyTimer.current);
+      copyTimer.current = setTimeout(() => setCopied(false), 1500);
+    } catch { if (mounted.current) { setCopyError(true); setCopied(false); } }
   };
 
   return (
@@ -66,6 +76,7 @@ export const CliResponseViewer: React.FC<CliResponseViewerProps> = ({
           </button>
         )}
       </div>
+      {copyError && <p role="alert" className="text-xs text-semantic-danger">No se pudo copiar al portapapeles.</p>}
 
       {/* Mensaje de error o salida del terminal */}
       {error ? (

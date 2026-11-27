@@ -53,6 +53,7 @@ dependencies = [
  "tauri-build",
  "tokio",
  "tokio-stream",
+ "tower",
  "tower-http 0.5.2",
 ]
 

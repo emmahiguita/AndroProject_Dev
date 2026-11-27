@@ -42,7 +42,7 @@ export const DeviceNavControls: React.FC<DeviceNavControlsProps> = ({
   onKey,
 }) => {
   const navBtnCls =
-    'flex flex-col items-center justify-center gap-0.5 py-1.5 rounded-lg text-[10px] font-medium bg-zinc-900/50 hover:bg-zinc-800 text-zinc-300 hover:text-white border border-zinc-800/60 transition-colors cursor-pointer';
+    'flex flex-col items-center justify-center gap-0.5 py-1.5 rounded-lg text-[10px] font-medium bg-surface-card hover:bg-surface-overlay text-text-primary border border-border-control disabled:opacity-50 transition-colors cursor-pointer';
 
   const keys = [
     { code: 'KEYCODE_BACK', label: 'Atrás', title: 'Atrás (Escape)', icon: <ArrowLeft size={12} /> },
@@ -57,31 +57,32 @@ export const DeviceNavControls: React.FC<DeviceNavControlsProps> = ({
   return (
     <>
       {/* Barra de inyección de texto y portapapeles PC -> Móvil */}
-      <form onSubmit={onSendText} className="flex items-center gap-2 px-3 py-1.5 bg-zinc-950/90 shrink-0 border-t border-zinc-800/80">
+      <form onSubmit={onSendText} className="flex items-center gap-2 px-3 py-1.5 bg-surface-card shrink-0 border-t border-border">
         <div className="relative flex-1">
           <Type size={12} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
           <input
             type="text"
+            disabled={isIos || !hasSerial}
             value={textInput}
             onChange={(e) => onTextChange(e.target.value)}
             placeholder={isIos ? 'Escribir en el dispositivo...' : 'Escribir texto en Android...'}
-            className="w-full pl-8 pr-3 py-1.5 rounded-lg bg-zinc-900/70 border border-zinc-800 text-zinc-100 text-xs placeholder:text-zinc-500 focus:outline-none focus:border-zinc-600 transition-colors"
+            className="w-full pl-8 pr-3 py-1.5 rounded-lg bg-surface-card border border-border-control text-text-primary text-xs placeholder:text-zinc-500 focus:outline-none focus:border-zinc-600 transition-colors"
           />
         </div>
         <button
           type="button"
           onClick={onPasteFromPc}
-          disabled={pastingClip || !hasSerial}
+          disabled={isIos || pastingClip || !hasSerial}
           title="Pegar texto copiado en la PC (Ctrl + V)"
-          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-zinc-800 bg-zinc-900/80 hover:bg-zinc-800 text-zinc-300 text-xs font-medium transition-colors cursor-pointer disabled:opacity-40"
+          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-border-control bg-surface-card hover:bg-surface-overlay text-text-primary text-xs font-medium transition-colors cursor-pointer disabled:opacity-40"
         >
           {pastedFeedback ? <Check size={12} className="text-emerald-400" /> : <ClipboardPaste size={12} />}
           <span className="hidden sm:inline">{pastedFeedback ? 'Pegado' : 'Pegar PC'}</span>
         </button>
         <button
           type="submit"
-          disabled={!textInput.trim() || sendingText}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-100 hover:bg-white text-zinc-950 text-xs font-semibold transition-colors disabled:opacity-40 shadow-sm cursor-pointer"
+          disabled={isIos || !hasSerial || !textInput.trim() || sendingText}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-text-primary text-surface-card text-xs font-semibold transition-colors disabled:opacity-40 shadow-sm cursor-pointer"
         >
           <Send size={11} />
           <span>Enviar</span>
@@ -89,11 +90,12 @@ export const DeviceNavControls: React.FC<DeviceNavControlsProps> = ({
       </form>
 
       {/* Botonera de navegación física Android */}
-      <div className="grid grid-cols-7 gap-1 px-2.5 py-1.5 bg-zinc-950 shrink-0 border-t border-zinc-800/50">
+      <div className="grid grid-cols-7 gap-1 px-2.5 py-1.5 bg-surface-card shrink-0 border-t border-border">
         {keys.map((k) => (
           <button
             key={k.code}
             type="button"
+            disabled={isIos || !hasSerial}
             onClick={() => onKey(k.code)}
             title={k.title}
             className={navBtnCls}

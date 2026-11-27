@@ -14,7 +14,7 @@ import {
   INITIAL_METRICS, getCameraErrorMessage, type CameraMetrics,
 } from './cameraTypes';
 import { attachPeerHandlers, createConfiguredPeer, negotiateSdpOffer, readPeerMetrics } from './cameraRtcHelpers';
-import { captureVideoSnapshot, disposeCameraResources, listVideoInputs, requestCameraStream, startWebmRecording } from './cameraMediaHelpers';
+import { captureVideoSnapshot, disposeCameraResources, listVideoInputs, requestCameraStream, resetCameraZoom, startWebmRecording } from './cameraMediaHelpers';
 import { useVisionHealth } from './useVisionHealth';
 
 const MAX_RECONNECT_ATTEMPTS = 5;
@@ -88,6 +88,7 @@ export function useCameraWebRtc() {
       addLog(`Iniciando cámara (${targetId ? 'dispositivo' : targetFacing})...`);
       streamRef.current?.getTracks().forEach((t) => t.stop());
       const mediaStream = await requestCameraStream(targetFacing, targetId || undefined);
+      await resetCameraZoom(mediaStream);
       streamRef.current = mediaStream; setStream(mediaStream);
       setCameras(await listVideoInputs());
       mediaStream.getTracks().forEach((t) => {

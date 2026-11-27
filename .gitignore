@@ -44,6 +44,8 @@ yarn-error.log*
 *.zip
 *.tar.gz
 AndroProject_Installer/output/
+# Identidad local cifrada con DPAPI para volver a firmar desde esta cuenta.
+/.local-signing/
 
 # OS / Temporary
 .DS_Store

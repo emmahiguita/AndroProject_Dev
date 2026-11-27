@@ -8,6 +8,7 @@
 //           escritorio Tauri manteniendo < 200 líneas y responsabilidad única.
 // ============================================================================
 
+use crate::apps_policy::{is_critical_system_package, is_valid_package};
 use serde::Serialize;
 use std::collections::HashSet;
 use std::path::PathBuf;
@@ -42,16 +43,6 @@ pub fn is_valid_serial(serial: &str) -> bool {
         && s.len() <= 64
         && s.chars()
             .all(|c| c.is_ascii_alphanumeric() || matches!(c, '.' | ':' | '-' | '_'))
-}
-
-/// Valida que el identificador de paquete Android siga el formato seguro `a.b.c`.
-pub fn is_valid_package(pkg: &str) -> bool {
-    let p = pkg.trim();
-    !p.is_empty()
-        && p.len() <= 160
-        && p.contains('.')
-        && p.chars()
-            .all(|c| c.is_ascii_alphanumeric() || matches!(c, '.' | '_' | '-'))
 }
 
 /// Ejecuta un subcomando `adb -s <serial> ...` sin ventana de consola y retorna stdout.
@@ -179,6 +170,11 @@ pub fn rust_app_action_fast(
         return Err("Nombre de paquete inválido".into());
     }
     let pkg = package_name.trim();
+    if is_critical_system_package(pkg)
+        && matches!(action.trim(), "uninstall" | "disable" | "clear_data")
+    {
+        return Err(format!("Paquete crítico del sistema protegido: {}", pkg));
+    }
     if action.trim() == "launch" {
         return launch_package_native(&serial, pkg);
     }

@@ -12,7 +12,7 @@
 'use client';
 import { apiUrl } from '@/lib/api-url';
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   Thermometer, Cpu, Activity, Database,
   RefreshCw, MonitorPlay, BarChart3,
@@ -68,10 +68,10 @@ export function DashboardView({ device: propDevice, addLog: propAddLog, onNaviga
 
   useEffect(() => {
     if (!device) return;
-    setCpuHistory((prev) => [...prev.slice(-19), telemetry.cpuPercent]);
-    setRamHistory((prev) => [...prev.slice(-19), telemetry.ramPercent]);
-    setTempHistory((prev) => [...prev.slice(-19), telemetry.tempNum]);
-    setStorHistory((prev) => [...prev.slice(-19), telemetry.storagePercent]);
+    if (device.cpuUsagePercent != null) setCpuHistory((prev) => [...prev.slice(-19), telemetry.cpuPercent]);
+    if (device.ramUsagePercent != null) setRamHistory((prev) => [...prev.slice(-19), telemetry.ramPercent]);
+    if (device.temperature != null) setTempHistory((prev) => [...prev.slice(-19), telemetry.tempNum]);
+    if (device.storageUsagePercent != null) setStorHistory((prev) => [...prev.slice(-19), telemetry.storagePercent]);
   }, [device, telemetry.cpuPercent, telemetry.ramPercent, telemetry.tempNum, telemetry.storagePercent]);
 
   // Polling activo cada 2.5s mientras la ficha de telemetría está abierta
@@ -142,10 +142,10 @@ export function DashboardView({ device: propDevice, addLog: propAddLog, onNaviga
 
         {device && (
           <div className="flex flex-wrap items-center gap-2 py-0.5">
-            <button type="button" onClick={() => setShowMetricsSheet(true)} className={pillCls} title={telemetry.cpuSubDetail}><Cpu size={12} /> <span>CPU {telemetry.cpuPercent}%</span></button>
-            <button type="button" onClick={() => setShowMetricsSheet(true)} className={pillCls} title={telemetry.ramSubDetail}><Activity size={12} /> <span>RAM {telemetry.ramPercent}% ({device.ramUsed || '--'})</span></button>
+            <button type="button" onClick={() => setShowMetricsSheet(true)} className={pillCls} title={telemetry.cpuSubDetail}><Cpu size={12} /> <span>CPU {device.cpuUsagePercent == null ? '—' : `${telemetry.cpuPercent}%`}</span></button>
+            <button type="button" onClick={() => setShowMetricsSheet(true)} className={pillCls} title={telemetry.ramSubDetail}><Activity size={12} /> <span>RAM {device.ramUsagePercent == null ? '—' : `${telemetry.ramPercent}%`} ({device.ramUsed || '--'})</span></button>
             <button type="button" onClick={() => setShowMetricsSheet(true)} className={pillCls} title={telemetry.tempSubDetail}><Thermometer size={12} /> <span>TEMP {telemetry.tempCelsius}°C</span></button>
-            <button type="button" onClick={() => setShowMetricsSheet(true)} className={pillCls} title={telemetry.storSubDetail}><Database size={12} /> <span>DISCO {telemetry.storagePercent}% ({telemetry.storageFreeGB}G libre)</span></button>
+            <button type="button" onClick={() => setShowMetricsSheet(true)} className={pillCls} title={telemetry.storSubDetail}><Database size={12} /> <span>DISCO {device.storageUsagePercent == null ? '—' : `${telemetry.storagePercent}%`} ({device.storageFreeGB == null ? '—' : `${device.storageFreeGB} GB libres`})</span></button>
             <button type="button" onClick={() => setShowMetricsSheet(true)} className={pillCls} title="Abrir monitor completo"><BarChart3 size={12} /> <span>Monitor</span></button>
           </div>
         )}

@@ -62,3 +62,11 @@ pub async fn stop(serial: &str) -> Value {
     }
     json!({"success": true, "alive": false, "message": "Proyección detenida"})
 }
+
+/// Termina y recoge las ventanas de proyección que todavía pertenecen al estudio.
+pub async fn shutdown() {
+    let children = std::mem::take(&mut *screens().lock().await);
+    futures_util::future::join_all(children.into_values().map(|mut child| async move {
+        let _ = child.kill().await;
+    })).await;
+}

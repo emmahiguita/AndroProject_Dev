@@ -11,15 +11,17 @@
 'use client';
 import { apiUrl } from '@/lib/api-url';
 
-import React, { useState, useEffect, useCallback, type ReactNode } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   Settings, FolderOpen, HardDrive, Monitor, Zap, Camera,
-  Wifi, Globe, Radio, Copy, Check, Wrench, RefreshCw, Terminal, ChevronRight,
+  Wifi, Globe, Radio, Wrench, RefreshCw, Terminal,
 } from 'lucide-react';
 import { useAppStore } from '@/stores';
 import { useTheme } from '@/hooks/useTheme';
 import { ViewShell } from '@/components/ViewShell';
 import { DeviceSettingsPanel, type LiveAndroidSettings } from './config/DeviceSettingsPanel';
+
+import { ConfigRow, QuickNavBtn } from './config/ConfigRows';
 
 interface ConfigViewProps {
   addLog?: (msg: string, type?: 'info' | 'success' | 'error') => void;
@@ -43,22 +45,31 @@ export function ConfigView({ addLog: propAddLog }: ConfigViewProps = {}) {
     [propAddLog, storeAddLog],
   );
 
+  const revision = useRef(0);
   // Carga automática real de rutas de binarios y ajustes del dispositivo Android
   const loadConfig = useCallback(async () => {
+    const request = ++revision.current;
     setBusyAction('load');
+    setDeviceSettings(null); setStatusBanner(null);
     try {
       const q = activeSerial ? `?serial=${encodeURIComponent(activeSerial)}` : '';
       const res = await fetch(apiUrl(`/api/config${q}`), { cache: 'no-store' });
       const data = await res.json();
-      if (data.success) { useAppStore.setState({ configData: data }); setVerified(data.verified || {}); setDeviceSettings(data.deviceSettings || null); }
-    } catch { log('Error al leer la configuración del sistema.', 'error'); }
-    finally { setBusyAction(null); }
-  }, [activeSerial, log]);
+      if (revision.current !== request) return;
+      if (!res.ok || !data.success) throw new Error(data.error || 'Error al leer la configuración');
+      { useAppStore.setState({ configData: data }); setVerified(data.verified || {}); setDeviceSettings(data.deviceSettings || null); }
+    } catch {
+      if (request !== revision.current) return;
+      useAppStore.setState({ configData: {} }); setVerified({});
+      setStatusBanner({ text: 'Error al leer la configuración del sistema.', ok: false });
+    } finally { if (request === revision.current) setBusyAction(null); }
+  }, [activeSerial]);
 
-  useEffect(() => { loadConfig(); }, [loadConfig]);
+  useEffect(() => { void loadConfig(); return () => { revision.current++; }; }, [loadConfig]);
 
   // Ejecuta un ajuste real en el dispositivo o en el servidor host
   const handleApplySetting = async (action: string, value?: string | number | boolean) => {
+    const request = ++revision.current;
     setBusyAction(action);
     try {
       // Las acciones del equipo usan /api/actions; los ajustes Android usan /api/config.
@@ -68,16 +79,18 @@ export function ConfigView({ addLog: propAddLog }: ConfigViewProps = {}) {
         body: JSON.stringify({ action: action === 'enable_tcpip' ? 'toggle_wifi_adb' : action, serial: activeSerial, value }),
       });
       const data = await res.json();
+      if (request !== revision.current) return;
       if (data.success) {
-        if (data.deviceSettings) setDeviceSettings(data.deviceSettings);
+        if (!nativeAction) setDeviceSettings(data.deviceSettings || null);
         setStatusBanner({ text: data.message || `Ajuste aplicado (${action})`, ok: true });
         log(`Ajuste aplicado (${action})`, 'success');
       } else {
+        if (!nativeAction) setDeviceSettings(data.deviceSettings || null);
         setStatusBanner({ text: data.error || data.message || 'Error aplicando ajuste', ok: false });
         log(data.error || data.message || 'Error aplicando ajuste', 'error');
       }
-    } catch { setStatusBanner({ text: 'Error de red al aplicar ajuste.', ok: false }); log('Error de red al aplicar ajuste.', 'error'); }
-    finally { setBusyAction(null); }
+    } catch { if (request !== revision.current) return; setStatusBanner({ text: 'Error de red al aplicar ajuste.', ok: false }); log('Error de red al aplicar ajuste.', 'error'); }
+    finally { if (request === revision.current) setBusyAction(null); }
   };
 
   const cardCls = dark ? 'bg-zinc-950 border-zinc-800 text-zinc-100' : 'bg-white border-slate-300 text-slate-900 shadow-sm';
@@ -119,11 +132,11 @@ export function ConfigView({ addLog: propAddLog }: ConfigViewProps = {}) {
           <div className={`rounded-lg border p-3.5 space-y-2 ${cardCls}`}>
             <h3 className="text-xs font-bold uppercase tracking-wider flex items-center gap-1.5"><HardDrive size={13} /> Binarios y Rutas del Host</h3>
             <div className="space-y-1">
-              <ConfigRow dark={dark} icon={<HardDrive size={12} />} label="Binario ADB" value={configData.adb || 'C:\\AndroProject\\adb.exe'} ok={verified.adb} />
-              <ConfigRow dark={dark} icon={<Zap size={12} />} label="Binario Fastboot" value={configData.fastboot || 'fastboot.exe'} ok={verified.fastboot} />
-              <ConfigRow dark={dark} icon={<Monitor size={12} />} label="Motor Scrcpy 4.1" value={configData.streamingEngine || 'scrcpy.exe'} ok={verified.scrcpy} />
-              <ConfigRow dark={dark} icon={<Camera size={12} />} label="Carpeta de Capturas" value={configData.capturesDir || 'C:\\AndroProject\\Capturas'} ok />
-              <ConfigRow dark={dark} icon={<FolderOpen size={12} />} label="Directorio Raíz" value={configData.home || 'C:\\AndroProject'} ok />
+              <ConfigRow dark={dark} icon={<HardDrive size={12} />} label="Binario ADB" value={configData.adb || 'Sin lectura'} ok={verified.adb} />
+              <ConfigRow dark={dark} icon={<Zap size={12} />} label="Binario Fastboot" value={configData.fastboot || 'Sin lectura'} ok={verified.fastboot} />
+              <ConfigRow dark={dark} icon={<Monitor size={12} />} label="Motor Scrcpy 4.1" value={configData.streamingEngine || 'Sin lectura'} ok={verified.scrcpy} />
+              <ConfigRow dark={dark} icon={<Camera size={12} />} label="Carpeta de Capturas" value={configData.capturesDir || 'Sin lectura'} />
+              <ConfigRow dark={dark} icon={<FolderOpen size={12} />} label="Directorio Raíz" value={configData.home || 'Sin lectura'} />
             </div>
           </div>
 
@@ -131,9 +144,9 @@ export function ConfigView({ addLog: propAddLog }: ConfigViewProps = {}) {
             <div className="space-y-2">
               <h3 className="text-xs font-bold uppercase tracking-wider flex items-center gap-1.5"><Wifi size={13} /> Red, Puertos y Servicios</h3>
               <div className="space-y-1">
-                <ConfigRow dark={dark} icon={<Wifi size={12} />} label="Puerto ADB Wi-Fi" value={String(configData.wifiPort || 5555)} ok={verified.adb} />
-                <ConfigRow dark={dark} icon={<Globe size={12} />} label="Puerto Estudio Web (Next.js)" value={String(configData.apiPort || 3000)} ok />
-                <ConfigRow dark={dark} icon={<Camera size={12} />} label="Vision Backend (WebRTC / YOLO)" value="127.0.0.1:8000" ok={verified.vision} />
+                <ConfigRow dark={dark} icon={<Wifi size={12} />} label="Puerto ADB Wi-Fi" value={String(configData.wifiPort || 'Sin lectura')} ok={verified.adb} />
+                <ConfigRow dark={dark} icon={<Globe size={12} />} label="Puerto de la API Rust" value={String(configData.apiPort || 'Sin lectura')} ok={configData.apiPort ? true : undefined} />
+                <ConfigRow dark={dark} icon={<Camera size={12} />} label="Vision Backend (WebRTC / YOLO)" value="127.0.0.1:8000 · comprobar en Cámara" ok={verified.vision ?? undefined} />
                 <ConfigRow dark={dark} icon={<Radio size={12} />} label="Receptor AirPlay 2 Nativo" value={verified.airplay ? '7001 (Activo)' : '7001 (En espera)'} ok={verified.airplay} />
               </div>
             </div>
@@ -151,47 +164,5 @@ export function ConfigView({ addLog: propAddLog }: ConfigViewProps = {}) {
         </div>
       </div>
     </ViewShell>
-  );
-}
-
-/** Fila compacta de ruta o puerto con insignia de verificación y botón de copia. */
-function ConfigRow({ icon, label, value, dark, ok }: { icon: ReactNode; label: string; value: string; dark: boolean; ok?: boolean }) {
-  const [copied, setCopied] = useState(false);
-  return (
-    <div className={`flex items-center gap-2 px-2 py-1.5 rounded border ${dark ? 'bg-zinc-900/50 border-zinc-800/80' : 'bg-slate-50 border-slate-200'}`}>
-      <span className={`shrink-0 ${dark ? 'text-zinc-400' : 'text-slate-500'}`}>{icon}</span>
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-1.5">
-          <span className={`text-[11px] font-semibold ${dark ? 'text-zinc-200' : 'text-slate-800'}`}>{label}</span>
-          {ok !== undefined && (
-            <span className={`text-[10px] font-mono px-1.5 rounded border ${dark ? 'bg-zinc-900 border-zinc-700 text-zinc-200' : 'bg-slate-100 border-slate-300 text-slate-800'}`}>{ok ? 'OK' : 'WARN'}</span>
-          )}
-        </div>
-        <p className={`text-[11px] font-mono truncate ${dark ? 'text-zinc-400' : 'text-slate-600'}`} title={value}>{value}</p>
-      </div>
-      <button
-        type="button"
-        onClick={() => { navigator.clipboard.writeText(value); setCopied(true); setTimeout(() => setCopied(false), 1500); }}
-        className={`p-1 rounded transition-colors ${dark ? 'hover:bg-zinc-800 text-zinc-300' : 'hover:bg-slate-200 text-slate-700'}`}
-        title="Copiar valor"
-      >
-        {copied ? <Check size={12} /> : <Copy size={12} />}
-      </button>
-    </div>
-  );
-}
-
-function QuickNavBtn({ dark, icon, label, onClick }: { dark: boolean; icon: ReactNode; label: string; onClick: () => void }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`flex items-center justify-between gap-1.5 px-2.5 py-1.5 rounded border text-[11px] font-semibold transition-colors ${
-        dark ? 'bg-zinc-900 border-zinc-800 text-zinc-200 hover:bg-zinc-800' : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
-      }`}
-    >
-      <span className="flex items-center gap-1.5 truncate">{icon} <span className="truncate">{label}</span></span>
-      <ChevronRight size={12} className="shrink-0 opacity-60" />
-    </button>
   );
 }

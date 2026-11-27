@@ -25,19 +25,6 @@ export async function postActionRequest(
   return (await r.json()) as Record<string, any>;
 }
 
-export async function postPatchRequest(
-  packageName: string,
-  serial: string | null,
-  isClone: boolean,
-): Promise<Record<string, any>> {
-  const res = await fetch(apiUrl('/api/patch-app'), {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ action: 'patch_app', packageName, serial, isClone }),
-  });
-  return (await res.json()) as Record<string, any>;
-}
-
 export async function projectScreensBatch(
   devicesList: Array<{ serial: string }>,
   videoSource: string,

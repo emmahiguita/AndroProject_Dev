@@ -9,7 +9,7 @@ export interface OptimizerSlice {
   optimizerTab: OptimizerTab;
   // Performance
   animScales: AnimScales;
-  currentDpi: number;
+  currentDpi: number | null;
   gpuTweaks: GpuTweaks;
   backgroundLimit: string;
   screenTimeout: string;
@@ -45,7 +45,7 @@ export interface OptimizerSlice {
   // Setters
   setOptimizerTab: (tab: OptimizerTab) => void;
   setAnimScales: (scales: AnimScales | ((prev: AnimScales) => AnimScales)) => void;
-  setCurrentDpi: (dpi: number) => void;
+  setCurrentDpi: (dpi: number | null) => void;
   setGpuTweaks: (tweaks: GpuTweaks | ((prev: GpuTweaks) => GpuTweaks)) => void;
   setBackgroundLimit: (v: string) => void;
   setScreenTimeout: (v: string) => void;
@@ -78,10 +78,10 @@ export interface OptimizerSlice {
 export const createOptimizerSlice: StateCreator<OptimizerSlice, [], [], OptimizerSlice> = (set) => ({
   optimizerTab: 'performance',
   animScales: { window_animation_scale: '1.0', transition_animation_scale: '1.0', animator_duration_scale: '1.0' },
-  currentDpi: 420,
+  currentDpi: null,
   gpuTweaks: { force_gpu: false, disable_overlays: false, force_msaa: false },
   backgroundLimit: 'standard',
-  screenTimeout: '1800000',
+  screenTimeout: '',
   peakRefreshRate: '60',
   nightMode: '2',
   autoBrightness: false,

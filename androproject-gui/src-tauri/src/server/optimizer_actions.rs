@@ -43,6 +43,47 @@ pub async fn run_maintenance(serial: &str, action: &str) -> Value {
     json!({"success": true, "message": message})
 }
 
+/// Applies only known, reversible performance settings and confirms each one.
+pub async fn apply_perf_profile(serial: &str, profile: &str) -> Value {
+    if serial.is_empty() { return json!({"success": false, "error": "Serial requerido"}); }
+    let settings: &[(&str, &str, &str)] = match profile {
+        "balanced" | "fluid" => &[
+            ("global", "development_settings_enabled", "1"),
+            ("global", "window_animation_scale", "0.5"),
+            ("global", "transition_animation_scale", "0.5"),
+            ("global", "animator_duration_scale", "0.5"),
+        ],
+        "gaming" => &[
+            ("global", "development_settings_enabled", "1"),
+            ("global", "window_animation_scale", "0.0"),
+            ("global", "transition_animation_scale", "0.0"),
+            ("global", "animator_duration_scale", "0.0"),
+        ],
+        "restore" => &[
+            ("global", "window_animation_scale", "1.0"),
+            ("global", "transition_animation_scale", "1.0"),
+            ("global", "animator_duration_scale", "1.0"),
+        ],
+        _ => return json!({"success": false, "error": "Perfil Turbo no válido"}),
+    };
+
+    let mut applied = Vec::with_capacity(settings.len());
+    for (scope, key, value) in settings {
+        let command = format!("settings put {} {} {}", scope, key, value);
+        let (ok, output, error) = adb_shell(serial, &command, 5000).await;
+        if !ok || output.contains("Error") || output.contains("Exception") {
+            return json!({"success": false, "applied": applied, "error": if error.is_empty() { output } else { error }});
+        }
+        let (verified, actual, read_error) = adb_shell(serial, &format!("settings get {} {}", scope, key), 5000).await;
+        if !verified || actual.trim() != *value {
+            return json!({"success": false, "applied": applied, "error": if read_error.is_empty() { format!("No se confirmó {}", key) } else { read_error }});
+        }
+        applied.push(key.to_string());
+    }
+    let status = super::developer_actions::status(serial).await;
+    json!({"success": true, "applied": applied, "status": status.get("status"), "message": format!("Perfil {} aplicado y verificado", profile)})
+}
+
 /// Valida el destino, aplica un ajuste y confirma el valor leído del teléfono.
 pub async fn apply(serial: &str, action: &str, body: &Value) -> Value {
     if serial.is_empty() { return json!({"success": false, "error": "Serial requerido"}); }

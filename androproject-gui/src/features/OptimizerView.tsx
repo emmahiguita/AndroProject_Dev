@@ -21,6 +21,7 @@ import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { TurboBoostPanel } from './optimizer/TurboBoostPanel';
 import { DeveloperOptionsPanel } from './optimizer/DeveloperOptionsPanel';
+import { GpuDriverPanel } from './optimizer/GpuDriverPanel';
 import { OptimizerNetworkAudioPanel } from './optimizer/OptimizerNetworkAudioPanel';
 import type { OptimizerTab } from '@/stores/optimizerSlice';
 import type { DeviceInfo } from './types';
@@ -50,13 +51,12 @@ export const OptimizerView: React.FC<OptimizerViewProps> = ({ device: propDevice
         body: JSON.stringify({ action: 'get_optimizer_settings', serial: targetSerial }),
       });
       const data = await res.json();
+      if (useAppStore.getState().activeSerial !== targetSerial) return;
       const st = data.settings;
-      if (!data.success || !st) return;
+      if (!data.success || !st) throw new Error(data.error || 'Error de lectura');
       if (st.animScales) s.setAnimScales(st.animScales);
-      if (typeof st.dpi === 'number') s.setCurrentDpi(st.dpi);
-      if (st.gpuTweaks) s.setGpuTweaks(st.gpuTweaks);
-      if (st.backgroundLimit) s.setBackgroundLimit(st.backgroundLimit);
-      if (st.screenTimeout) s.setScreenTimeout(st.screenTimeout);
+      s.setCurrentDpi(typeof st.dpi === 'number' ? st.dpi : null);
+      s.setScreenTimeout(st.screenTimeout || '');
       if (st.peakRefreshRate) s.setPeakRefreshRate(st.peakRefreshRate);
       if (st.nightMode) s.setNightMode(st.nightMode);
       if (typeof st.autoBrightness === 'boolean') s.setAutoBrightness(st.autoBrightness);
@@ -68,24 +68,19 @@ export const OptimizerView: React.FC<OptimizerViewProps> = ({ device: propDevice
       if (st.privateDnsMode) s.setPrivateDnsMode(st.privateDnsMode);
       if (typeof st.privateDnsSpecifier === 'string') s.setPrivateDnsSpecifier(st.privateDnsSpecifier);
       if (st.adguardProfile) s.setAdguardProfile(st.adguardProfile);
-      if (st.bluetooth) {
-        s.setBluetoothInfo({
-          codec: String(st.bluetooth.codec || ''),
-          sampleRate: String(st.bluetooth.sampleRate || ''),
-          bitsPerSample: String(st.bluetooth.bitsPerSample || ''),
-          ldacQuality: String(st.bluetooth.ldacQuality || ''),
-          disableAbsoluteVolume: st.bluetooth.disableAbsoluteVolume ? 'true' : 'false',
-        });
+    } catch (error) {
+      if (useAppStore.getState().activeSerial === targetSerial) {
+        s.setCurrentDpi(null); s.setScreenTimeout('');
+        addLog(error instanceof Error ? error.message : 'Error leyendo el optimizador', 'error');
       }
-      if (st.shade) {
-        s.setShadeHighContrast(Boolean(st.shade.highContrast));
-        s.setShadeBoldText(st.shade.fontScale === '1.1');
-      }
-    } catch {}
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAndroid, targetSerial]);
 
-  useEffect(() => { loadOptimizerSettings(); }, [loadOptimizerSettings]);
+  useEffect(() => {
+    useAppStore.setState({ currentDpi: null, screenTimeout: '' });
+    void loadOptimizerSettings();
+  }, [loadOptimizerSettings]);
 
   const handleRunOptimization = async () => {
     if (!targetSerial) { addLog('No hay ningún dispositivo seleccionado para optimizar.', 'error'); return; }
@@ -186,7 +181,12 @@ export const OptimizerView: React.FC<OptimizerViewProps> = ({ device: propDevice
           </>
         )}
 
-        {s.optimizerTab === 'diagnostics' && <DeveloperOptionsPanel serial={targetSerial} addLog={addLog} onRefreshGlobalSettings={loadOptimizerSettings} />}
+        {s.optimizerTab === 'diagnostics' && (
+          <div className="space-y-3">
+            <DeveloperOptionsPanel serial={targetSerial} addLog={addLog} onRefreshGlobalSettings={loadOptimizerSettings} />
+            <GpuDriverPanel serial={targetSerial} addLog={addLog} />
+          </div>
+        )}
         {(s.optimizerTab === 'network' || s.optimizerTab === 'audio' || s.optimizerTab === 'notifications') && (
           <OptimizerNetworkAudioPanel serial={targetSerial} mode={s.optimizerTab === 'network' ? 'network' : 'audio'} addLog={addLog} />
         )}

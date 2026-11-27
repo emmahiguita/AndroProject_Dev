@@ -57,11 +57,12 @@ export const SpywareAuditPanel: React.FC<SpywareAuditPanelProps> = ({ serial, on
 
   const runRemediation = async (pkg: string, action: RemediationKind) => {
     if (!serial) return;
+    if (action === 'disable' && !confirm(`¿Deshabilitar el paquete ${pkg}?`)) return;
     try {
       const r = await fetch(apiUrl('/api/apps'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ serial, packageName: pkg, action }),
+        body: JSON.stringify({ serial, packageName: pkg, action, confirmed: action === 'disable' }),
       });
       const d = await r.json();
       onLog(d.success ? (d.message || 'Acción aplicada') : (d.error || 'No se pudo aplicar la acción'), d.success ? 'success' : 'error');
@@ -76,7 +77,7 @@ export const SpywareAuditPanel: React.FC<SpywareAuditPanelProps> = ({ serial, on
       const r = await fetch(apiUrl('/api/apps'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'uninstall', packageName: pkg, serial }),
+        body: JSON.stringify({ action: 'uninstall', packageName: pkg, serial, confirmed: true }),
       });
       const d = await r.json();
       if (d.success) {
@@ -91,6 +92,10 @@ export const SpywareAuditPanel: React.FC<SpywareAuditPanelProps> = ({ serial, on
   };
 
   const mutedCls = dark ? 'text-zinc-400' : 'text-slate-600';
+  const severityTone = (sev: SpywareFinding['severity']): 'danger' | 'warning' | 'neutral' =>
+    sev === 'critical' ? 'danger' : sev === 'high' ? 'warning' : 'neutral';
+  const severityLabel = (sev: SpywareFinding['severity']) =>
+    sev === 'critical' ? 'CRÍTICO' : sev === 'high' ? 'ALTO' : 'MEDIO';
 
   return (
     <Card>
@@ -100,20 +105,21 @@ export const SpywareAuditPanel: React.FC<SpywareAuditPanelProps> = ({ serial, on
             <Radar size={18} />
           </div>
           <div>
-            <h3 className="text-sm font-bold">Revisión de nombres de paquetes</h3>
+            <h3 className="text-sm font-bold">Auditoría Heurística de Virus, Spyware y Adware</h3>
             <p className={`text-xs ${mutedCls}`}>
-              Busca términos en los nombres de las aplicaciones de terceros.
+              Analiza permisos críticos reales vía ADB: Overlay, Accesibilidad, Notificaciones, Instalador de APKs, Device Admin, apps ocultas y origen sideload.
             </p>
           </div>
         </div>
         <Button size="sm" icon={<ShieldAlert size={13} />} onClick={runDeepScan} disabled={scanning || !serial}>
-          {scanning ? 'Consultando paquetes...' : 'Revisar paquetes'}
+          {scanning ? 'Auditando dispositivo...' : 'Auditar virus ahora'}
         </Button>
       </div>
 
       {scannedCount !== null && (
         <div className={`mt-3 text-xs flex flex-wrap gap-4 ${mutedCls}`}>
-          <span>Apps de terceros revisadas: <strong>{scannedCount}</strong></span>
+          <span>Apps de terceros auditadas: <strong>{scannedCount}</strong></span>
+          <span>Hallazgos de riesgo: <strong>{findings?.length ?? 0}</strong></span>
         </div>
       )}
 
@@ -122,7 +128,7 @@ export const SpywareAuditPanel: React.FC<SpywareAuditPanelProps> = ({ serial, on
           dark ? 'bg-zinc-900 border-zinc-800 text-zinc-200' : 'bg-slate-50 border-slate-200 text-slate-800'
         }`}>
           <CheckCircle2 size={15} />
-          <span>No hay coincidencias con los términos de búsqueda.</span>
+          <span>Sin indicadores heurísticos de spyware, adware ni troyanos en las {scannedCount ?? 0} apps analizadas.</span>
         </div>
       )}
 
@@ -133,7 +139,14 @@ export const SpywareAuditPanel: React.FC<SpywareAuditPanelProps> = ({ serial, on
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex items-center gap-2 flex-wrap min-w-0">
                   <span className="font-mono text-xs font-bold truncate">{f.packageName}</span>
-                  <Badge tone="neutral">Coincidencia de nombre</Badge>
+                  <Badge tone={severityTone(f.severity)}>{severityLabel(f.severity)} · {f.score} pts</Badge>
+                  <Badge tone="neutral">{f.category.toUpperCase()}</Badge>
+                  {f.isDeviceAdmin && <Badge tone="danger">Admin Dispositivo</Badge>}
+                  {f.hasAccessibility && <Badge tone="danger">Accesibilidad</Badge>}
+                  {f.hasOverlay && <Badge tone="warning">Overlay</Badge>}
+                  {f.hasNotificationAccess && <Badge tone="warning">Notificaciones</Badge>}
+                  {f.hasInstallPackages && <Badge tone="warning">Instala APKs</Badge>}
+                  {f.isHidden && <Badge tone="warning">Oculta</Badge>}
                 </div>
                 <div className="flex items-center gap-1.5 flex-wrap">
                   <Button variant="secondary" size="sm" icon={<Square size={12} />} onClick={() => runRemediation(f.packageName, 'force_stop')}>Detener</Button>
@@ -141,6 +154,7 @@ export const SpywareAuditPanel: React.FC<SpywareAuditPanelProps> = ({ serial, on
                   <Button variant="danger" size="sm" icon={<Trash2 size={12} />} onClick={() => handleUninstall(f.packageName)}>Desinstalar</Button>
                 </div>
               </div>
+              <div className={`text-[11px] font-mono ${mutedCls}`}>Origen: {f.installer}</div>
               <ul className={`text-xs space-y-0.5 ${mutedCls}`}>
                 {f.reasons.map((r) => <li key={r}>• {r}</li>)}
               </ul>

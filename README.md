@@ -25,6 +25,10 @@
 | ![Recorrido Completo Modo Oscuro y Claro](./docs/images/androproject-walkthrough.gif) | ![Grabación Real de Transmisión Móvil](./docs/images/mobile-transmission-record.gif) |
 | [Descargar MP4 HD (`androproject-walkthrough.mp4`)](./docs/images/androproject-walkthrough.mp4) | [Descargar MP4 HD (`mobile-transmission-record.mp4`)](./docs/images/mobile-transmission-record.mp4) |
 
+## Compilación de Windows del 23 de noviembre de 2026
+
+Esta edición de prueba usa el certificado local de ANDRO-IOS Studio. La guía reúne los archivos de descarga, sus huellas, los cambios de interfaz y el alcance de las pruebas. [Consultar la ficha de la compilación](./docs/releases/windows-local-20261123.md).
+
 ## Code signing policy
 
 Free code signing provided by [SignPath.io](https://about.signpath.io/), certificate by [SignPath Foundation](https://signpath.org/).

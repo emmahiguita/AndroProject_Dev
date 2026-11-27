@@ -79,10 +79,9 @@ export function useAdbConnection() {
     setIsConnecting(true);
     setLastError(null);
     try {
-      const data = await postAdbAction<{ success?: boolean; message?: string }>('start_adb_server');
+      const data = await postAdbAction<{ success?: boolean; error?: string }>('start_adb_server');
       if (data.success) {
         setServerRunning(true);
-        await new Promise((r) => setTimeout(r, 1000));
         const status = await fetchStatus();
         if (status?.devices) {
           const registered = loadRegisteredDevices();
@@ -94,7 +93,7 @@ export function useAdbConnection() {
           }
         }
       } else {
-        setLastError(data.message || 'Error al iniciar servidor ADB');
+        setLastError(data.error || 'Error al iniciar servidor ADB');
       }
     } catch {
       setLastError('Error de conexión al iniciar ADB');
@@ -105,10 +104,11 @@ export function useAdbConnection() {
 
   const stopServer = useCallback(async () => {
     try {
-      await postAdbAction('stop_adb_server');
+      const result = await postAdbAction('stop_adb_server');
+      if (!result.success) throw new Error(String(result.error || 'Error al detener ADB'));
       setServerRunning(false);
       setDevices([]);
-    } catch { /* ignora errores al detener */ }
+    } catch (error) { setLastError(error instanceof Error ? error.message : 'Error al detener ADB'); }
   }, []);
 
   const toggleServer = useCallback(async () => {

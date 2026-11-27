@@ -91,14 +91,14 @@ export function computeDeviceTelemetry(device?: DeviceInfo | null): DeviceTeleme
   const tempNum = tempParsed !== null ? Math.round(tempParsed) : 0;
   const tempCelsius = tempParsed !== null ? tempParsed.toFixed(1) : '--';
 
-  const cpuStatus = cpuPercent < 50 ? 'Normal' : cpuPercent < 80 ? 'Carga media' : 'Crítico';
-  const cpuLevel: TelemetryLevel = cpuPercent < 50 ? 'ok' : cpuPercent < 80 ? 'warn' : 'crit';
+  const cpuStatus = device?.cpuUsagePercent == null ? 'Sin lectura' : cpuPercent < 50 ? 'Normal' : cpuPercent < 80 ? 'Carga media' : 'Crítico';
+  const cpuLevel: TelemetryLevel = device?.cpuUsagePercent == null ? 'neutral' : cpuPercent < 50 ? 'ok' : cpuPercent < 80 ? 'warn' : 'crit';
   const cpuSubDetail = device?.activeThreads
     ? `Load ${device.cpuLoadAvg || '--'} · Hilos ${device.activeThreads}`
     : 'Delta /proc/stat en vivo';
 
-  const ramStatus = ramPercent < 65 ? 'Normal' : ramPercent < 85 ? 'Uso alto' : 'Crítico';
-  const ramLevel: TelemetryLevel = ramPercent < 65 ? 'ok' : ramPercent < 85 ? 'warn' : 'crit';
+  const ramStatus = device?.ramUsagePercent == null ? 'Sin lectura' : ramPercent < 65 ? 'Normal' : ramPercent < 85 ? 'Uso alto' : 'Crítico';
+  const ramLevel: TelemetryLevel = device?.ramUsagePercent == null ? 'neutral' : ramPercent < 65 ? 'ok' : ramPercent < 85 ? 'warn' : 'crit';
   const ramSubDetail =
     device?.ramUsed && device?.ram
       ? `${device.ramUsed} / ${device.ram} (${device.ramFreeMB ?? '--'} MB libres)`
@@ -115,13 +115,13 @@ export function computeDeviceTelemetry(device?: DeviceInfo | null): DeviceTeleme
   const tempLevel: TelemetryLevel =
     tempParsed === null ? 'neutral' : tempNum < 41 ? 'ok' : tempNum < 46 ? 'warn' : 'crit';
   const tempSubDetail = device?.batteryVoltageMv
-    ? `${device.batteryVoltageMv} mV · ${device.batteryTech || 'Li-ion'}`
+    ? `${device.batteryVoltageMv} mV · ${device.batteryTech || 'Sin lectura'}`
     : `Batería ${device?.battery ?? '--'}%`;
 
-  const storStatus = storageFreeGB > 0 ? `${storageFreeGB} GB libres` : `${100 - storagePercent}% libre`;
-  const storLevel: TelemetryLevel = storagePercent < 85 ? 'neutral' : 'warn';
+  const storStatus = device?.storageUsagePercent == null ? 'Sin lectura' : storageFreeGB > 0 ? `${storageFreeGB} GB libres` : `${100 - storagePercent}% libre`;
+  const storLevel: TelemetryLevel = device?.storageUsagePercent == null ? 'neutral' : storagePercent < 85 ? 'neutral' : 'warn';
   const storSubDetail =
-    device?.storageUsedGB !== undefined && device?.storage
+    device?.storageUsedGB != null && device?.storage
       ? `${device.storageUsedGB} GB usados de ${device.storage}`
       : 'Partición /data';
 

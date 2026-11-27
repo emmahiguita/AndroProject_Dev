@@ -30,12 +30,10 @@ pub async fn post_airplay(Json(body): Json<Value>) -> Json<Value> {
 
 /// `GET /api/ios` — Estado de dispositivos iOS USB y AirPlay.
 pub async fn get_ios() -> Json<Value> {
+    let (usb, receiver) = tokio::join!(super::driver_scan::ios_usb(), super::airplay_process::status());
     Json(json!({
-        "success": false,
-        "error": "La detección de iOS no está implementada en el servidor Rust",
-        "wda": { "ready": false },
-        "usbDevices": [],
-        "airplay": { "running": false, "port": 7001, "serverName": "ANDRO-IOS [PC]" }
+        "success":usb.is_ok(), "error":usb.as_ref().err(), "usbDevices":usb.as_ref().ok(),
+        "wda":{"ready":false}, "airplay":receiver.get("status")
     }))
 }
 
@@ -80,31 +78,13 @@ pub async fn get_logcat(Query(q): Query<SerialQuery>) -> Sse<impl Stream<Item = 
     Sse::new(ReceiverStream::new(rx)).keep_alive(KeepAlive::default())
 }
 
-/// `GET /api/security-scan?serial=...` — Escaneo heurístico de paquetes de terceros.
+/// `GET /api/security-scan?serial=...` — Auditoría heurística real de virus, spyware y adware.
 pub async fn get_security_scan(Query(q): Query<SerialQuery>) -> Json<Value> {
     let serial = q.serial.as_deref().map(safe_serial).unwrap_or_default();
     if serial.is_empty() {
         return Json(json!({ "success": false, "error": "Serial requerido", "findings": [], "scannedCount": 0 }));
     }
-    // Distinguir un análisis vacío de una consulta ADB fallida.
-    let (ok, out, err) = adb_shell(&serial, "pm list packages -3", 6000).await;
-    if !ok {
-        return Json(json!({ "success": false, "error": err, "findings": [], "scannedCount": 0 }));
-    }
-    let pkgs: Vec<&str> = out.lines().filter_map(|l| l.trim().strip_prefix("package:")).collect();
-    let suspicious = ["spy", "track", "keylog", "rat.", "adware", "cleaner.booster", "helper"];
-    let findings: Vec<Value> = pkgs
-        .iter()
-        .filter(|p| suspicious.iter().any(|k| p.to_lowercase().contains(k)))
-        .map(|p| {
-            json!({
-                "packageName": p,
-                "reasons": ["El nombre contiene un término incluido en el filtro de búsqueda"],
-            })
-        })
-        .collect();
-
-    Json(json!({ "success": true, "findings": findings, "scannedCount": pkgs.len() }))
+    Json(super::security_scan::scan(&serial).await)
 }
 
 /// `POST /api/flash` — Operaciones Fastboot/ADB vía `multipart/form-data`.

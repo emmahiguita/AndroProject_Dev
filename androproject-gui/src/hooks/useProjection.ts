@@ -80,13 +80,17 @@ export function useProjection(device: DeviceInfo | null | undefined): UseProject
     stopRecordTimer(); setIsRecording(false); setRecordingSeconds(0);
     if (!serial || isIos) return;
     let isMounted = true;
-    run('check_record', '', { serial }, false).then((res: any) => {
-      if (!isMounted || !res?.recording) return;
-      const elapsed = typeof res.startedAt === 'number' ? Math.max(0, Math.floor((Date.now() - res.startedAt) / 1000)) : 0;
-      setIsRecording(true); startRecordTimer(elapsed);
-      if (typeof res.recordPath === 'string') setLastRecordedPath(res.recordPath);
-    }).catch(() => {});
-    return () => { isMounted = false; };
+    const sync = async () => {
+      const res = await run('check_record', '', { serial }, false);
+      if (!isMounted || typeof res?.recording !== 'boolean') return;
+      setIsRecording(res.recording);
+      if (res.recording && !recordTimerRef.current) startRecordTimer(Math.max(0, Math.floor((Date.now() - res.startedAt) / 1000)));
+      if (!res.recording) { stopRecordTimer(); setRecordingSeconds(0); }
+      if (res.recordPath) setLastRecordedPath(res.recordPath);
+    };
+    void sync();
+    const timer = setInterval(sync, STATUS_POLL_MS);
+    return () => { isMounted = false; clearInterval(timer); stopRecordTimer(); };
   }, [serial, isIos, run, startRecordTimer, stopRecordTimer]);
 
   // Auto-proyección cuando aparece un nuevo dispositivo
@@ -133,16 +137,14 @@ export function useProjection(device: DeviceInfo | null | undefined): UseProject
     setIsBusy(true);
     try {
       if (isRecording) {
-        stopRecordTimer();
         const res = await run('stop_record', 'Deteniendo grabación...', { serial });
-        setIsRecording(false);
-        setRecordingSeconds(0);
+        if (res?.recording === false) { setIsRecording(false); stopRecordTimer(); setRecordingSeconds(0); }
         const saved = typeof res?.recordPath === 'string' ? res.recordPath : null;
         if (saved) setLastRecordedPath(saved);
         return {
           success: Boolean(res?.success),
-          recording: false,
-          message: res?.message || (saved ? `Grabación guardada: ${saved}` : 'Grabación detenida'),
+          recording: res?.recording !== false,
+          message: res?.error || res?.message || (saved ? `Grabación guardada: ${saved}` : 'Grabación detenida'),
           recordPath: saved,
         };
       }

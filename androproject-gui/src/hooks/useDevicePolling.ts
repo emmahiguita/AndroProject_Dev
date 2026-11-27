@@ -13,6 +13,8 @@ interface UseDevicePollingResult {
   selectedSerial: string;
   setSelectedSerial: (s: string) => void;
   isScanning: boolean;
+  detectionError: string | null;
+  discovery: string | null;
   scanRadar: () => Promise<void>;
   refresh: () => Promise<void>;
 }
@@ -30,25 +32,35 @@ export function useDevicePolling(): UseDevicePollingResult {
   const [device, setDevice] = useState<DeviceInfo | null>(null);
   const [selectedSerial, setSelectedSerial] = useState('');
   const [isScanning, setIsScanning] = useState(false);
+  const [detectionError, setDetectionError] = useState<string | null>(null);
+  const [discovery, setDiscovery] = useState<string | null>(null);
   const storeSetDevice = useAppStore((s) => s.setDevice);
   const storeSetActiveSerial = useAppStore((s) => s.setActiveSerial);
   const storeSetDevicesList = useAppStore((s) => s.setDevicesList);
   const selectedRef = useRef(selectedSerial);
   const prevDeviceStrRef = useRef<string>('');
   const prevListStrRef = useRef<string>('');
-  const inFlightRef = useRef<boolean>(false);
+  const inFlightRef = useRef<AbortController | null>(null);
+  const consecutiveErrorsRef = useRef(0);
 
   const refresh = useCallback(async () => {
     if (inFlightRef.current) return;
-    inFlightRef.current = true;
+    const controller = new AbortController();
+    inFlightRef.current = controller;
+    const requestedSerial = selectedRef.current;
     try {
-      const requestedSerial = selectedRef.current;
       const url = requestedSerial
         ? `/api/device?serial=${encodeURIComponent(requestedSerial)}`
         : '/api/device';
-      const res = await fetch(apiUrl(url), { cache: 'no-store' });
-      if (!res.ok) return;
+      const res = await fetch(apiUrl(url), { cache: 'no-store', signal: controller.signal });
+
       const data = await res.json();
+
+      if (controller.signal.aborted || requestedSerial !== selectedRef.current) return;
+      if (!res.ok || data.success === false || !Array.isArray(data.devices))
+        throw new Error(data.error || 'Respuesta de detección inválida');
+      consecutiveErrorsRef.current = 0;
+      setDetectionError(null);
 
       // Device list (for selector + MultiScreenGrid via Zustand)
       const devList: DeviceInfo[] = data.devices || [];
@@ -87,7 +99,7 @@ export function useDevicePolling(): UseDevicePollingResult {
         }
 
         if (!active || !devList.some((d: DeviceInfo) => d.serial === active)) {
-          active = devList[0].serial;
+          active = activeDevice?.serial || devList.find(d => d.state === 'device')?.serial || devList[0].serial;
         }
 
         selectedRef.current = active;
@@ -113,8 +125,17 @@ export function useDevicePolling(): UseDevicePollingResult {
         storeSetDevice(null);
         storeSetActiveSerial(null);
       }
-    } catch { /* offline */ }
-    finally { inFlightRef.current = false; }
+    } catch (error) {
+      if (controller.signal.aborted || requestedSerial !== selectedRef.current) return;
+      consecutiveErrorsRef.current += 1;
+      setDetectionError(error instanceof Error ? error.message : 'No se pudo consultar ADB');
+      // Tolera hasta 2 fallos transitorios de ADB sin desmontar la pantalla ni perder el estado.
+      if (consecutiveErrorsRef.current < 3) return;
+      prevDeviceStrRef.current = '';
+      prevListStrRef.current = '';
+      setDevices([]); setDevice(null); setSelectedSerial('');
+      storeSetDevicesList([]); storeSetDevice(null); storeSetActiveSerial(null);
+    } finally { if (inFlightRef.current === controller) inFlightRef.current = null; }
   }, [storeSetDevice, storeSetActiveSerial, storeSetDevicesList]);
 
   useEffect(() => {
@@ -123,6 +144,8 @@ export function useDevicePolling(): UseDevicePollingResult {
     const interval = setInterval(pollIfVisible, POLL_INTERVAL);
     document.addEventListener('visibilitychange', pollIfVisible);
     return () => {
+      inFlightRef.current?.abort();
+      inFlightRef.current = null;
       clearInterval(interval);
       document.removeEventListener('visibilitychange', pollIfVisible);
     };
@@ -137,9 +160,11 @@ export function useDevicePolling(): UseDevicePollingResult {
         body: JSON.stringify({ action: 'scan_radar' }),
       });
       const data = await res.json();
-      if (data.success) await refresh();
-      return;
-    } catch { /* ignore */ }
+      if (!data.success) throw new Error(data.error || 'Falló la búsqueda inalámbrica');
+      const services: string[] = data.services;
+      setDiscovery(services.length ? services.join(' · ') : 'ADB no encontró servicios inalámbricos anunciados.');
+      await refresh();
+    } catch (error) { setDiscovery(error instanceof Error ? error.message : 'Error de red'); }
     finally { setIsScanning(false); }
   }, [refresh]);
 
@@ -159,7 +184,7 @@ export function useDevicePolling(): UseDevicePollingResult {
     device,
     selectedSerial,
     setSelectedSerial: handleSelectSerial,
-    isScanning,
+    isScanning, detectionError, discovery,
     scanRadar,
     refresh,
   };

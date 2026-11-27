@@ -5,7 +5,8 @@
 
 param(
     [switch]$SkipTauriBuild,
-    [string]$ScrcpyReleaseDir
+    [string]$ScrcpyReleaseDir,
+    [string]$LocalIdentityDirectory
 )
 
 $ErrorActionPreference = "Stop"
@@ -13,6 +14,15 @@ $InstallerDir = $PSScriptRoot
 $GuiDir       = Join-Path $InstallerDir "..\androproject-gui"
 $OutputDir    = Join-Path $InstallerDir "output"
 $TempDir      = Join-Path $InstallerDir "temp_build"
+. (Join-Path $InstallerDir 'InstallerSigning.ps1')
+if ($LocalIdentityDirectory) { $LocalIdentityDirectory = (Resolve-Path -LiteralPath $LocalIdentityDirectory).Path }
+else { $cert = Get-InstallerCertificate }
+# La limpieza solo puede actuar sobre el subdirectorio temporal propio del constructor.
+$TempDir = [IO.Path]::GetFullPath($TempDir)
+if ([IO.Path]::GetDirectoryName($TempDir) -ne [IO.Path]::GetFullPath($InstallerDir) -or
+    ((Test-Path -LiteralPath $TempDir) -and ((Get-Item -LiteralPath $TempDir).Attributes -band [IO.FileAttributes]::ReparsePoint))) {
+    throw 'Directorio temporal inesperado.'
+}
 
 # Detectar carpeta de scrcpy (WinGet v4.1, C:\AndroProject o Downloads v4.0)
 $Candidates = @(
@@ -28,8 +38,6 @@ if (-not $SourceReleaseDir) {
 Set-Location $InstallerDir
 
 Write-Host ""
-Write-Host "============================================================" -ForegroundColor Cyan
-Write-Host "   Constructor del Instalador AndroProject v1.0" -ForegroundColor Cyan
 Write-Host "============================================================" -ForegroundColor Cyan
 Write-Host ""
 
@@ -50,8 +58,17 @@ if (-not $SourceReleaseDir -or -not (Test-Path -LiteralPath $SourceReleaseDir -P
 }
 
 New-Item -ItemType Directory -Force -Path $TempDir | Out-Null
-Copy-Item "$SourceReleaseDir\*" "$TempDir\" -Recurse -Force -Exclude "-", "*.log", "*.tmp", "*.bak"
-if (Test-Path "$TempDir\-") { Remove-Item -LiteralPath "$TempDir\-" -Force }
+# Solo recoge archivos del runtime. Una instalacion existente puede contener capturas personales.
+$runtimeFiles = @('adb.exe','AdbWinApi.dll','AdbWinUsbApi.dll','scrcpy.exe','AndroProject.exe',
+    'scrcpy-server','AndroProject-server','scrcpy-noconsole.vbs','scrcpy-noconsole.exe',
+    'AndroProject-noconsole.vbs','AndroProject-noconsole.exe','scrcpy.png','LICENSE.txt',
+    'libusb-1.0.dll','SDL3.dll','avcodec-*.dll','avformat-*.dll','avutil-*.dll','swresample-*.dll')
+if ([IO.Path]::GetFullPath($SourceReleaseDir).TrimEnd('\') -eq 'C:\AndroProject') {
+    Get-ChildItem -Path "$SourceReleaseDir\*" -Include $runtimeFiles -File | Copy-Item -Destination $TempDir
+} else {
+    # Conserva los recursos suministrados por la distribucion de scrcpy.
+    Copy-Item "$SourceReleaseDir\*" -Destination $TempDir -Recurse -Exclude '-', '*.log', '*.tmp', '*.bak'
+}
 
 # Renombrar los ejecutables y archivos para que digan AndroProject en vez de scrcpy
 $RenameMap = @{
@@ -63,7 +80,8 @@ $RenameMap = @{
 
 foreach ($key in $RenameMap.Keys) {
     if (Test-Path "$TempDir\$key") {
-        Rename-Item "$TempDir\$key" $RenameMap[$key] -Force
+        # La instalacion puede traer ambos nombres. La copia oficial es la fuente del alias.
+        Move-Item -LiteralPath "$TempDir\$key" -Destination (Join-Path $TempDir $RenameMap[$key]) -Force
     }
 }
 if (Test-Path "$TempDir\AndroProject-server") {
@@ -72,6 +90,9 @@ if (Test-Path "$TempDir\AndroProject-server") {
 
 # Parchear el PE Header de AndroProject.exe a Subsystem 2 (Windows GUI) para eliminar consolas CMD
 $TargetBin = "$TempDir\AndroProject.exe"
+foreach ($name in 'adb.exe','AndroProject.exe','scrcpy-server') {
+    if (-not (Test-Path -LiteralPath (Join-Path $TempDir $name) -PathType Leaf)) { throw "Falta $name en el runtime." }
+}
 if (Test-Path $TargetBin) {
     $bytes = [System.IO.File]::ReadAllBytes($TargetBin)
     $peOffset = [BitConverter]::ToInt32($bytes, 0x3C)
@@ -98,14 +119,18 @@ if (Test-Path "$GuiDir") {
     if (-not $SkipTauriBuild) {
         Push-Location $GuiDir
         Write-Host "      > Ejecutando npm run tauri:build en $GuiDir..." -ForegroundColor Cyan
-        npm run tauri:build
-        Pop-Location
+        try {
+            & npm.cmd run build
+            if ($LASTEXITCODE -ne 0) { throw 'Fallo la exportacion de la interfaz.' }
+            & npm.cmd run tauri:build
+            if ($LASTEXITCODE -ne 0) { throw 'Fallo la compilacion del dashboard.' }
+        } finally { Pop-Location }
     }
-    $TauriExe = Get-ChildItem -Path "$GuiDir\src-tauri\target\release" -Filter "*.exe" -File -ErrorAction SilentlyContinue |
-        Where-Object { $_.Name -notmatch 'uninstall|setup' } | Select-Object -First 1
+    $TauriExe = Get-Item -LiteralPath "$GuiDir\src-tauri\target\release\androproject-desktop.exe" -ErrorAction SilentlyContinue
     if ($TauriExe) {
         Write-Host "      > Copiando binario 100% Rust ($($TauriExe.Name)) y frontend estatico (www)..." -ForegroundColor Green
         New-Item -ItemType Directory -Force -Path "$TempDir\Dashboard\www" | Out-Null
+        & (Join-Path $InstallerDir 'Copy-AirPlayRuntime.ps1') $GuiDir (Join-Path $TempDir 'airplay')
         Copy-Item $TauriExe.FullName "$TempDir\Dashboard\ANDRO-IOS.exe" -Force
         if (Test-Path "$GuiDir\out\index.html") {
             Copy-Item "$GuiDir\out\*" "$TempDir\Dashboard\www\" -Recurse -Force
@@ -113,14 +138,10 @@ if (Test-Path "$GuiDir") {
             Write-Host "      ERROR: No se encontro la exportacion estatica en androproject-gui\out." -ForegroundColor Red
             exit 1
         }
-        $innerCert = if ($env:SIGN_CERT_PFX -and (Test-Path $env:SIGN_CERT_PFX)) {
-            New-Object System.Security.Cryptography.X509Certificates.X509Certificate2($env:SIGN_CERT_PFX, $env:SIGN_CERT_PASS)
-        } elseif ($env:SIGN_CERT_THUMBPRINT) {
-            Get-ChildItem "Cert:\CurrentUser\My\$($env:SIGN_CERT_THUMBPRINT)" -ErrorAction SilentlyContinue
-        } else { $null }
-        if ($innerCert) {
-            @("$TempDir\Dashboard\ANDRO-IOS.exe", "$TempDir\AndroProject.exe") | Where-Object { Test-Path $_ } | ForEach-Object {
-                Set-AuthenticodeSignature -FilePath $_ -Certificate $innerCert -HashAlgorithm SHA256 -TimestampServer "http://timestamp.digicert.com" | Out-Null
+        if ($cert -or $LocalIdentityDirectory) {
+            foreach ($binary in @("$TempDir\Dashboard\ANDRO-IOS.exe", "$TempDir\AndroProject.exe")) {
+                if ($LocalIdentityDirectory) { & "$InstallerDir\Sign-LocalArtifact.ps1" $binary $LocalIdentityDirectory }
+                else { Set-VerifiedInstallerSignature $binary $cert }
             }
             Write-Host "      > Binarios internos (ANDRO-IOS.exe y AndroProject.exe) firmados con Authenticode." -ForegroundColor Green
         }
@@ -147,22 +168,16 @@ Write-Host ""
 Write-Host "[4/5] Compilando Instalador_AndroProject.exe con IExpress..." -ForegroundColor Yellow
 Start-Process -FilePath "iexpress.exe" -ArgumentList "/N /Q installer.sed" -Wait -NoNewWindow
 if (Test-Path "$OutputDir\Instalador_AndroProject.exe") {
-    Copy-Item "$OutputDir\Instalador_AndroProject.exe" "$OutputDir\Instalador_ANDRO-IOS.exe" -Force
-    Remove-Item "$OutputDir\Instalador_AndroProject.exe" -Force -ErrorAction SilentlyContinue
-    $TargetExe = "$OutputDir\Instalador_ANDRO-IOS.exe"
+    $TargetExe = "$OutputDir\Instalador_AndroProject.exe"
     & (Join-Path $InstallerDir 'Set-InstallerIcon.ps1') -InstallerPath $TargetExe -IconPath (Join-Path $GuiDir 'public/icon.ico')
     # Firma Authenticode oficial cuando existe certificado CA en variables de entorno
-    if ($env:SIGN_CERT_PFX -and (Test-Path $env:SIGN_CERT_PFX)) {
-        $cert = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2($env:SIGN_CERT_PFX, $env:SIGN_CERT_PASS)
-        Set-AuthenticodeSignature -FilePath $TargetExe -Certificate $cert -HashAlgorithm SHA256 -TimestampServer "http://timestamp.digicert.com" | Out-Null
-        Write-Host "      > Instalador firmado con Authenticode (PFX)." -ForegroundColor Green
-    } elseif ($env:SIGN_CERT_THUMBPRINT) {
-        $cert = Get-ChildItem "Cert:\CurrentUser\My\$($env:SIGN_CERT_THUMBPRINT)" -ErrorAction SilentlyContinue
-        if ($cert) {
-            Set-AuthenticodeSignature -FilePath $TargetExe -Certificate $cert -HashAlgorithm SHA256 -TimestampServer "http://timestamp.digicert.com" | Out-Null
-            Write-Host "      > Instalador firmado con Authenticode (Store)." -ForegroundColor Green
-        }
+    if ($LocalIdentityDirectory) { & "$InstallerDir\Sign-LocalArtifact.ps1" $TargetExe $LocalIdentityDirectory }
+    elseif ($cert) {
+        Set-VerifiedInstallerSignature $TargetExe $cert
     }
+    # Publica el paquete solo cuando el icono y la firma solicitada ya se verificaron.
+    Move-Item -LiteralPath $TargetExe -Destination "$OutputDir\Instalador_ANDRO-IOS.exe" -Force
+    $TargetExe = "$OutputDir\Instalador_ANDRO-IOS.exe"
     $hash = (Get-FileHash $TargetExe -Algorithm SHA256).Hash.ToLower()
     "$hash  Instalador_ANDRO-IOS.exe" | Set-Content -Encoding ASCII "$OutputDir\SHA256SUMS.txt"
     $ExeSize = [math]::Round((Get-Item $TargetExe).Length / 1MB, 2)
@@ -179,10 +194,5 @@ if (Test-Path "AndroProject_data.zip") { Remove-Item "AndroProject_data.zip" -Fo
 if (Test-Path $TempDir) { Remove-Item $TempDir -Recurse -Force }
 Write-Host "      > Listo." -ForegroundColor Green
 
-Write-Host ""
-Write-Host "============================================================" -ForegroundColor Cyan
 Write-Host "   EXITO: El instalador esta listo en:" -ForegroundColor Green
 Write-Host "   $TargetExe" -ForegroundColor White
-Write-Host "============================================================" -ForegroundColor Cyan
-Write-Host ""
-# Read-Host "Presiona Enter para cerrar"

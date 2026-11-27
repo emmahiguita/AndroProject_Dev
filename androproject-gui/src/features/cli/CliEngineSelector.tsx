@@ -10,14 +10,22 @@
 
 import React from 'react';
 import { Terminal, Cpu, Smartphone, RefreshCw } from 'lucide-react';
+import { engineAvailable } from './cli-suggestions';
 import { Button } from '@/components/ui/Button';
 
 export type InjectorMode = 'claude' | 'ollama' | 'adb' | 'cli';
+
+export interface SkillSummary {
+  id: string;
+  description: string;
+}
 
 export interface DiscoveryState {
   ollamaOnline: boolean;
   models: string[];
   clis: Record<string, boolean>;
+  queries: string[];
+  skills: SkillSummary[];
 }
 
 interface CliEngineSelectorProps {
@@ -25,6 +33,8 @@ interface CliEngineSelectorProps {
   onSelectMode: (m: InjectorMode) => void;
   model: string;
   onSelectModel: (m: string) => void;
+  skillId: string;
+  onSelectSkillId: (s: string) => void;
   includeDevice: boolean;
   onToggleIncludeDevice: (inc: boolean) => void;
   discovery: DiscoveryState;
@@ -37,6 +47,8 @@ export const CliEngineSelector: React.FC<CliEngineSelectorProps> = ({
   onSelectMode,
   model,
   onSelectModel,
+  skillId,
+  onSelectSkillId,
   includeDevice,
   onToggleIncludeDevice,
   discovery,
@@ -47,7 +59,7 @@ export const CliEngineSelector: React.FC<CliEngineSelectorProps> = ({
   const mutedCls = dark ? 'text-zinc-400' : 'text-slate-600';
 
   const tabCls = (active: boolean) =>
-    `px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border ${
+    `px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border disabled:cursor-not-allowed disabled:opacity-70 ${
       active
         ? dark
           ? 'bg-zinc-100 text-zinc-950 border-zinc-100 shadow-sm'
@@ -65,8 +77,8 @@ export const CliEngineSelector: React.FC<CliEngineSelectorProps> = ({
             <Terminal size={17} />
           </div>
           <div>
-            <h2 className="text-sm font-semibold tracking-tight">Motores CLI y ADB</h2>
-            <p className={`text-xs ${mutedCls}`}>Consultas ADB disponibles. Los demás motores requieren integración.</p>
+            <h2 className="text-sm font-semibold tracking-tight">Motores CLI, IA Local y ADB</h2>
+            <p className={`text-xs ${mutedCls}`}>ADB Shell, Ollama / LM Studio local y Claude CLI conectados en Rust.</p>
           </div>
         </div>
         <Button variant="secondary" size="sm" icon={<RefreshCw size={12} />} onClick={onRefreshDiscovery}>
@@ -77,16 +89,16 @@ export const CliEngineSelector: React.FC<CliEngineSelectorProps> = ({
       {/* Pestañas de modo + insignias de detección */}
       <div className="flex flex-wrap items-center justify-between gap-3 pt-1 border-t border-zinc-200/50 dark:border-zinc-800/50">
         <div className="flex flex-wrap items-center gap-1.5">
-          <button type="button" onClick={() => onSelectMode('claude')} className={tabCls(mode === 'claude')}>
+          <button type="button" disabled={!engineAvailable('claude', discovery)} onClick={() => onSelectMode('claude')} className={tabCls(mode === 'claude')}>
             Claude
           </button>
-          <button type="button" onClick={() => onSelectMode('ollama')} className={tabCls(mode === 'ollama')}>
+          <button type="button" disabled={!engineAvailable('ollama', discovery)} onClick={() => onSelectMode('ollama')} className={tabCls(mode === 'ollama')}>
             Ollama / Llama
           </button>
-          <button type="button" onClick={() => onSelectMode('adb')} className={tabCls(mode === 'adb')}>
+          <button type="button" disabled={!engineAvailable('adb', discovery)} onClick={() => onSelectMode('adb')} className={tabCls(mode === 'adb')}>
             ADB Shell
           </button>
-          <button type="button" onClick={() => onSelectMode('cli')} className={tabCls(mode === 'cli')}>
+          <button type="button" disabled={!engineAvailable('cli', discovery)} onClick={() => onSelectMode('cli')} className={tabCls(mode === 'cli')}>
             CLI Sistema
           </button>
         </div>
@@ -104,28 +116,39 @@ export const CliEngineSelector: React.FC<CliEngineSelectorProps> = ({
         </div>
       </div>
 
-      {/* Opciones adicionales: modelo Ollama y contexto de hardware */}
-      {mode === 'ollama' && (
-        <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
-          <div className="flex items-center gap-2">
-            <Cpu size={14} className={mutedCls} />
-            <span className={`text-xs font-medium ${mutedCls}`}>Modelo:</span>
-            {discovery.models.length > 0 ? (
-              <select value={model} onChange={(e) => onSelectModel(e.target.value)} className={`px-2.5 py-1 text-xs rounded-lg border outline-none ${dark ? 'bg-zinc-900 border-zinc-800 text-zinc-100' : 'bg-white border-slate-300 text-slate-900'}`}>
-                {discovery.models.map((m) => <option key={m} value={m}>{m}</option>)}
+      {/* Opciones adicionales: modelo Ollama y Skill (SKILL.md) */}
+      {(mode === 'ollama' || mode === 'claude') && (
+        <div className="flex flex-wrap items-center gap-3 pt-2">
+          {mode === 'ollama' && (
+            <div className="flex items-center gap-2">
+              <Cpu size={14} className={mutedCls} />
+              <span className={`text-xs font-medium ${mutedCls}`}>Modelo:</span>
+              {discovery.models.length > 0 ? (
+                <select value={model} onChange={(e) => onSelectModel(e.target.value)} className={`px-2.5 py-1 text-xs rounded-lg border outline-none ${dark ? 'bg-zinc-900 border-zinc-800 text-zinc-100' : 'bg-white border-slate-300 text-slate-900'}`}>
+                  {discovery.models.map((m) => <option key={m} value={m}>{m}</option>)}
+                </select>
+              ) : (
+                <input value={model} onChange={(e) => onSelectModel(e.target.value)} className={`px-2.5 py-1 text-xs rounded-lg border outline-none font-mono ${dark ? 'bg-zinc-900 border-zinc-800 text-zinc-100' : 'bg-white border-slate-300 text-slate-900'}`} />
+              )}
+            </div>
+          )}
+          {discovery.skills.length > 0 && (
+            <div className="flex items-center gap-2">
+              <span className={`text-xs font-medium ${mutedCls}`}>Skill ({discovery.skills.length}):</span>
+              <select value={skillId} onChange={(e) => onSelectSkillId(e.target.value)} className={`max-w-[260px] px-2.5 py-1 text-xs rounded-lg border outline-none ${dark ? 'bg-zinc-900 border-zinc-800 text-zinc-100' : 'bg-white border-slate-300 text-slate-900'}`}>
+                <option value="">Sin Skill adicional</option>
+                {discovery.skills.map((sk) => <option key={sk.id} value={sk.id}>{sk.id}</option>)}
               </select>
-            ) : (
-              <input value={model} onChange={(e) => onSelectModel(e.target.value)} className={`px-2.5 py-1 text-xs rounded-lg border outline-none font-mono ${dark ? 'bg-zinc-900 border-zinc-800 text-zinc-100' : 'bg-white border-slate-300 text-slate-900'}`} />
-            )}
-          </div>
+            </div>
+          )}
         </div>
       )}
 
       <div className="flex items-center justify-between pt-1 text-xs">
         <label className={`flex items-center gap-2 cursor-pointer ${mutedCls}`}>
-          <input type="checkbox" checked={includeDevice} onChange={(e) => onToggleIncludeDevice(e.target.checked)} className="rounded" />
+          <input type="checkbox" checked={mode !== 'adb' && includeDevice} disabled={mode === 'adb'} onChange={(e) => onToggleIncludeDevice(e.target.checked)} className="rounded" />
           <Smartphone size={13} />
-          <span>Inyectar contexto y estado del dispositivo al prompt</span>
+          <span>{mode === 'adb' ? 'Las consultas ADB no usan contexto adicional' : 'Inyectar contexto y estado del dispositivo al prompt'}</span>
         </label>
       </div>
     </div>

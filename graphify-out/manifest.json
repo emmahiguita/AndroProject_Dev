@@ -1,7 +1,7 @@
 {
   "AndroProject_Installer/build.ps1": {
-    "mtime": 1795391485.7314787,
-    "ast_hash": "a6bb2a11ad2f3fadf5f5066be47d70a6",
+    "mtime": 1795638033.933033,
+    "ast_hash": "f855cf094ff28d17c8e463046b1baa8f",
     "semantic_hash": ""
   },
   "androproject-gui/eslint.config.mjs": {
@@ -15,8 +15,8 @@
     "semantic_hash": ""
   },
   "androproject-gui/next.config.ts": {
-    "mtime": 1795403753.5420046,
-    "ast_hash": "8d0fab1cad8dde6cc65f0cfb84405a65",
+    "mtime": 1795637038.9125867,
+    "ast_hash": "6a283259ffd62812047a333f479baf95",
     "semantic_hash": ""
   },
   "androproject-gui/package.json": {
@@ -30,8 +30,8 @@
     "semantic_hash": "d3fd1d29b05a09ff76b595a70e1e7d50"
   },
   "androproject-gui/src/app/camera/page.tsx": {
-    "mtime": 1795391485.7553473,
-    "ast_hash": "9976a88e7069640e65904c15400c1a4c",
+    "mtime": 1795749705.2786047,
+    "ast_hash": "6759d28b1d9bbc5141bb00a95fb3bb1f",
     "semantic_hash": ""
   },
   "androproject-gui/src/app/error.tsx": {
@@ -45,8 +45,8 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/app/page.tsx": {
-    "mtime": 1795391485.760341,
-    "ast_hash": "0779d517bfa270c1d03a3c0b53c01346",
+    "mtime": 1795637281.591714,
+    "ast_hash": "fb1a0fc8710c648eba1568fe128082dc",
     "semantic_hash": ""
   },
   "androproject-gui/src/components/ViewShell.tsx": {
@@ -75,53 +75,53 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/features/AppsView.tsx": {
-    "mtime": 1795404270.7022712,
-    "ast_hash": "376f574f91b54860c77bd6ac95a5c118",
+    "mtime": 1795754269.1959476,
+    "ast_hash": "bb25016a8191ea8746ed4eec58d2d259",
     "semantic_hash": ""
   },
   "androproject-gui/src/features/ArchivosView.tsx": {
-    "mtime": 1795404270.7042818,
+    "mtime": 1795406329.4266353,
     "ast_hash": "d7c70fd93ad8ede6e0d14da34869148d",
     "semantic_hash": ""
   },
   "androproject-gui/src/features/ConfigView.tsx": {
-    "mtime": 1795404270.7060122,
-    "ast_hash": "5a0b51f227ee61d6248be925e5f6e6cf",
+    "mtime": 1795638016.6180599,
+    "ast_hash": "f48834d12d52f7b26efdc69a0e2ae190",
     "semantic_hash": ""
   },
   "androproject-gui/src/features/CurarView.tsx": {
-    "mtime": 1795404270.7060122,
-    "ast_hash": "27ca0d63dfc2eb2d902c937e5e69737c",
+    "mtime": 1795806989.5284445,
+    "ast_hash": "3ffd13a8dffd0be94e06fa4d9e8d6152",
     "semantic_hash": ""
   },
   "androproject-gui/src/features/DashboardView.tsx": {
-    "mtime": 1795404270.7060122,
-    "ast_hash": "ca4a6f2f60fcd276b0eba0a527779432",
+    "mtime": 1795637405.41803,
+    "ast_hash": "00767a4ae8fe6d5dcfe726b381c260ba",
     "semantic_hash": ""
   },
   "androproject-gui/src/features/FlasherView.tsx": {
-    "mtime": 1795404270.7060122,
-    "ast_hash": "237c4623a3b7298c34a0205e6f4cd0d6",
+    "mtime": 1795807745.318633,
+    "ast_hash": "b50b3a13ad7a2b8cbd4dea24776ae689",
     "semantic_hash": ""
   },
   "androproject-gui/src/features/OptimizerView.tsx": {
-    "mtime": 1795404270.7060122,
-    "ast_hash": "77c087a1dafb83bbd36a9a9bc470cef6",
+    "mtime": 1795808616.653936,
+    "ast_hash": "43e2fd3ff10c9f63113409e667e3705f",
     "semantic_hash": ""
   },
   "androproject-gui/src/features/ToolsView.tsx": {
-    "mtime": 1795404270.7060122,
-    "ast_hash": "53c5d062f22be0eb85a825f8bba6015f",
+    "mtime": 1795637281.591714,
+    "ast_hash": "000f2eb25e3aa80be92b3bd81cde9b53",
     "semantic_hash": ""
   },
   "androproject-gui/src/features/types.ts": {
-    "mtime": 1795367137.6785603,
-    "ast_hash": "8a20233d4ac063e7e34484c57b5d84cf",
+    "mtime": 1795445403.8862295,
+    "ast_hash": "d39721c6db2eeac701385a79bb889ede",
     "semantic_hash": ""
   },
   "androproject-gui/src/hooks/useActions.ts": {
-    "mtime": 1795404291.5587573,
-    "ast_hash": "cce4fc2886db534ed8c15b40b71b3f9b",
+    "mtime": 1795638016.6200695,
+    "ast_hash": "3ecd086e7d70855439ad2e2f24229088",
     "semantic_hash": ""
   },
   "androproject-gui/src/hooks/useTheme.ts": {
@@ -150,14 +150,14 @@
     "semantic_hash": "c95945d68fc23b92215c11cb99376e47"
   },
   "androproject-gui/src/stores/optimizerSlice.ts": {
-    "mtime": 1786059728.1943953,
-    "ast_hash": "7c428ec220b188e7d6c24118f1dee2eb",
-    "semantic_hash": "7c428ec220b188e7d6c24118f1dee2eb"
+    "mtime": 1795637405.4275062,
+    "ast_hash": "fb9b7c259075388e9514340f42132845",
+    "semantic_hash": ""
   },
   "androproject-gui/src/stores/patcherSlice.ts": {
-    "mtime": 1786059698.5793066,
-    "ast_hash": "ed30034fd11f66bf8ca8d9bfbfb292e8",
-    "semantic_hash": "ed30034fd11f66bf8ca8d9bfbfb292e8"
+    "mtime": 1795637281.5840907,
+    "ast_hash": "cb3d83594ca579b2fd43138530b875b6",
+    "semantic_hash": ""
   },
   "androproject-gui/src/stores/uiSlice.ts": {
     "mtime": 1788018386.032562,
@@ -170,9 +170,9 @@
     "semantic_hash": ""
   },
   "androproject-gui/tsconfig.json": {
-    "mtime": 1781448868.439268,
-    "ast_hash": "ee17fd1c97c735e9f3564e3f5251f125",
-    "semantic_hash": "ee17fd1c97c735e9f3564e3f5251f125"
+    "mtime": 1795445037.851266,
+    "ast_hash": "154465a67bb7f99b807a8a7470824b00",
+    "semantic_hash": ""
   },
   "opencode.json": {
     "mtime": 1783391335.8399725,
@@ -220,8 +220,8 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/components/ThemeProvider.tsx": {
-    "mtime": 1795391485.7616713,
-    "ast_hash": "860c8819e89b1d54634ebbfb2b961fd8",
+    "mtime": 1795443979.096459,
+    "ast_hash": "02c75ffa08736ecbce4e6c2e1504069a",
     "semantic_hash": ""
   },
   "androproject-gui/src/components/layout/AppShell.tsx": {
@@ -230,18 +230,18 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/components/layout/DeviceFrame.tsx": {
-    "mtime": 1795367137.5341609,
-    "ast_hash": "bd3b3c4c96f75904b0e735df081adae5",
+    "mtime": 1795807829.2714903,
+    "ast_hash": "0839950c4e7ee927e0643c666c43f66a",
     "semantic_hash": ""
   },
   "androproject-gui/src/components/layout/WirelessConnectModal.tsx": {
-    "mtime": 1795404291.6045766,
+    "mtime": 1795406329.4226165,
     "ast_hash": "91d7f50151b3fbcab193f79be433a543",
     "semantic_hash": ""
   },
   "androproject-gui/src/hooks/useDevicePolling.ts": {
-    "mtime": 1795404291.5625734,
-    "ast_hash": "cbdd20b79bc4ea067d220c340ea42621",
+    "mtime": 1795811520.01958,
+    "ast_hash": "25b76daa551526874553e69b649e567e",
     "semantic_hash": ""
   },
   "androproject-gui/src/hooks/useSystemLogs.ts": {
@@ -255,8 +255,8 @@
     "semantic_hash": ""
   },
   "AndroProject_Installer/README.md": {
-    "mtime": 1781447142.0327652,
-    "ast_hash": "4c8c33b76f498c05298651f7c5a10824",
+    "mtime": 1795448186.2741885,
+    "ast_hash": "472aacc746a027b93afa0095ebac9325",
     "semantic_hash": ""
   },
   "INSTRUCCIONES-USO.md": {
@@ -295,8 +295,8 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/components/ui/Button.tsx": {
-    "mtime": 1795391485.7712555,
-    "ast_hash": "71e808917e683f317b58c815051edfc2",
+    "mtime": 1795444093.4132392,
+    "ast_hash": "f935f31354908daffa54dae831b2f34b",
     "semantic_hash": ""
   },
   "androproject-gui/src/components/ui/Card.tsx": {
@@ -315,22 +315,22 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/features/ProjectionView.tsx": {
-    "mtime": 1795371870.7206228,
-    "ast_hash": "1b477b5b3f5ab5d485ff4d355205a3fd",
+    "mtime": 1795445015.012042,
+    "ast_hash": "0b052b4893659c433782605d1e062fcc",
     "semantic_hash": ""
   },
   "androproject-gui/src/hooks/useDeviceStream.ts": {
-    "mtime": 1795404291.5636237,
+    "mtime": 1795406329.456887,
     "ast_hash": "f9d50d1b6d0f2c22ce6856032eb597c8",
     "semantic_hash": ""
   },
   "androproject-gui/src/components/projection/DeviceInfoPanel.tsx": {
-    "mtime": 1795367137.5523221,
-    "ast_hash": "171939d01de6e59c1d04c412da59420b",
+    "mtime": 1795637639.0577843,
+    "ast_hash": "5a082781fce924f5e28375e7de84f0d4",
     "semantic_hash": ""
   },
   "androproject-gui/src/components/projection/EmptyState.tsx": {
-    "mtime": 1795404291.6092658,
+    "mtime": 1795406329.424626,
     "ast_hash": "ae2dc4db224b2687ab7f18052af161d4",
     "semantic_hash": ""
   },
@@ -345,8 +345,8 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/hooks/useProjection.ts": {
-    "mtime": 1795391485.7838757,
-    "ast_hash": "858829aa471fb7b39611372bcaf1351e",
+    "mtime": 1795637915.882293,
+    "ast_hash": "337d891ea9d96a824b956ad3f1dc8d62",
     "semantic_hash": ""
   },
   "androproject-gui/src/hooks/useSplitPanel.ts": {
@@ -355,8 +355,8 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/hooks/useAdbConnection.ts": {
-    "mtime": 1795367137.6908016,
-    "ast_hash": "adbac254b2b13160c82cb7240eb5f5e9",
+    "mtime": 1795637639.0577843,
+    "ast_hash": "a43e2d8eb5d3ab0e333fe83d8cc98f61",
     "semantic_hash": ""
   },
   "androproject-gui/scripts/stream-diagnostic.mjs": {
@@ -365,8 +365,8 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/components/projection/ProjectionCanvas.tsx": {
-    "mtime": 1795367137.5692348,
-    "ast_hash": "c943b3886a0636458b163009fd750c2a",
+    "mtime": 1795811524.447288,
+    "ast_hash": "2476643de95c02cb27b851323afb4633",
     "semantic_hash": ""
   },
   "androproject-gui/public/logo.png": {
@@ -385,8 +385,8 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/hooks/useRescueSync.ts": {
-    "mtime": 1795404291.5683763,
-    "ast_hash": "a1b385d0d0fbe2f19b19e5ffa7e4ab8f",
+    "mtime": 1795638016.6160479,
+    "ast_hash": "51c41bb2557a0a95d85bd7580d6edc98",
     "semantic_hash": ""
   },
   "androproject-gui/public/projection_header_banner.png": {
@@ -395,7 +395,7 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/hooks/useAirPlayServer.ts": {
-    "mtime": 1795404291.56112,
+    "mtime": 1795406329.4545753,
     "ast_hash": "28c06c9d19cd2f5449f75a87805baddd",
     "semantic_hash": ""
   },
@@ -410,13 +410,13 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/app/popout/page.tsx": {
-    "mtime": 1795404291.6333046,
+    "mtime": 1795406329.41001,
     "ast_hash": "58cb48ad576139f725bc0dce8e787805",
     "semantic_hash": ""
   },
   "androproject-gui/src/app/ios-mirror/page.tsx": {
-    "mtime": 1795404291.6323104,
-    "ast_hash": "3cf026820b9b4834b7455e27eec4fc17",
+    "mtime": 1795637491.0602734,
+    "ast_hash": "1a683b3f6195363c017c4d83ddea592a",
     "semantic_hash": ""
   },
   "package.json": {
@@ -425,13 +425,13 @@
     "semantic_hash": ""
   },
   "androproject-gui/src-tauri/src/main.rs": {
-    "mtime": 1795403188.3190992,
-    "ast_hash": "dc5be23eeb43be288428cbc509a04c51",
+    "mtime": 1795750052.5227983,
+    "ast_hash": "8f3b4ed17016ee110bad8ed6c26b4591",
     "semantic_hash": ""
   },
   "androproject-gui/src-tauri/tauri.conf.json": {
-    "mtime": 1795367910.4984696,
-    "ast_hash": "fb3f823b846d8f562a4b270b18080474",
+    "mtime": 1795752901.7174768,
+    "ast_hash": "62ba32f2bb7562c6f2df4df37b823857",
     "semantic_hash": ""
   },
   "androproject-gui/src/components/projection/LogcatInspectorPanel.tsx": {
@@ -445,7 +445,7 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/hooks/useLogcatStream.ts": {
-    "mtime": 1795404291.5653179,
+    "mtime": 1795406329.4579911,
     "ast_hash": "8cd066d8c41fdb8a154958f8e226db2a",
     "semantic_hash": ""
   },
@@ -480,8 +480,8 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/components/projection/MobileProjection.tsx": {
-    "mtime": 1795368173.8235328,
-    "ast_hash": "544e83577078d0904edfd45619860a99",
+    "mtime": 1795445015.0050354,
+    "ast_hash": "a35dead7801898339ac9562268fbb270",
     "semantic_hash": ""
   },
   "androproject-gui/src-tauri/icons/128x128.png": {
@@ -730,28 +730,28 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/components/projection/WebCodecsCanvas.tsx": {
-    "mtime": 1795404291.621588,
-    "ast_hash": "a5a4f3f53e7577f39109d15bd786c107",
+    "mtime": 1795811522.9935017,
+    "ast_hash": "6a9c7ffb2973eeab581ba957a67f40e7",
     "semantic_hash": ""
   },
   "androproject-gui/src-tauri/src/adb_fast.rs": {
-    "mtime": 1795367137.374853,
-    "ast_hash": "04f4e51430108bbafd14c31b698244a9",
+    "mtime": 1795637093.9886858,
+    "ast_hash": "2ba64e54da6d32c4b4ab42fe21664504",
     "semantic_hash": ""
   },
   "androproject-gui/src/lib/services/tauri-bridge.ts": {
-    "mtime": 1795400470.8483856,
+    "mtime": 1795406329.4604888,
     "ast_hash": "ef4a745c707c889edcfcff51901fd784",
     "semantic_hash": ""
   },
   "androproject-gui/src/lib/services/webcodecs-h264-player.ts": {
-    "mtime": 1795404291.5746746,
-    "ast_hash": "cc355ab6a23f1d3026e364d14daec8ec",
+    "mtime": 1795811525.7736511,
+    "ast_hash": "d2310b2a08883e22d52f75fb6a046c5b",
     "semantic_hash": ""
   },
   "androproject-gui/src-tauri/src/apps_native.rs": {
-    "mtime": 1795400472.2811694,
-    "ast_hash": "6f74f78b584b1faca654b572f404adee",
+    "mtime": 1795750042.7789323,
+    "ast_hash": "b77a6b02a706de19b064dfb4c7404294",
     "semantic_hash": ""
   },
   "androproject-gui/src-tauri/src/logcat_native.rs": {
@@ -760,28 +760,28 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/components/ui/RealAppIcon.tsx": {
-    "mtime": 1795404311.9403713,
-    "ast_hash": "1726e7ede54330e68ee1e02b5e74dc16",
+    "mtime": 1795445015.0060341,
+    "ast_hash": "b780a5b5bbd8fac06c887877ee8c3307",
     "semantic_hash": ""
   },
   "androproject-gui/src/features/CliInjectorView.tsx": {
-    "mtime": 1795404270.7060122,
-    "ast_hash": "c256c5cd5cab1fd477101c66c45932c4",
+    "mtime": 1795812168.8333988,
+    "ast_hash": "50fe12c646c8b0e1018f12c375425d72",
     "semantic_hash": ""
   },
   "androproject-gui/src/features/apps/AppInstallerPanel.tsx": {
-    "mtime": 1795404291.5774171,
-    "ast_hash": "d76ad675e34fab09c65ebf2b75311e98",
+    "mtime": 1795754238.387177,
+    "ast_hash": "4d8479b50069460a2ea1f84168b706f6",
     "semantic_hash": ""
   },
   "androproject-gui/src/features/apps/AppItemViews.tsx": {
-    "mtime": 1795391485.7769856,
-    "ast_hash": "74da33153606ee0e90e54eb856d0c2f1",
+    "mtime": 1795445015.0070333,
+    "ast_hash": "da3208ba698c3f13ada89ffab9260741",
     "semantic_hash": ""
   },
   "androproject-gui/src/features/apps/AppManagerPanel.tsx": {
-    "mtime": 1795391485.7769856,
-    "ast_hash": "6b8b31cd7b838bf89ed0a386debd414c",
+    "mtime": 1795445015.0080347,
+    "ast_hash": "0315d483daec613a757961dae79666e8",
     "semantic_hash": ""
   },
   "androproject-gui/src/features/apps/app-formatters.ts": {
@@ -790,8 +790,8 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/components/layout/DeviceManagerDropdown.tsx": {
-    "mtime": 1795391485.7661831,
-    "ast_hash": "dae81bae1ffbeb55a5b93b4c4a6e7662",
+    "mtime": 1795445015.0040233,
+    "ast_hash": "43022f0bace3a51df9d9a6f9133ea4a1",
     "semantic_hash": ""
   },
   "androproject-gui/src/components/layout/AutoDetectionToast.tsx": {
@@ -800,63 +800,63 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/components/layout/useStreamTracker.ts": {
-    "mtime": 1795404291.603439,
+    "mtime": 1795406329.4226165,
     "ast_hash": "d92b3f41ac9c70a6e48269a557e47f5b",
     "semantic_hash": ""
   },
   "androproject-gui/src/features/cli/CliEngineSelector.tsx": {
-    "mtime": 1795399934.9414816,
-    "ast_hash": "7d924da6b164d30e129e3355584ad22d",
+    "mtime": 1795806757.3128378,
+    "ast_hash": "35d6086dffd5d61438cdb653b5a1561d",
     "semantic_hash": ""
   },
   "androproject-gui/src/features/cli/CliResponseViewer.tsx": {
-    "mtime": 1795367137.6499174,
-    "ast_hash": "a0cf2c8512aaba55588d3cd8f3192f50",
+    "mtime": 1795444124.363011,
+    "ast_hash": "943423c25a87dc381bb54533e6ff522c",
     "semantic_hash": ""
   },
   "androproject-gui/src/features/cli/cli-suggestions.ts": {
-    "mtime": 1795367137.652237,
-    "ast_hash": "bbbb084ddc9dad1ed41559fe1dd87290",
+    "mtime": 1795805878.5925403,
+    "ast_hash": "7bed2be3596d6f3775f39a5adb0431d1",
     "semantic_hash": ""
   },
   "androproject-gui/src/features/dashboard/DashboardAppsPanel.tsx": {
-    "mtime": 1795404291.5884886,
+    "mtime": 1795406329.4440908,
     "ast_hash": "8477c37d6daab6d8518239406e28b182",
     "semantic_hash": ""
   },
   "androproject-gui/src/features/dashboard/TelemetryModal.tsx": {
-    "mtime": 1795367137.6618505,
-    "ast_hash": "5cf10812f5d4c21f051c595d025ff6fe",
+    "mtime": 1795637405.41803,
+    "ast_hash": "7c368e0577f645d38aa37e3f9ca9478b",
     "semantic_hash": ""
   },
   "androproject-gui/src/features/dashboard/dashboard-helpers.ts": {
-    "mtime": 1795367137.6642046,
-    "ast_hash": "56bd06dc650279d204541ef27f065abd",
+    "mtime": 1795637405.41803,
+    "ast_hash": "b0a0d2208291e78da929ed745aafe385",
     "semantic_hash": ""
   },
   "androproject-gui/src/features/config/DeviceSettingsPanel.tsx": {
-    "mtime": 1795367137.6547616,
-    "ast_hash": "6b0c8be86fa1377b9d90585f6a072f2b",
+    "mtime": 1795637193.207519,
+    "ast_hash": "60bd78a1581d8774dacf16a15092f86d",
     "semantic_hash": ""
   },
   "androproject-gui/src/features/flasher/FlasherBootloaderPanel.tsx": {
-    "mtime": 1795402724.9493508,
+    "mtime": 1795406329.4440908,
     "ast_hash": "d27f9abcb836c34d6c6185d270ec6baa",
     "semantic_hash": ""
   },
   "androproject-gui/src/features/flasher/FlasherImagePanel.tsx": {
-    "mtime": 1795402831.8657393,
+    "mtime": 1795406329.4440908,
     "ast_hash": "f0f256a88920459291fa94cc14374f7d",
     "semantic_hash": ""
   },
   "androproject-gui/src/features/flasher/flasher-partitions.ts": {
-    "mtime": 1795402797.2880416,
+    "mtime": 1795406329.4480155,
     "ast_hash": "cf83c7c4e5464199f37c92f51b2261b8",
     "semantic_hash": ""
   },
   "androproject-gui/src/components/layout/DeviceNavControls.tsx": {
-    "mtime": 1795367137.5409834,
-    "ast_hash": "a40ff84a4a5bfe2cf33dda3d3fe1534a",
+    "mtime": 1795637193.2100337,
+    "ast_hash": "07603d54b3b0d802b2f2ab012f226e9e",
     "semantic_hash": ""
   },
   "androproject-gui/src/components/projection/ProjectionToolbar.tsx": {
@@ -875,12 +875,12 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/components/projection/useProjectionDrop.ts": {
-    "mtime": 1795404291.618077,
+    "mtime": 1795406329.4266353,
     "ast_hash": "04d0fef629858b0e8625f369094dc0e1",
     "semantic_hash": ""
   },
   "androproject-gui/src/components/projection/useProjectionGestures.ts": {
-    "mtime": 1795404291.6200805,
+    "mtime": 1795406329.4266353,
     "ast_hash": "83afa44ebece3c7718ce013f1c7d28dc",
     "semantic_hash": ""
   },
@@ -890,18 +890,18 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/features/curar/ScreenshotPanel.tsx": {
-    "mtime": 1795404291.5846608,
-    "ast_hash": "e178ebede10abfd350d6c97a061d35b7",
+    "mtime": 1795637281.5840907,
+    "ast_hash": "564ecae4b2af24ad935f5dfcb4faaef6",
     "semantic_hash": ""
   },
   "androproject-gui/src/features/curar/SpywareAuditPanel.tsx": {
-    "mtime": 1795404291.5860622,
-    "ast_hash": "3aef89105c2b0ec3cc64788abf9e59f3",
+    "mtime": 1795754235.4361093,
+    "ast_hash": "d285d4df5a988ada3e0fae13a5973488",
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1795397659.6878562,
-    "ast_hash": "abfebba0d00e7b87611bc6913dfbae74",
+    "mtime": 1795448138.6882782,
+    "ast_hash": "4c03e3a43908c26955aaf8b0204d60c3",
     "semantic_hash": ""
   },
   "docs/ARCHITECTURE_MAP.md": {
@@ -925,7 +925,7 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/features/tools/DriverManagerPanel.tsx": {
-    "mtime": 1795404291.596823,
+    "mtime": 1795406329.4520373,
     "ast_hash": "da282e1c2080a0a43ef9d99c4d46d36f",
     "semantic_hash": ""
   },
@@ -935,8 +935,8 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/components/projection/AirPlayStudioCard.tsx": {
-    "mtime": 1795404291.6067514,
-    "ast_hash": "46ad035b4eefefa71df7881e335578d5",
+    "mtime": 1795637491.0602734,
+    "ast_hash": "164ee434884c20dba540a03f76ca5502",
     "semantic_hash": ""
   },
   "androproject-gui/src/components/projection/DeviceInfoPrimitives.tsx": {
@@ -950,18 +950,18 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/components/projection/VisionNanoStudioCard.tsx": {
-    "mtime": 1795397659.6878562,
-    "ast_hash": "fa1fa61c540b21cfa7df6febacabfadb",
+    "mtime": 1795807995.493743,
+    "ast_hash": "759aeb44fc3e4779a2bba0274fd6d9d2",
     "semantic_hash": ""
   },
   "androproject-gui/src/hooks/useProjectionActions.ts": {
-    "mtime": 1795367137.7036848,
-    "ast_hash": "d06dc1113a770fc787ef37916f7d40bd",
+    "mtime": 1795637491.0602734,
+    "ast_hash": "355e1ccc3bae18a1dfab57d8220e90e1",
     "semantic_hash": ""
   },
   "androproject-gui/src/hooks/useProjectionTypes.ts": {
-    "mtime": 1795397659.6942518,
-    "ast_hash": "f2f19f4f7f78cc8e7fd19aaa01c4869f",
+    "mtime": 1795638016.6160479,
+    "ast_hash": "a0775f0f32b49dc4605a33b7aa902e85",
     "semantic_hash": ""
   },
   "androproject-gui/src/hooks/logcatCrashBuilder.ts": {
@@ -990,18 +990,18 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/hooks/adbStorage.ts": {
-    "mtime": 1795404291.5577524,
+    "mtime": 1795406329.452547,
     "ast_hash": "323ab62d327f80d5e8cbe70f056057f9",
     "semantic_hash": ""
   },
   "androproject-gui/src/features/optimizer/TurboBoostPanel.tsx": {
-    "mtime": 1795404291.59458,
+    "mtime": 1795406329.4500263,
     "ast_hash": "0961c52e653ff8422deefcb454009290",
     "semantic_hash": ""
   },
   "androproject-gui/src/hooks/actionApi.ts": {
-    "mtime": 1795404291.5567496,
-    "ast_hash": "9931bdfbdb3a0fe0e2b1903531421b39",
+    "mtime": 1795637281.5840907,
+    "ast_hash": "77eb3fed01efb2808b2717566eded756",
     "semantic_hash": ""
   },
   "vision-backend/ingest/tracks.py": {
@@ -1010,13 +1010,13 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/app/camera/CameraMetricsAndLogs.tsx": {
-    "mtime": 1795391485.7533398,
-    "ast_hash": "477a1b4a31a7033f74e71df797039f3c",
+    "mtime": 1795445015.0017834,
+    "ast_hash": "30d8b0961002ad7df1fec42bdc703a52",
     "semantic_hash": ""
   },
   "androproject-gui/src/app/camera/cameraMediaHelpers.ts": {
-    "mtime": 1795367137.4963906,
-    "ast_hash": "767e0ceaf38f2e7adb3c221008a210f8",
+    "mtime": 1795749687.656344,
+    "ast_hash": "d2a93e6ab939ecb237f869c8b0074f3e",
     "semantic_hash": ""
   },
   "androproject-gui/src/app/camera/cameraRtcHelpers.ts": {
@@ -1030,8 +1030,8 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/app/camera/useCameraWebRtc.ts": {
-    "mtime": 1795367137.5021744,
-    "ast_hash": "fd0b91e4c196ac6f97daf7c390c84643",
+    "mtime": 1795749700.4582696,
+    "ast_hash": "6f81a0044d64743f2b249c2d55573786",
     "semantic_hash": ""
   },
   "androproject-gui/src/components/layout/DeviceFrameHeader.tsx": {
@@ -1040,13 +1040,13 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/features/optimizer/DeveloperOptionsPanel.tsx": {
-    "mtime": 1795404291.592495,
-    "ast_hash": "0108f99eded2c3dc7d25d20c160a667e",
+    "mtime": 1795807776.2400682,
+    "ast_hash": "ba678a4013345b59ab2f221d5aca7df0",
     "semantic_hash": ""
   },
   "androproject-gui/src/features/optimizer/OptimizerNetworkAudioPanel.tsx": {
-    "mtime": 1795404291.5935063,
-    "ast_hash": "1aa99f6be17c681256966be583917b17",
+    "mtime": 1795406329.4500263,
+    "ast_hash": "cd11a66bb8194385c705a0362488e046",
     "semantic_hash": ""
   },
   "androproject-gui/src/app/camera/useVisionHealth.ts": {
@@ -1055,7 +1055,7 @@
     "semantic_hash": ""
   },
   "androproject-gui/src/features/archivos/DeviceFileBrowser.tsx": {
-    "mtime": 1795404291.5804744,
+    "mtime": 1795406329.4357111,
     "ast_hash": "cfd193fe89694f40dbc0dbcee4e58e8d",
     "semantic_hash": ""
   },
@@ -1335,8 +1335,8 @@
     "semantic_hash": ""
   },
   ".github/workflows/windows-release.yml": {
-    "mtime": 1795382817.7386856,
-    "ast_hash": "039680cc06c2fa862bae2bc73acd7e35",
+    "mtime": 1795409468.2996054,
+    "ast_hash": "e50546d15b688d72f347b47f251cb49b",
     "semantic_hash": ""
   },
   "AndroProject_Installer/Set-InstallerIcon.ps1": {
@@ -1345,43 +1345,43 @@
     "semantic_hash": ""
   },
   "androproject-gui/src-tauri/src/server/actions_api.rs": {
-    "mtime": 1795401021.5642273,
-    "ast_hash": "d3967c92b14f463539621a9ea5ff7a41",
+    "mtime": 1795809780.8273048,
+    "ast_hash": "9cef4498e95935c812f24a1bb297893d",
     "semantic_hash": ""
   },
   "androproject-gui/src-tauri/src/server/apps_api.rs": {
-    "mtime": 1795402611.6339698,
-    "ast_hash": "66311648f8712755a458f128ede35ab5",
+    "mtime": 1795809784.2455702,
+    "ast_hash": "db4ca68cf4473240ae356bfcc0e28c6e",
     "semantic_hash": ""
   },
   "androproject-gui/src-tauri/src/server/device_api.rs": {
-    "mtime": 1795401124.6398516,
-    "ast_hash": "a64f22fa65c341bfe88f9909b8c31d10",
+    "mtime": 1795638016.6180599,
+    "ast_hash": "94aaccebc99709b928472ce4526c1bb8",
     "semantic_hash": ""
   },
   "androproject-gui/src-tauri/src/server/mod.rs": {
-    "mtime": 1795404524.0012352,
-    "ast_hash": "dcb739897f85886bf218811b7d0c44cd",
+    "mtime": 1795808599.8712428,
+    "ast_hash": "392e61792e03c05cd95dab8cf410640a",
     "semantic_hash": ""
   },
   "androproject-gui/src-tauri/src/server/paths.rs": {
-    "mtime": 1795398945.0679355,
+    "mtime": 1795406329.41001,
     "ast_hash": "9e515c34aa823c93bd04f5c1ff0c5426",
     "semantic_hash": ""
   },
   "androproject-gui/src-tauri/src/server/scrcpy_api.rs": {
-    "mtime": 1795391485.7467957,
-    "ast_hash": "d750f97838a823cdc0e2d896d45ed0e4",
+    "mtime": 1795810382.8206856,
+    "ast_hash": "879f0c0f8a7c30c734ae627e102ee431",
     "semantic_hash": ""
   },
   "androproject-gui/src-tauri/src/server/scrcpy_hub.rs": {
-    "mtime": 1795395351.149872,
-    "ast_hash": "585d1ff16d970393a8a5538967fd2f3d",
+    "mtime": 1795810379.69762,
+    "ast_hash": "f664abfa760687362f98457b7e03753c",
     "semantic_hash": ""
   },
   "androproject-gui/src-tauri/src/server/system_api.rs": {
-    "mtime": 1795403105.4717014,
-    "ast_hash": "77b2802b2401d148ac33156e67e4bf9d",
+    "mtime": 1795754052.5970802,
+    "ast_hash": "1579e6c3e879662caacb232d52ad6714",
     "semantic_hash": ""
   },
   "androproject-gui/src/features/logcat-types.ts": {
@@ -1390,13 +1390,13 @@
     "semantic_hash": ""
   },
   "androproject-gui/src-tauri/src/server/extra_actions.rs": {
-    "mtime": 1795401022.4544547,
-    "ast_hash": "10f5c081c86f28ce670f6361830b613f",
+    "mtime": 1795637639.0577843,
+    "ast_hash": "59dad644a1c97169325444f67722a435",
     "semantic_hash": ""
   },
   "androproject-gui/src-tauri/src/server/telemetry.rs": {
-    "mtime": 1795391600.2978477,
-    "ast_hash": "36b3e296fcae5540b2182c7f8dc0965d",
+    "mtime": 1795638033.933033,
+    "ast_hash": "000c180d1660f53faac0e1af7a3c8ed2",
     "semantic_hash": ""
   },
   "androproject-gui/src/features/security-types.ts": {
@@ -1405,1118 +1405,203 @@
     "semantic_hash": ""
   },
   "androproject-gui/src-tauri/src/server/developer_actions.rs": {
-    "mtime": 1795399121.7530756,
-    "ast_hash": "4df2776936d32e145c219397eaf00462",
+    "mtime": 1795807731.9472127,
+    "ast_hash": "11f03ac34e4161554e9f3bcd25eace99",
     "semantic_hash": ""
   },
   "androproject-gui/src-tauri/src/server/screen_process.rs": {
-    "mtime": 1795399207.1485963,
-    "ast_hash": "016270f5e900182c164dd3e9090551e8",
+    "mtime": 1795637915.8802826,
+    "ast_hash": "b107279e9941419df02d2e475cab5c73",
     "semantic_hash": ""
   },
   "androproject-gui/src-tauri/src/server/cli_api.rs": {
-    "mtime": 1795399786.2270916,
-    "ast_hash": "d07724d79af4ed5a98e07753710acfa3",
+    "mtime": 1795806708.7576964,
+    "ast_hash": "d4bb31249d2f3513a49994bba9eb077f",
     "semantic_hash": ""
   },
   "androproject-gui/src-tauri/src/server/optimizer_actions.rs": {
-    "mtime": 1795400187.286853,
-    "ast_hash": "e8808a8f62f483bb2aea8f653af11068",
+    "mtime": 1795749368.892462,
+    "ast_hash": "c7cc4441bab3c98ea3056e2adbc26a11",
     "semantic_hash": ""
   },
   "androproject-gui/src-tauri/src/server/capture_diagnostics.rs": {
-    "mtime": 1795400125.0100784,
-    "ast_hash": "15fb5a6eb53f11de2a52d56cca5a0f5f",
+    "mtime": 1795406329.4089952,
+    "ast_hash": "04518f66f83562a1e7926abc858347fd",
     "semantic_hash": ""
   },
   "androproject-gui/src-tauri/src/server/transfer_api.rs": {
-    "mtime": 1795400525.3660867,
-    "ast_hash": "31c5fcf476c30ef652d4e80c3ca372eb",
+    "mtime": 1795406329.41001,
+    "ast_hash": "0bdd137361432d0c73d4a02fb7e814a5",
     "semantic_hash": ""
   },
   "androproject-gui/src-tauri/src/server/origin_guard.rs": {
-    "mtime": 1795400958.0294669,
-    "ast_hash": "1cd09832b43266155b9d036e3dd30f43",
+    "mtime": 1795637038.9098742,
+    "ast_hash": "b61ef6a66e0a43229a9d624a4976ce8c",
     "semantic_hash": ""
   },
   "androproject-gui/src-tauri/src/server/file_operations_api.rs": {
-    "mtime": 1795401408.7943206,
-    "ast_hash": "d82706f2f5f7fd5ffa47aae0baa88b74",
+    "mtime": 1795406329.41001,
+    "ast_hash": "4a044f52cb4027a08a1e72409800f4b1",
     "semantic_hash": ""
   },
   "androproject-gui/src-tauri/src/server/apk_extract.rs": {
-    "mtime": 1795402675.1080532,
-    "ast_hash": "4f00315ff1171a6f8942e697900918fb",
+    "mtime": 1795406329.3933601,
+    "ast_hash": "7fe5537cbdb8f5b31e266f33cefaf378",
     "semantic_hash": ""
   },
   "androproject-gui/src-tauri/src/server/driver_actions.rs": {
-    "mtime": 1795402674.419829,
-    "ast_hash": "7cbcd12521b3058bdf3b5906f868424e",
+    "mtime": 1795406329.41001,
+    "ast_hash": "56226e5db2dc076bc4eebff86aae084f",
     "semantic_hash": ""
   },
   "androproject-gui/src-tauri/src/server/flash_image_api.rs": {
-    "mtime": 1795403035.9147632,
-    "ast_hash": "d8b6f90cd64ea3dd4b8d402c2c6a15b6",
+    "mtime": 1795406329.41001,
+    "ast_hash": "8022fa7b46892112f738d07b0ed6d37a",
     "semantic_hash": ""
   },
   "androproject-gui/src-tauri/src/server/flasher_actions.rs": {
-    "mtime": 1795402864.8200521,
-    "ast_hash": "9a6b71715ffa9a8cc468f573f951da13",
+    "mtime": 1795406329.41001,
+    "ast_hash": "402b45d8f7e1cff0b65b5775987dfba4",
     "semantic_hash": ""
   },
   "androproject-gui/src-tauri/src/server/driver_scan.rs": {
-    "mtime": 1795403027.5511456,
-    "ast_hash": "58c571e1f8d209e11fa60fc2f7a45cf9",
+    "mtime": 1795637491.0602734,
+    "ast_hash": "b3e01c307988abb3c8c4fca9f724a31e",
     "semantic_hash": ""
   },
   "androproject-gui/src-tauri/src/server/airplay_process.rs": {
-    "mtime": 1795403252.6709375,
-    "ast_hash": "1900d87a53869549a665d497646e40e7",
+    "mtime": 1795406329.3933601,
+    "ast_hash": "c1e2db59bd05a03decf1274e842a86b1",
     "semantic_hash": ""
   },
   "androproject-gui/src/lib/api-url.ts": {
-    "mtime": 1795404257.527794,
-    "ast_hash": "f4fb48ad87f9fc9546f1fa7dcbff774c",
+    "mtime": 1795406329.4604888,
+    "ast_hash": "5c9c31405fc11aa6b7320843f0121098",
     "semantic_hash": ""
   },
-  "build-staging-ec8f6e44/next-env.d.ts": {
-    "mtime": 1795388535.8923407,
-    "ast_hash": "2a74d3909800ca5467fa83b0ab4a4890",
+  "AndroProject_Installer/InstallerSigning.ps1": {
+    "mtime": 1795444419.1053028,
+    "ast_hash": "0b04d2cbc52b54d9c03bacc9bc3ab3bc",
     "semantic_hash": ""
   },
-  "build-staging-ec8f6e44/next.config.ts": {
-    "mtime": 1795403753.5420046,
-    "ast_hash": "8d0fab1cad8dde6cc65f0cfb84405a65",
+  "AndroProject_Installer/Sign-LocalArtifact.ps1": {
+    "mtime": 1795445104.680109,
+    "ast_hash": "9d018329714e2858f244ec843ef26dc4",
     "semantic_hash": ""
   },
-  "build-staging-ec8f6e44/package.json": {
-    "mtime": 1795367136.1394348,
-    "ast_hash": "57c204ee09b4cbafd28ca7077c7efc26",
+  "androproject-gui/src-tauri/src/server/route_tests.rs": {
+    "mtime": 1795637639.0577843,
+    "ast_hash": "1ee688cae9d03a6c6bb644297135ae86",
     "semantic_hash": ""
   },
-  "build-staging-ec8f6e44/postcss.config.mjs": {
-    "mtime": 1782240333.377218,
-    "ast_hash": "d3fd1d29b05a09ff76b595a70e1e7d50",
+  "AndroProject_Installer/Copy-AirPlayRuntime.ps1": {
+    "mtime": 1795638033.933033,
+    "ast_hash": "97552a374ce0a9c360628d198ed4b992",
     "semantic_hash": ""
   },
-  "build-staging-ec8f6e44/src-tauri/build.rs": {
-    "mtime": 1795367136.3302622,
-    "ast_hash": "667702979da61fdc96948886b7cd7a33",
+  "androproject-gui/src-tauri/src/server/adb_service.rs": {
+    "mtime": 1795637639.0577843,
+    "ast_hash": "cd317177b68d7bb7f13ce7ab4b92cd22",
     "semantic_hash": ""
   },
-  "build-staging-ec8f6e44/src-tauri/gen/schemas/acl-manifests.json": {
-    "mtime": 1795404413.3493536,
-    "ast_hash": "0ba7d29863a070859dda4d713ca118dc",
+  "androproject-gui/src-tauri/src/server/diagnostics.rs": {
+    "mtime": 1795637281.591714,
+    "ast_hash": "9d2d0dfebd36d81a9f36b4e16213a8e3",
     "semantic_hash": ""
   },
-  "build-staging-ec8f6e44/src-tauri/gen/schemas/capabilities.json": {
-    "mtime": 1795404413.3721192,
-    "ast_hash": "99914b932bd37a50b983c5e7c90ae93b",
+  "androproject-gui/src-tauri/src/server/navigation.rs": {
+    "mtime": 1795637093.9886858,
+    "ast_hash": "4467a6feb6053cd0a5ad83a74a470377",
     "semantic_hash": ""
   },
-  "build-staging-ec8f6e44/src-tauri/gen/schemas/desktop-schema.json": {
-    "mtime": 1795404413.3664565,
-    "ast_hash": "6c3f18b65fe3b826c905b040074ee10d",
+  "androproject-gui/src-tauri/src/server/recording.rs": {
+    "mtime": 1795638016.6200695,
+    "ast_hash": "2abb21aa586f6249dda774de96abb5d2",
     "semantic_hash": ""
   },
-  "build-staging-ec8f6e44/src-tauri/gen/schemas/windows-schema.json": {
-    "mtime": 1795404413.3664565,
-    "ast_hash": "6c3f18b65fe3b826c905b040074ee10d",
+  "androproject-gui/src-tauri/src/server/scrcpy_transport.rs": {
+    "mtime": 1795637825.7642012,
+    "ast_hash": "46db5c194c2c77cc2702c288e69238ea",
     "semantic_hash": ""
   },
-  "build-staging-ec8f6e44/src-tauri/src/adb_fast.rs": {
-    "mtime": 1795367137.374853,
-    "ast_hash": "04f4e51430108bbafd14c31b698244a9",
+  "androproject-gui/src/features/config/ConfigRows.tsx": {
+    "mtime": 1795637405.41803,
+    "ast_hash": "a57fff8e4c2b2638d553ff97c423b0e3",
     "semantic_hash": ""
   },
-  "build-staging-ec8f6e44/src-tauri/src/apps_native.rs": {
-    "mtime": 1795400472.2811694,
-    "ast_hash": "6f74f78b584b1faca654b572f404adee",
+  "docs/auditoria-modulos-20261125.md": {
+    "mtime": 1795636668.3461618,
+    "ast_hash": "ac27849b6aa9c3919cf5311a066b1af1",
     "semantic_hash": ""
   },
-  "build-staging-ec8f6e44/src-tauri/src/emulator.rs": {
-    "mtime": 1795367137.377871,
-    "ast_hash": "0b550b4e4dbb789e1add8394842c1a76",
+  "docs/releases/windows-local-20261123.md": {
+    "mtime": 1795448164.3501525,
+    "ast_hash": "8aea866e66db51c4c103c7cfadef7d63",
     "semantic_hash": ""
   },
-  "build-staging-ec8f6e44/src-tauri/src/logcat_native.rs": {
-    "mtime": 1795367137.3799496,
-    "ast_hash": "36c025b0ff10477171f476b11bf0cd41",
+  "androproject-gui/src-tauri/src/apps_policy.rs": {
+    "mtime": 1795750038.1221838,
+    "ast_hash": "01f5cadce62da9747f16328db62d34de",
     "semantic_hash": ""
   },
-  "build-staging-ec8f6e44/src-tauri/src/main.rs": {
-    "mtime": 1795403188.3190992,
-    "ast_hash": "dc5be23eeb43be288428cbc509a04c51",
+  "androproject-gui/src-tauri/src/server/apps_catalog.rs": {
+    "mtime": 1795754228.7213194,
+    "ast_hash": "8c053ff6374a947e4205b78dff6510db",
     "semantic_hash": ""
   },
-  "build-staging-ec8f6e44/src-tauri/src/server/actions_api.rs": {
-    "mtime": 1795401021.5642273,
-    "ast_hash": "d3967c92b14f463539621a9ea5ff7a41",
+  "androproject-gui/src-tauri/src/server/security_scan.rs": {
+    "mtime": 1795754050.1261218,
+    "ast_hash": "9396dcc4a8adc4c08da146f3fbf5b088",
     "semantic_hash": ""
   },
-  "build-staging-ec8f6e44/src-tauri/src/server/airplay_process.rs": {
-    "mtime": 1795403252.6709375,
-    "ast_hash": "1900d87a53869549a665d497646e40e7",
+  "androproject-gui/src/features/apps/audit-apps.ts": {
+    "mtime": 1795754266.6602774,
+    "ast_hash": "f1bccf4295e9cc5b091ec22de4ebf9f3",
     "semantic_hash": ""
   },
-  "build-staging-ec8f6e44/src-tauri/src/server/apk_extract.rs": {
-    "mtime": 1795402675.1080532,
-    "ast_hash": "4f00315ff1171a6f8942e697900918fb",
+  "androproject-gui/src-tauri/src/server/local_llm.rs": {
+    "mtime": 1795812170.9516728,
+    "ast_hash": "fb71d667d773d0b97e397bd186786dde",
     "semantic_hash": ""
   },
-  "build-staging-ec8f6e44/src-tauri/src/server/apps_api.rs": {
-    "mtime": 1795402611.6339698,
-    "ast_hash": "66311648f8712755a458f128ede35ab5",
+  "androproject-gui/src-tauri/src/server/skills_loader.rs": {
+    "mtime": 1795806696.7707016,
+    "ast_hash": "bef6a09dc92ab75d850df2a5f500f9f2",
     "semantic_hash": ""
   },
-  "build-staging-ec8f6e44/src-tauri/src/server/capture_diagnostics.rs": {
-    "mtime": 1795400125.0100784,
-    "ast_hash": "15fb5a6eb53f11de2a52d56cca5a0f5f",
+  "androproject-gui/src-tauri/src/server/threat_forensics.rs": {
+    "mtime": 1795809782.4853094,
+    "ast_hash": "35bea1bf0cb9d08f73358d54c08301c2",
     "semantic_hash": ""
   },
-  "build-staging-ec8f6e44/src-tauri/src/server/cli_api.rs": {
-    "mtime": 1795399786.2270916,
-    "ast_hash": "d07724d79af4ed5a98e07753710acfa3",
+  "androproject-gui/src-tauri/src/server/ui_automation.rs": {
+    "mtime": 1795806698.5316958,
+    "ast_hash": "65123ebbd65e85044b820116a11c0ef2",
     "semantic_hash": ""
   },
-  "build-staging-ec8f6e44/src-tauri/src/server/developer_actions.rs": {
-    "mtime": 1795399121.7530756,
-    "ast_hash": "4df2776936d32e145c219397eaf00462",
+  "androproject-gui/src/features/cli/UiAutomationPanel.tsx": {
+    "mtime": 1795806751.7638152,
+    "ast_hash": "d491af9f1af715173bf963ad300be168",
     "semantic_hash": ""
   },
-  "build-staging-ec8f6e44/src-tauri/src/server/device_api.rs": {
-    "mtime": 1795401124.6398516,
-    "ast_hash": "a64f22fa65c341bfe88f9909b8c31d10",
+  "androproject-gui/src/features/curar/ThreatForensicsCard.tsx": {
+    "mtime": 1795806985.6695247,
+    "ast_hash": "6ff571620b84977ee52a57352deb32dd",
     "semantic_hash": ""
   },
-  "build-staging-ec8f6e44/src-tauri/src/server/driver_actions.rs": {
-    "mtime": 1795402674.419829,
-    "ast_hash": "7cbcd12521b3058bdf3b5906f868424e",
+  "androproject-gui/src/features/flasher/FlasherLiveMonitor.tsx": {
+    "mtime": 1795809798.1400535,
+    "ast_hash": "6e1c3785ee8079a6aa9cd0b38ba1a4b0",
     "semantic_hash": ""
   },
-  "build-staging-ec8f6e44/src-tauri/src/server/driver_scan.rs": {
-    "mtime": 1795403027.5511456,
-    "ast_hash": "58c571e1f8d209e11fa60fc2f7a45cf9",
+  "androproject-gui/src-tauri/src/server/gpu_driver.rs": {
+    "mtime": 1795808597.3988488,
+    "ast_hash": "8fe304be54d7cc8353683fcf8e54cacf",
     "semantic_hash": ""
   },
-  "build-staging-ec8f6e44/src-tauri/src/server/extra_actions.rs": {
-    "mtime": 1795401022.4544547,
-    "ast_hash": "10f5c081c86f28ce670f6361830b613f",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src-tauri/src/server/file_operations_api.rs": {
-    "mtime": 1795401408.7943206,
-    "ast_hash": "d82706f2f5f7fd5ffa47aae0baa88b74",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src-tauri/src/server/flash_image_api.rs": {
-    "mtime": 1795403035.9147632,
-    "ast_hash": "d8b6f90cd64ea3dd4b8d402c2c6a15b6",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src-tauri/src/server/flasher_actions.rs": {
-    "mtime": 1795402864.8200521,
-    "ast_hash": "9a6b71715ffa9a8cc468f573f951da13",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src-tauri/src/server/mod.rs": {
-    "mtime": 1795403104.578637,
-    "ast_hash": "b07687ebf791fcbc3b606268844b7e0f",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src-tauri/src/server/optimizer_actions.rs": {
-    "mtime": 1795400187.286853,
-    "ast_hash": "e8808a8f62f483bb2aea8f653af11068",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src-tauri/src/server/origin_guard.rs": {
-    "mtime": 1795400958.0294669,
-    "ast_hash": "1cd09832b43266155b9d036e3dd30f43",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src-tauri/src/server/paths.rs": {
-    "mtime": 1795398945.0679355,
-    "ast_hash": "9e515c34aa823c93bd04f5c1ff0c5426",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src-tauri/src/server/scrcpy_api.rs": {
-    "mtime": 1795391485.7467957,
-    "ast_hash": "d750f97838a823cdc0e2d896d45ed0e4",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src-tauri/src/server/scrcpy_hub.rs": {
-    "mtime": 1795395351.149872,
-    "ast_hash": "585d1ff16d970393a8a5538967fd2f3d",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src-tauri/src/server/screen_process.rs": {
-    "mtime": 1795399207.1485963,
-    "ast_hash": "016270f5e900182c164dd3e9090551e8",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src-tauri/src/server/system_api.rs": {
-    "mtime": 1795403105.4717014,
-    "ast_hash": "77b2802b2401d148ac33156e67e4bf9d",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src-tauri/src/server/telemetry.rs": {
-    "mtime": 1795391600.2978477,
-    "ast_hash": "36b3e296fcae5540b2182c7f8dc0965d",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src-tauri/src/server/transfer_api.rs": {
-    "mtime": 1795400525.3660867,
-    "ast_hash": "31c5fcf476c30ef652d4e80c3ca372eb",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src-tauri/tauri.conf.json": {
-    "mtime": 1795367910.4984696,
-    "ast_hash": "fb3f823b846d8f562a4b270b18080474",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/app/camera/CameraMetricsAndLogs.tsx": {
-    "mtime": 1795391485.7533398,
-    "ast_hash": "477a1b4a31a7033f74e71df797039f3c",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/app/camera/cameraMediaHelpers.ts": {
-    "mtime": 1795367137.4963906,
-    "ast_hash": "767e0ceaf38f2e7adb3c221008a210f8",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/app/camera/cameraRtcHelpers.ts": {
-    "mtime": 1795367137.498027,
-    "ast_hash": "03509e9ff74c7586be2fa15d02d03d52",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/app/camera/cameraTypes.ts": {
-    "mtime": 1795367137.499176,
-    "ast_hash": "cee11db99a7cf1f3f74d78ba4b3f77dd",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/app/camera/page.tsx": {
-    "mtime": 1795391485.7553473,
-    "ast_hash": "9976a88e7069640e65904c15400c1a4c",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/app/camera/useCameraWebRtc.ts": {
-    "mtime": 1795367137.5021744,
-    "ast_hash": "fd0b91e4c196ac6f97daf7c390c84643",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/app/camera/useVisionHealth.ts": {
-    "mtime": 1795367137.5041778,
-    "ast_hash": "f96c838866b790660ddfac05ee2d3c4b",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/app/error.tsx": {
-    "mtime": 1795367137.5054667,
-    "ast_hash": "fc3622dfd9d90ae593400f9da57f3352",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/app/ios-mirror/page.tsx": {
-    "mtime": 1795404291.6323104,
-    "ast_hash": "3cf026820b9b4834b7455e27eec4fc17",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/app/layout.tsx": {
-    "mtime": 1795391485.7593412,
-    "ast_hash": "ed4c6d49c571caf2a852eda57afdd0f5",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/app/page.tsx": {
-    "mtime": 1795391485.760341,
-    "ast_hash": "0779d517bfa270c1d03a3c0b53c01346",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/app/popout/page.tsx": {
-    "mtime": 1795404291.6333046,
-    "ast_hash": "58cb48ad576139f725bc0dce8e787805",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/components/ThemeProvider.tsx": {
-    "mtime": 1795391485.7616713,
-    "ast_hash": "860c8819e89b1d54634ebbfb2b961fd8",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/components/ViewShell.tsx": {
-    "mtime": 1795391485.7628732,
-    "ast_hash": "e5ae0edba505fda99ab0d5822019b0b8",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/components/layout/AppShell.tsx": {
-    "mtime": 1795391485.7639725,
-    "ast_hash": "8c1ee804cf5a284b2f055721e481b36b",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/components/layout/AutoDetectionToast.tsx": {
-    "mtime": 1795391485.765098,
-    "ast_hash": "31830818cbbcdf2e7d9f4d867b1a6ba2",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/components/layout/DeviceFrame.tsx": {
-    "mtime": 1795367137.5341609,
-    "ast_hash": "bd3b3c4c96f75904b0e735df081adae5",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/components/layout/DeviceFrameHeader.tsx": {
-    "mtime": 1795367137.5351603,
-    "ast_hash": "dce1f20fc92db88e79934771a09d529b",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/components/layout/DeviceManagerDropdown.tsx": {
-    "mtime": 1795391485.7661831,
-    "ast_hash": "dae81bae1ffbeb55a5b93b4c4a6e7662",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/components/layout/DeviceNavControls.tsx": {
-    "mtime": 1795367137.5409834,
-    "ast_hash": "a40ff84a4a5bfe2cf33dda3d3fe1534a",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/components/layout/Header.tsx": {
-    "mtime": 1795391485.7667189,
-    "ast_hash": "d1e5b580aa4a6c2b63d8cc7c18a122e7",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/components/layout/Sidebar.tsx": {
-    "mtime": 1795391485.7677765,
-    "ast_hash": "22175f9486c7b9cca731b3a206b4f9fd",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/components/layout/WirelessConnectModal.tsx": {
-    "mtime": 1795404291.6045766,
-    "ast_hash": "91d7f50151b3fbcab193f79be433a543",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/components/layout/useStreamTracker.ts": {
-    "mtime": 1795404291.603439,
-    "ast_hash": "d92b3f41ac9c70a6e48269a557e47f5b",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/components/projection/AirPlayStudioCard.tsx": {
-    "mtime": 1795404291.6067514,
-    "ast_hash": "46ad035b4eefefa71df7881e335578d5",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/components/projection/DeviceInfoPanel.tsx": {
-    "mtime": 1795367137.5523221,
-    "ast_hash": "171939d01de6e59c1d04c412da59420b",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/components/projection/DeviceInfoPrimitives.tsx": {
-    "mtime": 1795367137.5536582,
-    "ast_hash": "42015014fe24056259beb3a61ed73629",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/components/projection/EmptyState.tsx": {
-    "mtime": 1795404291.6092658,
-    "ast_hash": "ae2dc4db224b2687ab7f18052af161d4",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/components/projection/LogcatConsoleView.tsx": {
-    "mtime": 1795391485.7686098,
-    "ast_hash": "30c3a7a7238f957109d46a954e529420",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/components/projection/LogcatCrashVault.tsx": {
-    "mtime": 1795367137.5597446,
-    "ast_hash": "e35314ae10a641b07891c9bad9ef7baf",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/components/projection/LogcatHeaderBar.tsx": {
-    "mtime": 1795367137.5614607,
-    "ast_hash": "13e3484036920c8265609fed0867cbbc",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/components/projection/LogcatInspectorPanel.tsx": {
-    "mtime": 1795391485.7696683,
-    "ast_hash": "051f754d9d9d9ae5f733642c04c59ca0",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/components/projection/MobileProjection.tsx": {
-    "mtime": 1795368173.8235328,
-    "ast_hash": "544e83577078d0904edfd45619860a99",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/components/projection/MultiScreenGrid.tsx": {
-    "mtime": 1795367137.5674763,
-    "ast_hash": "e83dc3bfc3cd04fab64d2a27ee049bdb",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/components/projection/ProjectionCanvas.tsx": {
-    "mtime": 1795367137.5692348,
-    "ast_hash": "c943b3886a0636458b163009fd750c2a",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/components/projection/ProjectionOverlays.tsx": {
-    "mtime": 1795367137.5712569,
-    "ast_hash": "7f5ac787b579d0cccca53ed454914128",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/components/projection/ProjectionToolbar.tsx": {
-    "mtime": 1795367137.5722544,
-    "ast_hash": "999fda1864db38a8662b4e1cfa9fbbf1",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/components/projection/ProjectionToolsCard.tsx": {
-    "mtime": 1795367137.5742574,
-    "ast_hash": "61f1dc086da8924023eb1cb8a60eabb3",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/components/projection/SplitDivider.tsx": {
-    "mtime": 1795367137.5762513,
-    "ast_hash": "7ddf591f334d8966627e691b8400572d",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/components/projection/VisionNanoStudioCard.tsx": {
-    "mtime": 1795397659.6878562,
-    "ast_hash": "fa1fa61c540b21cfa7df6febacabfadb",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/components/projection/WebCodecsCanvas.tsx": {
-    "mtime": 1795404291.621588,
-    "ast_hash": "a5a4f3f53e7577f39109d15bd786c107",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/components/projection/logcatHelpers.ts": {
-    "mtime": 1795391485.7701976,
-    "ast_hash": "f584ecb3c811b811be26d56d7d11ca24",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/components/projection/projection-math.ts": {
-    "mtime": 1795367137.5830646,
-    "ast_hash": "9b24e652dc753f9a65c859128da38c5d",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/components/projection/useProjectionDrop.ts": {
-    "mtime": 1795404291.618077,
-    "ast_hash": "04d0fef629858b0e8625f369094dc0e1",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/components/projection/useProjectionGestures.ts": {
-    "mtime": 1795404291.6200805,
-    "ast_hash": "83afa44ebece3c7718ce013f1c7d28dc",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/components/ui/Badge.tsx": {
-    "mtime": 1795367137.5897214,
-    "ast_hash": "7674e2b3fc672976564641c64ffe2381",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/components/ui/Button.tsx": {
-    "mtime": 1795391485.7712555,
-    "ast_hash": "71e808917e683f317b58c815051edfc2",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/components/ui/Card.tsx": {
-    "mtime": 1786398184.6859677,
-    "ast_hash": "d6043b1e9f3b15ffbae807fb97dd04a8",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/components/ui/FeatureErrorBoundary.tsx": {
-    "mtime": 1795367137.5927227,
-    "ast_hash": "32ebcfd8deffa0006f3235613e559da6",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/components/ui/Input.tsx": {
-    "mtime": 1795391485.772324,
-    "ast_hash": "b19ac349a247a7237692a2f8a6332866",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/components/ui/RealAppIcon.tsx": {
-    "mtime": 1795404311.9403713,
-    "ast_hash": "1726e7ede54330e68ee1e02b5e74dc16",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/components/ui/dashboard-components.tsx": {
-    "mtime": 1795367137.5989697,
-    "ast_hash": "f89cfc26026a378f1d598090db5c18b4",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/features/AppsView.tsx": {
-    "mtime": 1795404270.7022712,
-    "ast_hash": "376f574f91b54860c77bd6ac95a5c118",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/features/ArchivosView.tsx": {
-    "mtime": 1795404270.7042818,
-    "ast_hash": "d7c70fd93ad8ede6e0d14da34869148d",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/features/CliInjectorView.tsx": {
-    "mtime": 1795404270.7060122,
-    "ast_hash": "c256c5cd5cab1fd477101c66c45932c4",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/features/ConfigView.tsx": {
-    "mtime": 1795404270.7060122,
-    "ast_hash": "5a0b51f227ee61d6248be925e5f6e6cf",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/features/CurarView.tsx": {
-    "mtime": 1795404270.7060122,
-    "ast_hash": "27ca0d63dfc2eb2d902c937e5e69737c",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/features/DashboardView.tsx": {
-    "mtime": 1795404270.7060122,
-    "ast_hash": "ca4a6f2f60fcd276b0eba0a527779432",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/features/FlasherView.tsx": {
-    "mtime": 1795404270.7060122,
-    "ast_hash": "237c4623a3b7298c34a0205e6f4cd0d6",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/features/OptimizerView.tsx": {
-    "mtime": 1795404270.7060122,
-    "ast_hash": "77c087a1dafb83bbd36a9a9bc470cef6",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/features/ProjectionView.tsx": {
-    "mtime": 1795371870.7206228,
-    "ast_hash": "1b477b5b3f5ab5d485ff4d355205a3fd",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/features/ToolsView.tsx": {
-    "mtime": 1795404270.7060122,
-    "ast_hash": "53c5d062f22be0eb85a825f8bba6015f",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/features/apps/AppInstallerPanel.tsx": {
-    "mtime": 1795404291.5774171,
-    "ast_hash": "d76ad675e34fab09c65ebf2b75311e98",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/features/apps/AppItemViews.tsx": {
-    "mtime": 1795391485.7769856,
-    "ast_hash": "74da33153606ee0e90e54eb856d0c2f1",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/features/apps/AppManagerPanel.tsx": {
-    "mtime": 1795391485.7769856,
-    "ast_hash": "6b8b31cd7b838bf89ed0a386debd414c",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/features/apps/app-formatters.ts": {
-    "mtime": 1795367137.641536,
-    "ast_hash": "d1664e9cc550e0450170d24db939c555",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/features/archivos/DeviceFileBrowser.tsx": {
-    "mtime": 1795404291.5804744,
-    "ast_hash": "cfd193fe89694f40dbc0dbcee4e58e8d",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/features/cli/CliEngineSelector.tsx": {
-    "mtime": 1795399934.9414816,
-    "ast_hash": "7d924da6b164d30e129e3355584ad22d",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/features/cli/CliResponseViewer.tsx": {
-    "mtime": 1795367137.6499174,
-    "ast_hash": "a0cf2c8512aaba55588d3cd8f3192f50",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/features/cli/cli-suggestions.ts": {
-    "mtime": 1795367137.652237,
-    "ast_hash": "bbbb084ddc9dad1ed41559fe1dd87290",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/features/config/DeviceSettingsPanel.tsx": {
-    "mtime": 1795367137.6547616,
-    "ast_hash": "6b0c8be86fa1377b9d90585f6a072f2b",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/features/curar/ScreenshotPanel.tsx": {
-    "mtime": 1795404291.5846608,
-    "ast_hash": "e178ebede10abfd350d6c97a061d35b7",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/features/curar/SpywareAuditPanel.tsx": {
-    "mtime": 1795404291.5860622,
-    "ast_hash": "3aef89105c2b0ec3cc64788abf9e59f3",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/features/dashboard/DashboardAppsPanel.tsx": {
-    "mtime": 1795404291.5884886,
-    "ast_hash": "8477c37d6daab6d8518239406e28b182",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/features/dashboard/TelemetryModal.tsx": {
-    "mtime": 1795367137.6618505,
-    "ast_hash": "5cf10812f5d4c21f051c595d025ff6fe",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/features/dashboard/dashboard-helpers.ts": {
-    "mtime": 1795367137.6642046,
-    "ast_hash": "56bd06dc650279d204541ef27f065abd",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/features/flasher/FlasherBootloaderPanel.tsx": {
-    "mtime": 1795402724.9493508,
-    "ast_hash": "d27f9abcb836c34d6c6185d270ec6baa",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/features/flasher/FlasherImagePanel.tsx": {
-    "mtime": 1795402831.8657393,
-    "ast_hash": "f0f256a88920459291fa94cc14374f7d",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/features/flasher/flasher-partitions.ts": {
-    "mtime": 1795402797.2880416,
-    "ast_hash": "cf83c7c4e5464199f37c92f51b2261b8",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/features/logcat-types.ts": {
-    "mtime": 1795391485.7789936,
-    "ast_hash": "bb7a95f573121ca88a72ad9593b3fbf5",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/features/optimizer/DeveloperOptionsPanel.tsx": {
-    "mtime": 1795404291.592495,
-    "ast_hash": "0108f99eded2c3dc7d25d20c160a667e",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/features/optimizer/OptimizerNetworkAudioPanel.tsx": {
-    "mtime": 1795404291.5935063,
-    "ast_hash": "1aa99f6be17c681256966be583917b17",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/features/optimizer/TurboBoostPanel.tsx": {
-    "mtime": 1795404291.59458,
-    "ast_hash": "0961c52e653ff8422deefcb454009290",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/features/security-types.ts": {
-    "mtime": 1795394462.8530474,
-    "ast_hash": "3f6b2f2cc67ee386cf483de9f9310a59",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/features/tools/DriverManagerPanel.tsx": {
-    "mtime": 1795404291.596823,
-    "ast_hash": "da282e1c2080a0a43ef9d99c4d46d36f",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/features/types.ts": {
-    "mtime": 1795367137.6785603,
-    "ast_hash": "8a20233d4ac063e7e34484c57b5d84cf",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/hooks/actionApi.ts": {
-    "mtime": 1795404291.5567496,
-    "ast_hash": "9931bdfbdb3a0fe0e2b1903531421b39",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/hooks/adbStorage.ts": {
-    "mtime": 1795404291.5577524,
-    "ast_hash": "323ab62d327f80d5e8cbe70f056057f9",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/hooks/logcatCrashBuilder.ts": {
-    "mtime": 1795391485.7799928,
-    "ast_hash": "afe7724746c75d6784226180f0842f34",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/hooks/useActions.ts": {
-    "mtime": 1795404291.5587573,
-    "ast_hash": "cce4fc2886db534ed8c15b40b71b3f9b",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/hooks/useAdbConnection.ts": {
-    "mtime": 1795367137.6908016,
-    "ast_hash": "adbac254b2b13160c82cb7240eb5f5e9",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/hooks/useAirPlayServer.ts": {
-    "mtime": 1795404291.56112,
-    "ast_hash": "28c06c9d19cd2f5449f75a87805baddd",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/hooks/useDevicePolling.ts": {
-    "mtime": 1795404291.5625734,
-    "ast_hash": "cbdd20b79bc4ea067d220c340ea42621",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/hooks/useDeviceStream.ts": {
-    "mtime": 1795404291.5636237,
-    "ast_hash": "f9d50d1b6d0f2c22ce6856032eb597c8",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/hooks/useLogcatStream.ts": {
-    "mtime": 1795404291.5653179,
-    "ast_hash": "8cd066d8c41fdb8a154958f8e226db2a",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/hooks/useMediaQuery.ts": {
-    "mtime": 1786411453.04768,
-    "ast_hash": "052236050c289e75a30cb517f3be569b",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/hooks/useProjection.ts": {
-    "mtime": 1795391485.7838757,
-    "ast_hash": "858829aa471fb7b39611372bcaf1351e",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/hooks/useProjectionActions.ts": {
-    "mtime": 1795367137.7036848,
-    "ast_hash": "d06dc1113a770fc787ef37916f7d40bd",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/hooks/useProjectionTypes.ts": {
-    "mtime": 1795397659.6942518,
-    "ast_hash": "f2f19f4f7f78cc8e7fd19aaa01c4869f",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/hooks/useRescueSync.ts": {
-    "mtime": 1795404291.5683763,
-    "ast_hash": "a1b385d0d0fbe2f19b19e5ffa7e4ab8f",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/hooks/useSplitPanel.ts": {
-    "mtime": 1786411414.404944,
-    "ast_hash": "3de975325f2e4151a2928b37d29e9b37",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/hooks/useSystemLogs.ts": {
-    "mtime": 1786433056.2516534,
-    "ast_hash": "7ab2fbf8218723694a87a00b7db72347",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/hooks/useTheme.ts": {
-    "mtime": 1795367137.7102306,
-    "ast_hash": "e7df79755cd8d801783d719dba0b102b",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/lib/api-url.ts": {
-    "mtime": 1795404257.527794,
-    "ast_hash": "f4fb48ad87f9fc9546f1fa7dcbff774c",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/lib/cn.ts": {
-    "mtime": 1786387496.154302,
-    "ast_hash": "4ccce63f94ed856ff99963d96d2d4133",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/lib/services/tauri-bridge.ts": {
-    "mtime": 1795400470.8483856,
-    "ast_hash": "ef4a745c707c889edcfcff51901fd784",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/lib/services/webcodecs-h264-player.ts": {
-    "mtime": 1795404291.5746746,
-    "ast_hash": "cc355ab6a23f1d3026e364d14daec8ec",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/stores/appsSlice.ts": {
-    "mtime": 1795367137.7819524,
-    "ast_hash": "b9ef86711c7e3e5cdd86a988897be5a5",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/stores/deviceSlice.ts": {
-    "mtime": 1795391485.7938375,
-    "ast_hash": "347b5e45a415962a228de4bbc2c78728",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/stores/flasherSlice.ts": {
-    "mtime": 1786059691.2294593,
-    "ast_hash": "f7ef49df323c2b3b1656ae026e818d54",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/stores/index.ts": {
-    "mtime": 1786059736.5344207,
-    "ast_hash": "c95945d68fc23b92215c11cb99376e47",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/stores/optimizerSlice.ts": {
-    "mtime": 1786059728.1943953,
-    "ast_hash": "7c428ec220b188e7d6c24118f1dee2eb",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/stores/patcherSlice.ts": {
-    "mtime": 1786059698.5793066,
-    "ast_hash": "ed30034fd11f66bf8ca8d9bfbfb292e8",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/stores/uiSlice.ts": {
-    "mtime": 1788018386.032562,
-    "ast_hash": "f767ba9294b7e9dac2bb99ba28730dba",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/tailwind.config.ts": {
-    "mtime": 1795391485.7956674,
-    "ast_hash": "5a4402239b69a392e836421747c38411",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/tsconfig.json": {
-    "mtime": 1781448868.439268,
-    "ast_hash": "ee17fd1c97c735e9f3564e3f5251f125",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/public/favicon.png": {
-    "mtime": 1795376630.9419506,
-    "ast_hash": "5c95f1165fe090dffdb6ab261e9c3048",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/public/icon.png": {
-    "mtime": 1795376630.9494,
-    "ast_hash": "1f9ef0121ab4664145a5ce2532962c6f",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/public/logo.png": {
-    "mtime": 1795376630.9494,
-    "ast_hash": "ab379886b674de35edb68a94ce564630",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/public/projection_header_banner.png": {
-    "mtime": 1788024073.386749,
-    "ast_hash": "ebe9702be5a67ed2437c3c36d25937a8",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src-tauri/icons/128x128.png": {
-    "mtime": 1795376630.9601674,
-    "ast_hash": "1fe3236aefa44117fec815ba3d4289f9",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src-tauri/icons/128x128@2x.png": {
-    "mtime": 1795376630.9601674,
-    "ast_hash": "95f15d072cafdaa3b1cdd6c1f4951d90",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src-tauri/icons/32x32.png": {
-    "mtime": 1795376630.9601674,
-    "ast_hash": "4c3af7b2c487f0a5e9727dd15b1269fe",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src-tauri/icons/64x64.png": {
-    "mtime": 1795376630.9601674,
-    "ast_hash": "5c95f1165fe090dffdb6ab261e9c3048",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src-tauri/icons/Square107x107Logo.png": {
-    "mtime": 1795367137.2736108,
-    "ast_hash": "006af1c66381beccc5ba0ff2389004ae",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src-tauri/icons/Square142x142Logo.png": {
-    "mtime": 1795367137.2771952,
-    "ast_hash": "9c30acc9ab32cc0d45e499abe750507a",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src-tauri/icons/Square150x150Logo.png": {
-    "mtime": 1795367137.2815342,
-    "ast_hash": "72d2fcc6687c528987b04785dc92b3e6",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src-tauri/icons/Square284x284Logo.png": {
-    "mtime": 1795367137.2856405,
-    "ast_hash": "985ba9fa59da9a513c0d6fbfba8aeb63",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src-tauri/icons/Square30x30Logo.png": {
-    "mtime": 1795367137.2876594,
-    "ast_hash": "c80501c7fc322fa36638891065e8c48b",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src-tauri/icons/Square310x310Logo.png": {
-    "mtime": 1795367137.289977,
-    "ast_hash": "f695f83ef2784048931d86b9502dd130",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src-tauri/icons/Square44x44Logo.png": {
-    "mtime": 1795367137.2936819,
-    "ast_hash": "9984acfa50b0300440d9583f9069d549",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src-tauri/icons/Square71x71Logo.png": {
-    "mtime": 1795367137.2959445,
-    "ast_hash": "f7da60a9763fbbaf92992b18fef6e680",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src-tauri/icons/Square89x89Logo.png": {
-    "mtime": 1795367137.2978296,
-    "ast_hash": "7591f71aeee6e5f8f05e993a228912e6",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src-tauri/icons/StoreLogo.png": {
-    "mtime": 1795367137.299842,
-    "ast_hash": "2b114148b9dc79824d5936bec11ac4ce",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src-tauri/icons/android/mipmap-hdpi/ic_launcher.png": {
-    "mtime": 1795367137.3056898,
-    "ast_hash": "353bdea141a793b85e32021ecff6d658",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src-tauri/icons/android/mipmap-hdpi/ic_launcher_foreground.png": {
-    "mtime": 1795367137.3079362,
-    "ast_hash": "8ab9d10bf7db05d9e601fda4f54f6080",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src-tauri/icons/android/mipmap-hdpi/ic_launcher_round.png": {
-    "mtime": 1795367137.3099475,
-    "ast_hash": "353bdea141a793b85e32021ecff6d658",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src-tauri/icons/android/mipmap-mdpi/ic_launcher.png": {
-    "mtime": 1795367137.3124187,
-    "ast_hash": "5bba07e72e7d4f72412856234e36aa0d",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src-tauri/icons/android/mipmap-mdpi/ic_launcher_foreground.png": {
-    "mtime": 1795367137.3139431,
-    "ast_hash": "27e62d8cef1d7a3aa6cd7e282a258430",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src-tauri/icons/android/mipmap-mdpi/ic_launcher_round.png": {
-    "mtime": 1795367137.315958,
-    "ast_hash": "5bba07e72e7d4f72412856234e36aa0d",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src-tauri/icons/android/mipmap-xhdpi/ic_launcher.png": {
-    "mtime": 1795367137.3175213,
-    "ast_hash": "e0e3372602ab7c524d05d5d8eb2b2fc4",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src-tauri/icons/android/mipmap-xhdpi/ic_launcher_foreground.png": {
-    "mtime": 1795367137.3196938,
-    "ast_hash": "ef648ce6718ddf38a0df454ccb665492",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src-tauri/icons/android/mipmap-xhdpi/ic_launcher_round.png": {
-    "mtime": 1795367137.3207138,
-    "ast_hash": "e0e3372602ab7c524d05d5d8eb2b2fc4",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src-tauri/icons/android/mipmap-xxhdpi/ic_launcher.png": {
-    "mtime": 1795367137.3224478,
-    "ast_hash": "13721ed339e549323d20d8ac4046a78a",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src-tauri/icons/android/mipmap-xxhdpi/ic_launcher_foreground.png": {
-    "mtime": 1795367137.325045,
-    "ast_hash": "eadc57b9d18c64459f34d3054750edb5",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src-tauri/icons/android/mipmap-xxhdpi/ic_launcher_round.png": {
-    "mtime": 1795367137.3266275,
-    "ast_hash": "13721ed339e549323d20d8ac4046a78a",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src-tauri/icons/android/mipmap-xxxhdpi/ic_launcher.png": {
-    "mtime": 1795367137.3285172,
-    "ast_hash": "86c6be66d5cd271c98653e45f253d66b",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src-tauri/icons/android/mipmap-xxxhdpi/ic_launcher_foreground.png": {
-    "mtime": 1795367137.3297906,
-    "ast_hash": "bed323cf6ba89268779305a883258929",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src-tauri/icons/android/mipmap-xxxhdpi/ic_launcher_round.png": {
-    "mtime": 1795367137.3308635,
-    "ast_hash": "86c6be66d5cd271c98653e45f253d66b",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src-tauri/icons/icon.png": {
-    "mtime": 1795376630.9699552,
-    "ast_hash": "1f9ef0121ab4664145a5ce2532962c6f",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src-tauri/icons/ios/AppIcon-20x20@1x.png": {
-    "mtime": 1795367137.3392375,
-    "ast_hash": "2d6b38276d7ad60c3626e8ea74bdbf46",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src-tauri/icons/ios/AppIcon-20x20@2x-1.png": {
-    "mtime": 1795367137.3412528,
-    "ast_hash": "77a10a57bc42dbe702ffac3f6da5c028",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src-tauri/icons/ios/AppIcon-20x20@2x.png": {
-    "mtime": 1795367137.34225,
-    "ast_hash": "77a10a57bc42dbe702ffac3f6da5c028",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src-tauri/icons/ios/AppIcon-20x20@3x.png": {
-    "mtime": 1795367137.3442519,
-    "ast_hash": "28cab6b74424e87cb06aa42a751c2394",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src-tauri/icons/ios/AppIcon-29x29@1x.png": {
-    "mtime": 1795367137.34528,
-    "ast_hash": "7630ea5684d86735427f1b97a8087b0b",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src-tauri/icons/ios/AppIcon-29x29@2x-1.png": {
-    "mtime": 1795367137.346391,
-    "ast_hash": "7a92e9e2790a1ed26b2249f8a3bcde4d",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src-tauri/icons/ios/AppIcon-29x29@2x.png": {
-    "mtime": 1795367137.348156,
-    "ast_hash": "7a92e9e2790a1ed26b2249f8a3bcde4d",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src-tauri/icons/ios/AppIcon-29x29@3x.png": {
-    "mtime": 1795367137.3502572,
-    "ast_hash": "ab5a41581f671fa87382191ac543fe31",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src-tauri/icons/ios/AppIcon-40x40@1x.png": {
-    "mtime": 1795367137.3521783,
-    "ast_hash": "77a10a57bc42dbe702ffac3f6da5c028",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src-tauri/icons/ios/AppIcon-40x40@2x-1.png": {
-    "mtime": 1795367137.3526256,
-    "ast_hash": "f45dfcf5e790e1e4835bcee1607c401e",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src-tauri/icons/ios/AppIcon-40x40@2x.png": {
-    "mtime": 1795367137.3546355,
-    "ast_hash": "f45dfcf5e790e1e4835bcee1607c401e",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src-tauri/icons/ios/AppIcon-40x40@3x.png": {
-    "mtime": 1795367137.3546355,
-    "ast_hash": "c4433930579072b0ae96a20decac2c2c",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src-tauri/icons/ios/AppIcon-512@2x.png": {
-    "mtime": 1795367137.356648,
-    "ast_hash": "f496d36ee82247472296bd991954a745",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src-tauri/icons/ios/AppIcon-60x60@2x.png": {
-    "mtime": 1795367137.3591132,
-    "ast_hash": "c4433930579072b0ae96a20decac2c2c",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src-tauri/icons/ios/AppIcon-60x60@3x.png": {
-    "mtime": 1795367137.3603833,
-    "ast_hash": "f39a8a05698cd3a8f98656bbcc15801e",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src-tauri/icons/ios/AppIcon-76x76@1x.png": {
-    "mtime": 1795367137.3614037,
-    "ast_hash": "e95c439033ef9a12733c6dc2c594ad56",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src-tauri/icons/ios/AppIcon-76x76@2x.png": {
-    "mtime": 1795367137.366929,
-    "ast_hash": "ad305b7ff3df516e2d5ae53049a81ae5",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src-tauri/icons/ios/AppIcon-83.5x83.5@2x.png": {
-    "mtime": 1795367137.3694754,
-    "ast_hash": "de0e76a352f42cf6db622eb41bb7234e",
-    "semantic_hash": ""
-  },
-  "build-staging-ec8f6e44/src/app/icon.png": {
-    "mtime": 1788022650.174346,
-    "ast_hash": "3fe305e6ac34b56a1937690445b2a9c7",
+  "androproject-gui/src/features/optimizer/GpuDriverPanel.tsx": {
+    "mtime": 1795808601.5354393,
+    "ast_hash": "17204fcabd61943f29382f88b2a20c5f",
     "semantic_hash": ""
   }
 }

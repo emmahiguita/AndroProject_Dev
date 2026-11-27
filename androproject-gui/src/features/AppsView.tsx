@@ -18,17 +18,13 @@ import { useMemo, useCallback, useEffect, useState, useRef } from 'react';
 import { useAppStore } from '@/stores';
 import { useTheme } from '@/hooks/useTheme';
 import { ViewShell } from '@/components/ViewShell';
-import { rustBridge } from '@/lib/services/tauri-bridge';
 import { AppInstallerPanel } from './apps/AppInstallerPanel';
 import { AppManagerPanel } from './apps/AppManagerPanel';
-import {
-  filterAndSortApps, formatBytes, formatDate, getErrorMessage, summarizeAppThreats,
-} from './apps/app-formatters';
+import { filterAndSortApps, formatBytes, formatDate, getErrorMessage } from './apps/app-formatters';
+import { executeAppPkgAction, runAppsVirusAudit, type PkgAction } from './apps/audit-apps';
 import type { AppInfo, DeviceInfo } from './types';
 
 export { formatBytes, formatDate };
-
-type PkgAction = 'uninstall' | 'disable' | 'enable' | 'force_stop' | 'clear_data' | 'launch' | 'extract_apk';
 
 interface AppsViewProps {
   device?: DeviceInfo | null;
@@ -108,25 +104,9 @@ export function AppsView({ device: propDevice, addLog: propAddLog }: AppsViewPro
     }
     s.setAppActionLoading(pkgName);
     try {
-      if (action !== 'extract_apk' && rustBridge.isDesktop() && targetSerial && targetSerial !== 'Hardware Level') {
-        const rustOut = await rustBridge.appActionFast(targetSerial, pkgName, action);
-        if (rustOut !== null && !/Failure|Exception|Error:|No activities found/i.test(rustOut)) {
-          applyLocalMutation(action, pkgName);
-          const cleanMsg = action === 'launch' && rustOut.trim() ? rustOut.trim() : `[Nativo] ${action} → ${pkgName} completado.`;
-          notify(cleanMsg);
-          return;
-        }
-        notify(`No se pudo completar ${action} para ${pkgName}: ${rustOut || 'sin respuesta del servicio nativo'}`, true);
-        return;
-      }
-      const res = await fetch(apiUrl('/api/apps'), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action, packageName: pkgName, serial: targetSerial }),
-      });
-      const data = await res.json();
-      if (data.success) { applyLocalMutation(action, pkgName); notify(data.message || `Acción ${action} aplicada a ${pkgName}.`); }
-      else notify(`Error (${action} en ${pkgName}): ${data.error || 'fallo ADB'}`, true);
+      const result = await executeAppPkgAction(targetSerial, pkgName, action);
+      if (result.ok) applyLocalMutation(action, pkgName);
+      notify(result.message, !result.ok);
     } catch (err: unknown) {
       notify(`Error al ejecutar ${action}: ${getErrorMessage(err)}`, true);
     } finally {
@@ -155,15 +135,20 @@ export function AppsView({ device: propDevice, addLog: propAddLog }: AppsViewPro
     // Conserva la selección para que el usuario revise el resultado del lote.
   };
 
-  const handleAuditThreats = () => {
-    const { malwareCount, overlayCount, hiddenUserCount, totalSuspect } = summarizeAppThreats(s.appsList);
-    if (totalSuspect > 0) {
-      s.setAppsFilter('malware');
-      notify(`Auditoría: ${malwareCount} amenazas/spyware, ${overlayCount} apps con publicidad Overlay y ${hiddenUserCount} apps ocultas sin icono. Mostrando sospechosas.`, true);
-    } else {
-      // La lista ADB no incluye un análisis antivirus; no acredita que el dispositivo esté limpio.
-      notify('La lista de paquetes no incluye un análisis de malware; no se puede confirmar que el dispositivo esté limpio.', true);
-    }
+  const handleAuditThreats = async () => {
+    if (!targetSerial) { notify('Conecta un dispositivo Android para auditar virus.', true); return; }
+    notify('Ejecutando auditoría heurística de virus y spyware vía ADB...');
+    try {
+      const r = await runAppsVirusAudit(targetSerial, s.appsList);
+      if (!r.ok) { notify(r.error || 'Error en auditoría.', true); return; }
+      s.setAppsList(r.updatedApps);
+      if (r.findingsCount > 0) {
+        s.setAppsFilter('malware');
+        notify(`Auditoría (${r.scannedCount} apps): ${r.findingsCount} hallazgo(s) de riesgo detectados.`, true);
+      } else {
+        notify(`Auditoría (${r.scannedCount} apps de terceros): sin amenazas heurísticas detectadas.`);
+      }
+    } catch { notify('Error de red al consultar /api/security-scan.', true); }
   };
 
   const tabCls = 'min-h-10 rounded-md border border-transparent px-3 text-sm font-semibold text-text-secondary transition-colors hover:bg-surface-overlay aria-pressed:border-border-selected aria-pressed:bg-surface-selected aria-pressed:text-text-selected';

@@ -143,7 +143,8 @@ export function useRescueSync(devices: DeviceInfo[], onRefresh?: () => void) {
 
         const scr = await postAction({ action: 'check_screen', serial: matched.serial }).catch(() => null);
         if (!scr?.alive && alive) {
-          await postAction({ action: 'open_screen', serial: matched.serial, stayAwake: true, alwaysOnTop: true, turnScreenOff: cfg.turnScreenOff }).catch(() => {});
+          const opened = await postAction({ action: 'open_screen', serial: matched.serial, stayAwake: true, turnScreenOff: cfg.turnScreenOff }).catch(() => null);
+          if (!opened?.success) { if (alive) setLastSyncMsg(opened?.error || 'No se pudo abrir la proyección'); return; }
         }
 
         if (alive) { setStatus('connected'); setLastSyncMsg(`Activo · ${matched.model || matched.serial}`); }

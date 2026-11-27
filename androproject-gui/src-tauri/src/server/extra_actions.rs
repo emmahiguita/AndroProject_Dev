@@ -18,12 +18,10 @@ use std::time::Duration;
 
 /// Responde `action: "get_adb_status"` para el indicador superior de ADB.
 pub async fn handle_get_adb_status() -> Value {
-    let devices = list_adb_devices().await;
-    json!({
-        "success": true,
-        "serverRunning": true,
-        "devices": devices,
-    })
+    match list_adb_devices().await {
+        Ok(devices) => json!({"success": true, "serverRunning": true, "devices": devices}),
+        Err(error) => json!({"success": false, "serverRunning": false, "error": error, "devices": []}),
+    }
 }
 
 /// Lee ajustes reales del sistema Android para `ConfigView` (`/api/config`).
@@ -36,29 +34,28 @@ pub async fn read_live_android_settings(serial: &str) -> Value {
     if !ok || out.trim().is_empty() {
         return Value::Null;
     }
-    let parts: Vec<&str> = out.split("---").map(|s| s.trim()).collect();
-    let stay_val: i32 = parts.first().and_then(|s| s.parse().ok()).unwrap_or(0);
-    let show_touches = parts.get(1).copied().unwrap_or("0") == "1";
-    let anim_num: f64 = parts.get(2).and_then(|s| s.parse().ok()).unwrap_or(1.0);
-    let timeout_ms: u64 = parts.get(3).and_then(|s| s.parse().ok()).unwrap_or(60000);
-    let dpi = parts
-        .get(4)
-        .and_then(|s| s.split_whitespace().last())
-        .filter(|s| s.chars().all(|c| c.is_ascii_digit()))
-        .map(|d| format!("{} dpi", d))
-        .unwrap_or_else(|| "--".to_string());
+    parse_settings(&out)
+}
 
+/// Un campo sin permiso o sin lectura queda vacío. La última densidad es la efectiva.
+fn parse_settings(out: &str) -> Value {
+    let parts: Vec<_> = out.split("---").map(str::trim).collect();
+    let [stay, touches, anim, timeout, density] = parts.as_slice() else { return Value::Null; };
+    let dpi = density.lines().rev().find_map(|line| {
+        let (label, value) = line.split_once(':')?;
+        matches!(label.trim(), "Override density" | "Physical density").then(|| value.trim().parse::<u32>().ok()).flatten()
+    });
     json!({
-        "stayAwake": stay_val > 0,
-        "showTouches": show_touches,
-        "animScale": format!("{:.1}", anim_num),
-        "screenTimeoutMs": timeout_ms,
-        "densityDpi": dpi,
+        "stayAwake": stay.parse::<u32>().ok().map(|mask| mask != 0),
+        "showTouches": match *touches { "0" => Some(false), "1" => Some(true), _ => None },
+        "animScale": anim.parse::<f64>().ok().filter(|n| n.is_finite()).map(|n| format!("{n:.1}")),
+        "screenTimeoutMs": timeout.parse::<u64>().ok(),
+        "densityDpi": dpi.map(|n| format!("{n} dpi")), "dpi": dpi,
     })
 }
 
 /// Responde `get_optimizer_settings` y `get_perf_status` para la vista Optimizador.
-pub async fn handle_optimizer_query(serial: &str, action: &str) -> Value {
+pub async fn handle_optimizer_query(serial: &str) -> Value {
     let live = read_live_android_settings(serial).await;
     // Un teléfono inaccesible no debe aparecer como una lectura satisfactoria.
     if live.is_null() {
@@ -68,11 +65,6 @@ pub async fn handle_optimizer_query(serial: &str, action: &str) -> Value {
     if state["success"] != true { return state; }
     let status = &state["status"];
     let display = super::optimizer_actions::read(serial).await;
-    let stay = live["stayAwake"].as_bool().unwrap_or(false);
-    let touches = live["showTouches"].as_bool().unwrap_or(false);
-    if action == "get_perf_status" {
-        return state;
-    }
     json!({
         "success": true,
         "settings": {
@@ -81,8 +73,10 @@ pub async fn handle_optimizer_query(serial: &str, action: &str) -> Value {
                 "transition_animation_scale": status["transitionScale"],
                 "animator_duration_scale": status["animatorScale"],
             },
-            "stayAwake": stay,
-            "showTouches": touches,
+            "stayAwake": live["stayAwake"],
+            "showTouches": live["showTouches"],
+            "dpi": live["dpi"],
+            "screenTimeout": live["screenTimeoutMs"].as_u64().map(|ms| ms.to_string()),
             "privateDnsMode": display.get("privateDnsMode"),
             "privateDnsSpecifier": display.get("privateDnsSpecifier"),
             "adguardProfile": display.get("adguardProfile"),
@@ -103,11 +97,13 @@ pub async fn post_config(Json(body): Json<Value>) -> Json<Value> {
     }
     let cmd = match action {
         "set_stay_awake" => {
-            let v = if body["value"].as_bool().unwrap_or(false) { "3" } else { "0" };
+            let Some(enabled) = body["value"].as_bool() else { return Json(json!({"success":false,"error":"Se requiere un valor booleano"})); };
+            let v = if enabled { "3" } else { "0" };
             format!("settings put global stay_on_while_plugged_in {}", v)
         }
         "set_show_touches" => {
-            let v = if body["value"].as_bool().unwrap_or(false) { "1" } else { "0" };
+            let Some(enabled) = body["value"].as_bool() else { return Json(json!({"success":false,"error":"Se requiere un valor booleano"})); };
+            let v = if enabled { "1" } else { "0" };
             format!("settings put system show_touches {}", v)
         }
         "set_anim_scale" => {
@@ -115,17 +111,23 @@ pub async fn post_config(Json(body): Json<Value>) -> Json<Value> {
             let Some(v @ ("0.0" | "0.5" | "1.0")) = body["value"].as_str() else {
                 return Json(json!({ "success": false, "error": "Escala de animación no válida" }));
             };
-            format!("settings put global window_animation_scale {0}; settings put global transition_animation_scale {0}; settings put global animator_duration_scale {0}", v)
+            format!("settings put global window_animation_scale {0} && settings put global transition_animation_scale {0} && settings put global animator_duration_scale {0}", v)
         }
         "set_screen_timeout" => {
-            let ms = body["value"].as_u64().unwrap_or(60000);
+            let Some(ms) = body["value"].as_u64().filter(|ms| *ms > 0 && *ms <= i32::MAX as u64) else { return Json(json!({"success":false,"error":"Tiempo de pantalla inválido"})); };
             format!("settings put system screen_off_timeout {}", ms)
         }
         _ => return Json(json!({ "success": false, "error": format!("Ajuste no implementado: {}", action) })),
     };
     let (ok, _, err) = adb_shell(&serial, &cmd, 4000).await;
     let settings = if ok { read_live_android_settings(&serial).await } else { Value::Null };
-    Json(json!({ "success": ok, "message": if ok { "Ajuste aplicado" } else { "Error aplicando ajuste" }, "error": err, "deviceSettings": settings }))
+    let field = match action {
+        "set_show_touches" => "showTouches", "set_stay_awake" => "stayAwake",
+        "set_screen_timeout" => "screenTimeoutMs", _ => "animScale",
+    };
+    let confirmed = ok && settings[field] == body["value"];
+    let error = if !confirmed && err.trim().is_empty() { "Android no confirmó el valor solicitado" } else { err.trim() };
+    Json(json!({"success":confirmed,"message":if confirmed {"Ajuste confirmado en Android"} else {error}, "error":error, "deviceSettings":settings}))
 }
 
 /// Construye argumentos reales de VisionNano / Cámara (Android 12+) para `open_screen`.
@@ -135,7 +137,8 @@ pub fn build_screen_args(serial: &str, body: &Value) -> Vec<String> {
     let rate = body["bitRate"].as_str().unwrap_or("16M").to_string();
     let is_cam = body["videoSource"].as_str() == Some("camera");
 
-    let mut args = vec!["-s".into(), serial.into(), "--video-codec=h264".into(), "-b".into(), rate, "--video-buffer=0".into(), "--no-audio".into(), "--render-driver=direct3d11".into()];
+    let mut args = vec!["-s".into(), serial.into(), "--video-codec=h264".into(), "-b".into(), rate, "--video-buffer=0".into(), "--render-driver=direct3d11".into()];
+    if !body["enableAudio"].as_bool().unwrap_or(false) { args.push("--no-audio".into()); }
     if is_cam {
         args.push("--video-source=camera".into());
         let facing = body["cameraFacing"].as_str().unwrap_or("back");
@@ -160,9 +163,27 @@ pub fn build_screen_args(serial: &str, body: &Value) -> Vec<String> {
 pub async fn handle_list_cameras(serial: &str) -> Value {
     if serial.is_empty() { return json!({ "success": false, "cameras": [], "error": "Serial requerido" }); }
     let mut cmd = silent_cmd(scrcpy_bin());
-    cmd.args(["-s", serial, "--list-cameras"]).stdout(Stdio::piped()).stderr(Stdio::piped());
+    cmd.kill_on_drop(true).args(["-s", serial, "--list-cameras"]).stdout(Stdio::piped()).stderr(Stdio::piped());
     let out = tokio::time::timeout(Duration::from_secs(6), cmd.output()).await.ok().and_then(|r| r.ok());
     let raw = out.map(|o| format!("{}{}", String::from_utf8_lossy(&o.stdout), String::from_utf8_lossy(&o.stderr))).unwrap_or_default();
     let cameras: Vec<String> = raw.lines().filter(|l| l.contains("--camera-id=")).map(|l| l.trim().to_string()).collect();
     json!({ "success": !cameras.is_empty(), "cameras": cameras, "raw": raw.trim() })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn reads_effective_density_and_preserves_unknown_values() {
+        let data = parse_settings("3---null---0.5---30000---Physical density: 420\nOverride density: 380");
+        assert_eq!(data["dpi"], 380);
+        assert_eq!(data["screenTimeoutMs"], 30000);
+        assert_eq!(data["showTouches"], Value::Null);
+        assert!(parse_settings("permission denied").is_null());
+    }
+    #[test]
+    fn scrcpy_audio_follows_requested_setting() {
+        assert!(build_screen_args("usb", &json!({})).iter().any(|v| v == "--no-audio"));
+        assert!(!build_screen_args("usb", &json!({"enableAudio":true})).iter().any(|v| v == "--no-audio"));
+    }
 }

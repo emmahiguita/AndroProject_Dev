@@ -10,7 +10,6 @@
 
 'use client';
 
-import React from 'react';
 import {
   Trash2, Eye, EyeOff, ShieldCheck, Lock, AlertTriangle,
   Check, Play, Square, Eraser, Download,

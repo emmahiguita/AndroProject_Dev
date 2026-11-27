@@ -13,7 +13,7 @@ import { apiUrl } from '@/lib/api-url';
 
 import { useRef, useCallback } from 'react';
 import { useAppStore } from '@/stores';
-import { postActionRequest, postPatchRequest, projectScreensBatch } from './actionApi';
+import { postActionRequest, projectScreensBatch } from './actionApi';
 
 export function useActions() {
   const activeSerial = useAppStore((s) => s.activeSerial);
@@ -33,7 +33,6 @@ export function useActions() {
   const setSecureAppsList = useAppStore((s) => s.setSecureAppsList);
   const setScreenStreaming = useAppStore((s) => s.setScreenStreaming);
   const setScreenBusy = useAppStore((s) => s.setScreenBusy);
-  const setConfigData = useAppStore((s) => s.setConfigData);
   const setAppsList = useAppStore((s) => s.setAppsList);
   const setAppsLoading = useAppStore((s) => s.setAppsLoading);
   const setDiagnostics = useAppStore((s) => s.setDiagnostics);
@@ -44,23 +43,27 @@ export function useActions() {
   const fetchDevice = useCallback(async () => {
     setLoading(true);
     try {
-      const d = await postActionRequest('detect', activeSerial, deviceIP);
-      if (d.success && d.device) {
-        setDevice(d.device);
-        if (d.device.serial && !activeSerial) setActiveSerial(d.device.serial);
-        if (d.device.state !== 'device') addLog(`Dispositivo en estado: ${d.device.state}`);
-        if (d.device.foregroundApp) setForegroundApp(d.device.foregroundApp);
-        if (d.device.secureAppsList) setSecureAppsList(d.device.secureAppsList);
-        if (d.device.ip) setDeviceIP(d.device.ip);
-        if (d.devices) setDevicesList(d.devices);
-        if (d.config) setConfigData(d.config);
+      const query = activeSerial ? `?serial=${encodeURIComponent(activeSerial)}` : '';
+      const response = await fetch(apiUrl(`/api/device${query}`), { cache: 'no-store' });
+      const d = await response.json();
+      if (useAppStore.getState().activeSerial !== activeSerial) return;
+      if (!response.ok || !d.success) throw new Error(d.error || 'Error de detección');
+      const device = d.activeDevice;
+      setDevice(device || null); setDevicesList(d.devices);
+
+      if (device) {
+        if (device.serial && !activeSerial) setActiveSerial(device.serial);
+        if (device.state !== 'device') addLog(`Dispositivo en estado: ${device.state}`);
+        if (device.foregroundApp) setForegroundApp(device.foregroundApp);
+        if (device.secureAppsList) setSecureAppsList(device.secureAppsList);
+        if (device.ip) setDeviceIP(device.ip);
       }
     } catch {
       addLog('Error detectando dispositivo');
     } finally {
       setLoading(false);
     }
-  }, [activeSerial, deviceIP, addLog, setLoading, setDevice, setActiveSerial, setForegroundApp, setSecureAppsList, setDeviceIP, setDevicesList, setConfigData]);
+  }, [activeSerial, addLog, setLoading, setDevice, setActiveSerial, setForegroundApp, setSecureAppsList, setDeviceIP, setDevicesList]);
 
   const run = useCallback(async (
     action: string,
@@ -75,13 +78,13 @@ export function useActions() {
     if (logResult) addLog(`Ejecutando: ${desc}...`);
     try {
       const d = await postActionRequest(action, activeSerial, deviceIP, extraBody);
-      if (logResult) addLog(d.success ? `${d.message}` : `Error: ${d.error}`);
+      if (logResult || (!d.success && ['input_text', 'keyevent'].includes(action))) addLog(d.success ? (d.message || desc) : `Error: ${d.error || action}`);
       if (!d.success && typeof d.error === 'string' && (d.error.includes('device offline') || d.error.includes('not found'))) {
         fetchDevice();
       }
       return d;
     } catch {
-      if (logResult) addLog('Error de conexión');
+      addLog('Error de conexión');
       return { success: false, error: 'Error de conexión' };
     }
   }, [activeSerial, deviceIP, addLog, fetchDevice]);
@@ -105,23 +108,6 @@ export function useActions() {
     } finally {
       if (useAppStore.getState().activeSerial === serial) setAppsLoading(false);
     }
-  };
-
-  const startPatching = async (targetPackage: string, setIsPatching: (v: boolean) => void, setPatchLogs: (l: string) => void) => {
-    const state = useAppStore.getState();
-    const pkg = targetPackage || state.patchPackage;
-    if (!pkg) { setPatchLogs('Ingresa un nombre de paquete válido'); return; }
-    setIsPatching(true);
-    setPatchLogs(`Analizando ${pkg}...`);
-    addLog(`Iniciando parcheo de ${pkg}...`);
-    try {
-      const d = await postPatchRequest(pkg, activeSerial, state.isCloneMode);
-      if (d.success) { setPatchLogs(`${d.message || 'Proceso completado exitosamente'}`); addLog(`Aplicación curada: ${pkg}`); }
-      else { setPatchLogs(`Error: ${d.error || 'Error en el proceso de curado'}`); addLog(`Error parcheando ${pkg}: ${d.error}`); }
-    } catch (err: unknown) {
-      setPatchLogs(`Error de conexión: ${err instanceof Error ? err.message : String(err)}`);
-      addLog(`Error de conexión al parchear ${pkg}`);
-    } finally { setIsPatching(false); }
   };
 
   const toggleScreenStreaming = async () => {
@@ -171,7 +157,7 @@ export function useActions() {
   };
 
   return {
-    run, fetchDevice, fetchApps, startPatching, toggleScreenStreaming,
+    run, fetchDevice, fetchApps, toggleScreenStreaming,
     projectAllScreens, sendKey, tapDevice, swipeDevice, getDiagnostics,
     wasScreenOpenRef, screenReconnectAttemptRef,
   };

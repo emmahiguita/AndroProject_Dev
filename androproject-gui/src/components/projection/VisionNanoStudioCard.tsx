@@ -12,7 +12,7 @@
 'use client';
 
 import React from 'react';
-import { Play, Square, Sparkles, EyeOff, Sun, Maximize2, Layers, Camera, Zap, RefreshCw } from 'lucide-react';
+import { Play, Square, Sparkles, EyeOff, Sun, Maximize2, Layers, Camera, Zap, RefreshCw, Volume2 } from 'lucide-react';
 import type { ScrcpyOptions } from '@/hooks/useProjection';
 import { ToggleRow } from './DeviceInfoPrimitives';
 
@@ -39,12 +39,7 @@ export const VisionNanoStudioCard: React.FC<VisionNanoStudioCardProps> = ({
   }`;
   const labelCls = `text-[10px] block font-medium mb-1 ${dark ? 'text-zinc-400' : 'text-slate-500'}`;
 
-  const updateOpt = (patch: Partial<ScrcpyOptions>) => {
-    setScrcpyOptions((prev) => {
-      const next = { ...prev, ...patch };
-      return next;
-    });
-  };
+  const updateOpt = (patch: Partial<ScrcpyOptions>) => setScrcpyOptions((prev) => ({ ...prev, ...patch }));
 
   return (
     <div className={`rounded-xl border p-3.5 ${cardStyle} space-y-3`}>
@@ -126,6 +121,10 @@ export const VisionNanoStudioCard: React.FC<VisionNanoStudioCardProps> = ({
       </div>
 
       <div className="space-y-1.5 pt-1">
+        <ToggleRow dark={dark} icon={<Volume2 size={12} />}
+          label="Escuchar en el PC" description="Se aplica al iniciar o reiniciar la proyección"
+          checked={Boolean(scrcpyOptions.enableAudio)} disabled={isBusy}
+          onChange={(checked) => updateOpt({ enableAudio: checked })} />
         <ToggleRow
           dark={dark} icon={<EyeOff size={12} className="text-zinc-400" />}
           label="Apagar pantalla física al proyectar" description="Ahorra batería y temperatura"

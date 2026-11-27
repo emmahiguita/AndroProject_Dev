@@ -16,6 +16,13 @@ async fn query(program: impl AsRef<std::ffi::OsStr>, args: &[&str]) -> Result<St
     }
 }
 
+/// Consulta los iPhone/iPad visibles como dispositivos portátiles en Windows.
+pub async fn ios_usb() -> Result<Vec<Value>, String> {
+    let script = r#"$ErrorActionPreference='Stop'; [Console]::OutputEncoding=[Text.UTF8Encoding]::new($false); $d=@(Get-PnpDevice -PresentOnly | Where-Object { $_.Class -eq 'WPD' -and $_.FriendlyName -match 'iPhone|iPad' -and $_.InstanceId -match 'USB' } | Select-Object FriendlyName,InstanceId,Status); ConvertTo-Json -InputObject $d -Compress"#;
+    let result = query("powershell.exe", &["-NoProfile", "-NonInteractive", "-Command", script]).await?;
+    serde_json::from_str(&result).map_err(|error| error.to_string())
+}
+
 /// Devuelve solo información realmente consultada; informa cualquier fuente no disponible.
 pub async fn scan() -> Value {
     let script = "$ErrorActionPreference='Stop'; $d=@(Get-PnpDevice -PresentOnly | Where-Object { $_.Class -eq 'AndroidUsbDeviceClass' -or $_.Class -eq 'AndroidDevice' -or $_.FriendlyName -match 'Android|\\bMTP\\b|iPhone' } | Select-Object InstanceId,FriendlyName,Class,Status,Problem); ConvertTo-Json -InputObject $d -Compress";

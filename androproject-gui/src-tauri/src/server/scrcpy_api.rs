@@ -28,6 +28,8 @@ pub struct ControlPayload {
     pub action: Option<Value>,
     pub x: Option<f64>,
     pub y: Option<f64>,
+    pub nx: Option<f64>,
+    pub ny: Option<f64>,
 }
 
 /// `GET /api/scrcpy-video?serial=...` — Stream continuo H.264 formato SC41.
@@ -60,7 +62,11 @@ pub async fn stream_video(Query(q): Query<SerialQuery>) -> Response {
 
     tokio::spawn(async move {
         loop {
-            match bcast.recv().await {
+            let next = tokio::select! {
+                _ = tx.closed() => break,
+                packet = bcast.recv() => packet,
+            };
+            match next {
                 Ok(pkt) => {
                     if tx.try_send(Ok((*pkt).clone())).is_err() && tx.is_closed() {
                         break;
@@ -96,8 +102,10 @@ pub async fn post_control(Json(body): Json<ControlPayload>) -> Json<Value> {
         },
         _ => 0,
     };
-    let x = body.x.unwrap_or(0.0).round() as i32;
-    let y = body.y.unwrap_or(0.0).round() as i32;
-    let ok = send_touch(&serial, act_code, x, y).await;
+    let (x, y, normalized) = match (body.nx, body.ny) {
+        (Some(nx), Some(ny)) => (nx, ny, true),
+        _ => (body.x.unwrap_or(0.0), body.y.unwrap_or(0.0), false),
+    };
+    let ok = send_touch(&serial, act_code, x, y, normalized).await;
     Json(json!({ "success": ok }))
 }

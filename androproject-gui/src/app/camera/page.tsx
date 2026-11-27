@@ -80,7 +80,7 @@ export default function CameraTransmitter() {
               </div>
             )}
             {stream ? (
-              <video ref={videoRef} autoPlay playsInline muted className="h-full w-full object-cover" />
+              <video ref={videoRef} autoPlay playsInline muted className="h-full w-full object-contain" />
             ) : (
               <div className="flex h-full items-center justify-center p-6 text-center text-zinc-500">
                 <div>

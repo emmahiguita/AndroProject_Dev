@@ -21,6 +21,7 @@ import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { SpywareAuditPanel } from './curar/SpywareAuditPanel';
+import { ThreatForensicsCard } from './curar/ThreatForensicsCard';
 import { ScreenshotPanel } from './curar/ScreenshotPanel';
 import type { DeviceInfo } from './types';
 import type { AdguardProfile } from '@/stores/optimizerSlice';
@@ -98,7 +99,10 @@ function AntivirusPanel({ serial, propAddLog }: { serial: string | null; propAdd
       const r = await fetch(apiUrl('/api/apps'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action, packageName: pkg, serial }),
+        body: JSON.stringify({
+          action, packageName: pkg, serial,
+          confirmed: action === 'uninstall' || action === 'disable',
+        }),
       });
       const d = await r.json();
       if (d.success) { addLog(`Acción ${action} aplicada sobre ${pkg}.`, 'success'); fetchApps(); }
@@ -112,6 +116,7 @@ function AntivirusPanel({ serial, propAddLog }: { serial: string | null; propAdd
   return (
     <div className="space-y-3.5">
       <SpywareAuditPanel key={serial || 'none'} serial={serial} onLog={addLog} />
+      <ThreatForensicsCard key={`forensics-${serial || 'none'}`} serial={serial} />
 
       <Card>
         <div className="flex flex-wrap items-center justify-between gap-3">

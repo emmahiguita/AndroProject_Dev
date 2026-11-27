@@ -30,12 +30,16 @@ export function AppInstallerPanel({
   onInstalled,
 }: AppInstallerPanelProps) {
   const [installing, setInstalling] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
   const [statusMsg, setStatusMsg] = useState<{ text: string; ok: boolean } | null>(null);
 
-  /** Procesa secuencialmente los archivos seleccionados contra `/api/install-apk`. */
-  const handleFiles = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    if (files.length === 0) return;
+  /** Procesa secuencialmente los archivos APK contra `/api/install-apk`. */
+  const installApkFiles = async (rawFiles: File[]) => {
+    const files = rawFiles.filter((f) => f.name.toLowerCase().endsWith('.apk'));
+    if (files.length === 0) {
+      setStatusMsg({ text: 'Solo se admiten archivos con extensión .apk.', ok: false });
+      return;
+    }
     setInstalling(true);
     setStatusMsg(null);
     let anyInstalled = false;
@@ -68,8 +72,21 @@ export function AppInstallerPanel({
       if (anyInstalled && onInstalled) onInstalled();
     } finally {
       setInstalling(false);
-      e.target.value = '';
     }
+  };
+
+  const handleFiles = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    e.target.value = '';
+    if (files.length > 0) await installApkFiles(files);
+  };
+
+  const handleDrop = async (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragging(false);
+    if (!connected || installing) return;
+    const files = Array.from(e.dataTransfer.files || []);
+    if (files.length > 0) await installApkFiles(files);
   };
 
   return (
@@ -87,9 +104,16 @@ export function AppInstallerPanel({
           </div>
         </div>
 
-        <div className={`border-2 border-dashed rounded-xl p-10 flex flex-col items-center justify-center relative transition-colors ${
-          dark ? 'border-zinc-800 hover:border-zinc-600 bg-zinc-900/40' : 'border-slate-300 hover:border-slate-500 bg-slate-50'
-        }`}>
+        <div
+          onDragOver={(e) => { e.preventDefault(); if (connected && !installing) setIsDragging(true); }}
+          onDragLeave={() => setIsDragging(false)}
+          onDrop={handleDrop}
+          className={`border-2 border-dashed rounded-xl p-10 flex flex-col items-center justify-center relative transition-colors ${
+            isDragging
+              ? (dark ? 'border-emerald-400 bg-emerald-950/30' : 'border-emerald-600 bg-emerald-50')
+              : (dark ? 'border-zinc-800 hover:border-zinc-600 bg-zinc-900/40' : 'border-slate-300 hover:border-slate-500 bg-slate-50')
+          }`}
+        >
           <input
             type="file"
             accept=".apk"

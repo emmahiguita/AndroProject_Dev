@@ -88,7 +88,7 @@ export const DeviceInfoPanel: React.FC<DeviceInfoPanelProps> = (props) => {
     try {
       const text = await navigator.clipboard.readText();
       if (!text) { showToast('Portapapeles de la PC vacío'); return; }
-      const res = await run('paste_clipboard', 'Pegar del PC', { text, serial: device.serial }, false);
+      const res = await run('input_text', 'Pegar del PC', { text, serial: device.serial }, false);
       showToast(res?.success ? 'Texto pegado en el dispositivo' : 'Error al pegar en dispositivo', !res?.success);
     } catch {
       showToast('Permiso de portapapeles denegado', true);
@@ -97,7 +97,7 @@ export const DeviceInfoPanel: React.FC<DeviceInfoPanelProps> = (props) => {
 
   const handleToggleStayAwake = async (enabled: boolean) => {
     if (!device.serial) return;
-    const res = await run('set_stay_awake', 'Mantener pantalla activa', { enabled, serial: device.serial }, false);
+    const res = await run('set_developer_option', 'Mantener pantalla activa', { option: 'stay_awake', value: enabled, serial: device.serial }, false);
     showToast(res?.success ? `Stay Awake: ${enabled ? 'ACTIVO' : 'INACTIVO'}` : 'Error aplicando Stay Awake', !res?.success);
   };
 
@@ -124,12 +124,7 @@ export const DeviceInfoPanel: React.FC<DeviceInfoPanelProps> = (props) => {
       )}
 
       {isIos ? (
-        <AirPlayStudioCard
-          serial={device.serial} dark={dark} cardStyle={cardStyle}
-          scrcpyOptions={props.scrcpyOptions} setScrcpyOptions={props.setScrcpyOptions}
-          onMouseControl={props.onMouseControl} onScreenshotClick={handleScreenshotClick}
-          onPasteClipboard={handlePasteClipboard} run={run} showToast={showToast}
-        />
+        <AirPlayStudioCard dark={dark} cardStyle={cardStyle} />
       ) : (
         <>
           <VisionNanoStudioCard

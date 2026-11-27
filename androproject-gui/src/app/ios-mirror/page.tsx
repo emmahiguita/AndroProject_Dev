@@ -1,78 +1,32 @@
-// ============================================================================
-// ARCHIVO: page.tsx (/ios-mirror)
-// QUÉ HACE: Espejo interactivo Apple AirPlay 2 con chasis iPhone, botones
-//           físicos laterales funcionales (Vol+, Vol-, Power), captura HD,
-//           control de receptor AirPlay (`useAirPlayServer`) y ventana nativa.
-// CÓMO FUNCIONA: Pausa el polling de frames cuando el receptor está detenido
-//           o la pestaña está oculta (`visibilityState`), evitando peticiones
-//           zombis, y despacha eventos reales a `/api/actions` y `/api/airplay`.
-// POR QUÉ: Inyectar lógica real a los botones laterales huérfanos y eliminar
-//          el intervalo zombi (< 200 líneas, SRP).
-// ============================================================================
+// Estado del receptor y detección USB mediante Windows Plug and Play.
 'use client';
 import { apiUrl } from '@/lib/api-url';
 
-import React, { useEffect, useState, useCallback, useRef } from 'react';
-import { Camera, ExternalLink, RefreshCw } from 'lucide-react';
+import { useState } from 'react';
+import { RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { useAirPlayServer } from '@/hooks/useAirPlayServer';
 import './ios-mirror.css';
 
 export default function IOSMirrorPage() {
   const { status, loading, error, toggleServer, refresh } = useAirPlayServer();
-  const [toastMsg, setToastMsg] = useState<string | null>(null);
-  const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [usbMessage, setUsbMessage] = useState('');
+  const [checkingUsb, setCheckingUsb] = useState(false);
 
-  useEffect(() => () => { if (toastTimerRef.current) clearTimeout(toastTimerRef.current); }, []);
-
-  const notify = useCallback((msg: string) => {
-    setToastMsg(msg);
-    if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
-    toastTimerRef.current = setTimeout(() => setToastMsg(null), 2400);
-  }, []);
-
-  const sendIosKey = async (keycode: string, label: string) => {
-    notify(label);
+  // El inventario USB es independiente de la conexión de vídeo por AirPlay.
+  async function checkUsb() {
+    setCheckingUsb(true);
     try {
-      await fetch(apiUrl('/api/actions'), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'keyevent', keycode, serial: 'airplay-ios' }),
-      });
-    } catch {
-      notify('Error enviando comando iOS');
-    }
-  };
-
-  const handleFocusNative = async () => {
-    notify('Abriendo ventana nativa AirPlay...');
-    try {
-      const res = await fetch(apiUrl('/api/airplay'), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'open_native_window' }),
-      });
-      const result = await res.json();
-      if (!res.ok || !result.success) notify(result.error || 'No se pudo abrir la ventana de AirPlay.');
-    } catch {
-      notify('Error de conexión con AirPlay.');
-    }
-  };
-
-  const handleScreenshot = async () => {
-    notify('Capturando pantalla iOS HD...');
-    try {
-      const res = await fetch(apiUrl('/api/actions'), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'screenshot', serial: 'airplay-ios' }),
-      });
-      const d = await res.json();
-      notify(d.success ? (d.message || 'Captura guardada') : (d.error || 'Error al capturar'));
-    } catch {
-      notify('Error de red al capturar');
-    }
-  };
+      const response = await fetch(apiUrl('/api/ios'), { cache: 'no-store' });
+      const data = await response.json();
+      if (!response.ok || !data.success) throw new Error(data.error || 'Falló la consulta USB');
+      setUsbMessage(data.usbDevices.length
+        ? data.usbDevices.map((d: { FriendlyName: string; Status: string }) => `${d.FriendlyName} (${d.Status})`).join(' · ')
+        : 'Windows no detectó un iPhone o iPad por USB.');
+    } catch (error) {
+      setUsbMessage(error instanceof Error ? error.message : 'Error consultando Windows');
+    } finally { setCheckingUsb(false); }
+  }
 
   const serverReady = status.running;
 
@@ -89,48 +43,19 @@ export default function IOSMirrorPage() {
         <Button size="sm" variant={serverReady ? 'secondary' : 'primary'} onClick={toggleServer} loading={loading}>
           {serverReady ? 'Detener AirPlay' : 'Iniciar AirPlay'}
         </Button>
-        <Button size="sm" variant="secondary" onClick={handleScreenshot} disabled icon={<Camera size={15} />}>Captura no disponible</Button>
-        <Button size="sm" variant="secondary" onClick={handleFocusNative} disabled icon={<ExternalLink size={15} />}>Ventana libre</Button>
+        <Button size="sm" variant="secondary" onClick={checkUsb} loading={checkingUsb}>Detectar por USB</Button>
         <Button size="sm" variant="secondary" onClick={refresh} aria-label="Actualizar estado de AirPlay" title="Actualizar estado de AirPlay" className="px-2">
           <RefreshCw size={16} />
         </Button>
       </header>
 
-      {(toastMsg || error) && (
+      {(usbMessage || error) && (
         <div role={error ? 'alert' : 'status'} className={`max-w-4xl rounded-md border border-border bg-surface-card px-3 py-2 text-sm ${error ? 'text-semantic-danger' : 'text-text-secondary'}`}>
-          {toastMsg || error}
+          {error || usbMessage}
         </div>
       )}
 
       <section className="iphone">
-        <button
-          type="button"
-          className="sideButton volumeUp"
-          title="Subir Volumen (iOS)"
-          aria-label="Subir Volumen"
-          disabled
-          onClick={() => sendIosKey('KEYCODE_VOLUME_UP', 'Subiendo volumen iOS...')}
-          style={{ cursor: 'pointer', border: 'none' }}
-        />
-        <button
-          type="button"
-          className="sideButton volumeDown"
-          title="Bajar Volumen (iOS)"
-          aria-label="Bajar Volumen"
-          disabled
-          onClick={() => sendIosKey('KEYCODE_VOLUME_DOWN', 'Bajando volumen iOS...')}
-          style={{ cursor: 'pointer', border: 'none' }}
-        />
-        <button
-          type="button"
-          className="powerButton"
-          title="Bloquear / Encender Pantalla (iOS)"
-          aria-label="Botón de encendido"
-          disabled
-          onClick={() => sendIosKey('KEYCODE_POWER', 'Alternando bloqueo iOS...')}
-          style={{ cursor: 'pointer', border: 'none' }}
-        />
-
         <div className="screen">
             <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '24px', textAlign: 'center', color: '#a1a1aa' }}>
               <span style={{ fontSize: '13px', fontWeight: 700, color: '#f4f4f5' }}>Vídeo integrado no disponible</span>

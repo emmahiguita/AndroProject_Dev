@@ -1,18 +1,10 @@
-// ============================================================================
-// ARCHIVO: webcodecs-h264-player.ts
-// QUÉ HACE: Driver de decodificación H.264 por GPU (WebCodecs) de ultra-baja
-//           latencia (< 30ms) sobre `/api/scrcpy-video` a 60 FPS reales.
-// CÓMO FUNCIONA: Extrae dinámicamente el perfil H.264 exacto (`avc1.PPCCLL`)
-//           desde el paquete SPS para activar decodificación hardware nativa,
-//           cachea el contexto 2D del canvas y descarta colas > 3 frames.
-// POR QUÉ: Lograr duplicación de pantalla 100% fluida y veloz sin copias
-//           innecesarias de memoria ni tirones de GPU (< 200 líneas, SOLID).
-// ============================================================================
-
+// ARCHIVO: webcodecs-h264-player.ts — Decodificación H.264 GPU (WebCodecs) <30ms
+// sobre `/api/scrcpy-video` con resincronización y fallback automático si falla.
 import { apiUrl } from '@/lib/api-url';
 export interface WebCodecsPlayerCallbacks {
   onFrameRendered?: () => void;
   onFps?: (fps: number) => void;
+  onResize?: (width: number, height: number) => void;
   onError?: () => void;
 }
 
@@ -53,6 +45,7 @@ export function startWebCodecsH264Player(
   let activeAbort: AbortController | null = null;
   let decoder: VideoDecoder | null = null;
   let retryDelay = 250;
+  let consecutiveFails = 0;
 
   const closeDecoder = () => {
     try { if (decoder && decoder.state !== 'closed') decoder.close(); } catch {}
@@ -97,6 +90,7 @@ export function startWebCodecsH264Player(
               if (canvas.width !== frame.displayWidth || canvas.height !== frame.displayHeight) {
                 canvas.width = frame.displayWidth;
                 canvas.height = frame.displayHeight;
+                getCallbacks().onResize?.(frame.displayWidth, frame.displayHeight);
               }
               cachedCtx?.drawImage(frame, 0, 0);
             }
@@ -104,6 +98,7 @@ export function startWebCodecsH264Player(
             frames++;
             if (!hadFirstFrame) {
               hadFirstFrame = true;
+              consecutiveFails = 0;
               getCallbacks().onFrameRendered?.();
             }
             const now = performance.now();
@@ -155,7 +150,7 @@ export function startWebCodecsH264Player(
                   codedWidth: vidW,
                   codedHeight: vidH,
                   optimizeForLatency: true,
-                  hardwareAcceleration: 'prefer-hardware',
+                  hardwareAcceleration: consecutiveFails === 0 ? 'prefer-hardware' : 'no-preference',
                 });
                 configured = true;
                 waitingForKey = true;
@@ -178,8 +173,16 @@ export function startWebCodecsH264Player(
           }
         }
       } catch {
-        // Reconexión rápida silenciosa conservando el último fotograma dibujado
+        // Reconexión rápida; si falla repetidamente sin fotograma, activa fallback visual
       } finally { closeDecoder(); }
+
+      if (!stopped && !hadFirstFrame) {
+        consecutiveFails++;
+        if (consecutiveFails >= 3) {
+          getCallbacks().onError?.();
+          return;
+        }
+      }
 
       if (!stopped) {
         await new Promise((r) => setTimeout(r, retryDelay));
