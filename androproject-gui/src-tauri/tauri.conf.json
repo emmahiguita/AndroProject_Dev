@@ -1,18 +1,18 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "ANDRO-IOS",
-  "version": "3.2.0",
+  "version": "3.3.0",
   "identifier": "com.androios.desktop",
   "build": {
     "frontendDist": "../out",
-    "devUrl": "http://localhost:3000",
-    "beforeDevCommand": "npm run dev"
+    "devUrl": "http://127.0.0.1:3001",
+    "beforeDevCommand": "npm run dev -- --hostname 127.0.0.1 --port 3001"
   },
   "app": {
     "withGlobalTauri": true,
     "windows": [
       {
-        "title": "ANDRO-IOS v3.2.0 — Native Studio",
+        "title": "ANDRO-IOS v3.3.0 — Native Studio",
         "width": 1360,
         "height": 860,
         "minWidth": 900,
